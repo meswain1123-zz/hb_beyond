@@ -1,0 +1,93 @@
+import React, { Component } from 'react';
+import { connect, ConnectedProps } from 'react-redux';
+
+import { 
+  ModelBase
+} from "../../../models";
+
+import API from "../../../utilities/smart_api";
+import { APIClass } from "../../../utilities/smart_api_class";
+
+
+interface AppState {
+}
+
+interface RootState {
+  app: AppState
+}
+
+const mapState = (state: RootState) => ({
+})
+
+const mapDispatch = {
+}
+
+const connector = connect(mapState, mapDispatch)
+
+type PropsFromRedux = ConnectedProps<typeof connector>
+
+type Props = PropsFromRedux & {
+  ids: string[];
+  type: string;
+}
+
+export interface State { 
+  loading: boolean;
+  objects: ModelBase[] | null;
+}
+
+class DisplayObjects extends Component<Props, State> {
+  // public static defaultProps = {
+  //   choice_name: null
+  // };
+  constructor(props: Props) {
+    super(props);
+    this.state = {
+      loading: false,
+      objects: null
+    };
+    this.api = API.getInstance();
+  }
+
+  api: APIClass;
+
+  componentDidMount() {
+  }
+
+  load() {
+    this.setState({ loading: true }, () => {
+      this.api.getObjects(this.props.type).then((res: any) => {
+        if (res && !res.error) {
+          this.setState({ objects: res, loading: false });
+        }
+      });
+    });
+  }
+
+  render() {
+    if (this.props.type === "") {
+      return <span></span>;
+    } else if (this.state.loading) {
+      return <span>Loading</span>;
+    } else if (this.state.objects === null) {
+      this.load();
+      return <span>Loading</span>;
+    } else {
+      const obj_finder = this.state.objects.filter(o => 
+        this.props.ids.includes(o._id));
+      const details = obj_finder.map(o => o.name).join(", ");
+      // let details = "";
+      // obj_finder.forEach(obj => {
+      //   if (details.length > 0) {
+      //     details += ", ";
+      //   }
+      //   details += obj.name;
+      // });
+      return (
+        <span>{ details }</span>
+      );
+    }
+  }
+}
+
+export default connector(DisplayObjects);

@@ -1,0 +1,7 @@
+
+Class Names are in PascalCase
+Class Properties are in snake_case
+Class Functions are in camelCase
+
+Ignore these for properties and functions which are just pass throughs
+to things I didn't make (like labelWidth).
