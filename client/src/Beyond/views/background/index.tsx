@@ -13,9 +13,6 @@ import {
   Link
 } from "@material-ui/core";
 import { Background } from "../../models";
-// import { 
-//   SCHOOLS 
-// } from "../../models/Constants";
 
 import StringBox from "../../components/input/StringBox";
 
@@ -33,13 +30,11 @@ interface RootState {
 }
 
 const mapState = (state: RootState) => ({
-  // backgrounds: state.app.backgrounds,
   height: state.app.height,
   width: state.app.width
 })
 
 const mapDispatch = {
-  // setBackgrounds: (objects: Background[]) => ({ type: 'SET', dataType: 'backgrounds', payload: objects })
 }
 
 const connector = connect(mapState, mapDispatch)

@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
-// import { RouteComponentProps } from 'react-router';
+
 import {
   Grid,
   Tooltip,
@@ -15,7 +15,6 @@ import {
 } from "../../../models";
 
 import StringBox from "../../input/StringBox";
-// import SelectBox from "../input/SelectBox";
 import SelectStringBox from "../../input/SelectStringBox"; 
 
 import API from "../../../utilities/smart_api";
@@ -23,7 +22,6 @@ import { APIClass } from "../../../utilities/smart_api_class";
 
 
 interface AppState {
-  // templates: TemplateBase[]
 }
 
 interface RootState {
@@ -31,11 +29,9 @@ interface RootState {
 }
 
 const mapState = (state: RootState) => ({
-  // templates: state.app.templates
 })
 
 const mapDispatch = {
-  // addTemplate: (obj: TemplateBase) => ({ type: 'ADD', dataType: 'templates', payload: obj })
 }
 
 const connector = connect(mapState, mapDispatch)
@@ -48,15 +44,10 @@ type Props = PropsFromRedux & {
   onDelete: () => void;
 }
 
-export interface State { 
-  // loading: boolean;
-  // type: string;
+export interface State {
 }
 
 class AbilityPotenceInput extends Component<Props, State> {
-  // public static defaultProps = {
-  //   choice_name: null
-  // };
   constructor(props: Props) {
     super(props);
     this.state = {
@@ -83,7 +74,7 @@ class AbilityPotenceInput extends Component<Props, State> {
   render() {
     return (
       <Grid item container spacing={1} direction="row">
-        <Grid item xs={4}>
+        <Grid item xs={2}>
           <SelectStringBox 
             options={["1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20"]}
             value={`${this.props.obj.level}`} 
@@ -91,6 +82,17 @@ class AbilityPotenceInput extends Component<Props, State> {
             onChange={(changed: string) => {
               const obj = this.props.obj;
               obj.level = +changed;
+              this.props.onChange(obj);
+            }}
+          />
+        </Grid>
+        <Grid item xs={2}>
+          <StringBox 
+            value={`${this.props.obj.rolls.flat}`} 
+            name="Flat"
+            onBlur={(changed: string) => {
+              const obj = this.props.obj;
+              obj.rolls.flat = +changed;
               this.props.onChange(obj);
             }}
           />

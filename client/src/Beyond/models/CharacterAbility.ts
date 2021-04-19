@@ -5,6 +5,7 @@ import { ItemAffectingAbility } from "./ItemAffectingAbility";
 import { 
   Character,
   CreatureAbility,
+  MinionAbility,
   CharacterFeature, 
   IStringNumOrStringHash,
   CharacterClass, 
@@ -17,7 +18,7 @@ export class CharacterAbility {
   true_id: string;
   id: number;
   ability_type: string; 
-  the_ability: Ability | SpellAsAbility | ItemAffectingAbility | CreatureAbility | null;
+  the_ability: Ability | SpellAsAbility | ItemAffectingAbility | CreatureAbility | MinionAbility | null;
   source_type: string; // Class, Race, Feat, or Item
   source_id: string;
   source_name: string;
@@ -37,6 +38,9 @@ export class CharacterAbility {
       break;
       case "Creature Ability":
         this.the_ability = obj ? new CreatureAbility(obj.the_ability) : new CreatureAbility();
+      break;
+      case "Minion Ability":
+        this.the_ability = obj ? new MinionAbility(obj.the_ability) : new CreatureAbility();
       break;
       case "Spell as Ability":
         this.the_ability = obj ? new SpellAsAbility(obj.the_ability) : new SpellAsAbility();
@@ -121,6 +125,9 @@ export class CharacterAbility {
       break;
       case "Creature Ability":
         the_ability = (this.the_ability as CreatureAbility).toDBObj();
+      break;
+      case "Minion Ability":
+        the_ability = (this.the_ability as MinionAbility).toDBObj();
       break;
       case "Spell as Ability":
         the_ability = (this.the_ability as SpellAsAbility).toDBObj();

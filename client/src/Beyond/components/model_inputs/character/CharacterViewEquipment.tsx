@@ -1,8 +1,5 @@
 import React, { Component } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
-// import {
-//   FontDownload
-// } from "@material-ui/icons";
 import {
   Grid, 
   Drawer,
@@ -71,9 +68,6 @@ export interface State {
 }
 
 class CharacterViewEquipment extends Component<Props, State> {
-  // public static defaultProps = {
-  //   value: null,
-  // };
   constructor(props: Props) {
     super(props);
     this.state = {
@@ -101,36 +95,6 @@ class CharacterViewEquipment extends Component<Props, State> {
   load() {
     this.setState({ loading: true }, () => {
       this.api.getSetOfObjects(["armor_type","base_item","magic_item","magic_item_keyword","weapon_keyword"]).then((res: any) => {
-        // const armor_types: ArmorType[] = res.armor_type;
-        // const weapon_keywords: WeaponKeyword[] = res.weapon_keyword;
-          
-        // const base_items: BaseItem[] = res.base_item;
-        // base_items.forEach(item => {
-        //   if (item.item_type === "Armor") {
-        //     if (item.armor_type_name === "") {
-        //       const obj_finder = armor_types.filter(o => o._id === item.armor_type_id);
-        //       if (obj_finder.length === 1) {
-        //         item.armor_type_name = obj_finder[0].name;
-        //       }
-        //     }
-        //   } else if (item.item_type === "Weapon") {
-        //     if (item.weapon_keyword_names.length === 0) {
-        //       const obj_finder = weapon_keywords.filter(o => item.weapon_keyword_ids.includes(o._id) && o.display_in_equipment);
-        //       obj_finder.forEach(kw => {
-        //         item.weapon_keyword_names.push(kw.name);
-        //       });
-        //     }
-        //   }
-        // });
-        // const magic_items: MagicItem[] = res.magic_item;
-        // magic_items.forEach(item => {
-        //   if (!item.base_item) {
-        //     const obj_finder = base_items.filter(o => o._id === item.base_item_id);
-        //     if (obj_finder.length === 1) {
-        //       item.base_item = obj_finder[0];
-        //     }
-        //   }
-        // });
         this.setState({ 
           armor_types: res.armor_type,
           weapon_keywords: res.weapon_keyword,

@@ -13,9 +13,6 @@ import {
   Link
 } from "@material-ui/core";
 import { EquipmentPack } from "../../models";
-// import { 
-//   SCHOOLS 
-// } from "../../models/Constants";
 
 import StringBox from "../../components/input/StringBox";
 
@@ -33,13 +30,11 @@ interface RootState {
 }
 
 const mapState = (state: RootState) => ({
-  // equipment_packs: state.app.equipment_packs,
   height: state.app.height,
   width: state.app.width
 })
 
 const mapDispatch = {
-  // setEquipmentPacks: (objects: EquipmentPack[]) => ({ type: 'SET', dataType: 'equipment_packs', payload: objects })
 }
 
 const connector = connect(mapState, mapDispatch)

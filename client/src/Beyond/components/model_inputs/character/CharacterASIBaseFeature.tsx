@@ -1,44 +1,25 @@
 import React, { Component } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
-// import { RouteComponentProps } from 'react-router';
+
 import {
   Grid, 
-  // Fab, Tooltip, Button
 } from "@material-ui/core";
-// import {
-//   DeleteForever
-// } from "@material-ui/icons";
 
 import { 
   Character,
-  // Creature,
   CharacterFeat,
   CharacterFeature,
   CharacterASIBaseFeature,
-  // CharacterASIFeature,
   ASIBaseFeature,
-  // ASIFeature
 } from "../../../models";
-// import { 
-//   // DAMAGE_TYPES, 
-//   // DURATIONS,
-//   // COMPONENTS,
-//   // CASTING_TIMES,
-//   // RESOURCES,
-//   ABILITY_SCORES 
-// } from "../../../models/Constants";
 import API from "../../../utilities/smart_api";
 import { APIClass } from "../../../utilities/smart_api_class";
 
-// import StringBox from "../../input/StringBox";
-// import SelectBox from "../input/SelectBox";
 import SelectStringBox from "../../input/SelectStringBox";
 import CharacterFeatBox from "./CharacterFeatBox";
-// import SelectLanguageBox from "../select/SelectLanguageBox";
 
 
 interface AppState {
-  // resources: Resource[] | null;
 }
 
 interface RootState {
@@ -46,11 +27,10 @@ interface RootState {
 }
 
 const mapState = (state: RootState) => ({
-  // resources: state.app.resources
 })
 
 const mapDispatch = {
-  // setAbilities: (objects: Ability[]) => ({ type: 'SET', dataType: 'abilities', payload: objects })
+  
 }
 
 const connector = connect(mapState, mapDispatch)
@@ -58,7 +38,6 @@ const connector = connect(mapState, mapDispatch)
 type PropsFromRedux = ConnectedProps<typeof connector>
 
 type Props = PropsFromRedux & {
-  // name: string;
   character: Character;
   obj: CharacterFeature;
   onChange: (changed: CharacterASIBaseFeature) => void; 
@@ -68,9 +47,6 @@ export interface State {
 }
 
 class CharacterASIBaseFeatureInput extends Component<Props, State> {
-  // public static defaultProps = {
-  //   choice_name: null
-  // };
   constructor(props: Props) {
     super(props);
     this.state = {
@@ -154,21 +130,11 @@ class CharacterASIBaseFeatureInput extends Component<Props, State> {
     } else if (asi_base_feature.feat_option && character_asi_base_feature.use_feat) {
       selection = 
         <Grid item>
-          {/* <SelectFeatBox
-            name="Select a Feat"
-            value={character_asi_base_feature.feat_id}
-            onChange={(id: string) => {
-              character_asi_base_feature.feat_id = id;
-              this.props.onChange(character_asi_base_feature);
-            }}
-            color={ character_asi_base_feature.feat_id === "" ? "blue" : "" }
-          /> */}
           <CharacterFeatBox
             obj={character_asi_base_feature.feat}
             character={this.props.character}
             onChange={(changed: CharacterFeat) => {
               character_asi_base_feature.feat = changed;
-              // this.props.character.recalcFeats();
               this.props.onChange(character_asi_base_feature);
             }}
           />

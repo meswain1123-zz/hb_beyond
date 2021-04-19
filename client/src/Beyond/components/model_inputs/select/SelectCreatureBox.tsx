@@ -12,7 +12,6 @@ import { APIClass } from "../../../utilities/smart_api_class";
 
 
 interface AppState {
-  // templates: TemplateBase[]
 }
 
 interface RootState {
@@ -20,11 +19,9 @@ interface RootState {
 }
 
 const mapState = (state: RootState) => ({
-  // templates: state.app.templates
 })
 
 const mapDispatch = {
-  // addTemplate: (obj: TemplateBase) => ({ type: 'ADD', dataType: 'templates', payload: obj })
 }
 
 const connector = connect(mapState, mapDispatch)
@@ -37,7 +34,6 @@ type Props = PropsFromRedux & {
   creatures: Creature[] | null;
   onChange: (id: string) => void;
   color: string;
-  // allow_all: boolean;
   creature_types: string[];
   subtypes: string[];
   sizes: string[];
@@ -105,14 +101,9 @@ class SelectCreatureBox extends Component<Props, State> {
         this.props.min_cr <= o.challenge_rating && 
         o.challenge_rating <= this.props.max_cr
       );
-      // swimming: boolean;
-      // flying: boolean;
-      // min_cr: number;
-      // max_cr: number;
       return (
         <SelectBox 
           options={creatures}
-          // allow_all={this.props.allow_all}
           value={this.props.value} 
           name={this.props.name}
           color={this.props.color}

@@ -3,34 +3,17 @@ import { connect, ConnectedProps } from 'react-redux';
 import { RouteComponentProps } from 'react-router';
 import { Redirect } from "react-router-dom";
 import {
-  // Add, 
   Edit, ArrowBack, DeleteForever
 } from "@material-ui/icons";
 import {
-  Grid, 
-  // List, ListItem, 
-  // Button, 
+  Grid,  
   Tooltip, Fab,
-  // FormControl, InputLabel,
-  // OutlinedInput, FormHelperText
 } from "@material-ui/core";
-// import KeyboardArrowDownIcon from '@material-ui/icons/KeyboardArrowDown';
-// import KeyboardArrowRightIcon from '@material-ui/icons/KeyboardArrowRight';
+
 import { 
   PactBoon
 } from "../../models";
-// import StringBox from "../../components/input/StringBox";
-// import SelectBox from "../../components/input/SelectBox";
-// import SelectStringBox from "../../components/input/SelectStringBox";
-// import CheckBox from "../../components/input/CheckBox";
-// import { 
-//   // DAMAGE_TYPES, 
-//   // DURATIONS,
-//   // COMPONENTS,
-//   // CASTING_TIMES,
-//   // RESOURCES,
-//   ABILITY_SCORES 
-// } from "../../models/Constants";
+
 import API from "../../utilities/smart_api";
 import { APIClass } from "../../utilities/smart_api_class";
 
@@ -56,8 +39,6 @@ const mapState = (state: RootState) => ({
 })
 
 const mapDispatch = {
-  setPactBoons: (objects: PactBoon[]) => ({ type: 'SET', dataType: 'pact_boons', payload: objects }),
-  // addPactBoon: (obj: PactBoon) => ({ type: 'ADD', dataType: 'pact_boons', payload: obj })
 }
 
 const connector = connect(mapState, mapDispatch)
@@ -121,7 +102,6 @@ class PactBoonDetails extends Component<Props, State> {
                   onClick={ () => {
                     this.api.deleteObject(this.state.obj).then((res: any) => {
                       if (this.props.objects) {
-                        // this.props.setPactBoons(this.props.objects.filter(o => o._id !== this.state.obj._id));
                         this.setState({ redirectTo:`/beyond/pact_boon` });
                       }
                     });

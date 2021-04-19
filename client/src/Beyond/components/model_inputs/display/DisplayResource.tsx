@@ -7,7 +7,6 @@ import {
 
 import { 
   Character,
-  // Creature,
   CharacterResource,
   ResourceFeature,
   Resource
@@ -43,19 +42,14 @@ type Props = PropsFromRedux & {
 
 export interface State { 
   loading: boolean;
-  // reloading: boolean;
   resources: Resource[] | null;
 }
 
 class DisplayResource extends Component<Props, State> {
-  // public static defaultProps = {
-  //   choice_name: null
-  // };
   constructor(props: Props) {
     super(props);
     this.state = {
       loading: false,
-      // reloading: false,
       resources: null
     };
     this.api = API.getInstance();
@@ -127,16 +121,8 @@ class DisplayResource extends Component<Props, State> {
             } else {
               resource.used--;
             }
-            // const obj = this.props.obj;
-            // this.props.onChange(obj);
             this.setState({ }, () => {
               this.api.updateObject(this.props.obj).then((res: any) => {
-                if ((changed && resource.used === resource.total) || (!changed && resource.used === resource.total - 1)) {
-                  // Reload to make the cast buttons enabled/disabled appropriately
-                  // this.setState({ reloading: true }, () => {
-                  //   this.setState({ reloading: false });
-                  // });
-                }
               });
             });
           }}

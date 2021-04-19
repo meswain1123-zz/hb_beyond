@@ -3,7 +3,6 @@ import { connect, ConnectedProps } from 'react-redux';
 
 import { 
   Creature,
-  // IStringArrayHash
 } from "../../../models";
 
 import SelectStringBox from "../../input/SelectStringBox";
@@ -13,7 +12,6 @@ import { APIClass } from "../../../utilities/smart_api_class";
 
 
 interface AppState {
-  // templates: TemplateBase[]
 }
 
 interface RootState {
@@ -21,11 +19,9 @@ interface RootState {
 }
 
 const mapState = (state: RootState) => ({
-  // templates: state.app.templates
 })
 
 const mapDispatch = {
-  // addTemplate: (obj: TemplateBase) => ({ type: 'ADD', dataType: 'templates', payload: obj })
 }
 
 const connector = connect(mapState, mapDispatch)
@@ -35,7 +31,6 @@ type PropsFromRedux = ConnectedProps<typeof connector>
 type Props = PropsFromRedux & {
   name: string;
   value: string;
-  // creatures: Creature[] | null;
   onChange: (id: string) => void;
   color: string;
   allow_any: boolean;
@@ -93,12 +88,10 @@ class SelectCreatureBox extends Component<Props, State> {
       this.load();
       return <span>Loading</span>;
     } else {
-      // const creatures = this.props.creatures ? this.props.creatures : this.state.creatures;
       const subtypes = this.props.allow_any ? ["Any",...this.state.subtypes] : this.state.subtypes;
       return (
         <SelectStringBox 
           options={subtypes}
-          // allow_any={this.props.allow_any}
           value={this.props.value} 
           name={this.props.name}
           color={this.props.color}

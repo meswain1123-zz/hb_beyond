@@ -18,17 +18,9 @@ import {
   MagicItem,
   CharacterSpell, 
   Spell, 
-  // SpellSlotType,
   CharacterSlot,
-  // Resource,
-  // ResourceFeature,
-  // SpellAsAbility,
-  // EldritchInvocation,
   CharacterSense,
-  // SenseFeature,
   IStringNumHash, IStringHash,
-  // Ability,
-  // WeaponKeyword,
   DamageMultiplierSimple,
   Bonus,
   CreatureInstance
@@ -37,7 +29,6 @@ import {
 
 export class Character extends ModelBase {
   connected: boolean;
-  // full: boolean;
   image_url: string;
   race: CharacterRace;
   classes: CharacterClass[];
@@ -139,7 +130,6 @@ export class Character extends ModelBase {
     super(obj);
     this.data_type = "character";
     this.image_url = obj && obj.image_url ? obj.image_url : "";
-    // this.full = obj ? obj.full : false;
     this.inspiration = obj && obj.inspiration ? obj.inspiration : 0;
     this.race = obj ? new CharacterRace(obj.race) : new CharacterRace();
     this.classes = [];

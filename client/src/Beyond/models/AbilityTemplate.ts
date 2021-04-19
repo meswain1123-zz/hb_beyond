@@ -1,12 +1,10 @@
 
 import { TemplateBase } from "./TemplateBase";
-// import { Skill } from "./Skill";
 import { AbilityEffect } from "./AbilityEffect";
 import { Ability } from "./Ability";
 
 
 export class AbilityTemplate extends TemplateBase {
-  // skill_id: number | null; // Skill relevant to the ability
   saving_throw_ability_score: string | null; // Ability Score saving throw the target(s) have to make
   effect: AbilityEffect; // Formula for how much damage/healing to do
   effect_2: AbilityEffect; // Some abilities have a second (like Ice Knife or Booming Blade or things that do different types of damage)
@@ -28,7 +26,6 @@ export class AbilityTemplate extends TemplateBase {
   constructor(obj?: any) {
     super(obj);
     this.type = "Ability";
-    // this.skill_id = obj?.skill_id;
     this.saving_throw_ability_score = obj?.saving_throw_ability_score;
     this.effect = obj ? new AbilityEffect(obj.effect) : new AbilityEffect();
     this.effect_2 = obj ? new AbilityEffect(obj.effect_2) : new AbilityEffect();
@@ -55,7 +52,6 @@ export class AbilityTemplate extends TemplateBase {
       description: this.description,
       type: "Ability",
       category: this.category,
-      // skill_id: this.skill_id,
       saving_throw_ability_score: this.saving_throw_ability_score,
       effect: this.effect.toDBObj(),
       effect_2: this.effect_2.toDBObj(),
@@ -86,7 +82,6 @@ export class AbilityTemplate extends TemplateBase {
     this.description = copyMe.description;
     this.type = "Ability";
     this.category = copyMe.category;
-    // this.skill_id = copyMe.skill_id;
     this.saving_throw_ability_score = copyMe.saving_throw_ability_score;
     this.effect = copyMe.effect;
     this.effect_2 = copyMe.effect_2;
@@ -110,7 +105,6 @@ export class AbilityTemplate extends TemplateBase {
     this.name = copyMe.name;
     this.description = copyMe.description;
     this.type = "Ability";
-    // this.skill_id = copyMe.skill_id;
     this.saving_throw_ability_score = copyMe.saving_throw_ability_score;
     this.effect = copyMe.effect;
     this.effect_2 = copyMe.effect_2;

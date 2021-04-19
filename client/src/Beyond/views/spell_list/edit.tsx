@@ -3,37 +3,24 @@ import { connect, ConnectedProps } from 'react-redux';
 import { RouteComponentProps } from 'react-router';
 import { Redirect } from "react-router-dom";
 import {
-  // Add, Edit,
   ArrowBack
 } from "@material-ui/icons";
 import {
   Grid, 
-  // List, ListItem, 
   Button, 
   Tooltip, Fab,
   Link,
-  // FormControl, InputLabel,
-  // OutlinedInput, FormHelperText
 } from "@material-ui/core";
-// import KeyboardArrowDownIcon from '@material-ui/icons/KeyboardArrowDown';
-// import KeyboardArrowRightIcon from '@material-ui/icons/KeyboardArrowRight';
+
 import { 
-  // ModelBase, 
   SpellList, 
   Spell
 } from "../../models";
 import StringBox from "../../components/input/StringBox";
-// import SelectBox from "../../components/input/SelectBox";
 import SelectStringBox from "../../components/input/SelectStringBox";
 import CheckBox from "../../components/input/CheckBox";
 import ToggleButtonBox from "../../components/input/ToggleButtonBox";
 import { 
-  // ABILITY_SCORES, 
-  // DAMAGE_TYPES, 
-  // DURATIONS,
-  // COMPONENTS,
-  // CASTING_TIMES,
-  // RESOURCES,
   SCHOOLS
 } from "../../models/Constants";
 import API from "../../utilities/smart_api";
@@ -41,8 +28,6 @@ import { APIClass } from "../../utilities/smart_api_class";
 
 
 interface AppState {
-  // spell_lists: SpellList[] | null;
-  // skills: Skill[] | null;
   height: number;
   width: number;
 }
@@ -56,16 +41,11 @@ interface MatchParams {
 }
 
 const mapState = (state: RootState) => ({
-  // spell_lists: state.app.spell_lists,
-  // skillsMB: state.app.skills as ModelBase[],
-  // skills: state.app.skills,
   height: state.app.height,
   width: state.app.width
 })
 
 const mapDispatch = {
-  // setSpellLists: (objects: SpellList[]) => ({ type: 'SET', dataType: 'spell_lists', payload: objects }),
-  // addSpellList: (object: SpellList) => ({ type: 'ADD', dataType: 'spell_lists', payload: object })
 }
 
 const connector = connect(mapState, mapDispatch)
@@ -78,7 +58,6 @@ export interface State {
   redirectTo: string | null;
   obj: SpellList;
   processing: boolean;
-  // skills: Skill[] | null;
   spell_lists: SpellList[] | null;
   spells: Spell[] | null;
   page_num: number;
@@ -97,7 +76,6 @@ class SpellListEdit extends Component<Props, State> {
       redirectTo: null,
       obj: new SpellList(),
       processing: false,
-      // skills: null,
       spell_lists: null,
       spells: null,
       page_num: 0,
@@ -222,7 +200,6 @@ class SpellListEdit extends Component<Props, State> {
               </Button>
               <Button
                 variant="contained"
-                // color="primary"
                 disabled={this.state.processing}
                 style={{ marginLeft: "4px" }}
                 onClick={ () => { 

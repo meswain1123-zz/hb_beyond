@@ -1,6 +1,4 @@
 
-// import { Ability } from "./Ability";
-
 export class DamageMultiplier {
   id: number;
   damage_types: string[];

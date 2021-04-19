@@ -9,28 +9,19 @@ import {
 } from "@material-ui/icons";
 import {
   Grid, 
-  // List, ListItem, 
   Button, 
   Tooltip, Fab
 } from "@material-ui/core";
-// import KeyboardArrowDownIcon from '@material-ui/icons/KeyboardArrowDown';
-// import KeyboardArrowRightIcon from '@material-ui/icons/KeyboardArrowRight';
+
 import { User } from "../../models";
-// import { 
-//   SCHOOLS 
-// } from "../../models/Constants";
 
 import StringBox from "../../components/input/StringBox";
-// import SelectBox from "../../components/input/SelectBox";
-// import SelectStringBox from "../../components/input/SelectStringBox";
-// import CheckBox from "../../components/input/CheckBox";
 
 import API from "../../utilities/smart_api";
 import { APIClass } from "../../utilities/smart_api_class";
 
 
 interface AppState {
-  // users: User[] | null;
   width: number;
 }
 
@@ -39,12 +30,10 @@ interface RootState {
 }
 
 const mapState = (state: RootState) => ({
-  // users: state.app.users,
   width: state.app.width
 })
 
 const mapDispatch = {
-  // setUsers: (objects: User[]) => ({ type: 'SET', dataType: 'users', payload: objects })
 }
 
 const connector = connect(mapState, mapDispatch)

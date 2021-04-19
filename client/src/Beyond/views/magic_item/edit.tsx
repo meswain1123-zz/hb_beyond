@@ -3,53 +3,36 @@ import { connect, ConnectedProps } from 'react-redux';
 import { RouteComponentProps } from 'react-router';
 import { Redirect } from "react-router-dom";
 import {
-  Add, // Edit,
+  Add,
   ArrowBack, 
-  // DeleteForever
 } from "@material-ui/icons";
 import {
   Grid, 
-  // List, ListItem, 
   Button, 
   Tooltip, Fab,
-  // FormControl, InputLabel,
-  // OutlinedInput, FormHelperText
 } from "@material-ui/core";
-// import KeyboardArrowDownIcon from '@material-ui/icons/KeyboardArrowDown';
-// import KeyboardArrowRightIcon from '@material-ui/icons/KeyboardArrowRight';
+
 import {  
   MagicItem, 
   TemplateBase,
-  // MagicItemTemplate,
   FeatureBase, 
   RollPlus,
-  // DiceRoll
 } from "../../models";
 import StringBox from "../../components/input/StringBox";
-// import SelectBox from "../../components/input/SelectBox";
+
 import SelectStringBox from "../../components/input/SelectStringBox";
 import CheckBox from "../../components/input/CheckBox";
 import FeatureBasesInput from "../../components/model_inputs/feature/FeatureBases";
 import FeatureBaseInput from "../../components/model_inputs/feature/FeatureBase";
 import SelectBaseItemBox from "../../components/model_inputs/select/SelectBaseItemBox";
-// import DamageInput from "../../components/model_inputs/other/DamageInput";
-// import SelectAbilityBox from "../../components/model_inputs/SelectAbilityBox";
+
 import TemplateBox from "../../components/model_inputs/TemplateBox";
-// import { 
-//   ABILITY_SCORES, 
-//   DAMAGE_TYPES, 
-//   DURATIONS,
-//   COMPONENTS,
-//   CASTING_TIMES,
-//   RESOURCES
-// } from "../../models/Constants";
+
 import API from "../../utilities/smart_api";
 import { APIClass } from "../../utilities/smart_api_class";
 
 
 interface AppState {
-  // magic_items: MagicItem[] | null;
-  // skills: Skill[] | null;
   height: number;
   width: number;
 }
@@ -63,16 +46,11 @@ interface MatchParams {
 }
 
 const mapState = (state: RootState) => ({
-  // magic_items: state.app.magic_items,
-  // skillsMB: state.app.skills as ModelBase[],
-  // skills: state.app.skills,
   height: state.app.height,
   width: state.app.width
 })
 
 const mapDispatch = {
-  // setMagicItems: (objects: MagicItem[]) => ({ type: 'SET', dataType: 'magic_items', payload: objects }),
-  // addMagicItem: (object: MagicItem) => ({ type: 'ADD', dataType: 'magic_items', payload: object })
 }
 
 const connector = connect(mapState, mapDispatch)
@@ -87,7 +65,6 @@ export interface State {
   processing: boolean;
   expanded_feature_base: FeatureBase | null;
   child_names_valid: boolean;
-  // skills: Skill[] | null;
   magic_items: MagicItem[] | null;
   loading: boolean;
   reloading: boolean;
@@ -102,7 +79,6 @@ class MagicItemEdit extends Component<Props, State> {
       processing: false,
       expanded_feature_base: null,
       child_names_valid: true,
-      // skills: null,
       magic_items: null,
       loading: false,
       reloading: false
@@ -231,13 +207,6 @@ class MagicItemEdit extends Component<Props, State> {
                   obj={this.state.obj}
                   type="MagicItem"
                   useTemplate={(template: TemplateBase) => {
-                    // const magic_item_template: MagicItemTemplate = template as MagicItemTemplate;
-                    // const obj = this.state.obj;
-                    // obj.copyTemplate(magic_item_template);
-                    // this.props.onChange(feature);
-                    // this.setState({ obj, loading: true }, () => {
-                    //   this.setState({ loading: false });
-                    // });
                   }}
                 />
               </Grid>
@@ -356,7 +325,6 @@ class MagicItemEdit extends Component<Props, State> {
               </Button>
               <Button
                 variant="contained"
-                // color="primary"
                 disabled={this.state.processing}
                 style={{ marginLeft: "4px" }}
                 onClick={ () => { 

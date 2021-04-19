@@ -1,42 +1,18 @@
 import React, { Component } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
-// import {
-//   // Clear, 
-//   RadioButtonUnchecked,
-//   RadioButtonChecked,
-// } from "@material-ui/icons";
 import {
   Grid, 
-  // Drawer,
-  // Popover,
-  // Snackbar 
 } from "@material-ui/core";
 
 import { 
   Attack,
   Character,
-  // Creature,
-  // CharacterAbility,
-  // CharacterItem,
   CharacterSpell,
-  // CharacterSlot,
   Skill,
-  // SpellAsAbility,
-  // SpellSlotType,
   INumHash,
-  // SpellAsAbility
 } from "../../../models";
 
-// import StringBox from "../../input/StringBox";
-// import CheckBox from "../../input/CheckBox";
-// import ToggleButtonBox from "../../input/ToggleButtonBox";
-// import ButtonBox from "../../input/ButtonBox";
-
-// import CharacterManageSpells from "./CharacterManageSpells";
 import DisplayObjects from "../display/DisplayObjects";
-// import CharacterSpellDetails from './CharacterSpellDetails';
-// import CheckBox from '../../input/CheckBox';
-// import CharacterAction from "./CharacterAction";
 
 import API from "../../../utilities/smart_api";
 import { APIClass } from "../../../utilities/smart_api_class";
@@ -86,9 +62,6 @@ export interface State {
 }
 
 class CharacterSenses extends Component<Props, State> {
-  // public static defaultProps = {
-  //   value: null,
-  // };
   constructor(props: Props) {
     super(props);
     this.state = {

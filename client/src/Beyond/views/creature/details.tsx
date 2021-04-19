@@ -2,77 +2,25 @@ import React, { Component } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
 import { RouteComponentProps } from 'react-router';
 import { Redirect } from "react-router-dom";
-// import GnomeRanger from "../../assets/img/characters/Gnome Ranger.png";
 import {
-  // Add, 
-  // Edit, 
-  ArrowBack, 
-  // DeleteForever,
-  // Settings,
-  // CheckCircleOutline,
-  // RadioButtonUnchecked,
-  // RadioButtonChecked,
-  // Apps,
-  // FontDownload,
-  // Clear,
-  // Star,
-  // StarBorder
+  ArrowBack,
 } from "@material-ui/icons";
 import {
   Grid, 
-  // Drawer,
-  // List, ListItem, 
-  // Button, 
   Tooltip, 
   Fab,
-  // FormControl, InputLabel,
-  // OutlinedInput, FormHelperText
 } from "@material-ui/core";
-// import KeyboardArrowDownIcon from '@material-ui/icons/KeyboardArrowDown';
-// import KeyboardArrowRightIcon from '@material-ui/icons/KeyboardArrowRight';
 import { 
   ArmorType,
-  // Background,
   Creature,
   Condition,
   EldritchInvocation,
-  // Race,
-  // Subrace,
-  // GameClass,
-  // Subclass,
   Skill,
-  // Language,
-  // BaseItem,
-  // MagicItem,
-  // MagicItemKeyword,
   WeaponKeyword,
   Spell,
   SpellSlotType,
-  // DamageMultiplierSimple
 } from "../../models";
-// import { 
-//   DAMAGE_TYPES
-// } from "../../models/Constants";
-// import StringBox from "../../components/input/StringBox";
-// import SelectBox from "../../components/input/SelectBox";
-// import SelectStringBox from "../../components/input/SelectStringBox";
-// import CheckBox from "../../components/input/CheckBox";
-// import ToggleButtonBox from '../../components/input/ToggleButtonBox';
 
-// import CharacterViewEquipment from "../../components/model_inputs/character/CharacterViewEquipment";
-// import CharacterFeatures from "../../components/model_inputs/character/CharacterFeatures";
-// import CharacterSpells from '../../components/model_inputs/character/CharacterSpells';
-// import CharacterProficiencies from '../../components/model_inputs/character/CharacterProficiencies';
-// import CharacterNotes from '../../components/model_inputs/character/CharacterNotes';
-// import CharacterDescription from '../../components/model_inputs/character/CharacterDescription';
-// import DamageTypeImage from "../../components/model_inputs/display/DamageTypeImage";
-// import DisplayObjects from "../../components/model_inputs/display/DisplayObjects";
-// import CharacterActions from '../../components/model_inputs/character/CharacterActions';
-// import CharacterAbilityScores from '../../components/model_inputs/character/CharacterAbilityScores';
-// import CharacterSavingThrows from '../../components/model_inputs/character/CharacterSavingThrows';
-// import CharacterSenses from '../../components/model_inputs/character/CharacterSenses';
-// import CharacterSkills from '../../components/model_inputs/character/CharacterSkills';
-// import ViewSpell from "../../components/model_inputs/ViewSpell";
 import CreatureStatBlock from "../../components/model_inputs/creature/CreatureStatBlock";
 
 import API from "../../utilities/smart_api";

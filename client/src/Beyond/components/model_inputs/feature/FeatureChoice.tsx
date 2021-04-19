@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
-// import { RouteComponentProps } from 'react-router';
+
 import {
   Grid, Fab, Tooltip, Button
 } from "@material-ui/core";
@@ -16,16 +16,12 @@ import {
 } from "../../../models";
 
 import StringBox from "../../input/StringBox";
-// import SelectBox from "../input/SelectBox";
-// import SelectStringBox from "../input/SelectStringBox";
 import FeatureListInput from "./FeatureList";
 import FeatureInput from "./FeatureMain";
 import TemplateBox from "../TemplateBox";
 
 
 interface AppState {
-  // abilities: Ability[] | null;
-  // width: number;
 }
 
 interface RootState {
@@ -33,12 +29,9 @@ interface RootState {
 }
 
 const mapState = (state: RootState) => ({
-  // abilities: state.app.abilities
-  // width: state.app.width
 })
 
 const mapDispatch = {
-  // setAbilities: (objects: Ability[]) => ({ type: 'SET', dataType: 'abilities', payload: objects })
 }
 
 const connector = connect(mapState, mapDispatch)
@@ -49,8 +42,6 @@ type Props = PropsFromRedux & {
   parent_name: string;
   base_name: string;
   obj: FeatureChoice;
-  // onNameChange: (name: string) => void; 
-  // onDescriptionChange: (description: string) => void; 
   onChange: (obj: FeatureChoice) => void; 
   onDelete: () => void; 
   onDone: (target: string) => void;
@@ -64,9 +55,6 @@ export interface State {
 }
 
 class FeatureChoiceInput extends Component<Props, State> {
-  // public static defaultProps = {
-  //   labelWidth: null
-  // };
   constructor(props: Props) {
     super(props);
     this.state = {
@@ -158,7 +146,6 @@ class FeatureChoiceInput extends Component<Props, State> {
             <Button
               variant="contained"
               color="primary"
-              // disabled={this.state.processing}
               onClick={ () => { 
                 this.props.onDone("parent");
               }}>
@@ -168,7 +155,6 @@ class FeatureChoiceInput extends Component<Props, State> {
             <Button
               variant="contained"
               color="primary"
-              // disabled={this.state.processing}
               onClick={ () => { 
                 this.props.onDone("base");
               }}>

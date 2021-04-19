@@ -1,27 +1,18 @@
 
 
 import {
-  // AbilityTemplate,
-  // SpellAsAbilityTemplate,
-  // ItemAffectingAbilityTemplate,
-  // Skill,
-  // SpellList,
   Ability,
   AbilityScores,
   Advantage,
   ArmorType,
-  // Background,
-  // BaseItem,
   Bonus,
   BonusSpells,
-  // Campaign,
   Character,
   CharacterAbility,
   CharacterASIBaseFeature,
   CharacterEldritchInvocation,
   CharacterFeat,
   CharacterFeature,
-  // CharacterFeatureBase,
   CharacterItem,
   CharacterLanguageFeature,
   CharacterPactBoon,
@@ -34,24 +25,10 @@ import {
   Condition,
   DamageMultiplier,
   DamageMultiplierSimple,
-  // DiceRoll,
   EldritchInvocation,
-  // EquipmentPack,
-  // PactBoon,
-  // Feat,
-  // FeatureBaseTemplate,
-  // FeatureChoiceTemplate,
-  // FeatureTemplate,
-  // GameClass,
   HitDice,
-  // MagicItem,
-  // MagicItemKeyword,
-  // MagicItemTemplate,
   Modifier,
   Proficiency,
-  // Race,
-  // Subrace,
-  // Resource,
   ResourceFeature,
   SenseFeature,
   Spell,
@@ -60,25 +37,11 @@ import {
   SpellcastingFeature,
   SpellModifier,
   SpellSlotType,
-  // SpecialFeature,
-  // SpellTemplate,
-  // Subclass,
-  // Tool,
-  // Sense,
-  // User,
   WeaponKeyword,
-  // TemplateBase,
-  // Language,
-  // ModelBase,
-  // DiceRoll,
   Attack,
-  // Damage
   RollPlus,
   IStringNumHash
 } from "../models";
-// import {
-//   DAMAGE_TYPES
-// } from "../models/Constants";
 
 import API from "./smart_api";
 import { APIClass } from "./smart_api_class";
@@ -386,11 +349,9 @@ export class CharacterUtilitiesClass {
           sense_features.push(f.feature.the_feature as SenseFeature);
         } else if (f.feature_type === "Skill Proficiencies") {
           const prof = f.feature.the_feature as Proficiency;
-          // skill_proficiencies = [...skill_proficiencies, ...prof.the_proficiencies];
           prof.the_proficiencies.forEach(id => {
             if (prof.double) {
               skill_proficiencies[id] = 2;
-              // expertises = [...expertises, ...prof.the_proficiencies];
             } else {
               skill_proficiencies[id] = 1;
             }
@@ -781,11 +742,6 @@ export class CharacterUtilitiesClass {
           });
       }
       const checkArmorRequirement = (me: Character, mod: Modifier) => {
-        // TODO: Change this to come from the db
-        // const shield_id = "5ff36c6f5cf70f25a4e368db";
-        // const heavy_id = "5fd132997a9c0d15f0a87844";
-        // const medium_id = "5fd12fb57a9c0d15f0a87843";
-        // const light_id = "5fc958e4f96ed5252811fffd"; 
         // Check if it matches the armor_requirement field
         if (mod.allowed_armor_types.filter(o => o === "All").length === 1) {
           // Check for required
@@ -898,9 +854,6 @@ export class CharacterUtilitiesClass {
               const bonus = new Bonus();
               bonus.source = mod_obj.source_name;
               bonus.types = mod.modifies_details;
-              // if (mod.modifies_detail_2 === "All") {
-              //   bonus.subtypes.push(mod.modifies_detail_2);
-              // }
               if (amount.includes("d")) {
                 const pieces = amount.split("d");
                 bonus.rolls.count = +pieces[0];
@@ -912,7 +865,6 @@ export class CharacterUtilitiesClass {
             }
           }
         } else if (mod.modifies === "Ability Score Max") {
-          // if (checkArmorRequirement(char, mod)) {
           const amount = getModifierAmount(char, mod_obj);
           if (amount) {
             for (let i = 0; i < mod.modifies_details.length; i++) {
@@ -938,9 +890,7 @@ export class CharacterUtilitiesClass {
               }
             }
           }
-          // }
         } else if (mod.modifies === "Resource Dice Size") {
-          // if (checkArmorRequirement(char, mod)) {
           const size = getModifierAmount(char, mod_obj);
           if (size) {
             const resource_type = mod.modifies_details[0];
@@ -950,7 +900,6 @@ export class CharacterUtilitiesClass {
               char_resource.size = Math.max(char_resource.size, +size);
             }
           }
-          // }
         } else if (mod.modifies === "Initiative") {
           if (checkArmorRequirement(char, mod)) {
             const amount = getModifierAmount(char, mod_obj);
@@ -1104,11 +1053,6 @@ export class CharacterUtilitiesClass {
             });
           }
         }
-        // if (char_class.spellcasting_level) {
-        //   if (char.spell_slot_types) {
-        //     data = char.spell_slot_types.filter(o => o.type === id);
-        //   }
-        // }
         char_class.spell_ids = [];
         char_class.cantrip_ids = [];
         char.spells.filter(o => !o.always_known && o.source_type === "Class" && o.source_id === char_class.game_class_id).forEach(char_spell => {
@@ -1154,24 +1098,9 @@ export class CharacterUtilitiesClass {
             char.concentrating_on.connectSpell(obj_finder[0]);
           }
         } 
-        // else if (char.concentrating_on instanceof CharacterAbility) {
-        //   if (char.concentrating_on.ability_type === "Ability") {
-        //     const the_ability = char.concentrating_on.the_ability as Ability;
-        //     console.log(the_ability);
-        //     // const spell_id = char.concentrating_on.true_id;
-        //     // const obj_finder = all_spells.filter(o => o._id === spell_id);
-        //     // if (obj_finder.length === 1) {
-        //     //   char.concentrating_on.connectSpell(obj_finder[0]);
-        //     // }
-        //   }
-        // }
       }
 
       const type_levels: any = {
-        // type_id: {
-        //   table: table,
-        //   level: 0
-        // }
       };
       char.classes.filter(o => o.spell_table !== "").forEach(game_class => {
         if (!type_levels[game_class.spell_table]) {
@@ -1195,13 +1124,6 @@ export class CharacterUtilitiesClass {
           const entry = entry_finder[0];
           Object.keys(entry.slots_per_level).forEach((sl: any) => {
             const slot_level = +sl;
-            // if (!slot_type_levels[slot_level]) {
-            //   slot_type_levels[slot_level] = {};
-            // }
-            // slot_type_levels[slot_level][type_id] = {
-            //   count: entry.slots_per_level[slot_level],
-            //   slot_name: table.slot_name
-            // };
             const slot = new CharacterSlot();
             slot.level = slot_level;
             slot.total = entry.slots_per_level[slot_level];
@@ -1309,9 +1231,6 @@ export class CharacterUtilitiesClass {
             if (spell.the_spell.effect.attack_type === "Save") {
               // It's a save attack
               char.attack_bonuses.filter(o => o.types.includes("Cantrip Saves")).forEach(ab => {
-                // const roll: DiceRoll = new DiceRoll();
-                // roll.size = 1;
-                // roll.count = ab.rolls.flat;
                 const rolls = new RollPlus(ab.rolls);
                 attack.attack_rolls.push(rolls);
               });

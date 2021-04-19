@@ -1,7 +1,6 @@
 
 import { Feat } from "./Feat";
 import { CharacterFeatureBase } from "./CharacterFeatureBase";
-// import { Mask } from "./Mask";
 
 export class CharacterFeat {
   id: number;

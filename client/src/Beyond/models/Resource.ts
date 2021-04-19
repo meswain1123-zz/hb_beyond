@@ -1,6 +1,4 @@
 
-// import { Map } from "./Subclass";
-// import { PlayToken } from "./Ability";
 import { ModelBase } from "./ModelBase";
 
 /**

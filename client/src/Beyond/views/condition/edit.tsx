@@ -3,43 +3,25 @@ import { connect, ConnectedProps } from 'react-redux';
 import { RouteComponentProps } from 'react-router';
 import { Redirect } from "react-router-dom";
 import {
-  // Add, Edit,
   ArrowBack
 } from "@material-ui/icons";
 import {
   Grid, 
-  // List, ListItem, 
   Button, 
   Tooltip, Fab,
-  // FormControl, InputLabel,
-  // OutlinedInput, FormHelperText
 } from "@material-ui/core";
-// import KeyboardArrowDownIcon from '@material-ui/icons/KeyboardArrowDown';
-// import KeyboardArrowRightIcon from '@material-ui/icons/KeyboardArrowRight';
 import { 
   Condition, Feature
 } from "../../models";
 import StringBox from "../../components/input/StringBox";
 import FeatureListInput from "../../components/model_inputs/feature/FeatureList";
 import FeatureInput from "../../components/model_inputs/feature/FeatureMain";
-// import SelectBox from "../../components/input/SelectBox";
-// import SelectStringBox from "../../components/input/SelectStringBox";
-// import SelectPactBoonBox from "../../components/model_inputs/select/SelectPactBoonBox";
 import ToggleButtonBox from "../../components/input/ToggleButtonBox";
-// import { 
-//   // DAMAGE_TYPES, 
-//   // DURATIONS,
-//   // COMPONENTS,
-//   // CASTING_TIMES,
-//   // RESOURCES,
-//   ABILITY_SCORES 
-// } from "../../models/Constants";
 import API from "../../utilities/smart_api";
 import { APIClass } from "../../utilities/smart_api_class";
 
 
 interface AppState {
-  // conditions: Condition[] | null;
   height: number;
   width: number;
 }
@@ -53,14 +35,11 @@ interface MatchParams {
 }
 
 const mapState = (state: RootState) => ({
-  // objects: state.app.conditions,
   height: state.app.height,
   width: state.app.width
 })
 
 const mapDispatch = {
-  // setConditions: (objects: Condition[]) => ({ type: 'SET', dataType: 'conditions', payload: objects }),
-  // addCondition: (object: Condition) => ({ type: 'ADD', dataType: 'conditions', payload: object })
 }
 
 const connector = connect(mapState, mapDispatch)
@@ -311,7 +290,6 @@ class ConditionEdit extends Component<Props, State> {
               </Button>
               <Button
                 variant="contained"
-                // color="primary"
                 disabled={this.state.processing}
                 style={{ marginLeft: "4px" }}
                 onClick={ () => { 

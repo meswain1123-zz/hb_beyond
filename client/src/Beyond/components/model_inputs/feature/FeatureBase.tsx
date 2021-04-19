@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
-// import { RouteComponentProps } from 'react-router';
+
 import {
   Grid, Fab, Tooltip, Button
 } from "@material-ui/core";
@@ -29,8 +29,6 @@ import TemplateBox from "../TemplateBox";
 
 
 interface AppState {
-  // abilities: Ability[] | null;
-  // width: number;
 }
 
 interface RootState {
@@ -38,12 +36,10 @@ interface RootState {
 }
 
 const mapState = (state: RootState) => ({
-  // abilities: state.app.abilities
-  // width: state.app.width
 })
 
 const mapDispatch = {
-  // setAbilities: (objects: Ability[]) => ({ type: 'SET', dataType: 'abilities', payload: objects })
+  
 }
 
 const connector = connect(mapState, mapDispatch)
@@ -53,8 +49,6 @@ type PropsFromRedux = ConnectedProps<typeof connector>
 type Props = PropsFromRedux & {
   parent_name: string;
   feature_base: FeatureBase;
-  // onNameChange: (name: string) => void; 
-  // onDescriptionChange: (description: string) => void; 
   onChange: (feature_base: FeatureBase) => void; 
   onDelete: () => void; 
   onDone: () => void;
@@ -68,9 +62,6 @@ export interface State {
 }
 
 class FeatureBaseInput extends Component<Props, State> {
-  // public static defaultProps = {
-  //   labelWidth: null
-  // };
   constructor(props: Props) {
     super(props);
     this.state = {
@@ -202,7 +193,6 @@ class FeatureBaseInput extends Component<Props, State> {
             <Button
               variant="contained"
               color="primary"
-              // disabled={this.state.processing}
               onClick={ () => { 
                 this.props.onDone();
               }}>

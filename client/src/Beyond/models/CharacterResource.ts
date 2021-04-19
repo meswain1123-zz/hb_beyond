@@ -1,8 +1,5 @@
 
-// import { Map } from "./Subclass";
-// import { PlayToken } from "./Ability";
 import { 
-  // Resource, 
   ResourceFeature 
 } from ".";
 
@@ -24,7 +21,6 @@ export class CharacterResource {
   total: number;
   used: number;
   name: string;
-  // type: ResourceFeature | null;
 
   constructor(obj?: any) {
     this.type_id = obj ? obj.type_id : "";
@@ -33,8 +29,6 @@ export class CharacterResource {
     this.total = obj ? obj.total : 0;
     this.used = obj ? obj.used : 0;
     this.name = obj && obj.name ? obj.name : "";
-    
-    // this.type = obj && obj.type ? obj.type : null;
   }
 
   toDBObj = () => {
@@ -52,7 +46,6 @@ export class CharacterResource {
       this.type_id = copyMe.type_id;
       this.total = copyMe.total;
       this.name = copyMe.resource ? copyMe.resource.name : "";
-      // this.type = copyMe;
     }
   }
 }

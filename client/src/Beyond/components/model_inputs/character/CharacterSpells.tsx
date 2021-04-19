@@ -1,42 +1,22 @@
 import React, { Component } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
-// import {
-//   Clear, 
-// } from "@material-ui/icons";
 import {
   Grid, 
   Drawer,
-  // Popover,
-  // Snackbar 
 } from "@material-ui/core";
 
 import { 
   Character,
-  // Creature,
   CharacterSpell,
   CharacterSlot,
   Spell,
-  // SpellAsAbility,
-  // SpellSlotType,
   INumHash,
-  // SpellAsAbility
 } from "../../../models";
-// import { 
-//   CritFail, 
-//   CritSuccess, 
-//   D20,
-//   D4, D6, D8, 
-//   D10, // D100,
-//   D12
-// } from "../../../models/Images";
 
 import StringBox from "../../input/StringBox";
-// import CheckBox from "../../input/CheckBox";
 import ToggleButtonBox from "../../input/ToggleButtonBox";
 import ButtonBox from "../../input/ButtonBox";
 import CharacterManageSpells from "./CharacterManageSpells";
-// import ViewSpell from "../ViewSpell";
-// import CharacterSpellDetails from './CharacterSpellDetails';
 import CheckBox from '../../input/CheckBox';
 import CharacterAction from "./CharacterAction";
 
@@ -82,16 +62,9 @@ export interface State {
   levels: INumHash;
   concentration: boolean;
   ritual: boolean;
-  // popoverAnchorEl: HTMLDivElement | null;
-  // popoverSpell: CharacterSpell | null;
-  // popoverSpellLevel: number;
-  // popoverMode: string;
 }
 
 class CharacterSpells extends Component<Props, State> {
-  // public static defaultProps = {
-  //   value: null,
-  // };
   constructor(props: Props) {
     super(props);
     this.state = {
@@ -107,10 +80,6 @@ class CharacterSpells extends Component<Props, State> {
       levels: {},
       concentration: false,
       ritual: false,
-      // popoverAnchorEl: null,
-      // popoverSpell: null,
-      // popoverSpellLevel: -1,
-      // popoverMode: ""
     };
     this.api = API.getInstance();
     this.data_util = DataUtilities.getInstance();
@@ -226,7 +195,6 @@ class CharacterSpells extends Component<Props, State> {
             <CharacterManageSpells
               obj={this.props.obj}
               onChange={() => {
-                // this.props.onChange();
                 this.setState({ reloading: true }, () => {
                   this.setState({ reloading: false }, () => {
                     this.resetSearch();

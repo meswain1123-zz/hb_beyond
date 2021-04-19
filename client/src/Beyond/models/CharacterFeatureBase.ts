@@ -1,10 +1,4 @@
 
-// import { GameClass } from "./GameClass";
-// import { Subclass } from "./Subclass";
-// import { Background } from "./Background";
-// import { Feat } from "./Feat";
-// import { Race } from "./Race";
-
 import { FeatureBase } from "./FeatureBase";
 import { Feature } from "./Feature";
 import { FeatureChoice } from "./FeatureChoice";
@@ -41,14 +35,8 @@ export class CharacterFeatureBase {
       }
     }
     this.feature_choices = [];
-    // if (obj && obj.feature_choices && obj.feature_choices.length > 0) {
-    //   obj.feature_choices.forEach((o: any) => {
-    //     this.feature_choices.push(new CharacterFeatureChoice(o));
-    //   });
-    // }
     this.feature_base = obj && obj.feature_base ? new FeatureBase(obj.feature_base) : null;
     this.needs_attention = false;
-    // this.calcAttention();
   }
 
   toDBObj = () => {
@@ -75,14 +63,12 @@ export class CharacterFeatureBase {
     this.features = [];
     copyMe.features.forEach((f: Feature) => {
       const char_feature = new CharacterFeature();
-      // char_feature.id = this.features.length;
       char_feature.copyFeature(f);
       this.features.push(char_feature);
     });
     this.feature_choices = [];
     copyMe.feature_choices.forEach((fc: FeatureChoice) => {
       const char_feature_choice = new CharacterFeatureChoice();
-      // char_feature_choice.id = this.feature_choices.length;
       char_feature_choice.copyFeatureChoice(fc);
       this.feature_choices.push(char_feature_choice);
     });
@@ -97,13 +83,6 @@ export class CharacterFeatureBase {
         f.connectFeature(objFinder[0]);
       }
     });
-    // this.feature_choices = [];
-    // copyMe.feature_choices.forEach((fc: FeatureChoice) => {
-    //   const char_feature_choice = new CharacterFeatureChoice();
-    //   // char_feature_choice.id = this.feature_choices.length;
-    //   char_feature_choice.copyFeatureChoice(fc);
-    //   this.feature_choices.push(char_feature_choice);
-    // });
     this.calcAttention();
   }
 

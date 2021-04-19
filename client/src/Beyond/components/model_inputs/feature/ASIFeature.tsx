@@ -1,10 +1,9 @@
 import React, { Component } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
-// import { RouteComponentProps } from 'react-router';
+
 import {
   Grid, 
   Fab, Tooltip, 
-  // Button
 } from "@material-ui/core";
 import {
   DeleteForever
@@ -12,27 +11,16 @@ import {
 
 import { 
   ASIFeature,
-  // ASIFeature,
-  // ModelBase,
 } from "../../../models";
 import { 
-  // DAMAGE_TYPES, 
-  // DURATIONS,
-  // COMPONENTS,
-  // CASTING_TIMES,
-  // RESOURCES,
   ABILITY_SCORES 
 } from "../../../models/Constants";
 
 import StringBox from "../../input/StringBox";
 import SelectStringBox from "../../input/SelectStringBox";
-// import CheckBox from "../input/CheckBox";
 
 
 interface AppState {
-  // skills: Skill[] | null; 
-  // armor_types: ArmorType[] | null;
-  // weapon_keywords: WeaponKeyword[] | null;
 }
 
 interface RootState {
@@ -40,16 +28,10 @@ interface RootState {
 }
 
 const mapState = (state: RootState) => ({
-  // skills: state.app.skills,
-  // armor_types: state.app.armor_types,
-  // weapon_keywords: state.app.weapon_keywords,
-  // skills_mb: state.app.skills as ModelBase[],
-  // armor_types_mb: state.app.armor_types as ModelBase[],
-  // weapon_keywords_mb: state.app.weapon_keywords as ModelBase[],
 })
 
 const mapDispatch = {
-  // setAbilities: (objects: Ability[]) => ({ type: 'SET', dataType: 'abilities', payload: objects })
+  
 }
 
 const connector = connect(mapState, mapDispatch)
@@ -58,8 +40,6 @@ type PropsFromRedux = ConnectedProps<typeof connector>
 
 type Props = PropsFromRedux & {
   asi_feature: ASIFeature;
-  // onNameChange: (name: string) => void; 
-  // onDescriptionChange: (description: string) => void; 
   onChange: (asi_feature: ASIFeature) => void; 
   onDelete: () => void; 
 }
@@ -70,9 +50,6 @@ export interface State {
 }
 
 class ASIFeatureInput extends Component<Props, State> {
-  // public static defaultProps = {
-  //   choice_name: null
-  // };
   constructor(props: Props) {
     super(props);
     this.state = {

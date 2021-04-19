@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
-// import { RouteComponentProps } from 'react-router';
+
 import {
   Grid,
   Tooltip,
@@ -12,14 +12,9 @@ import {
 
 import { FeatureBase } from "../../../models";
 
-// import StringBox from "../input/StringBox";
-// import SelectBox from "../input/SelectBox";
-// import SelectStringBox from "../input/SelectStringBox";
-// import FeatureBaseInput from "./FeatureBase";
-
 
 interface AppState {
-  // abilities: Ability[] | null;
+  
   width: number
 }
 
@@ -28,12 +23,12 @@ interface RootState {
 }
 
 const mapState = (state: RootState) => ({
-  // abilities: state.app.abilities
+  
   width: state.app.width
 })
 
 const mapDispatch = {
-  // setAbilities: (objects: Ability[]) => ({ type: 'SET', dataType: 'abilities', payload: objects })
+  
 }
 
 const connector = connect(mapState, mapDispatch)
@@ -44,8 +39,6 @@ type Props = PropsFromRedux & {
   parent_type: string;
   parent_id: string;
   feature_bases: FeatureBase[];
-  // onNameChange: (name: string) => void; 
-  // onDescriptionChange: (description: string) => void; 
   onChange: (feature_bases: FeatureBase[]) => void; 
   onExpand: (feature_base: FeatureBase) => void;
   onAdd: () => void;
@@ -55,9 +48,6 @@ export interface State {
 }
 
 class FeatureBasesModal extends Component<Props, State> {
-  // public static defaultProps = {
-  //   labelWidth: null
-  // };
   constructor(props: Props) {
     super(props);
     this.state = {

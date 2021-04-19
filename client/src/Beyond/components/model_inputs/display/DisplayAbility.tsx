@@ -7,9 +7,6 @@ import {
 
 import { 
   Character,
-  // Creature,
-  // CharacterResource,
-  // ResourceFeature,
   Resource,
   Ability,
   SpellAsAbility,
@@ -49,9 +46,6 @@ export interface State {
 }
 
 class DisplayAbility extends Component<Props, State> {
-  // public static defaultProps = {
-  //   choice_name: null
-  // };
   constructor(props: Props) {
     super(props);
     this.state = {
@@ -91,17 +85,6 @@ class DisplayAbility extends Component<Props, State> {
       if (ability.resource_consumed) {
         // Eventually I'll add buttons for using it which will 
         // consume the resource
-        // const char_resource_finder = this.props.obj.resources.filter(o => o.type_id === ability.resource_consumed);
-        // console.log(char_resource_finder);
-        // if (char_resource_finder.length === 1) {
-        //   return (
-        //     <Grid container spacing={0} direction="column">
-        //       <Grid item>
-        //         <b>{ r.name }:</b>&nbsp;{ this.renderSlots(char_resource_finder[0]) }
-        //       </Grid>
-        //     </Grid>
-        //   );
-        // }
       } else if (!(ability instanceof ItemAffectingAbility) && ability.concentration) {
         // Eventually I'll make a button for casting it which will set it as the concentration
       }

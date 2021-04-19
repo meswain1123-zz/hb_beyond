@@ -1,29 +1,22 @@
 import React, { Component } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
-// import { RouteComponentProps } from 'react-router';
 import {
   FormControl, InputLabel,
   Select, MenuItem, Input,
   Checkbox, ListItemText
 } from "@material-ui/core";
 
-// import { ModelBase } from "../../../models/ModelBase";
-
 
 interface AppState {
-  // abilities: Ability[] | null;
 }
 
 interface RootState {
-  // app: AppState
 }
 
 const mapState = (state: RootState) => ({
-  // abilities: state.app.abilities
 })
 
 const mapDispatch = {
-  // setAbilities: (objects: Ability[]) => ({ type: 'SET', dataType: 'abilities', payload: objects })
 }
 
 const connector = connect(mapState, mapDispatch)
@@ -44,8 +37,6 @@ type Props = PropsFromRedux & {
 }
 
 export interface State { 
-  // value: string;
-  // values: string[];
   labelWidth: number;
 }
 
@@ -74,8 +65,6 @@ class SelectStringBox extends Component<Props, State> {
   constructor(props: Props) {
     super(props);
     this.state = {
-      // value: props.value? props.value : "",
-      // values: props.values,
       labelWidth: this.getLabelWidth(props.name)
     };
   }

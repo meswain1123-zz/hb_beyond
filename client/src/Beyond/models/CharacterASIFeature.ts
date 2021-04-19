@@ -1,6 +1,4 @@
 
-// import { Map } from "./Subclass";
-// import { PlayToken } from "./Ability";
 import { ASIFeature } from "./ASIFeature";
 
 /**
@@ -42,11 +40,5 @@ export class CharacterASIFeature {
   }
 
   connectASIFeature(copyMe: ASIFeature): void {
-    // this.id = copyMe.id;
-    // this.amount = copyMe.amount;
-    // this.selected_option = "";
-    // if (copyMe.options.length === 1) {
-    //   this.selected_option = copyMe.options[0];
-    // }
   }
 }

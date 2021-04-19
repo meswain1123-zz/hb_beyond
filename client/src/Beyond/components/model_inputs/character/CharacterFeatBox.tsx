@@ -1,41 +1,23 @@
 import React, { Component } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
-// import { RouteComponentProps } from 'react-router';
+
 import {
   Grid, 
-  // Fab, Tooltip, Button
 } from "@material-ui/core";
-// import {
-//   DeleteForever
-// } from "@material-ui/icons";
 
 import { 
   Character,
-  // Creature,
-  // CharacterFeatureBase,
   CharacterFeat,
   Feat
 } from "../../../models";
-// import { 
-//   // DAMAGE_TYPES, 
-//   // DURATIONS,
-//   // COMPONENTS,
-//   // CASTING_TIMES,
-//   // RESOURCES,
-//   ABILITY_SCORES 
-// } from "../../../models/Constants";
 import API from "../../../utilities/smart_api";
 import { APIClass } from "../../../utilities/smart_api_class";
 
-// import StringBox from "../../input/StringBox";
-// import SelectBox from "../input/SelectBox";
-// import SelectStringBox from "../../input/SelectStringBox";
 import SelectFeatBox from "../select/SelectFeatBox";
 import CharacterFeatureBasesInput from './CharacterFeatureBases';
 
 
 interface AppState {
-  // resources: Resource[] | null;
 }
 
 interface RootState {
@@ -43,11 +25,10 @@ interface RootState {
 }
 
 const mapState = (state: RootState) => ({
-  // resources: state.app.resources
 })
 
 const mapDispatch = {
-  // setAbilities: (objects: Ability[]) => ({ type: 'SET', dataType: 'abilities', payload: objects })
+  
 }
 
 const connector = connect(mapState, mapDispatch)
@@ -55,7 +36,6 @@ const connector = connect(mapState, mapDispatch)
 type PropsFromRedux = ConnectedProps<typeof connector>
 
 type Props = PropsFromRedux & {
-  // name: string;
   character: Character;
   obj: CharacterFeat;
   onChange: (changed: CharacterFeat) => void;
@@ -128,9 +108,6 @@ class CharacterFeatBox extends Component<Props, State> {
                   if (objFinder.length === 1) {
                     feat = objFinder[0];
                     this.props.obj.copyFeat(feat);
-                    // if (this.state.armor_types) {
-                    //   this.props.character.recalcAll(this.state.armor_types);
-                    // }
                     this.props.onChange(this.props.obj);
                   }
                   this.setState({ feat });
@@ -151,9 +128,6 @@ class CharacterFeatBox extends Component<Props, State> {
                   character={this.props.character}
                   features={this.props.obj.features}
                   onChange={() => {
-                    // if (this.state.armor_types) {
-                    //   this.props.character.recalcAll(this.state.armor_types);
-                    // }
                     this.props.onChange(this.props.obj);
                   }}
                 />

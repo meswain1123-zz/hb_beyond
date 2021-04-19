@@ -1,7 +1,6 @@
 
 import { PactBoon } from "./PactBoon";
 import { CharacterFeature } from "./CharacterFeature";
-// import { Mask } from "./Mask";
 
 export class CharacterPactBoon {
   id: number;

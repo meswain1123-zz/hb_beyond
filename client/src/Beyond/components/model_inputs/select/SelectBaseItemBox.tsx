@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
-// import { RouteComponentProps } from 'react-router';
+
 import {
   Grid
 } from "@material-ui/core";
@@ -21,7 +21,6 @@ import { APIClass } from "../../../utilities/smart_api_class";
 
 
 interface AppState {
-  // templates: TemplateBase[]
 }
 
 interface RootState {
@@ -29,11 +28,9 @@ interface RootState {
 }
 
 const mapState = (state: RootState) => ({
-  // templates: state.app.templates
 })
 
 const mapDispatch = {
-  // addTemplate: (obj: TemplateBase) => ({ type: 'ADD', dataType: 'templates', payload: obj })
 }
 
 const connector = connect(mapState, mapDispatch)

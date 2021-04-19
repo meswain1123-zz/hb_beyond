@@ -1,10 +1,5 @@
 import React, { Component } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
-// import {
-//   Bludgeoning, 
-//   Psychic, 
-//   Force
-// } from "../assets/img/damage";
 
 import { 
   Psychic, 
@@ -53,9 +48,6 @@ export interface State {
 }
 
 class Attributions extends Component<Props, State> {
-  // public static defaultProps = {
-  //   value: null,
-  // };
   constructor(props: Props) {
     super(props);
     this.state = {

@@ -1,7 +1,5 @@
 
 import { ModelBase } from "./ModelBase";
-// import { PlayToken } from "./Ability";
-// import { Mask } from "./Mask";
 
 /**
  * Simple, Martial, Range, Ammunition, 

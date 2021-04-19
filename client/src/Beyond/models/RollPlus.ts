@@ -4,8 +4,6 @@ import {
 } from ".";
 
 export class RollPlus extends DiceRoll {
-  // true_id: string;
-  // dice_roll: DiceRoll;
   flat: number;
   ability_score: string;
   as_string: string;
@@ -13,8 +11,6 @@ export class RollPlus extends DiceRoll {
 
   constructor(obj?: any) {
     super(obj);
-    // this.true_id = obj ? obj.true_id : uuidv4().toString();
-    // this.dice_roll = obj ? new DiceRoll(obj.dice_roll) : new DiceRoll();
     this.flat = obj && obj.flat ? obj.flat : 0;
     this.ability_score = obj && obj.ability_score ? obj.ability_score : "";
     this.type = obj && obj.type ? obj.type : "";

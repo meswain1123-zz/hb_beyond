@@ -1,34 +1,13 @@
 import React, { Component } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
-// import { RouteComponentProps } from 'react-router';
-// import {
-//   Grid, 
-//   // Fab, Tooltip, Button
-// } from "@material-ui/core";
-// import {
-//   DeleteForever
-// } from "@material-ui/icons";
 
 import { 
   Character,
-  // Creature,
   CharacterFeature,
   CharacterLanguageFeature,
   Language,
   LanguageFeature
 } from "../../../models";
-// import { 
-//   // DAMAGE_TYPES, 
-//   // DURATIONS,
-//   // COMPONENTS,
-//   // CASTING_TIMES,
-//   // RESOURCES,
-//   ABILITY_SCORES 
-// } from "../../../models/Constants";
-
-// import StringBox from "../../input/StringBox";
-// import SelectBox from "../input/SelectBox";
-// import SelectStringBox from "../../input/SelectStringBox";
 import SelectLanguageBox from "../select/SelectLanguageBox";
 
 import API from "../../../utilities/smart_api";
@@ -36,7 +15,6 @@ import { APIClass } from "../../../utilities/smart_api_class";
 
 
 interface AppState {
-  // resources: Resource[] | null;
 }
 
 interface RootState {
@@ -44,11 +22,10 @@ interface RootState {
 }
 
 const mapState = (state: RootState) => ({
-  // resources: state.app.resources
 })
 
 const mapDispatch = {
-  // setAbilities: (objects: Ability[]) => ({ type: 'SET', dataType: 'abilities', payload: objects })
+  
 }
 
 const connector = connect(mapState, mapDispatch)
@@ -56,7 +33,6 @@ const connector = connect(mapState, mapDispatch)
 type PropsFromRedux = ConnectedProps<typeof connector>
 
 type Props = PropsFromRedux & {
-  // name: string;
   character: Character;
   obj: CharacterFeature;
   onChange: (changed: CharacterLanguageFeature) => void;

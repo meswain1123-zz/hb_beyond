@@ -4,46 +4,28 @@ import { RouteComponentProps } from 'react-router';
 import { Redirect } from "react-router-dom";
 import {
   Add, 
-  // Edit,
   ArrowBack,
   Close
 } from "@material-ui/icons";
 import {
   Grid, 
-  // List, ListItem, 
   Button, 
   Tooltip, Fab,
-  // FormControl, InputLabel,
-  // OutlinedInput, FormHelperText
 } from "@material-ui/core";
-// import KeyboardArrowDownIcon from '@material-ui/icons/KeyboardArrowDown';
-// import KeyboardArrowRightIcon from '@material-ui/icons/KeyboardArrowRight';
+
 import { 
-  // ModelBase, 
   EquipmentPack, 
   EquipmentPackItem,
-  // Skill
 } from "../../models";
 import StringBox from "../../components/input/StringBox";
-// import SelectBox from "../../components/input/SelectBox";
-// import SelectStringBox from "../../components/input/SelectStringBox";
-// import CheckBox from "../../components/input/CheckBox";
+
 import SelectBaseItemBox from "../../components/model_inputs/select/SelectBaseItemBox";
-// import { 
-//   ABILITY_SCORES, 
-//   DAMAGE_TYPES, 
-//   DURATIONS,
-//   COMPONENTS,
-//   CASTING_TIMES,
-//   RESOURCES
-// } from "../../models/Constants";
+
 import API from "../../utilities/smart_api";
 import { APIClass } from "../../utilities/smart_api_class";
 
 
 interface AppState {
-  // equipment_packs: EquipmentPack[] | null;
-  // skills: Skill[] | null;
   height: number;
   width: number;
 }
@@ -57,16 +39,11 @@ interface MatchParams {
 }
 
 const mapState = (state: RootState) => ({
-  // equipment_packs: state.app.equipment_packs,
-  // skillsMB: state.app.skills as ModelBase[],
-  // skills: state.app.skills,
   height: state.app.height,
   width: state.app.width
 })
 
 const mapDispatch = {
-  // setEquipmentPacks: (objects: EquipmentPack[]) => ({ type: 'SET', dataType: 'equipment_packs', payload: objects }),
-  // addEquipmentPack: (object: EquipmentPack) => ({ type: 'ADD', dataType: 'equipment_packs', payload: object })
 }
 
 const connector = connect(mapState, mapDispatch)
@@ -79,7 +56,6 @@ export interface State {
   redirectTo: string | null;
   obj: EquipmentPack;
   processing: boolean;
-  // skills: Skill[] | null;
   equipment_packs: EquipmentPack[] | null;
   loading: boolean;
 }
@@ -91,7 +67,6 @@ class EquipmentPackEdit extends Component<Props, State> {
       redirectTo: null,
       obj: new EquipmentPack(),
       processing: false,
-      // skills: null,
       equipment_packs: null,
       loading: false
     };
@@ -278,7 +253,6 @@ class EquipmentPackEdit extends Component<Props, State> {
               </Button>
               <Button
                 variant="contained"
-                // color="primary"
                 disabled={this.state.processing}
                 style={{ marginLeft: "4px" }}
                 onClick={ () => { 

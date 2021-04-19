@@ -1,15 +1,10 @@
 import React, { Component } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
 import {
-  // FontDownload, 
-  // ExpandMore, 
   Clear
 } from "@material-ui/icons";
 import {
   Grid, 
-  // Accordion,
-  // AccordionSummary,
-  // AccordionDetails
 } from "@material-ui/core";
 
 import { 
@@ -17,14 +12,8 @@ import {
   Character,
   CharacterAbility
 } from "../../../models";
-// import { 
-//   ITEM_TYPES 
-// } from "../../../models/Constants";
 
-// import StringBox from "../../input/StringBox";
-// import SelectStringBox from "../../input/SelectStringBox";
 import CheckBox from "../../input/CheckBox";
-// import ToggleButtonBox from "../../input/ToggleButtonBox";
 import ButtonBox from "../../input/ButtonBox";
 
 import DisplayObjects from "../display/DisplayObjects";
@@ -68,9 +57,6 @@ export interface State {
 }
 
 class CharacterAbilityDetails extends Component<Props, State> {
-  // public static defaultProps = {
-  //   value: null,
-  // };
   constructor(props: Props) {
     super(props);
     this.state = {

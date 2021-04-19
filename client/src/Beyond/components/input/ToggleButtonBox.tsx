@@ -1,24 +1,19 @@
 import React, { Component } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
-// import { RouteComponentProps } from 'react-router';
-
-// import { ModelBase } from "../../models/ModelBase";
 
 
 interface AppState {
-  // abilities: Ability[] | null;
 }
 
 interface RootState {
-  // app: AppState
 }
 
 const mapState = (state: RootState) => ({
-  // abilities: state.app.abilities
+  
 })
 
 const mapDispatch = {
-  // setAbilities: (objects: Ability[]) => ({ type: 'SET', dataType: 'abilities', payload: objects })
+  
 }
 
 const connector = connect(mapState, mapDispatch)
@@ -90,7 +85,6 @@ class ToggleButtonBox extends Component<Props, State> {
           : 
             <img src={ this.props.image } alt={ this.props.name }
               style={{
-                // width: (this.props.width > 0 ? `${this.props.width}px` : "100%"),
                 height: `${this.props.height}px`
               }} 
             />

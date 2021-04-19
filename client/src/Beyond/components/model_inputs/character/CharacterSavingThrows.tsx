@@ -53,9 +53,6 @@ export interface State {
 }
 
 class CharacterSavingThrows extends Component<Props, State> {
-  // public static defaultProps = {
-  //   value: null,
-  // };
   constructor(props: Props) {
     super(props);
     this.state = {
@@ -204,7 +201,6 @@ class CharacterSavingThrows extends Component<Props, State> {
         Saving Throw Details
       </Drawer>,
       <Popover key="rolls"
-        // id={id}
         open={ this.state.popoverAnchorEl !== null && this.state.popoverSave !== "" }
         anchorEl={this.state.popoverAnchorEl}
         onClose={() => {

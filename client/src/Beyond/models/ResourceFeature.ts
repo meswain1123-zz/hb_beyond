@@ -1,6 +1,4 @@
 
-// import { Map } from "./Subclass";
-// import { PlayToken } from "./Ability";
 import { Resource } from ".";
 
 /**
@@ -14,7 +12,6 @@ import { Resource } from ".";
  */
 export class ResourceFeature {
   type_id: string | null;
-  // level: number;
   total: number;
   // If this is true then this 
   // gets added to others of the same type
@@ -23,8 +20,7 @@ export class ResourceFeature {
   resource: Resource | null;
 
   constructor(obj?: any) {
-    this.type_id = obj ? `${obj.type_id}` : null;
-    // this.level = obj ? obj.level : 1;
+    this.type_id = obj ? obj.type_id : null;
     this.total = obj ? obj.total : 0;
     this.extra = obj ? obj.extra : false;
     this.resource = null;
@@ -33,7 +29,6 @@ export class ResourceFeature {
   toDBObj = () => {
     return {
       type_id: this.type_id,
-      // level: this.level,
       total: this.total,
       extra: this.extra
     };

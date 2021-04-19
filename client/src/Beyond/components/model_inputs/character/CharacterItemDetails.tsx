@@ -19,13 +19,7 @@ import {
   WeaponKeyword,
   ArmorType,
 } from "../../../models";
-// import { 
-//   ITEM_TYPES 
-// } from "../../../models/Constants";
 
-// import StringBox from "../../input/StringBox";
-// import SelectStringBox from "../../input/SelectStringBox";
-// import CheckBox from "../../input/CheckBox";
 import ToggleButtonBox from "../../input/ToggleButtonBox";
 import ButtonBox from "../../input/ButtonBox";
 import StringBox from '../../input/StringBox';
@@ -76,9 +70,6 @@ export interface State {
 }
 
 class CharacterItemDetails extends Component<Props, State> {
-  // public static defaultProps = {
-  //   value: null,
-  // };
   constructor(props: Props) {
     super(props);
     this.state = {
@@ -108,14 +99,6 @@ class CharacterItemDetails extends Component<Props, State> {
       this.api.getSetOfObjects(["armor_type","base_item","magic_item","magic_item_keyword","weapon_keyword"]).then((res: any) => {
         const base_items: BaseItem[] = res.base_item;
         const magic_items: MagicItem[] = res.magic_item;
-        // magic_items.forEach(item => {
-        //   if (!item.base_item) {
-        //     const obj_finder = base_items.filter(o => o._id === item.base_item_id);
-        //     if (obj_finder.length === 1) {
-        //       item.base_item = obj_finder[0];
-        //     }
-        //   }
-        // });
         this.setState({ 
           armor_types: res.armor_type,
           weapon_keywords: res.weapon_keyword,
@@ -152,7 +135,6 @@ class CharacterItemDetails extends Component<Props, State> {
               style={{ 
                 backgroundColor: "white",
                 color: "black",
-                // border: "1px solid blue",
                 minHeight: "800px",
                 width: "316px",
                 overflowX: "hidden"

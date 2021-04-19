@@ -3,19 +3,14 @@ import { connect, ConnectedProps } from 'react-redux';
 import { RouteComponentProps } from 'react-router';
 import { Redirect } from "react-router-dom";
 import {
-  // Add, Edit,
   ArrowBack
 } from "@material-ui/icons";
 import {
   Grid, 
-  // List, ListItem, 
   Button, 
   Tooltip, Fab,
-  // FormControl, InputLabel,
-  // OutlinedInput, FormHelperText
 } from "@material-ui/core";
-// import KeyboardArrowDownIcon from '@material-ui/icons/KeyboardArrowDown';
-// import KeyboardArrowRightIcon from '@material-ui/icons/KeyboardArrowRight';
+
 import { 
   Spell, 
   TemplateBase,
@@ -23,18 +18,16 @@ import {
   AbilityEffect
 } from "../../models";
 import StringBox from "../../components/input/StringBox";
-// import SelectBox from "../../components/input/SelectBox";
+
 import SelectStringBox from "../../components/input/SelectStringBox";
 import CheckBox from "../../components/input/CheckBox";
 import TemplateBox from "../../components/model_inputs/TemplateBox";
 import AbilityEffectInput from "../../components/model_inputs/feature/AbilityEffect";
 import { 
   ABILITY_SCORES, 
-  // DAMAGE_TYPES, 
   DURATIONS,
   COMPONENTS,
   CASTING_TIMES,
-  // RESOURCES,
   SCHOOLS
 } from "../../models/Constants";
 import API from "../../utilities/smart_api";
@@ -42,8 +35,6 @@ import { APIClass } from "../../utilities/smart_api_class";
 
 
 interface AppState {
-  // spells: Spell[] | null;
-  // skills: Skill[] | null;
   height: number;
   width: number;
 }
@@ -57,16 +48,11 @@ interface MatchParams {
 }
 
 const mapState = (state: RootState) => ({
-  // spells: state.app.spells,
-  // skillsMB: state.app.skills as ModelBase[],
-  // skills: state.app.skills,
   height: state.app.height,
   width: state.app.width
 })
 
 const mapDispatch = {
-  // setSpells: (objects: Spell[]) => ({ type: 'SET', dataType: 'spells', payload: objects }),
-  // addSpell: (object: Spell) => ({ type: 'ADD', dataType: 'spells', payload: object })
 }
 
 const connector = connect(mapState, mapDispatch)
@@ -165,7 +151,6 @@ class SpellEdit extends Component<Props, State> {
                     const spell_template: SpellTemplate = template as SpellTemplate;
                     const obj = this.state.obj;
                     obj.copyTemplate(spell_template);
-                    // this.props.onChange(feature);
                     this.setState({ obj });
                   }}
                 />
@@ -426,7 +411,6 @@ class SpellEdit extends Component<Props, State> {
               </Button>
               <Button
                 variant="contained"
-                // color="primary"
                 disabled={this.state.processing}
                 style={{ marginLeft: "4px" }}
                 onClick={ () => { 

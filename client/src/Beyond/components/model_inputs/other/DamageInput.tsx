@@ -1,17 +1,14 @@
 import React, { Component } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
-// import { RouteComponentProps } from 'react-router';
+
 import {
   Grid, Fab, Tooltip, 
-  // Button
 } from "@material-ui/core";
 import {
   DeleteForever, 
-  // Add
 } from "@material-ui/icons";
 
 import { 
-  // Damage,
   RollPlus,
   DiceRoll
 } from "../../../models";
@@ -24,8 +21,6 @@ import SelectStringBox from "../../input/SelectStringBox";
 
 
 interface AppState {
-  // abilities: Ability[] | null;
-  // width: number;
 }
 
 interface RootState {
@@ -33,12 +28,10 @@ interface RootState {
 }
 
 const mapState = (state: RootState) => ({
-  // abilities: state.app.abilities
-  // width: state.app.width
 })
 
 const mapDispatch = {
-  // setAbilities: (objects: Ability[]) => ({ type: 'SET', dataType: 'abilities', payload: objects })
+  
 }
 
 const connector = connect(mapState, mapDispatch)
@@ -56,9 +49,6 @@ export interface State {
 }
 
 class DamageInput extends Component<Props, State> {
-  // public static defaultProps = {
-  //   labelWidth: null
-  // };
   constructor(props: Props) {
     super(props);
     this.state = {
@@ -98,19 +88,6 @@ class DamageInput extends Component<Props, State> {
         </Grid>
         <Grid item>
           Dice Rolls
-          {/* <Tooltip title={`Add Roll`}>
-            <Fab size="small" color="primary" style={{marginLeft: "8px"}}
-              onClick={ () => {
-                const damage = this.props.damage;
-                damage.damage_rolls.push(new DiceRoll());
-                this.props.onChange();
-                this.setState({ reloading: true }, () => {
-                  this.setState({ reloading: false });
-                });
-              }}>
-              <Add/>
-            </Fab>
-          </Tooltip> */}
         </Grid>
         { !this.state.reloading && this.renderRoll(this.props.damage) }
       </Grid>
@@ -145,21 +122,6 @@ class DamageInput extends Component<Props, State> {
         <Grid item xs={4}>
           { roll.size === 1 ? `${roll.count}` : `${roll.count}d${roll.size}`}
         </Grid>
-        {/* <Grid item xs={2}>
-          <Tooltip title={`Remove Bonus Damage`}>
-            <Fab size="small" color="primary" style={{marginLeft: "8px"}}
-              onClick={ () => {
-                const damage = this.props.damage;
-                damage.damage_rolls = damage.damage_rolls.filter(o => o.true_id !== roll.true_id);
-                this.props.onChange();
-                this.setState({ reloading: true }, () => {
-                  this.setState({ reloading: false });
-                });
-              }}>
-              <DeleteForever/>
-            </Fab>
-          </Tooltip>
-        </Grid> */}
       </Grid>
     );
   }

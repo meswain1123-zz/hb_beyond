@@ -1,7 +1,5 @@
 
 import Home from "@material-ui/icons/Home";
-// import Forum from "@material-ui/icons/Forum";
-// import HomePage from "../../views/Home";
 
 
 const menuRoutes = {

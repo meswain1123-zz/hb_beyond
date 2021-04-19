@@ -13,7 +13,6 @@ import {
   Campaign,
   Character,
   Creature,
-  // CreatureTemplate,
   EldritchInvocation,
   EquipmentPack,
   PactBoon,
@@ -47,15 +46,12 @@ import {
 class UnauthorizedError {
   name: string;
   message: string;
-  // response: string | null;
 
   constructor(message: string) {
     this.name = "UnauthorizedError";
     this.message = message;
-    // this.response = null;
   }
 }
-// UnauthorizedError.prototype = new Error();
 
 
 export class APIClass {
@@ -136,11 +132,9 @@ export class APIClass {
       return response;
     } else if (response.status === 401) {
       let unauthorizedError = new UnauthorizedError(response.statusText);
-      // unauthorizedError.response = response;
       return Promise.reject(unauthorizedError);
     } else {
       var error = new Error(response.statusText);
-      // error.response = response;
       return Promise.reject(error);
     }
   };
@@ -208,30 +202,6 @@ export class APIClass {
           data = this.backgrounds;
         break;
         case "base_item": 
-          // if (this.base_items) {
-          //   if (!this.armor_types) {
-          //     await this.getObjects("armor_type");
-          //   }
-          //   if (!this.weapon_keywords) {
-          //     await this.getObjects("weapon_keyword");
-          //   }
-          //   this.base_items.filter(item => item.item_type === "Armor" && item.armor_type_name === "").forEach(item => {
-          //     if (this.armor_types) {
-          //       const obj_finder = this.armor_types.filter(o => o._id === item.armor_type_id);
-          //       if (obj_finder.length === 1) {
-          //         item.armor_type_name = obj_finder[0].name;
-          //       }
-          //     }
-          //   });
-          //   this.base_items.filter(item => item.item_type === "Weapon" && item.weapon_keyword_names.length === 0).forEach(item => {
-          //     if (this.weapon_keywords) {
-          //       const obj_finder = this.weapon_keywords.filter(o => item.weapon_keyword_ids.includes(o._id) && o.display_in_equipment);
-          //       obj_finder.forEach(kw => {
-          //         item.weapon_keyword_names.push(kw.name);
-          //       });
-          //     }
-          //   });
-          // }
           data = this.base_items;
         break;
         case "campaign": 
@@ -259,41 +229,14 @@ export class APIClass {
           data = this.game_classes;
         break;
         case "magic_item": 
-          // if (this.magic_items) {
-          //   if (!this.base_items) {
-          //     await this.getObjects("base_item");
-          //   }
-          //   this.magic_items.filter(item => !item.base_item).forEach(item => {
-          //     if (this.base_items) {
-          //       const obj_finder = this.base_items.filter(o => o._id === item.base_item_id);
-          //       if (obj_finder.length === 1) {
-          //         item.base_item = obj_finder[0];
-          //       }
-          //     }
-          //   });
-          // }
           data = this.magic_items;
         break;
         case "magic_item_keyword":
           data = this.magic_item_keywords;
         break;
         case "magic_item_template": 
-          // data = this.magic_item_templates;
         break;
         case "race": 
-          // if (this.races) {
-          //   if (!this.subraces) {
-          //     await this.getObjects("subrace");
-          //   }
-          //   this.races.filter(race => race.subraces.length === 0).forEach(race => {
-          //     if (this.subraces) {
-          //       const obj_finder = this.subraces.filter(o => o.race_id === race._id);
-          //       obj_finder.forEach(sub => {
-          //         race.subraces.push(sub);
-          //       });
-          //     }
-          //   });
-          // }
           data = this.races;
         break;
         case "subrace": 
@@ -532,14 +475,6 @@ export class APIClass {
             await this.getObjects("creature");
           }
           if (this.creatures) {
-            // const alignments: any = {};
-            // this.creatures.forEach(c => {
-            //   if (!alignments[c.alignment]) {
-            //     alignments[c.alignment] = 0;
-            //   }
-            //   alignments[c.alignment]++;
-            // });
-            // console.log(alignments);
             data = this.creatures.filter(o => o._id === id);
           }
         break;
@@ -600,12 +535,6 @@ export class APIClass {
           }
         break;
         case "magic_item_template": 
-          // if (!this.magic_item_templates) {
-          //   await this.getObjects("magic_item_template");
-          // }
-          // if (this.magic_item_templates) {
-          //   data = this.magic_item_templates.filter(o => o._id === id);
-          // }
         break;
         case "race": 
           if (!this.races) {
@@ -851,9 +780,6 @@ export class APIClass {
             }
           break;
           case "magic_item_template": 
-            // if (this.magic_item_templates) {
-            //   this.magic_item_templates.push(obj as MagicItemTemplate);
-            // }
           break;
           case "race": 
             if (this.races) {
@@ -907,12 +833,8 @@ export class APIClass {
                 this.template_bases.push(obj as FeatureChoiceTemplate);
               } else if (template.type === "Feature") {
                 this.template_bases.push(obj as FeatureTemplate);
-              // } else if (template.type === "Creature") {
-              //   this.template_bases.push(obj as CreatureTemplate);
               } else if (template.type === "SummonStatBlock") {
                 this.template_bases.push(obj as SummonStatBlockTemplate);
-              // } else if (template.type === "MagicItem") {
-              //   this.template_bases.push(obj as MagicItemTemplate);
               }
             }
           break;
@@ -1037,10 +959,7 @@ export class APIClass {
               this.magic_item_keywords = this.magic_item_keywords.filter(o => o._id !== object_id);
             }
           break;
-          case "magic_item_template": 
-            // if (this.magic_item_templates) {
-            //   this.magic_item_templates = this.magic_item_templates.filter(o => o._id !== object_id);
-            // }
+          case "magic_item_template":
           break;
           case "race": 
             if (this.races) {
@@ -1318,15 +1237,6 @@ export class APIClass {
             }
           break;
           case "magic_item_template": 
-            // if (this.magic_item_templates) {
-            //   const objects: MagicItemTemplate[] = this.magic_item_templates;
-            //   const objFinder = objects.filter(o => o._id === obj._id);
-            //   if (objFinder.length === 1) {
-            //     const updated = objFinder[0];
-            //     updated.copy(obj as MagicItemTemplate);
-            //     this.magic_item_templates = objects;
-            //   }
-            // }
           break;
           case "race": 
             if (this.races) {
@@ -1425,12 +1335,8 @@ export class APIClass {
                   updated.copy(obj as FeatureChoiceTemplate);
                 } else if (updated.type === "Feature") {
                   updated.copy(obj as FeatureTemplate);
-                // } else if (updated.type === "Creature") {
-                //   updated.copy(obj as CreatureTemplate);
                 } else if (updated.type === "SummonStatBlock") {
                   updated.copy(obj as SummonStatBlockTemplate);
-                // } else if (updated.type === "MagicItem") {
-                //   updated.copy(obj as MagicItemTemplate);
                 }
                 this.template_bases = objects;
               }
@@ -1780,12 +1686,6 @@ export class APIClass {
             response = magic_item_keywords;
           break;
           case "magic_item_template": 
-            // const magic_item_templates: MagicItemTemplate[] = [];
-            // body.objects.forEach((o: any) => {
-            //   magic_item_templates.push(new MagicItemTemplate(o));
-            // });
-            // this.magic_item_templates = magic_item_templates;
-            // response = magic_item_templates;
           break;
           case "race": 
             const races: Race[] = [];
@@ -1879,14 +1779,10 @@ export class APIClass {
                 case "FeatureChoice":
                   template_bases.push(new FeatureChoiceTemplate(o));
                   break;
-                // case "Creature":
-                //   template_bases.push(new CreatureTemplate(o));
-                //   break;
                 case "SummonStatBlock":
                   template_bases.push(new SummonStatBlockTemplate(o));
                 break;
                 case "MagicItem":
-                  // template_bases.push(new MagicItemTemplate(o));
                 break;
               }
             });
@@ -1943,17 +1839,6 @@ export class APIClass {
     };
   };
 
-  // relogin = async () => {
-  //   try {
-  //     const user = this.getSessionData("loginUser");
-  //     if (user !== null) {
-  //       const response = await this.postData("/api/user/login", user);
-  //       this.processResponse(response, "user", null, "user", true);
-  //     }
-  //   }
-  //   catch {}
-  // }
-
   getSessionData = (sessionName: string) => {
     const sessionStr = sessionStorage.getItem(sessionName);
     if (sessionStr !== null) {
@@ -2002,7 +1887,6 @@ export class APIClass {
   fetch5eData = async (path: string, options: any = {}) => {
     return await fetch(`${path}`, {
       mode: "cors",
-      // credentials: "include",
       ...options,
       headers: {
         Accept: "application/json",

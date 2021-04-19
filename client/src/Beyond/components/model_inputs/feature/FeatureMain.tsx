@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
-// import { RouteComponentProps } from 'react-router';
+
 import {
   Grid, Fab, Tooltip, Button
 } from "@material-ui/core";
@@ -15,34 +15,27 @@ import {
   Proficiency, 
   Ability,
   CreatureAbility,
+  MinionAbility,
   SpellAsAbility,
   ItemAffectingAbility,
   ResourceFeature,
   Advantage,
   DamageMultiplier,
-  // Skill,
-  // ArmorType,
-  // WeaponKeyword,
   ASIBaseFeature,
-  // ModelBase,
   FeatureTemplate,
   TemplateBase,
   BonusSpells,
   SpellBook,
-  // SpecialFeature,
   LanguageFeature,
   SenseFeature,
   SpellcastingFeature
 } from "../../../models";
 import { 
   FEATURE_TYPES,
-  // ABILITY_SCORES 
 } from "../../../models/Constants";
 
 import StringBox from "../../input/StringBox";
-// import SelectBox from "../input/SelectBox";
 import SelectStringBox from "../../input/SelectStringBox";
-// import CheckBox from "../../input/CheckBox";
 import ProficiencyFeatureInput from "./ProficiencyFeature";
 import ASIBaseFeatureInput from "./ASIBaseFeature";
 import ResourceFeatureInput from "./ResourceFeature";
@@ -52,12 +45,12 @@ import SpellModifierInput from "./SpellModifier";
 import AdvantageInput from "./Advantage";
 import AbilityInput from "./Ability";
 import CreatureAbilityInput from "./CreatureAbility";
+import MinionAbilityInput from "./MinionAbility";
 import BonusSpellsInput from "./BonusSpells";
 import SpellAsAbilityInput from "./SpellAsAbility";
 import ItemAffectingAbilityInput from "./ItemAffectingAbility";
 import TemplateBox from "../TemplateBox";
 import SpellBookInput from "./SpellBook";
-// import SelectSpellListBox from "../select/SelectSpellListBox";
 import SelectSpecialFeatureTypeBox from "../select/SelectSpecialFeatureTypeBox";
 import SelectSpecialFeatureBox from "../select/SelectSpecialFeatureBox";
 import DamageMultiplierInput from "./DamageMultiplier";
@@ -69,14 +62,6 @@ import { APIClass } from "../../../utilities/smart_api_class";
 
 
 interface AppState {
-  // abilities: Ability[] | null;
-  // skills: Skill[] | null; 
-  // // Proficiencies are basically subsets of 
-  // // [...skills,...armor_types,...weapon_keywords,...tool_types]
-  // // I need to figure out how I want to handle these
-  // armor_types: ArmorType[] | null;
-  // weapon_keywords: WeaponKeyword[] | null;
-  // width: number;
 }
 
 interface RootState {
@@ -84,15 +69,10 @@ interface RootState {
 }
 
 const mapState = (state: RootState) => ({
-  // abilities: state.app.abilities,
-  // skills: state.app.skills,
-  // armor_types: state.app.armor_types,
-  // weapon_keywords: state.app.weapon_keywords,
-  // width: state.app.width
-})
+});
 
 const mapDispatch = {
-  // setAbilities: (objects: Ability[]) => ({ type: 'SET', dataType: 'abilities', payload: objects })
+  
 }
 
 const connector = connect(mapState, mapDispatch)
@@ -105,8 +85,6 @@ type Props = PropsFromRedux & {
   base_name: string | null;
   choice_name: string | null;
   feature: Feature;
-  // onNameChange: (name: string) => void; 
-  // onDescriptionChange: (description: string) => void; 
   onChange: (feature: Feature) => void; 
   onDelete: () => void; 
   onDone: (target: string) => void;
@@ -157,7 +135,6 @@ class FeatureInput extends Component<Props, State> {
             <Button
               variant="contained"
               color="primary"
-              // disabled={this.state.processing}
               onClick={ () => { 
                 this.props.onDone("parent");
               }}>
@@ -169,7 +146,6 @@ class FeatureInput extends Component<Props, State> {
                 <Button
                   variant="contained"
                   color="primary"
-                  // disabled={this.state.processing}
                   onClick={ () => { 
                     this.props.onDone("base");
                   }}>
@@ -183,7 +159,6 @@ class FeatureInput extends Component<Props, State> {
                 <Button
                   variant="contained"
                   color="primary"
-                  // disabled={this.state.processing}
                   onClick={ () => { 
                     this.props.onDone("choice");
                   }}>
@@ -323,6 +298,9 @@ class FeatureInput extends Component<Props, State> {
                   case "Creature Ability":
                     the_feature = new CreatureAbility();
                   break;
+                  case "Minion Ability":
+                    the_feature = new MinionAbility();
+                  break;
                   case "Spell as Ability":
                     the_feature = new SpellAsAbility();
                   break;
@@ -394,14 +372,12 @@ class FeatureInput extends Component<Props, State> {
         break;
         case "Pact Boon":
           if (typeof this.state.feature.the_feature === "string") {
-            // const invocation: string = this.state.feature.the_feature;
             feature_details = 
               <span>The player will be able to choose a Pact Boon</span>;
           }
         break;
         case "Eldritch Invocation":
           if (typeof this.state.feature.the_feature === "string") {
-            // const invocation: string = this.state.feature.the_feature;
             feature_details = 
               <span>The player will be able to choose an Eldritch Invocation</span>;
           }
@@ -604,7 +580,6 @@ class FeatureInput extends Component<Props, State> {
                   this.setState({ feature });
                 }} 
               />;
-            // <span>Expertise: { expertise ? "True" : "False" }</span>;
           }
         break;
         case "Ability":
@@ -628,6 +603,20 @@ class FeatureInput extends Component<Props, State> {
               <CreatureAbilityInput 
                 obj={ability}
                 onChange={(changed: CreatureAbility) => {
+                  const feature = this.state.feature;
+                  feature.the_feature = changed;
+                  this.setState({ feature });
+                }}
+              />;
+          }
+        break;
+        case "Minion Ability":
+          if (this.state.feature.the_feature instanceof MinionAbility) {
+            const ability: MinionAbility = this.state.feature.the_feature;
+            feature_details =
+              <MinionAbilityInput 
+                obj={ability}
+                onChange={(changed: MinionAbility) => {
                   const feature = this.state.feature;
                   feature.the_feature = changed;
                   this.setState({ feature });
@@ -736,37 +725,32 @@ class FeatureInput extends Component<Props, State> {
           }
         break;
         case "Spells":
-          // if (typeof this.state.feature.the_feature === "string") {
-            const spells_prepared: string = `${this.state.feature.the_feature}`;
-            feature_details = 
-              <StringBox 
-                name="Spells"
-                value={spells_prepared} 
-                onBlur={(value: string) => {
-                  const feature = this.state.feature;
-                  feature.the_feature = value;
-                  this.setState({ feature });
-                }} 
-              />;
-          // }
+          const spells_prepared: string = `${this.state.feature.the_feature}`;
+          feature_details = 
+            <StringBox 
+              name="Spells"
+              value={spells_prepared} 
+              onBlur={(value: string) => {
+                const feature = this.state.feature;
+                feature.the_feature = value;
+                this.setState({ feature });
+              }} 
+            />;
         break;
         case "Cantrips":
-          // if (typeof this.state.feature.the_feature === "string") {
-            const cantrips_known: string = `${this.state.feature.the_feature}`;
-            feature_details = 
-              <StringBox 
-                name="Cantrips"
-                value={cantrips_known} 
-                onBlur={(value: string) => {
-                  const feature = this.state.feature;
-                  feature.the_feature = value;
-                  this.setState({ feature });
-                }} 
-              />;
-          // }
+          const cantrips_known: string = `${this.state.feature.the_feature}`;
+          feature_details = 
+            <StringBox 
+              name="Cantrips"
+              value={cantrips_known} 
+              onBlur={(value: string) => {
+                const feature = this.state.feature;
+                feature.the_feature = value;
+                this.setState({ feature });
+              }} 
+            />;
         break;
         case "Ritual Casting":
-          // feature_details = <span>Ritual Casting</span>;
         break;
         case "Bonus Spells":
           if (this.state.feature.the_feature instanceof BonusSpells) {
@@ -827,7 +811,6 @@ class FeatureInput extends Component<Props, State> {
                   this.setState({ feature });
                 }} 
               />;
-            // <span>Expertise: { expertise ? "True" : "False" }</span>;
           }
         break;
       }

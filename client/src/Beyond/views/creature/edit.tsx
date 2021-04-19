@@ -3,12 +3,10 @@ import { connect, ConnectedProps } from 'react-redux';
 import { RouteComponentProps } from 'react-router';
 import { Redirect } from "react-router-dom";
 import {
-  // Add, Edit,
   ArrowBack
 } from "@material-ui/icons";
 import {
   Grid, 
-  // List, ListItem, 
   Button, 
   Tooltip, Fab,
   Link,
@@ -114,7 +112,6 @@ class CreatureEdit extends Component<Props, State> {
   submit() {
     this.setState({ processing: true }, () => {
       const obj = this.state.obj;
-      // obj.current_hit_points = obj.max_hit_points;
       this.api.upsertObject(obj).then((res: any) => {
         this.setState({ processing: false, redirectTo: "/beyond/creature" });
       });
@@ -286,7 +283,6 @@ class CreatureEdit extends Component<Props, State> {
               </Button>
               <Button
                 variant="contained"
-                // color="primary"
                 disabled={this.state.processing}
                 style={{ marginLeft: "4px" }}
                 onClick={ () => { 
@@ -720,7 +716,6 @@ class CreatureEdit extends Component<Props, State> {
         </Grid>
       ); 
     }
-    // return null;
   }
 
   render_attributes() {

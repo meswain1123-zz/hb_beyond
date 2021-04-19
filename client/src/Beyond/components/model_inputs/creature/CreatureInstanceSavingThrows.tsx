@@ -1,9 +1,5 @@
 import React, { Component } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
-// import {
-//   RadioButtonUnchecked,
-//   RadioButtonChecked,
-// } from "@material-ui/icons";
 import {
   Grid, 
   Drawer,
@@ -53,9 +49,6 @@ export interface State {
 }
 
 class CreatureInstanceSavingThrows extends Component<Props, State> {
-  // public static defaultProps = {
-  //   value: null,
-  // };
   constructor(props: Props) {
     super(props);
     this.state = {
@@ -152,7 +145,6 @@ class CreatureInstanceSavingThrows extends Component<Props, State> {
         Saving Throw Details
       </Drawer>,
       <Popover key="rolls"
-        // id={id}
         open={ this.state.popoverAnchorEl !== null && this.state.popoverSave !== "" }
         anchorEl={this.state.popoverAnchorEl}
         onClose={() => {
@@ -175,18 +167,11 @@ class CreatureInstanceSavingThrows extends Component<Props, State> {
   renderRoll() {
     const rolls: RollPlus[] = [];
     const roll_plus = new RollPlus();
-    // roll_plus.ability_score = this.state.popoverSave;
     roll_plus.flat = this.props.obj.get_saving_throw(this.state.popoverSave);
     rolls.push(roll_plus);
-    // this.props.obj.saving_throw_bonuses.forEach(bonus => {
-    //   if (bonus.types.includes(this.state.popoverSave)) {
-    //     rolls.push(bonus.rolls);
-    //   }
-    // });
     return (
       <Roller 
         name={this.state.popoverSave}
-        // char={this.props.obj}
         rolls={rolls} 
         type="Saving Throw" 
       />

@@ -1,8 +1,4 @@
 
-// import { Map } from "./Subclass";
-// import { PlayToken } from "./Ability";
-// import { Resource } from "./Resource";
-
 /**
  * This is a simple increasing of an Ability Score.
  * It has an amount and options.  

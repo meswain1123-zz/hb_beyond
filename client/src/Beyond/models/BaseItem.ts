@@ -1,11 +1,7 @@
 
-// import { ArmorType } from "./ArmorType";
-// import { WeaponKeyword } from "./WeaponKeyword";
 import { 
   ModelBase,
-  // Damage,
   RollPlus,
-  // DiceRoll 
 } from ".";
 
 export class BaseItem extends ModelBase {
@@ -56,7 +52,6 @@ export class BaseItem extends ModelBase {
         this.attack_damages.push(new RollPlus(d));
       });
     } else if (obj && obj.base_attack_damage_formula) {
-      // obj && obj.base_attack_damage_formula ? obj.base_attack_damage_formula : "1d6";
       const formula_split = obj.base_attack_damage_formula.split("d");
       const damage = new RollPlus();
       damage.count = formula_split[0];
@@ -75,7 +70,6 @@ export class BaseItem extends ModelBase {
         this.versatile_attack_damages.push(new RollPlus(d));
       });
     } else if (obj && obj.versatile_attack_damage_formula) {
-      // obj && obj.versatile_attack_damage_formula ? obj.versatile_attack_damage_formula : "1d6";
       const formula_split = obj.versatile_attack_damage_formula.split("d");
       const damage = new RollPlus();
       damage.count = formula_split[0];

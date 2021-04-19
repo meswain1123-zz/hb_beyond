@@ -37,19 +37,19 @@ import {
 } from "../../../models/Images";
 
 interface AppState {
-  // abilities: Ability[] | null;
+  
 }
 
 interface RootState {
-  // app: AppState
+  
 }
 
 const mapState = (state: RootState) => ({
-  // abilities: state.app.abilities
+  
 })
 
 const mapDispatch = {
-  // setAbilities: (objects: Ability[]) => ({ type: 'SET', dataType: 'abilities', payload: objects })
+  
 }
 
 const connector = connect(mapState, mapDispatch)

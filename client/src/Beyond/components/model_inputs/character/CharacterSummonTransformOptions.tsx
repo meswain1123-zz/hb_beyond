@@ -1,15 +1,5 @@
 import React, { Component } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
-// import {
-//   ExpandMore
-// } from "@material-ui/icons";
-// import {
-//   Grid, 
-//   Popover,
-//   Accordion,
-//   AccordionSummary,
-//   AccordionDetails
-// } from "@material-ui/core";
 
 import { 
   Character,
@@ -63,9 +53,6 @@ export interface State {
 }
 
 class CharacterSummonTransformOptions extends Component<Props, State> {
-  // public static defaultProps = {
-  //   value: null,
-  // };
   constructor(props: Props) {
     super(props);
     this.state = {
@@ -100,7 +87,6 @@ class CharacterSummonTransformOptions extends Component<Props, State> {
       return <span>Loading</span>;
     } else {
       const summon_options = this.props.potence.summon_options;
-      // const selected_summon = summon_options.length === 1 ?
       const all_options: (Creature | SummonStatBlock)[] = [];
       const counts: IStringNumHash = {};
       summon_options.forEach(option => {

@@ -91,12 +91,12 @@ export const FEATURE_TYPES = [
     "Ability Score Improvement",
     "Ability",
     "Creature Ability",
+    "Minion Ability",
     "Spell as Ability",
     "Item Affecting Ability", // This is for Pact Weapon, Infusions, and Alchemist Potions
     "Ritual Casting",
     "Spellcasting",
     "Spellcasting Focus",
-    // "Spell List",
     "Spell Book",
     "Cantrips",
     "Spells",

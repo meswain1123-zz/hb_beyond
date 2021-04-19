@@ -3,59 +3,33 @@ import { connect, ConnectedProps } from 'react-redux';
 import { RouteComponentProps } from 'react-router';
 import { Redirect } from "react-router-dom";
 import {
-  // Add, Edit,
   ArrowBack
 } from "@material-ui/icons";
 import {
   Grid, 
-  // List, ListItem, 
   Button, 
   Tooltip, Fab,
   Link,
-  // FormControl, InputLabel,
-  // OutlinedInput, FormHelperText
 } from "@material-ui/core";
-// import KeyboardArrowDownIcon from '@material-ui/icons/KeyboardArrowDown';
-// import KeyboardArrowRightIcon from '@material-ui/icons/KeyboardArrowRight';
 import {  
   ArmorType,
   AbilityScores,
-  // Background,
   Character, 
   CharacterBackground,
-  // CharacterClass,
-  // CharacterItem,
-  // CharacterFeature,
   CharacterRace,
-  // CharacterResource,
   EldritchInvocation,
   FeatureBase,
-  // GameClass,
-  // Subclass,
-  // Race,
-  // Subrace,
-  // BaseItem,
-  // MagicItem,
   WeaponKeyword,
   Spell,
   SpellSlotType
 } from "../../models";
 import StringBox from "../../components/input/StringBox";
-// import SelectBox from "../../components/input/SelectBox";
-// import SelectStringBox from "../../components/input/SelectStringBox";
-// import CheckBox from "../../components/input/CheckBox";
-// import FeatureBasesInput from "../../components/model_inputs/feature/FeatureBases";
-// import FeatureBaseInput from "../../components/model_inputs/feature/FeatureBase";
-// import SelectArmorTypeBox from "../../components/model_inputs/SelectArmorTypeBox";
-// import SelectBaseItemBox from "../../components/model_inputs/SelectBaseItemBox";
 import CharacterRaceInput from "../../components/model_inputs/character/CharacterRace";
 import CharacterBackgroundInput from "../../components/model_inputs/character/CharacterBackground";
 import CharacterAbilityScoresInput from "../../components/model_inputs/character/CharacterAbilityScoresInput";
 import CharacterClassInput from "../../components/model_inputs/character/CharacterClassInput";
 import CharacterEquipment from "../../components/model_inputs/character/CharacterEquipment";
-// import { 
-//   ITEM_TYPES
-// } from "../../models/Constants";
+
 import API from "../../utilities/smart_api";
 import { APIClass } from "../../utilities/smart_api_class";
 import CharacterUtilities from "../../utilities/character_utilities";
@@ -64,8 +38,6 @@ import { CharacterUtilitiesClass } from "../../utilities/character_utilities_cla
 
 
 interface AppState {
-  // characters: Character[] | null;
-  // skills: Skill[] | null;
   height: number;
   width: number;
 }
@@ -79,16 +51,11 @@ interface MatchParams {
 }
 
 const mapState = (state: RootState) => ({
-  // characters: state.app.characters,
-  // skillsMB: state.app.skills as ModelBase[],
-  // skills: state.app.skills,
   height: state.app.height,
   width: state.app.width
 })
 
 const mapDispatch = {
-  // setCharacters: (objects: Character[]) => ({ type: 'SET', dataType: 'characters', payload: objects }),
-  // addCharacter: (object: Character) => ({ type: 'ADD', dataType: 'characters', payload: object })
 }
 
 const connector = connect(mapState, mapDispatch)
@@ -104,19 +71,11 @@ export interface State {
   expanded_feature_base: FeatureBase | null;
   child_names_valid: boolean;
   mode: string;
-  // characters: Character[] | null;
   armor_types: ArmorType[] | null;
-  // game_classes: GameClass[] | null;
-  // subclasses: Subclass[] | null;
-  // races: Race[] | null;
-  // subraces: Subrace[] | null;
-  // base_items: BaseItem[] | null;
-  // magic_items: MagicItem[] | null;
   weapon_keywords: WeaponKeyword[] | null;
   spells: Spell[] | null;
   spell_slot_types: SpellSlotType[] | null;
   eldritch_invocations: EldritchInvocation[] | null;
-  // backgrounds: Background[] | null;
   loading: boolean;
 }
 
@@ -130,19 +89,11 @@ class CharacterEdit extends Component<Props, State> {
       expanded_feature_base: null,
       child_names_valid: true,
       mode: "main",
-      // characters: null,
       armor_types: null,
-      // game_classes: null,
-      // subclasses: null,
-      // races: null,
-      // subraces: null,
-      // base_items: null,
-      // magic_items: null,
       weapon_keywords: null,
       spells: null,
       spell_slot_types: null,
       eldritch_invocations: null,
-      // backgrounds: null,
       loading: false
     };
     this.api = API.getInstance();
@@ -178,70 +129,8 @@ class CharacterEdit extends Component<Props, State> {
         const obj = res[0];
         this.char_util.recalcAll(obj);
         this.setState({ obj });
-        // if (this.state.armor_types && this.state.spells && this.state.spell_slot_types && this.state.eldritch_invocations && this.state.weapon_keywords) {
-        //   obj.recalcAll(this.state.armor_types, this.state.weapon_keywords, this.state.spells, this.state.spell_slot_types, this.state.eldritch_invocations);
-        // }
-        // this.setState({ 
-        //   obj
-        // });
       }
     });
-    // const objFinder = this.state.characters ? this.state.characters.filter(a => a._id === id) : [];
-    // if (objFinder.length === 1 && this.state.races && this.state.backgrounds && this.state.game_classes && this.state.subclasses) {
-    //   const obj = objFinder[0];
-    //   if (obj.race.race_id !== "" && !obj.race.race) {
-    //     const races = this.state.races;
-    //     const obj_finder = races.filter(o => o._id === obj.race.race_id);
-    //     if (obj_finder.length === 1) {
-    //       obj.race.connectRace(obj_finder[0]);
-    //     }
-    //   }
-    //   if (obj.background.background_id !== "" && !obj.background.background) {
-    //     const backgrounds = this.state.backgrounds;
-    //     const obj_finder = backgrounds.filter(o => o._id === obj.background.background_id);
-    //     if (obj_finder.length === 1) {
-    //       obj.background.connectBackground(obj_finder[0]);
-    //     }
-    //   }
-    //   const game_classes = this.state.game_classes;
-    //   const subclasses = this.state.subclasses;
-    //   obj.classes.forEach(char_class => {
-    //     if (!char_class.game_class) {
-    //       const objFinder = game_classes.filter(o => o._id === char_class.game_class_id);
-    //       if (objFinder.length === 1) {
-    //         char_class.connectGameClass(objFinder[0]);
-    //       }
-    //     }
-    //     if (char_class.subclass_id !== "" && !char_class.subclass) {
-    //       const objFinder = subclasses.filter(o => o._id === char_class.subclass_id);
-    //       if (objFinder.length === 1) {
-    //         char_class.connectSubclass(objFinder[0]);
-    //       }
-    //     }
-    //   });
-    //   const base_items = this.state.base_items;
-    //   const magic_items = this.state.magic_items;
-    //   // const magic_item_keywords = this.state.magic_item_keywords;
-    //   obj.items.forEach(item => {
-    //     if (!item.base_item && magic_items && base_items) {
-    //       if (item.magic_item_id !== "") {
-    //         const objFinder = magic_items.filter(o => o._id === item.magic_item_id);
-    //         if (objFinder.length === 1) {
-    //           item.connectMagicItem(objFinder[0]);
-    //         }
-    //       } else {
-    //         const objFinder = base_items.filter(o => o._id === item.base_item_id);
-    //         if (objFinder.length === 1) {
-    //           item.connectBaseItem(objFinder[0]);
-    //         }
-    //       }
-    //     }
-    //   });
-    //   if (this.state.armor_types && this.state.spells) {
-    //     obj.recalcAll(this.state.armor_types, this.state.spells);
-    //   }
-    //   this.setState({ obj });
-    // }
   }
 
   load() {
@@ -389,7 +278,6 @@ class CharacterEdit extends Component<Props, State> {
               </Button>
               <Button
                 variant="contained"
-                // color="primary"
                 disabled={this.state.processing}
                 style={{ marginLeft: "4px" }}
                 onClick={ () => { 
@@ -414,10 +302,6 @@ class CharacterEdit extends Component<Props, State> {
             obj.race = changed;
             this.char_util.recalcAll(obj);
             this.setState({ obj });
-            // if (this.state.armor_types && this.state.spells && this.state.spell_slot_types && this.state.eldritch_invocations && this.state.weapon_keywords) {
-            //   obj.recalcAll(this.state.armor_types, this.state.weapon_keywords, this.state.spells, this.state.spell_slot_types, this.state.eldritch_invocations);
-            // }
-            // this.setState({ obj });
           }}
         />
       );
@@ -430,10 +314,6 @@ class CharacterEdit extends Component<Props, State> {
             obj.background = changed;
             this.char_util.recalcAll(obj);
             this.setState({ obj });
-            // if (this.state.armor_types && this.state.spells && this.state.spell_slot_types && this.state.eldritch_invocations && this.state.weapon_keywords) {
-            //   obj.recalcAll(this.state.armor_types, this.state.weapon_keywords, this.state.spells, this.state.spell_slot_types, this.state.eldritch_invocations);
-            // }
-            // this.setState({ obj });
           }}
         />
       );
@@ -446,10 +326,6 @@ class CharacterEdit extends Component<Props, State> {
             obj.base_ability_scores = changed;
             this.char_util.recalcAll(obj);
             this.setState({ obj });
-            // if (this.state.armor_types && this.state.spells && this.state.spell_slot_types && this.state.eldritch_invocations && this.state.weapon_keywords) {
-            //   obj.recalcAll(this.state.armor_types, this.state.weapon_keywords, this.state.spells, this.state.spell_slot_types, this.state.eldritch_invocations);
-            // }
-            // this.setState({ obj });
           }}
         />
       );
@@ -461,13 +337,6 @@ class CharacterEdit extends Component<Props, State> {
             const obj = changed;
             this.char_util.recalcAll(obj);
             this.setState({ obj });
-            // const obj = this.state.obj;
-            // obj.base_ability_scores = changed;
-            // obj.recalcAbilityScores();
-            // if (this.state.armor_types && this.state.spells && this.state.spell_slot_types && this.state.eldritch_invocations && this.state.weapon_keywords) {
-            //   changed.recalcAll(this.state.armor_types, this.state.weapon_keywords, this.state.spells, this.state.spell_slot_types, this.state.eldritch_invocations);
-            // }
-            // this.setState({ obj: changed });
           }}
         />
       );
@@ -479,11 +348,6 @@ class CharacterEdit extends Component<Props, State> {
             const obj = this.state.obj;
             this.char_util.recalcAll(obj);
             this.setState({ obj });
-            // const obj = this.state.obj;
-            // if (this.state.armor_types && this.state.spells && this.state.spell_slot_types && this.state.eldritch_invocations && this.state.weapon_keywords) {
-            //   obj.recalcAll(this.state.armor_types, this.state.weapon_keywords, this.state.spells, this.state.spell_slot_types, this.state.eldritch_invocations);
-            // }
-            // this.setState({ obj });
           }}
         />
       );

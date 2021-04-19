@@ -1,8 +1,5 @@
 import React, { Component } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
-// import {
-//   FontDownload, ExpandMore
-// } from "@material-ui/icons";
 import {
   Grid, 
 } from "@material-ui/core";
@@ -10,6 +7,7 @@ import {
 import { 
   Character,
   CreatureAbility,
+  MinionAbility,
   CharacterClass,
   CharacterFeatureBase,
   CharacterFeature,
@@ -27,26 +25,12 @@ import {
   CharacterASIBaseFeature,
   SpellAsAbility
 } from "../../../models";
-// import { 
-//   ITEM_TYPES 
-// } from "../../../models/Constants";
-
-// import SelectStringBox from "../../input/SelectStringBox";
-// import CheckBox from "../../input/CheckBox";
-// import ToggleButtonBox from "../../input/ToggleButtonBox";
-// import ButtonBox from "../../input/ButtonBox";
-// import StringBox from '../../input/StringBox';
-
-// import ViewItem from "../../ViewItem";
 
 import DisplayObjects from "../display/DisplayObjects";
 import DisplaySpellcasting from "../display/DisplaySpellcasting";
 import DisplayResource from "../display/DisplayResource";
 import DisplayAbility from "../display/DisplayAbility";
 import DisplaySpellModifier from "../display/DisplaySpellModifier";
-
-// import API from "../../../utilities/smart_api";
-// import { APIClass } from "../../../utilities/smart_api_class";
 
 
 interface AppState {
@@ -80,31 +64,7 @@ export interface State {
 }
 
 class CharacterFeatureBaseDetails extends Component<Props, State> {
-  // public static defaultProps = {
-  //   value: null,
-  // };
-  // constructor(props: Props) {
-  //   super(props);
-  //   this.state = {
-  //     // armor_types: null,
-  //     // weapon_keywords: null,
-  //     // base_items: null,
-  //     // magic_items: null,
-  //     // magic_item_keywords: null,
-  //     // skills: null,
-  //     // loading: false,
-  //     // search_string: "",
-  //     // view: "",
-  //     // proficient: false,
-  //     // common: false,
-  //     // magical: false,
-  //     // item_types: []
-  //   };
-  //   // this.api = API.getInstance();
-  // }
-
-  // api: APIClass;
-
+  
   componentDidMount() {
   }
 
@@ -128,7 +88,6 @@ class CharacterFeatureBaseDetails extends Component<Props, State> {
               style={{ 
                 backgroundColor: "white",
                 color: "black",
-                // border: "1px solid blue",
                 minHeight: "800px",
                 width: "316px",
                 overflowX: "hidden"
@@ -172,7 +131,6 @@ class CharacterFeatureBaseDetails extends Component<Props, State> {
               style={{ 
                 backgroundColor: "white",
                 color: "black",
-                // border: "1px solid blue",
                 minHeight: "800px",
                 width: "316px",
                 overflowX: "hidden"
@@ -219,7 +177,6 @@ class CharacterFeatureBaseDetails extends Component<Props, State> {
               style={{ 
                 backgroundColor: "white",
                 color: "black",
-                // border: "1px solid blue",
                 minHeight: "800px",
                 width: "316px",
                 overflowX: "hidden"
@@ -354,6 +311,19 @@ class CharacterFeatureBaseDetails extends Component<Props, State> {
       );
     } else if (feature.feature_type === "Creature Ability") {
       const ability = feature.feature.the_feature as CreatureAbility;
+      return (
+        <Grid item key={key}>
+          { ability.name }
+          {/* <DisplayAbility obj={this.props.obj} 
+            ability={ability}
+            onChange={() => {
+              this.props.onChange();
+            }}  
+          /> */}
+        </Grid>
+      );
+    } else if (feature.feature_type === "Minion Ability") {
+      const ability = feature.feature.the_feature as MinionAbility;
       return (
         <Grid item key={key}>
           { ability.name }

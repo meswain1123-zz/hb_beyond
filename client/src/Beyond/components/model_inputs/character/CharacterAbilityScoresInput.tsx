@@ -1,44 +1,20 @@
 import React, { Component } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
-// import { RouteComponentProps } from 'react-router';
+
 import {
   Grid, 
-  // Button, Link, Tooltip
 } from "@material-ui/core";
 
 import { 
   AbilityScores,
   Race, 
   Subrace,
-  // Language,
   Character,
-  // Creature,
-  // CharacterRace,
-  // CharacterFeature,
-  // CharacterFeatureBase,
-  // CharacterFeatureChoice,
-  // FeatureBase,
-  // Feature,
-  // FeatureChoice,
-  // CharacterASIBaseFeature,
-  // CharacterASIFeature,
-  // CharacterLanguageFeature,
   INumHash,
   IStringHash
 } from "../../../models";
-// import { 
-//   // DAMAGE_TYPES, 
-//   // DURATIONS,
-//   // COMPONENTS,
-//   // CASTING_TIMES,
-//   // RESOURCES,
-//   ABILITY_SCORES 
-// } from "../../../models/Constants";
 
-// import StringBox from "../../input/StringBox";
-// import SelectBox from "../../input/SelectBox";
 import SelectStringBox from "../../input/SelectStringBox"; 
-// import CharacterFeatureBaseInput from "./CharacterFeatureBase";
 
 import API from "../../../utilities/smart_api";
 import { APIClass } from "../../../utilities/smart_api_class";
@@ -47,7 +23,6 @@ import { DataUtilitiesClass } from "../../../utilities/data_utilities_class";
 
 
 interface AppState {
-  // templates: TemplateBase[]
   width: number;
 }
 
@@ -56,12 +31,10 @@ interface RootState {
 }
 
 const mapState = (state: RootState) => ({
-  // templates: state.app.templates
   width: state.app.width
 })
 
 const mapDispatch = {
-  // addTemplate: (obj: TemplateBase) => ({ type: 'ADD', dataType: 'templates', payload: obj })
 }
 
 const connector = connect(mapState, mapDispatch)
@@ -94,9 +67,6 @@ const points_for_num_map: INumHash = {
 };
 
 class CharacterAbilityScoresInput extends Component<Props, State> {
-  // public static defaultProps = {
-  //   value: null,
-  // };
   constructor(props: Props) {
     super(props);
     this.state = {

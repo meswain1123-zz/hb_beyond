@@ -27,11 +27,9 @@ export class CharacterClass {
   knowledge_type: string; // Prepared, Known, Spell Book
   // These can be increased through other features.
   cantrips_max: number;
-  // cantrips_count: number; // How many are currently known/prepared
   spell_count_per_level: number;
   extra_prepared_from_ability: string; // This increases the number of spells Prepared/Known
   spells_prepared_max: number; // This is calculated from the two above
-  // spells_prepared_count: number; // How many are currently known/prepared
   // These can be granted through other features
   ritual_casting: boolean;
   spellcasting_focus: string;
@@ -41,9 +39,6 @@ export class CharacterClass {
   mystic_arcanum_levels: number[]; 
   // Each entry represents a mystic arcanum the character gets.  
   // The value is the level.
-
-  // spells: string[]; // The ids of their known/prepared spells
-  // spell_book_spells: string[]; // The ids of the spells in their spell book
 
   constructor(obj?: any) {
     this.position = 0;
@@ -79,20 +74,15 @@ export class CharacterClass {
     this.spell_level_max = 0;
     this.spell_ids = [];
     this.cantrip_ids = [];
-    // this.cantrips_count = 0;
     this.spell_count_per_level = 0;
     this.extra_prepared_from_ability = "";
     this.spells_prepared_max = 0;
-    // this.spells_prepared_count = 0;
     this.ritual_casting = false;
     this.spellcasting_focus = "";
     this.spell_book = null;
     this.bonus_spells = [];
 
     this.mystic_arcanum_levels = [];
-
-    // this.spells = obj ? obj.spells : [];
-    // this.spell_book_spells = obj ? obj.spell_book_spells : [];
   }
 
   get name(): string {
@@ -118,8 +108,6 @@ export class CharacterClass {
       class_features,
       subclass_features,
       level: this.level,
-      // spells: this.spells,
-      // spell_book_spells: this.spell_book_spells
     };
   }
 
@@ -134,7 +122,6 @@ export class CharacterClass {
       game_class.features.filter(fb => fb.level > this.level && fb.level <= level).forEach(fb => {
         if (fb.multiclassing === 0 || (fb.multiclassing === 2 && this.position > 0) || (fb.multiclassing === 1 && this.position === 0)) {
           const char_feature_base = new CharacterFeatureBase();
-          // char_feature_base.id = this.class_features.length;
           char_feature_base.copyFeatureBase(fb);
           this.class_features.push(char_feature_base);
         }
@@ -155,7 +142,6 @@ export class CharacterClass {
     if (this.game_class) {
       this.game_class.features.filter(fb => fb.level <= this.level && fb.multiclassing === 1).forEach(fb => {
         const char_feature_base = new CharacterFeatureBase();
-        // char_feature_base.id = this.class_features.length;
         char_feature_base.copyFeatureBase(fb);
         this.class_features.push(char_feature_base);
       });
@@ -163,7 +149,6 @@ export class CharacterClass {
     if (this.subclass) {
       this.subclass.features.filter(fb => fb.level <= this.level && fb.multiclassing === 1).forEach(fb => {
         const char_feature_base = new CharacterFeatureBase();
-        // char_feature_base.id = this.subclass_features.length;
         char_feature_base.copyFeatureBase(fb);
         this.subclass_features.push(char_feature_base);
       });
@@ -181,7 +166,6 @@ export class CharacterClass {
     if (do_all) {
       subclass.features.filter(fb => fb.level <= level).forEach(fb => {
         const char_feature_base = new CharacterFeatureBase();
-        // char_feature_base.id = this.subclass_features.length;
         char_feature_base.copyFeatureBase(fb);
         this.subclass_features.push(char_feature_base);
       });
@@ -191,7 +175,6 @@ export class CharacterClass {
       } else {
         subclass.features.filter(fb => fb.level > this.level && fb.level <= level).forEach(fb => {
           const char_feature_base = new CharacterFeatureBase();
-          // char_feature_base.id = this.subclass_features.length;
           char_feature_base.copyFeatureBase(fb);
           this.subclass_features.push(char_feature_base);
         });

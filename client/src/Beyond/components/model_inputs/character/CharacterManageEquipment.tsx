@@ -24,7 +24,6 @@ import {
 } from "../../../models/Constants";
 
 import StringBox from "../../input/StringBox";
-// import SelectStringBox from "../../input/SelectStringBox";
 import CheckBox from "../../input/CheckBox";
 import ToggleButtonBox from "../../input/ToggleButtonBox";
 
@@ -74,9 +73,6 @@ export interface State {
 }
 
 class CharacterManageEquipment extends Component<Props, State> {
-  // public static defaultProps = {
-  //   value: null,
-  // };
   constructor(props: Props) {
     super(props);
     this.state = {
@@ -141,7 +137,6 @@ class CharacterManageEquipment extends Component<Props, State> {
             style={{ 
               backgroundColor: "white",
               color: "black",
-              // border: "1px solid blue",
               minHeight: "800px",
               width: "316px",
               overflowX: "hidden"
@@ -196,15 +191,6 @@ class CharacterManageEquipment extends Component<Props, State> {
                             />
                           </Grid>
                         ))}
-                        {/* <SelectStringBox
-                          name="Filter By Type"
-                          options={ITEM_TYPES}
-                          values={this.state.item_types}
-                          multiple
-                          onChange={(item_types: string[]) => {
-                            this.setState({ item_types });
-                          }}
-                        /> */}
                       </Grid>
                       <Grid item container spacing={0} direction="row">
                         <Grid item xs={6}>
@@ -282,13 +268,6 @@ class CharacterManageEquipment extends Component<Props, State> {
           tool_types.includes(o.base_item.item_type) ||
           (o.base_item.item_type === "Armor" && obj.armor_proficiencies.includes(o.base_item.armor_type_id)) ||
           (o.base_item.item_type === "Weapon" && (this.findAnyCommonality(obj.weapon_proficiencies, o.base_item.weapon_keyword_ids) || obj.special_weapon_proficiencies.includes(o.base_item_id)))));
-        
-        // obj.armor_proficiencies;
-        // obj.weapon_proficiencies;
-        // obj.special_weapon_proficiencies;
-        // obj.tool_proficiencies;
-        // filtered_base_items = filtered_base_items.filter(o => );
-        // filtered_magic_items = filtered_magic_items.filter(o => o.base_item && this.state.item_types.includes(o.base_item.item_type));
       }
 
       if ((filtered_base_items.length + filtered_magic_items.length) < 100) {

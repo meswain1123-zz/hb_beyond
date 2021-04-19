@@ -18,12 +18,12 @@ import { LanguageFeature } from "./LanguageFeature";
 import {
   SenseFeature,
   CreatureAbility,
-  // MinionAbility
+  MinionAbility
 } from ".";
 
 export class FeatureTemplate extends TemplateBase {
   feature_type: string;
-  the_feature: Modifier | LanguageFeature | SpellModifier | Proficiency | Advantage | DamageMultiplier | ResourceFeature | ASIBaseFeature | Ability | CreatureAbility | SpellAsAbility | ItemAffectingAbility | BonusSpells | SpellBook | SpellcastingFeature | SenseFeature | boolean | number | string | null;
+  the_feature: Modifier | LanguageFeature | SpellModifier | Proficiency | Advantage | DamageMultiplier | ResourceFeature | ASIBaseFeature | Ability | CreatureAbility | MinionAbility | SpellAsAbility | ItemAffectingAbility | BonusSpells | SpellBook | SpellcastingFeature | SenseFeature | boolean | number | string | null;
   
   constructor(obj?: any) {
     super(obj);
@@ -78,6 +78,11 @@ export class FeatureTemplate extends TemplateBase {
           this.the_feature.name = obj.name;
           this.the_feature.description = obj.description;
         break;
+        case "Minion Ability":
+          this.the_feature = new MinionAbility(obj.the_feature);
+          this.the_feature.name = obj.name;
+          this.the_feature.description = obj.description;
+        break;
         case "Spell as Ability":
           this.the_feature = new SpellAsAbility(obj.the_feature);
           this.the_feature.name = obj.name;
@@ -97,9 +102,6 @@ export class FeatureTemplate extends TemplateBase {
         case "Spellcasting":
           this.the_feature = new SpellcastingFeature(obj.the_feature);
         break;
-        // case "Spell List":
-        //   this.the_feature = obj.the_feature as string;
-        // break;
         case "Bonus Spells":
           this.the_feature = new BonusSpells(obj.the_feature);
         break;
@@ -179,6 +181,9 @@ export class FeatureTemplate extends TemplateBase {
       case "Creature Ability":
         the_feature = (this.the_feature as CreatureAbility).toDBObj();
       break;
+      case "Minion Ability":
+        the_feature = (this.the_feature as MinionAbility).toDBObj();
+      break;
       case "Spell as Ability":
         the_feature = (this.the_feature as SpellAsAbility).toDBObj();
       break;
@@ -194,9 +199,6 @@ export class FeatureTemplate extends TemplateBase {
       case "Spellcasting":
         the_feature = (this.the_feature as SpellcastingFeature).toDBObj();
       break;
-      // case "Spell List":
-      //   the_feature = this.the_feature as string;
-      // break;
       case "Bonus Spells":
         the_feature = (this.the_feature as BonusSpells).toDBObj();
       break;
@@ -251,13 +253,13 @@ export class FeatureTemplate extends TemplateBase {
     switch(this.feature_type) {
       case "Language":
         this.the_feature = new LanguageFeature(copyMe.the_feature);
-        break;
+      break;
       case "Modifier":
         this.the_feature = new Modifier(copyMe.the_feature);
-        break;
+      break;
       case "Spell Modifier":
         this.the_feature = new SpellModifier(copyMe.the_feature);
-        break;
+      break;
       case "Skill Proficiencies":
       case "Skill Proficiency Choices":
       case "Tool Proficiency":
@@ -266,40 +268,43 @@ export class FeatureTemplate extends TemplateBase {
       case "Special Weapon Proficiencies":
       case "Saving Throw Proficiencies":
         this.the_feature = new Proficiency(copyMe.the_feature);
-        break;
+      break;
       case "Ability":
         this.the_feature = new Ability(copyMe.the_feature);
-        break;
+      break;
       case "Creature Ability":
         this.the_feature = new CreatureAbility(copyMe.the_feature);
-        break;
+      break;
+      case "Minion Ability":
+        this.the_feature = new MinionAbility(copyMe.the_feature);
+      break;
       case "Spell as Ability":
         this.the_feature = new SpellAsAbility(copyMe.the_feature);
-        break;
+      break;
       case "Item Affecting Ability":
         this.the_feature = new ItemAffectingAbility(copyMe.the_feature);
-        break;
+      break;
       case "Advantage":
         this.the_feature = new Advantage(copyMe.the_feature);
-        break;
+      break;
       case "Damage Multiplier":
         this.the_feature = new DamageMultiplier(copyMe.the_feature);
-        break;
+      break;
       case "Bonus Spells":
         this.the_feature = new BonusSpells(copyMe.the_feature);
-        break;
+      break;
       case "Spell Book":
         this.the_feature = new SpellBook(copyMe.the_feature);
-        break;
+      break;
       case "Resource":
         this.the_feature = new ResourceFeature(copyMe.the_feature);
-        break;
+      break;
       case "Ability Score Improvement":
         this.the_feature = new ASIBaseFeature(copyMe.the_feature);
-        break;
+      break;
       default:
         this.the_feature = copyMe.the_feature;
-        break;
+      break;
     }
   }
 

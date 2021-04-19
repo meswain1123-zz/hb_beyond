@@ -1,14 +1,10 @@
 import React, { Component } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
-// import { RouteComponentProps } from 'react-router';
+
 import {
   Grid, 
-  // Fab, Tooltip, 
   Button
 } from "@material-ui/core";
-// import {
-//   DeleteForever
-// } from "@material-ui/icons";
 
 import { 
   Ability,
@@ -18,16 +14,13 @@ import {
 } from "../../../models";
 import { 
   ABILITY_SCORES, 
-  // DAMAGE_TYPES, 
   DURATIONS,
   COMPONENTS,
   CASTING_TIMES,
-  // RESOURCES,
   REFRESH_RULES
 } from "../../../models/Constants";
 
 import StringBox from "../../input/StringBox";
-// import SelectBox from "../input/SelectBox";
 import SelectStringBox from "../../input/SelectStringBox";
 import CheckBox from "../../input/CheckBox";
 
@@ -58,28 +51,20 @@ const connector = connect(mapState, mapDispatch)
 type PropsFromRedux = ConnectedProps<typeof connector>
 
 type Props = PropsFromRedux & {
-  // choice_name: string | null;
   obj: Ability;
   onChange: (changed: Ability) => void; 
 }
 
-export interface State { 
-  // obj: Ability;
-  // loading: boolean;
+export interface State {
   reloading: boolean;
   show_effect: number;
   special_refresh_rule: boolean;
 }
 
 class AbilityInput extends Component<Props, State> {
-  // public static defaultProps = {
-  //   choice_name: null
-  // };
   constructor(props: Props) {
     super(props);
     this.state = {
-      // obj: new Ability(),
-      // loading: false,
       reloading: false,
       show_effect: 0,
       special_refresh_rule: false
@@ -110,9 +95,6 @@ class AbilityInput extends Component<Props, State> {
                 const obj = this.props.obj;
                 obj.copyTemplate(ability_template);
                 this.props.onChange(obj);
-                // this.setState({ obj, reloading: true }, () => {
-                //   this.setState({ reloading: false });
-                // });
               }}
             />
           </Grid>
@@ -295,7 +277,6 @@ class AbilityInput extends Component<Props, State> {
                   obj.special_resource_refresh_rule = "Long Rest";
                 }
                 this.props.onChange(obj);
-                // this.props.onChange(obj);
               }}
             /> 
           </Grid>
@@ -309,7 +290,6 @@ class AbilityInput extends Component<Props, State> {
                   const obj = this.props.obj;
                   obj.amount_consumed = value;
                   this.props.onChange(obj);
-                  // this.props.onChange(obj);
                 }}
               />
             </Grid>
@@ -323,7 +303,6 @@ class AbilityInput extends Component<Props, State> {
                   const obj = this.props.obj;
                   obj.special_resource_amount = value;
                   this.props.onChange(obj);
-                  // this.props.onChange(obj);
                 }}
               />
             </Grid>

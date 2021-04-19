@@ -45,7 +45,6 @@ export class Ability {
   true_id: string;
   name: string;
   description: string;
-  // skill_id: number | null; // Skill relevant to the ability
   saving_throw_ability_score: string | null; // Ability Score saving throw the target(s) have to make
   effect: AbilityEffect; // Formula for how much damage/healing to do
   effect_2: AbilityEffect; // Some abilities have a second (like Ice Knife or Booming Blade or things that do different types of damage)
@@ -74,7 +73,6 @@ export class Ability {
     this.feature_id = obj ? obj.feature_id : 0;
     this.name = obj ? obj.name : "";
     this.description = obj ? obj.description : "";
-    // this.skill_id = obj?.skill_id;
     this.saving_throw_ability_score = obj ? obj.saving_throw_ability_score : "";
     this.effect = obj ? new AbilityEffect(obj.effect) : new AbilityEffect();
     this.effect_2 = obj ? new AbilityEffect(obj.effect_2) : new AbilityEffect();
@@ -99,7 +97,6 @@ export class Ability {
       true_id: this.true_id,
       name: this.name,
       description: this.description,
-      // skill_id: this.skill_id,
       saving_throw_ability_score: this.saving_throw_ability_score,
       effect: this.effect.toDBObj(),
       effect_2: this.effect_2.toDBObj(),
@@ -129,7 +126,6 @@ export class Ability {
     this.id = copyMe.id;
     this.name = copyMe.name;
     this.description = copyMe.description;
-    // this.skill_id = copyMe.skill_id;
     this.saving_throw_ability_score = copyMe.saving_throw_ability_score;
     this.effect = copyMe.effect;
     this.effect_2 = copyMe.effect_2;
@@ -152,7 +148,6 @@ export class Ability {
   copyTemplate(copyMe: AbilityTemplate): void {
     this.name = `${copyMe.name}`;
     this.description = `${copyMe.description}`;
-    // this.skill_id = copyMe.skill_id;
     this.saving_throw_ability_score = copyMe.saving_throw_ability_score;
     this.effect = copyMe.effect;
     this.effect_2 = copyMe.effect_2;

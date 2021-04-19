@@ -1,6 +1,5 @@
 
 import { ModelBase } from "./ModelBase";
-// import { MagicItemTemplate } from "./MagicItemTemplate";
 import { FeatureBase } from "./FeatureBase";
 import { BaseItem } from "./BaseItem";
 import { MagicItem } from "./MagicItem";
@@ -15,11 +14,8 @@ export class MagicItemKeyword extends ModelBase {
   exclusions: string;
   rarity: string; // Common, Uncommon, Rare, Very-Rare, Legendary
   attunement: boolean;
-  // modifies: string[]; // AC, DC, STR (etc), Hit-All, Hit-This, Hit-Spell, SavingThrow-STR (etc) 
-  // modifier: number;
   charges: number;
   charge_refresh_rule: string;
-  // ability_ids: string[];
   features: FeatureBase[];
   base_item: BaseItem | null;
 
@@ -35,11 +31,8 @@ export class MagicItemKeyword extends ModelBase {
     this.exclusions = obj ? `${obj.exclusions}` : "";
     this.rarity = obj ? `${obj.rarity}` : "Common";
     this.attunement = obj ? obj.attunement : false;
-    // this.modifies = obj ? [...obj.modifies] : [];
-    // this.modifier = obj ? obj.modifier : 0;
     this.charges = obj ? obj.charges : 0;
     this.charge_refresh_rule = obj ? `${obj.charge_refresh_rule}` : "";
-    // this.ability_ids = obj ? obj.ability_ids : [];
     if (obj && obj.features && obj.features.length > 0) {
       if (obj.features[0] instanceof FeatureBase) {
         this.features = obj ? [...obj.features] : [];
@@ -71,11 +64,8 @@ export class MagicItemKeyword extends ModelBase {
       exclusions: this.exclusions,
       rarity: this.rarity,
       attunement: this.attunement,
-      // modifies: this.modifies,
-      // modifier: this.modifier,
       charges: this.charges,
       charge_refresh_rule: this.charge_refresh_rule,
-      // ability_ids: this.ability_ids,
       features
     };
   }
@@ -97,11 +87,8 @@ export class MagicItemKeyword extends ModelBase {
     this.exclusions = copyMe.exclusions;
     this.rarity = copyMe.rarity;
     this.attunement = copyMe.attunement;
-    // this.modifies = [...copyMe.modifies];
-    // this.modifier = copyMe.modifier;
     this.charges = copyMe.charges;
     this.charge_refresh_rule = copyMe.charge_refresh_rule;
-    // this.ability_ids = [...copyMe.ability_ids];
     this.features = [...copyMe.features];
   }
 
@@ -114,11 +101,8 @@ export class MagicItemKeyword extends ModelBase {
     this.base_item_id = copyMe.base_item_id;
     this.rarity = copyMe.rarity;
     this.attunement = copyMe.attunement;
-    // this.modifies = [...copyMe.modifies];
-    // this.modifier = copyMe.modifier;
     this.charges = copyMe.charges;
     this.charge_refresh_rule = copyMe.charge_refresh_rule;
-    // this.ability_ids = [...copyMe.ability_ids];
     this.features = [...copyMe.features];
   }
 }

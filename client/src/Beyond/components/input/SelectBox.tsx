@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
-// import { RouteComponentProps } from 'react-router';
 import {
   FormControl, 
   InputLabel,
@@ -15,19 +14,15 @@ import { ModelBase } from "../../models/ModelBase";
 
 
 interface AppState {
-  // abilities: Ability[] | null;
 }
 
 interface RootState {
-  // app: AppState
 }
 
 const mapState = (state: RootState) => ({
-  // abilities: state.app.abilities
 })
 
 const mapDispatch = {
-  // setAbilities: (objects: Ability[]) => ({ type: 'SET', dataType: 'abilities', payload: objects })
 }
 
 const connector = connect(mapState, mapDispatch)
@@ -42,13 +37,12 @@ type Props = PropsFromRedux & {
   allow_all: boolean;
   allow_none: boolean;
   name: string;
-  onChange: Function; // (selected: string) => void; 
+  onChange: Function;
   labelWidth: number | null;
   color: string;
 }
 
 export interface State { 
-  // value: ModelBase | null;
   labelWidth: number;
 }
 
@@ -76,7 +70,6 @@ class SelectBox extends Component<Props, State> {
   constructor(props: Props) {
     super(props);
     this.state = {
-      // value: props.value,
       labelWidth: this.getLabelWidth(props.name)
     };
   }

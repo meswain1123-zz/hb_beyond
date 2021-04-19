@@ -1,7 +1,4 @@
 
-// import { ModelBase } from "./ModelBase";
-
-
 export class LanguageFeature {
   type: string; // Standard, Exotic, or Specific
   language_id: string | null; // if it's specific, then this is the id of it

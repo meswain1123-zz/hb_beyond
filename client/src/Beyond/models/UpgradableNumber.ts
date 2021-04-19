@@ -6,7 +6,6 @@ export class UpgradableNumber {
   add_char_level_mult: number; // add a multiple of the character level
   add_class_level_mult: number; // multiply the class level by this when adding
   add_prof_bonus_mult: number;
-  // base_slot_level: number;
   add_slot_level_mult: number;
   
   
@@ -15,7 +14,6 @@ export class UpgradableNumber {
     this.add_char_level_mult = obj ? obj.add_char_level_mult : 0;
     this.add_class_level_mult = obj ? obj.add_class_level_mult : 0;
     this.add_prof_bonus_mult = obj ? obj.add_prof_bonus_mult : 0;
-    // this.base_slot_level = obj ? obj.base_slot_level : 0;
     this.add_slot_level_mult = obj ? obj.add_slot_level_mult : 0;
   }
 
@@ -25,7 +23,6 @@ export class UpgradableNumber {
       add_char_level_mult: this.add_char_level_mult,
       add_class_level_mult: this.add_class_level_mult,
       add_prof_bonus_mult: this.add_prof_bonus_mult,
-      // base_slot_level: this.base_slot_level,
       add_slot_level_mult: this.add_slot_level_mult
     };
   }
@@ -39,7 +36,6 @@ export class UpgradableNumber {
     this.add_char_level_mult = copyMe.add_char_level_mult;
     this.add_class_level_mult = copyMe.add_class_level_mult;
     this.add_prof_bonus_mult = copyMe.add_prof_bonus_mult;
-    // this.base_slot_level = copyMe.base_slot_level;
     this.add_slot_level_mult = copyMe.add_slot_level_mult;
   }
 
@@ -58,8 +54,4 @@ export class UpgradableNumber {
     }
     return value;
   }
-
-  // copyTemplate(copyMe: AbilityTemplate): void {
-  //   // this.name = copyMe.name;
-  // }
 }

@@ -1,7 +1,5 @@
 import React, { Component } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
-// import { withStyles } from '@material-ui/core/styles';
-// import { NavLink } from "react-router-dom";
 import {
   Menu, MenuItem,
   ListItem, ListItemText
@@ -71,7 +69,6 @@ class UserMenu extends Component<Props, State> {
           <ListItemText primary={` ${this.props.loginUser?.username}`}/>
         </ListItem>
         <Menu
-          // open={this.state.open}
           id="customized-menu"
           anchorEl={this.state.anchorEl}
           keepMounted

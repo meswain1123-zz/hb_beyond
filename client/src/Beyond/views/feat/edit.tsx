@@ -3,23 +3,15 @@ import { connect, ConnectedProps } from 'react-redux';
 import { RouteComponentProps } from 'react-router';
 import { Redirect } from "react-router-dom";
 import {
-  // Add, Edit,
   ArrowBack
 } from "@material-ui/icons";
 import {
   Grid, 
-  // List, ListItem, 
   Button, 
   Tooltip, Fab,
-  // FormControl, InputLabel,
-  // OutlinedInput, FormHelperText
 } from "@material-ui/core";
-// import KeyboardArrowDownIcon from '@material-ui/icons/KeyboardArrowDown';
-// import KeyboardArrowRightIcon from '@material-ui/icons/KeyboardArrowRight';
 import { 
-  // ModelBase, 
   Feat, 
-  // Skill,
   FeatureBase
 } from "../../models";
 
@@ -28,24 +20,12 @@ import FeatureBaseInput from "../../components/model_inputs/feature/FeatureBase"
 import SelectRaceBox from "../../components/model_inputs/select/SelectRaceBox";
 
 import StringBox from "../../components/input/StringBox";
-// import SelectBox from "../../components/input/SelectBox";
-// import SelectStringBox from "../../components/input/SelectStringBox";
-// import CheckBox from "../../components/input/CheckBox";
-// import { 
-//   ABILITY_SCORES, 
-//   DAMAGE_TYPES, 
-//   DURATIONS,
-//   COMPONENTS,
-//   CASTING_TIMES,
-//   RESOURCES
-// } from "../../models/Constants";
+
 import API from "../../utilities/smart_api";
 import { APIClass } from "../../utilities/smart_api_class";
 
 
 interface AppState {
-  // feats: Feat[] | null;
-  // skills: Skill[] | null;
   height: number;
   width: number;
 }
@@ -59,16 +39,11 @@ interface MatchParams {
 }
 
 const mapState = (state: RootState) => ({
-  // feats: state.app.feats,
-  // skillsMB: state.app.skills as ModelBase[],
-  // skills: state.app.skills,
   height: state.app.height,
   width: state.app.width
 })
 
 const mapDispatch = {
-  // setFeats: (objects: Feat[]) => ({ type: 'SET', dataType: 'feats', payload: objects }),
-  // addFeat: (object: Feat) => ({ type: 'ADD', dataType: 'feats', payload: object })
 }
 
 const connector = connect(mapState, mapDispatch)
@@ -81,7 +56,6 @@ export interface State {
   redirectTo: string | null;
   obj: Feat;
   processing: boolean;
-  // skills: Skill[] | null;
   feats: Feat[] | null;
   loading: boolean;
   expanded_feature_base: FeatureBase | null;
@@ -95,7 +69,6 @@ class FeatEdit extends Component<Props, State> {
       redirectTo: null,
       obj: new Feat(),
       processing: false,
-      // skills: null,
       feats: null,
       loading: false,
       expanded_feature_base: null,
@@ -311,7 +284,6 @@ class FeatEdit extends Component<Props, State> {
               </Button>
               <Button
                 variant="contained"
-                // color="primary"
                 disabled={this.state.processing}
                 style={{ marginLeft: "4px" }}
                 onClick={ () => { 

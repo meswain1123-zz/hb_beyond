@@ -1,5 +1,4 @@
 
-// import { Ability } from "./Ability";
 
 export class SpellcastingFeature {
   ability: string;

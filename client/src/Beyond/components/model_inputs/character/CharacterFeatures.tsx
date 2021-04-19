@@ -1,8 +1,5 @@
 import React, { Component } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
-// import {
-//   FontDownload
-// } from "@material-ui/icons";
 import {
   Grid, 
   Drawer,
@@ -10,7 +7,6 @@ import {
 
 import { 
   Character,
-  // Creature,
   CharacterClass,
   CharacterFeatureBase,
   CharacterRace,
@@ -22,12 +18,7 @@ import {
   ArmorType,
 } from "../../../models";
 
-// import StringBox from "../../input/StringBox";
-// import CheckBox from "../../input/CheckBox";
 import ToggleButtonBox from "../../input/ToggleButtonBox";
-
-// import CharacterManageEquipment from "./CharacterManageEquipment";
-// import ViewItem from "../ViewItem";
 
 import CharacterFeatureBaseDetails from './CharacterFeatureBaseDetails';
 
@@ -76,9 +67,6 @@ export interface State {
 }
 
 class CharacterFeatures extends Component<Props, State> {
-  // public static defaultProps = {
-  //   value: null,
-  // };
   constructor(props: Props) {
     super(props);
     this.state = {

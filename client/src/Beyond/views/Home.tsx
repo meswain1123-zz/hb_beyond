@@ -7,10 +7,6 @@ import {
 
 
 interface AppState {
-  // tokens: Token[],
-  // players: Player[],
-  // selectedPlayMap: PlayMap,
-  // selectedCampaign: Campaign
 }
 
 interface RootState {
@@ -18,17 +14,9 @@ interface RootState {
 }
 
 const mapState = (state: RootState) => ({
-  // tokens: state.app.tokens,
-  // players: state.app.players,
-  // selectedPlayMap: state.app.selectedPlayMap,
-  // selectedCampaign: state.app.selectedCampaign
 });
 
 const mapDispatch = {
-  // selectCampaign: (campaign: Campaign) => ({ type: 'SELECT_CAMPAIGN', payload: campaign }),
-  // updateCampaign: (campaign: Campaign) => ({ type: 'UPDATE_CAMPAIGN', payload: campaign }),
-  // selectPlayMap: (playMap: PlayMap) => ({ type: 'SELECT_PLAYMAP', payload: playMap }),
-  // updatePlayMap: (playMap: PlayMap) => ({ type: 'UPDATE_PLAYMAP', payload: playMap })
 }
 
 const connector = connect(mapState, mapDispatch)
@@ -53,9 +41,6 @@ class HomePage extends Component<Props, State> {
   componentDidMount() {}
 
   render() {
-    // if (this.props.fromLogin) {
-    //   this.props.notFromLogin();
-    // }
     if (this.state.redirectTo !== null) {
       return <Redirect to={this.state.redirectTo} />;
     } else {

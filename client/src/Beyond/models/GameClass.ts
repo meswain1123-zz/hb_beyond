@@ -85,15 +85,7 @@ export class GameClass extends ModelBase {
   copy5e(copyMe: any): void {
     console.log(copyMe);
     this.name = copyMe.name;
-    // this.description = copyMe.description;
     this.hit_die = copyMe.hit_die;
-    this.subclass_level = 3; // copyMe.subclass_level;
-    // this.subclasses_called = copyMe.subclasses_called;
-    // this.features = [];
-    // copyMe.proficiencies.forEach((p: any) => {
-    //   this.features.push(new FeatureBase(
-
-    //   ));
-    // });
+    this.subclass_level = 3;
   }
 }

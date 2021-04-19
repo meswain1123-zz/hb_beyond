@@ -1,49 +1,22 @@
 import React, { Component } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
-// import { RouteComponentProps } from 'react-router';
+
 import {
   Grid, 
-  // Button, Link, Tooltip
 } from "@material-ui/core";
 
 import { 
   Character,
-  // Creature,
-  // CharacterFeature,
   CharacterFeatureBase,
-  // CharacterFeatureChoice,
-  // // FeatureBase,
-  // // Feature,
-  // // FeatureChoice,
-  // CharacterASIBaseFeature,
-  // // CharacterASIFeature,
-  // CharacterLanguageFeature,
-  // Proficiency
 } from "../../../models";
-// import { 
-//   // DAMAGE_TYPES, 
-//   // DURATIONS,
-//   // COMPONENTS,
-//   // CASTING_TIMES,
-//   // RESOURCES,
-//   ABILITY_SCORES 
-// } from "../../../models/Constants";
-
-// import StringBox from "../../input/StringBox";
-// import SelectBox from "../../input/SelectBox";
-// import SelectStringBox from "../input/SelectStringBox"; 
+ 
 import CharacterFeatureBaseInput from "./CharacterFeatureBase";
-// import CharacterASIFeatureInput from "./CharacterASIFeature";
-// import CharacterLanguageFeatureInput from "./CharacterLanguageFeature";
-// import SelectSpecialFeatureBox from "../select/SelectSpecialFeatureBox";
-// import SelectSkillBox from "../select/SelectSkillBox";
 
 import API from "../../../utilities/smart_api";
 import { APIClass } from "../../../utilities/smart_api_class";
 
 
 interface AppState {
-  // templates: TemplateBase[]
   width: number;
 }
 
@@ -52,12 +25,10 @@ interface RootState {
 }
 
 const mapState = (state: RootState) => ({
-  // templates: state.app.templates
   width: state.app.width
 })
 
 const mapDispatch = {
-  // addTemplate: (obj: TemplateBase) => ({ type: 'ADD', dataType: 'templates', payload: obj })
 }
 
 const connector = connect(mapState, mapDispatch)
@@ -65,10 +36,8 @@ const connector = connect(mapState, mapDispatch)
 type PropsFromRedux = ConnectedProps<typeof connector>
 
 type Props = PropsFromRedux & {
-  // name: string;
   character: Character;
   features: CharacterFeatureBase[];
-  // races: Race[] | null;
   onChange: () => void;
 }
 
@@ -77,9 +46,6 @@ export interface State {
 }
 
 class CharacterFeatureBasesInput extends Component<Props, State> {
-  // public static defaultProps = {
-  //   value: null,
-  // };
   constructor(props: Props) {
     super(props);
     this.state = {

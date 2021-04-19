@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
-// import { RouteComponentProps } from 'react-router';
 import {
   FormControl, InputLabel,
   OutlinedInput, FormHelperText
@@ -8,19 +7,15 @@ import {
 
 
 interface AppState {
-  // abilities: Ability[] | null;
 }
 
 interface RootState {
-  // app: AppState
 }
 
 const mapState = (state: RootState) => ({
-  // abilities: state.app.abilities
 })
 
 const mapDispatch = {
-  // setAbilities: (objects: Ability[]) => ({ type: 'SET', dataType: 'abilities', payload: objects })
 }
 
 const connector = connect(mapState, mapDispatch)
@@ -106,7 +101,6 @@ class StringBox extends Component<Props, State> {
           name={`stringInput_${this.props.name}`}
           type={this.props.type}
           autoComplete="Off"
-          // error={!this.state.fields.name.valid}
           value={this.state.value}
           onChange={(event: any) => {
             this.setState({ value: event.target.value }, () => {

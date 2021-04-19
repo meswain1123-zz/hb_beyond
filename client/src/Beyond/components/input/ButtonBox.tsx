@@ -4,26 +4,19 @@ import { connect, ConnectedProps } from 'react-redux';
 import { 
   DAMAGE_TYPES
 } from "../../models/Constants";
-// import { RouteComponentProps } from 'react-router';
-
-// import { ModelBase } from "../../models/ModelBase";
 
 import DamageTypeImage from "../model_inputs/display/DamageTypeImage";
 
 interface AppState {
-  // abilities: Ability[] | null;
 }
 
 interface RootState {
-  // app: AppState
 }
 
 const mapState = (state: RootState) => ({
-  // abilities: state.app.abilities
 })
 
 const mapDispatch = {
-  // setAbilities: (objects: Ability[]) => ({ type: 'SET', dataType: 'abilities', payload: objects })
 }
 
 const connector = connect(mapState, mapDispatch)
@@ -58,7 +51,7 @@ class ButtonBox extends Component<Props, State> {
     onClick: null,
     image: "",
     find_images: false,
-    fontWeight: undefined // "inherit"
+    fontWeight: undefined 
   };
   componentDidMount() {
   }

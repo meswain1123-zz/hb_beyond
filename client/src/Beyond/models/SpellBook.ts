@@ -1,6 +1,4 @@
 
-// import { ModelBase } from "./ModelBase";
-// import { Ability } from "./Ability";
 
 /**
  * This represents a Book that a spellcaster is 

@@ -3,28 +3,18 @@ import { connect, ConnectedProps } from 'react-redux';
 import { RouteComponentProps } from 'react-router';
 import { Redirect } from "react-router-dom";
 import {
-  // Add, Edit,
   ArrowBack
 } from "@material-ui/icons";
 import {
   Grid, 
-  // List, ListItem, 
   Button, 
   Tooltip, Fab,
-  // FormControl, InputLabel,
-  // OutlinedInput, FormHelperText
 } from "@material-ui/core";
-// import KeyboardArrowDownIcon from '@material-ui/icons/KeyboardArrowDown';
-// import KeyboardArrowRightIcon from '@material-ui/icons/KeyboardArrowRight';
 import { 
-  // ModelBase, 
   Resource, 
-  // Skill
 } from "../../models";
 import StringBox from "../../components/input/StringBox";
-// import SelectBox from "../../components/input/SelectBox";
 import SelectStringBox from "../../components/input/SelectStringBox";
-// import CheckBox from "../../components/input/CheckBox";
 import { 
   REFRESH_RULES
 } from "../../models/Constants";
@@ -33,8 +23,6 @@ import { APIClass } from "../../utilities/smart_api_class";
 
 
 interface AppState {
-  // resources: Resource[] | null;
-  // skills: Skill[] | null;
   height: number;
   width: number;
 }
@@ -48,16 +36,11 @@ interface MatchParams {
 }
 
 const mapState = (state: RootState) => ({
-  // resources: state.app.resources,
-  // skillsMB: state.app.skills as ModelBase[],
-  // skills: state.app.skills,
   height: state.app.height,
   width: state.app.width
 })
 
 const mapDispatch = {
-  // setResources: (objects: Resource[]) => ({ type: 'SET', dataType: 'resources', payload: objects }),
-  // addResource: (object: Resource) => ({ type: 'ADD', dataType: 'resources', payload: object })
 }
 
 const connector = connect(mapState, mapDispatch)
@@ -70,7 +53,6 @@ export interface State {
   redirectTo: string | null;
   obj: Resource;
   processing: boolean;
-  // skills: Skill[] | null;
   resources: Resource[] | null;
   loading: boolean;
 }
@@ -82,7 +64,6 @@ class ResourceEdit extends Component<Props, State> {
       redirectTo: null,
       obj: new Resource(),
       processing: false,
-      // skills: null,
       resources: null,
       loading: false
     };
@@ -221,7 +202,6 @@ class ResourceEdit extends Component<Props, State> {
               </Button>
               <Button
                 variant="contained"
-                // color="primary"
                 disabled={this.state.processing}
                 style={{ marginLeft: "4px" }}
                 onClick={ () => { 

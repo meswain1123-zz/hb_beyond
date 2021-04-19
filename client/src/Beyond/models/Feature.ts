@@ -18,7 +18,7 @@ import { SpellcastingFeature } from "./SpellcastingFeature";
 import {
   SenseFeature,
   CreatureAbility,
-  // MinionAbility
+  MinionAbility
 } from ".";
 
 
@@ -38,7 +38,7 @@ export class Feature {
   name: string;
   description: string;
   feature_type: string;
-  the_feature: Modifier | LanguageFeature | SpellModifier | Proficiency | Advantage | DamageMultiplier | ResourceFeature | ASIBaseFeature | Ability | CreatureAbility | SpellAsAbility | ItemAffectingAbility | BonusSpells | SpellBook | SpellcastingFeature | SenseFeature | boolean | number | string | null;
+  the_feature: Modifier | LanguageFeature | SpellModifier | Proficiency | Advantage | DamageMultiplier | ResourceFeature | ASIBaseFeature | Ability | CreatureAbility | MinionAbility | SpellAsAbility | ItemAffectingAbility | BonusSpells | SpellBook | SpellcastingFeature | SenseFeature | boolean | number | string | null;
 
   constructor(obj?: any) {
     this.parent_type = obj ? obj.parent_type : "";
@@ -98,6 +98,11 @@ export class Feature {
           this.the_feature.name = obj.name;
           this.the_feature.description = obj.description;
         break;
+        case "Minion Ability":
+          this.the_feature = new MinionAbility(obj.the_feature);
+          this.the_feature.name = obj.name;
+          this.the_feature.description = obj.description;
+        break;
         case "Spell as Ability":
           this.the_feature = new SpellAsAbility(obj.the_feature);
           this.the_feature.name = obj.name;
@@ -117,9 +122,6 @@ export class Feature {
         case "Spellcasting":
           this.the_feature = new SpellcastingFeature(obj.the_feature);
         break;
-        // case "Spell List":
-        //   this.the_feature = obj.the_feature as string;
-        // break;
         case "Bonus Spells":
           this.the_feature = new BonusSpells(obj.the_feature);
         break;
@@ -199,6 +201,9 @@ export class Feature {
       case "Creature Ability":
         the_feature = (this.the_feature as CreatureAbility).toDBObj();
       break;
+      case "Minion Ability":
+        the_feature = (this.the_feature as MinionAbility).toDBObj();
+      break;
       case "Spell as Ability":
         the_feature = (this.the_feature as SpellAsAbility).toDBObj();
       break;
@@ -214,9 +219,6 @@ export class Feature {
       case "Spellcasting":
         the_feature = (this.the_feature as SpellcastingFeature).toDBObj();
       break;
-      // case "Spell List":
-      //   the_feature = this.the_feature as string;
-      // break;
       case "Bonus Spells":
         the_feature = (this.the_feature as BonusSpells).toDBObj();
       break;
@@ -287,6 +289,9 @@ export class Feature {
         break;
       case "Creature Ability":
         this.the_feature = new CreatureAbility(copyMe.the_feature);
+        break;
+      case "Minion Ability":
+        this.the_feature = new MinionAbility(copyMe.the_feature);
         break;
       case "Spell as Ability":
         this.the_feature = new SpellAsAbility(copyMe.the_feature);

@@ -1,7 +1,6 @@
 import React, { Component } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
 import {
-  // Clear, 
   RadioButtonUnchecked, // Not Proficient
   RadioButtonChecked, // Proficient
   Tonality, // Half Proficient
@@ -10,22 +9,11 @@ import {
   Grid, 
   Drawer,
   Popover,
-  // Snackbar 
 } from "@material-ui/core";
 
 import { 
-  // Attack,
   Character,
-  // Creature,
-  // CharacterAbility,
-  // CharacterItem,
-  // CharacterSpell,
-  // CharacterSlot,
   Skill,
-  // SpellAsAbility,
-  // SpellSlotType,
-  // INumHash,
-  // SpellAsAbility,
   RollPlus
 } from "../../../models";
 import { 
@@ -74,9 +62,6 @@ export interface State {
 }
 
 class CharacterSkills extends Component<Props, State> {
-  // public static defaultProps = {
-  //   value: null,
-  // };
   constructor(props: Props) {
     super(props);
     this.state = {
@@ -257,7 +242,6 @@ class CharacterSkills extends Component<Props, State> {
         { this.renderDetails() }
       </Drawer>,
       <Popover key="rolls"
-        // id={id}
         open={ this.state.popoverAnchorEl !== null && this.state.popoverSkill !== null }
         anchorEl={this.state.popoverAnchorEl}
         onClose={() => {
@@ -384,7 +368,6 @@ class CharacterSkills extends Component<Props, State> {
             style={{ 
               backgroundColor: "white",
               color: "black",
-              // border: "1px solid blue",
               minHeight: "800px",
               width: "316px",
               overflowX: "hidden"

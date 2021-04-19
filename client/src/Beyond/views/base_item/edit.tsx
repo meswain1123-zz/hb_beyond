@@ -3,28 +3,18 @@ import { connect, ConnectedProps } from 'react-redux';
 import { RouteComponentProps } from 'react-router';
 import { Redirect } from "react-router-dom";
 import {
-  Add, // Edit,
+  Add,
   ArrowBack,
-  // DeleteForever
 } from "@material-ui/icons";
 import {
   Grid, 
-  // List, ListItem, 
   Button, 
   Tooltip, Fab,
-  // FormControl, 
-  // InputLabel,
-  // OutlinedInput, FormHelperText
 } from "@material-ui/core";
-// import KeyboardArrowDownIcon from '@material-ui/icons/KeyboardArrowDown';
-// import KeyboardArrowRightIcon from '@material-ui/icons/KeyboardArrowRight';
+
 import { 
-  // ArmorType,
   WeaponKeyword,
-  // GameClass,
   BaseItem, 
-  // Skill,
-  // Damage,
   RollPlus
 } from "../../models";
 import { 
@@ -33,14 +23,12 @@ import {
 } from "../../models/Constants";
 
 import StringBox from "../../components/input/StringBox";
-// import SelectBox from "../../components/input/SelectBox";
 import SelectStringBox from "../../components/input/SelectStringBox";
 import CheckBox from "../../components/input/CheckBox";
 
 import SelectArmorTypeBox from "../../components/model_inputs/select/SelectArmorTypeBox";
 import SelectWeaponKeywordBox from "../../components/model_inputs/select/SelectWeaponKeywordBox";
 import SelectToolBox from "../../components/model_inputs/select/SelectToolBox";
-// import SelectGameClassBox from "../../components/model_inputs/SelectGameClassBox";
 import DamageInput from "../../components/model_inputs/other/DamageInput";
 
 import API from "../../utilities/smart_api";
@@ -48,8 +36,6 @@ import { APIClass } from "../../utilities/smart_api_class";
 
 
 interface AppState {
-  // base_items: BaseItem[] | null;
-  // skills: Skill[] | null;
   item_type: string;
   height: number;
   width: number;
@@ -64,17 +50,12 @@ interface MatchParams {
 }
 
 const mapState = (state: RootState) => ({
-  // base_items: state.app.base_items,
-  // skillsMB: state.app.skills as ModelBase[],
-  // skills: state.app.skills,
   item_type: state.app.item_type,
   height: state.app.height,
   width: state.app.width
 })
 
 const mapDispatch = {
-  // setBaseItems: (objects: BaseItem[]) => ({ type: 'SET', dataType: 'base_items', payload: objects }),
-  // addBaseItem: (object: BaseItem) => ({ type: 'ADD', dataType: 'base_items', payload: object })
 }
 
 const connector = connect(mapState, mapDispatch)
@@ -87,14 +68,11 @@ export interface State {
   redirectTo: string | null;
   obj: BaseItem;
   processing: boolean;
-  // skills: Skill[] | null;
   base_items: BaseItem[] | null;
-  // armor_types: ArmorType[] | null;
   weapon_keywords: WeaponKeyword[] | null;
   range_ids: string[];
   reach_id: string;
   versatile_id: string;
-  // game_classes: GameClass[] | null;
   loading: boolean;
   reloading: boolean;
 }
@@ -106,14 +84,11 @@ class BaseItemEdit extends Component<Props, State> {
       redirectTo: null,
       obj: new BaseItem(),
       processing: false,
-      // skills: null,
       base_items: null,
-      // armor_types: null,
       weapon_keywords: null,
       range_ids: [],
       reach_id: "",
       versatile_id: "",
-      // game_classes: null,
       loading: false,
       reloading: false
     };
@@ -168,12 +143,10 @@ class BaseItemEdit extends Component<Props, State> {
         this.setState({ 
           obj,
           base_items: res.base_item, 
-          // armor_types: res.armor_type,
           weapon_keywords: res.weapon_keyword,
           range_ids,
           reach_id,
           versatile_id,
-          // game_classes: res.game_class,
           loading: false
         });
       });
@@ -462,7 +435,6 @@ class BaseItemEdit extends Component<Props, State> {
               </Button>
               <Button
                 variant="contained"
-                // color="primary"
                 disabled={this.state.processing}
                 style={{ marginLeft: "4px" }}
                 onClick={ () => { 

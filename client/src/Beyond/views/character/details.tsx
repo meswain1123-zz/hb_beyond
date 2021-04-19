@@ -7,15 +7,8 @@ import ShieldImage from "../../assets/img/Shield.png";
 import ListImage from "../../assets/img/List.png";
 import PeopleImage from "../../assets/img/People.png";
 import {
-  // Add, 
-  // Edit, 
-  // ArrowBack, DeleteForever,
   Settings,
-  // CheckCircleOutline,
-  // RadioButtonUnchecked,
-  // RadioButtonChecked,
   Apps,
-  // FontDownload,
   Clear,
   Star,
   StarBorder
@@ -23,29 +16,14 @@ import {
 import {
   Grid, 
   Drawer,
-  // List, ListItem, 
-  // Button, 
   Tooltip, Fab,
-  // FormControl, InputLabel,
-  // OutlinedInput, FormHelperText
 } from "@material-ui/core";
-// import KeyboardArrowDownIcon from '@material-ui/icons/KeyboardArrowDown';
-// import KeyboardArrowRightIcon from '@material-ui/icons/KeyboardArrowRight';
 import { 
   ArmorType,
-  // Background,
   Character,
   Condition,
   EldritchInvocation,
-  // Race,
-  // Subrace,
-  // GameClass,
-  // Subclass,
   Skill,
-  // Language,
-  // BaseItem,
-  // MagicItem,
-  // MagicItemKeyword,
   WeaponKeyword,
   Spell,
   SpellSlotType,
@@ -56,8 +34,6 @@ import {
   DAMAGE_TYPES
 } from "../../models/Constants";
 import StringBox from "../../components/input/StringBox";
-// import SelectBox from "../../components/input/SelectBox";
-// import SelectStringBox from "../../components/input/SelectStringBox";
 import CheckBox from "../../components/input/CheckBox";
 import ToggleButtonBox from '../../components/input/ToggleButtonBox';
 
@@ -68,7 +44,6 @@ import CharacterProficiencies from '../../components/model_inputs/character/Char
 import CharacterNotes from '../../components/model_inputs/character/CharacterNotes';
 import CharacterDescription from '../../components/model_inputs/character/CharacterDescription';
 import DamageTypeImage from "../../components/model_inputs/display/DamageTypeImage";
-// import DisplayObjects from "../../components/model_inputs/display/DisplayObjects";
 import CharacterActions from '../../components/model_inputs/character/CharacterActions';
 import CharacterAbilityScores from '../../components/model_inputs/character/CharacterAbilityScores';
 import CharacterSavingThrows from '../../components/model_inputs/character/CharacterSavingThrows';
@@ -88,7 +63,6 @@ import { CharacterUtilitiesClass } from "../../utilities/character_utilities_cla
 
 
 interface AppState {
-  // characters: Character[] | null;
   height: number;
   width: number;
 }
@@ -172,9 +146,6 @@ class CharacterDetails extends Component<Props, State> {
       if (res && res.length === 1) {
         const obj = res[0];
         this.char_util.recalcAll(obj);
-        // if (this.state.armor_types && this.state.spells && this.state.spell_slot_types && this.state.eldritch_invocations && this.state.weapon_keywords) {
-        //   obj.recalcAll(this.state.armor_types, this.state.weapon_keywords, this.state.spells, this.state.spell_slot_types, this.state.eldritch_invocations);
-        // }
         this.setState({ 
           obj
         });
@@ -1314,15 +1285,9 @@ class CharacterDetails extends Component<Props, State> {
         this.state.conditions.filter(o => o.level === -1 && this.state.obj.favorite_conditions.includes(o._id)).forEach(cond => {
           return_me.push(this.renderCondition(cond, true));
         });
-        // this.state.conditions.filter(o => o.level > -1 && this.props.obj.favorite_conditions.includes(o._id)).forEach(cond => {
-        //   return_me.push(this.renderCondition(cond));
-        // });
         this.state.conditions.filter(o => o.level === -1 && !this.state.obj.favorite_conditions.includes(o._id)).forEach(cond => {
           return_me.push(this.renderCondition(cond, false));
         });
-        // this.state.conditions.filter(o => o.level > -1).forEach(cond => {
-        //   return_me.push(this.renderCondition(cond));
-        // });
       }
     } else if (this.state.bar3_mode === "Minions") {
       // Iterate through character's minions
@@ -1335,7 +1300,6 @@ class CharacterDetails extends Component<Props, State> {
         <div
           style={{
             display: "flex",
-            // justifyContent: "center",
             borderTop: "1px solid lightgray",
             minHeight: "76px",
             width: `${this.props.width - 60}px`,
@@ -1545,40 +1509,6 @@ class CharacterDetails extends Component<Props, State> {
                 { minion.current_hit_points } 
                 { minion.temp_hit_points > 0 && <span style={{ color: "blue" }}>+{minion.temp_hit_points}</span> } 
               </Grid>
-              {/* <Grid item xs={2} container spacing={0} direction="column" style={{ width: "10px", lineHeight: 1 }}>
-                <Grid item 
-                  style={{ height: "8px", width: "10px", cursor: "pointer" }}
-                  onClick={() => {
-                    if (minion.override_max_hit_points === -1 ? (minion.current_hit_points >= (minion.max_hit_points + minion.max_hit_points_modifier)) : (minion.current_hit_points >= (minion.override_max_hit_points + minion.max_hit_points_modifier))) {
-
-                    } else {
-                      minion.current_hit_points++;
-                      this.api.updateObject(this.state.obj).then((res: any) => {
-                        // this.setState({ obj });
-                      });
-                    }
-                  }}>
-                  +
-                </Grid>
-                <Grid item 
-                  style={{ height: "8px", width: "10px", cursor: "pointer" }}
-                  onClick={() => {
-                    // const obj = this.state.obj;
-                    if (minion.temp_hit_points > 0) {
-                      minion.temp_hit_points--;
-                      this.api.updateObject(this.state.obj).then((res: any) => {
-                        this.setState({ });
-                      });
-                    } else if (minion.current_hit_points > 0) {
-                      minion.current_hit_points--;
-                      this.api.updateObject(this.state.obj).then((res: any) => {
-                        this.setState({ });
-                      });
-                    }
-                  }}>
-                  -
-                </Grid>
-              </Grid> */}
               <Grid item xs={7} onClick={() => {
                 this.setState({ 
                   menu_open: "minion",
@@ -1687,10 +1617,6 @@ class CharacterDetails extends Component<Props, State> {
               const obj = this.state.obj;
               this.char_util.recalcAll(obj);
               this.setState({ obj });
-              // if (this.state.armor_types && this.state.spells && this.state.spell_slot_types && this.state.eldritch_invocations && this.state.weapon_keywords) {
-              //   this.state.obj.recalcAll(this.state.armor_types, this.state.weapon_keywords, this.state.spells, this.state.spell_slot_types, this.state.eldritch_invocations);
-              //   this.setState({ obj: this.state.obj });
-              // }
             }}
           />;
       break;
@@ -1702,10 +1628,6 @@ class CharacterDetails extends Component<Props, State> {
               const obj = this.state.obj;
               this.char_util.recalcAll(obj);
               this.setState({ obj });
-              // if (this.state.armor_types && this.state.spells && this.state.spell_slot_types && this.state.eldritch_invocations && this.state.weapon_keywords) {
-              //   this.state.obj.recalcAll(this.state.armor_types, this.state.weapon_keywords, this.state.spells, this.state.spell_slot_types, this.state.eldritch_invocations);
-              //   this.setState({ obj: this.state.obj });
-              // }
             }}
           />;
       break;
@@ -1714,10 +1636,7 @@ class CharacterDetails extends Component<Props, State> {
           <CharacterSpells 
             obj={this.state.obj}
             onChange={() => {
-              // if (this.state.armor_types && this.state.spells && this.state.spell_slot_types) {
-                // this.state.obj.recalcAll(this.state.armor_types, this.state.spells, this.state.spell_slot_types);
-                this.setState({ obj: this.state.obj });
-              // }
+              this.setState({ obj: this.state.obj });
             }}
           />;
       break;

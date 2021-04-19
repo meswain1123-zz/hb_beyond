@@ -2,7 +2,6 @@
 import { 
   ModelBase, 
   AbilityEffect, 
-  // Potence, 
   SpellTemplate 
 } from ".";
 

@@ -7,10 +7,6 @@ import { CharacterFeature } from "./CharacterFeature";
 export class CharacterSpellcasting {
   id: number;
   class_id: string | null;
-  // Spell List, Ritual Casting, 
-  // Spellcasting,
-  // Spell Book, Spells/Cantrips Known/Prepared,
-  // Bonus Spells, Mystic Arcanum
   feature_type: string; 
   the_feature: SpellcastingFeature | SpellBook | BonusSpells | string | number | null;
 

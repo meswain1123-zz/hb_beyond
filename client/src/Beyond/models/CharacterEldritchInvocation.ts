@@ -1,7 +1,6 @@
 
 import { EldritchInvocation } from "./EldritchInvocation";
 import { CharacterFeature } from "./CharacterFeature";
-// import { Mask } from "./Mask";
 
 export class CharacterEldritchInvocation {
   id: number;

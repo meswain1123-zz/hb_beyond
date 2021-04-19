@@ -1,39 +1,28 @@
 import React, { Component } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
-// import { RouteComponentProps } from 'react-router';
+
 import {
   Grid, 
-  // Fab, Tooltip, 
   Button
 } from "@material-ui/core";
-// import {
-//   DeleteForever
-// } from "@material-ui/icons";
 
 import { 
   CreatureAbility,
   AbilityEffect, 
-  // AbilityTemplate,
-  // TemplateBase
 } from "../../../models";
 import { 
   ABILITY_SCORES, 
-  // DAMAGE_TYPES, 
   DURATIONS,
   COMPONENTS,
   CASTING_TIMES,
-  // RESOURCES,
   REFRESH_RULES
 } from "../../../models/Constants";
 
 import StringBox from "../../input/StringBox";
-// import SelectBox from "../input/SelectBox";
 import SelectStringBox from "../../input/SelectStringBox";
 import CheckBox from "../../input/CheckBox";
 
 import SelectResourceBox from "../select/SelectResourceBox";
-
-// import TemplateBox from "../TemplateBox";
 import AbilityEffectInput from "./AbilityEffect";
 
 import API from "../../../utilities/smart_api";
@@ -58,28 +47,20 @@ const connector = connect(mapState, mapDispatch)
 type PropsFromRedux = ConnectedProps<typeof connector>
 
 type Props = PropsFromRedux & {
-  // choice_name: string | null;
   obj: CreatureAbility;
   onChange: (changed: CreatureAbility) => void; 
 }
 
 export interface State { 
-  // obj: CreatureAbility;
-  // loading: boolean;
   reloading: boolean;
   show_effect: number;
   special_refresh_rule: boolean;
 }
 
 class CreatureAbilityInput extends Component<Props, State> {
-  // public static defaultProps = {
-  //   choice_name: null
-  // };
   constructor(props: Props) {
     super(props);
     this.state = {
-      // obj: new CreatureAbility(),
-      // loading: false,
       reloading: false,
       show_effect: 0,
       special_refresh_rule: false
@@ -103,7 +84,7 @@ class CreatureAbilityInput extends Component<Props, State> {
       return (
         <Grid item container spacing={1} direction="column">
           <Grid item container spacing={1} direction="row">
-            <Grid item xs={4}>
+            <Grid item xs={2}>
               <SelectStringBox 
                 name="Casting Time"
                 options={CASTING_TIMES}
@@ -114,6 +95,17 @@ class CreatureAbilityInput extends Component<Props, State> {
                   this.props.onChange(obj);
                 }}
               /> 
+            </Grid>
+            <Grid item xs={2}>
+              <StringBox
+                name="Attack Bonus"
+                value={`${this.props.obj.attack_bonus}`}
+                onBlur={(value: string) => {
+                  const obj = this.props.obj;
+                  obj.attack_bonus = +value;
+                  this.props.onChange(obj);
+                }}
+              />
             </Grid>
             <Grid item xs={4} container spacing={1} direction="row">
               <Grid item xs={6}>
@@ -281,7 +273,6 @@ class CreatureAbilityInput extends Component<Props, State> {
                   obj.special_resource_refresh_rule = "Long Rest";
                 }
                 this.props.onChange(obj);
-                // this.props.onChange(obj);
               }}
             /> 
           </Grid>
@@ -295,7 +286,6 @@ class CreatureAbilityInput extends Component<Props, State> {
                   const obj = this.props.obj;
                   obj.amount_consumed = value;
                   this.props.onChange(obj);
-                  // this.props.onChange(obj);
                 }}
               />
             </Grid>
@@ -309,7 +299,6 @@ class CreatureAbilityInput extends Component<Props, State> {
                   const obj = this.props.obj;
                   obj.special_resource_amount = value;
                   this.props.onChange(obj);
-                  // this.props.onChange(obj);
                 }}
               />
             </Grid>
@@ -335,19 +324,6 @@ class CreatureAbilityInput extends Component<Props, State> {
               />
             </Grid>
           }
-          {/* { (this.state.special_refresh_rule || refresh_rule_helper === "Special") &&
-            <Grid item>
-              <StringBox 
-                value={ this.props.obj.special_resource_refresh_rule } 
-                name="Refresh Rule"
-                onBlur={(value: string) => {
-                  const obj = this.props.obj;
-                  obj.special_resource_refresh_rule = value;
-                  this.props.onChange(obj);
-                }}
-              />
-            </Grid>
-          } */}
         </Grid>
       );
     }

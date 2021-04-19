@@ -1,19 +1,13 @@
 import React, { Component } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
-// import {
-//   Clear, 
-// } from "@material-ui/icons";
 import {
   Grid, 
   Drawer,
   Popover,
-  // Snackbar 
 } from "@material-ui/core";
 
 import { 
-  // Attack,
   Character,
-  // Creature,
   RollPlus
 } from "../../../models";
 
@@ -60,9 +54,6 @@ export interface State {
 }
 
 class CharacterAbilityScores extends Component<Props, State> {
-  // public static defaultProps = {
-  //   value: null,
-  // };
   constructor(props: Props) {
     super(props);
     this.state = {
@@ -175,7 +166,6 @@ class CharacterAbilityScores extends Component<Props, State> {
         { this.renderDetails() }
       </Drawer>,
       <Popover key="rolls"
-        // id={id}
         open={ this.state.popoverAnchorEl !== null && this.state.popoverAbility !== "" }
         anchorEl={this.state.popoverAnchorEl}
         onClose={() => {
@@ -199,9 +189,6 @@ class CharacterAbilityScores extends Component<Props, State> {
     const rolls: RollPlus[] = [];
     const roll_plus = new RollPlus();
     roll_plus.ability_score = this.state.popoverAbility;
-    // if (this.props.obj.saving_throw_proficiencies.includes(this.state.popoverSave)) {
-    //   roll_plus.flat = this.props.obj.proficiency_modifier;
-    // }
     rolls.push(roll_plus);
     if (this.props.obj instanceof Character) {
       this.props.obj.check_bonuses.forEach(bonus => {
@@ -268,7 +255,6 @@ class CharacterAbilityScores extends Component<Props, State> {
             style={{ 
               backgroundColor: "white",
               color: "black",
-              // border: "1px solid blue",
               minHeight: "800px",
               width: "316px",
               overflowX: "hidden"

@@ -51,7 +51,6 @@ export class CharacterRace {
     for (let i = 0; i < race.features.length; i++) {
       const fb = race.features[i];
       const char_feature_base = new CharacterFeatureBase();
-      // char_feature_base.id = this.features.length;
       char_feature_base.copyFeatureBase(fb);
       this.features.push(char_feature_base);
     }

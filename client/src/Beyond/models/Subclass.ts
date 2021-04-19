@@ -1,6 +1,5 @@
 
 import { ModelBase } from "./ModelBase";
-// import { GameClass } from "./GameClass";
 import { FeatureBase } from "./FeatureBase";
 
 export class Subclass extends ModelBase {

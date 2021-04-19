@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
-// import { RouteComponentProps } from 'react-router';
+
 import {
   Grid,
   Tooltip,
@@ -15,11 +15,6 @@ import {
 } from "../../../models";
 import { 
   DAMAGE_TYPES, 
-  // DURATIONS,
-  // COMPONENTS,
-  // CASTING_TIMES,
-  // RESOURCES,
-  // ABILITY_SCORES 
 } from "../../../models/Constants";
 
 import StringBox from "../../input/StringBox";
@@ -34,7 +29,6 @@ import { APIClass } from "../../../utilities/smart_api_class";
 
 
 interface AppState {
-  // templates: TemplateBase[]
 }
 
 interface RootState {
@@ -42,11 +36,9 @@ interface RootState {
 }
 
 const mapState = (state: RootState) => ({
-  // templates: state.app.templates
 })
 
 const mapDispatch = {
-  // addTemplate: (obj: TemplateBase) => ({ type: 'ADD', dataType: 'templates', payload: obj })
 }
 
 const connector = connect(mapState, mapDispatch)
@@ -61,8 +53,6 @@ type Props = PropsFromRedux & {
 }
 
 export interface State { 
-  // loading: boolean;
-  // type: string;
 }
 
 class AbilityEffectInput extends Component<Props, State> {
@@ -72,16 +62,6 @@ class AbilityEffectInput extends Component<Props, State> {
   constructor(props: Props) {
     super(props);
     this.state = {
-      // type: props.obj ? props.obj.type : "None",
-      // categories: [],
-      // selected_category: "",
-      // all_templates: null,
-      // templates: [],
-      // selected_template: null,
-      // loading: false,
-      // processing: false,
-      // modal_open: false,
-      // new_template: null
     };
     this.api = API.getInstance();
   }
@@ -203,7 +183,6 @@ class AbilityEffectInput extends Component<Props, State> {
                       size = last.rolls.size;
                     }
                     const potence = new Potence();
-                    // obj.potences.length, level, count, size
                     potence.level = level;
                     potence.rolls.count = count;
                     potence.rolls.size = size;

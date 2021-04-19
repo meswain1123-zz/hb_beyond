@@ -16,7 +16,6 @@ import {
   CharacterSpell,
   CreatureInstance,
   RollPlus,
-  // SummonStatBlock
 } from "../../../models";
 
 import ToggleButtonBox from "../../input/ToggleButtonBox";
@@ -71,9 +70,6 @@ export interface State {
 }
 
 class CharacterSpellDetails extends Component<Props, State> {
-  // public static defaultProps = {
-  //   value: null,
-  // };
   constructor(props: Props) {
     super(props);
     this.state = {
@@ -153,7 +149,6 @@ class CharacterSpellDetails extends Component<Props, State> {
               style={{ 
                 backgroundColor: "white",
                 color: "black",
-                // border: "1px solid blue",
                 minHeight: "800px",
                 width: "316px",
                 overflowX: "hidden"
@@ -435,7 +430,6 @@ class CharacterSpellDetails extends Component<Props, State> {
               </Grid>
             </Grid>
             <Popover key="rolls"
-              // id={id}
               open={ this.state.popoverAnchorEl !== null && this.state.popoverMode !== "" }
               anchorEl={this.state.popoverAnchorEl}
               onClose={() => {
@@ -482,8 +476,6 @@ class CharacterSpellDetails extends Component<Props, State> {
                     }
                   }
                   this.props.onChange();
-                  // this.api.updateObject(this.props.obj).then((res: any) => {
-                  // });
                 }} 
               />
             </div>
@@ -504,10 +496,7 @@ class CharacterSpellDetails extends Component<Props, State> {
                   }
                 }
                 this.props.onChange();
-                this.setState({ }, () => {
-                  // this.api.updateObject(this.props.obj).then((res: any) => {
-                  // });
-                });
+                this.setState({ });
               }} 
             />
           );
@@ -573,8 +562,6 @@ class CharacterSpellDetails extends Component<Props, State> {
                       }
                     }
                     this.props.onChange();
-                    // this.api.updateObject(this.props.obj).then((res: any) => {
-                    // });
                   }} 
                 />
               </div>
@@ -597,10 +584,7 @@ class CharacterSpellDetails extends Component<Props, State> {
                     }
                   }
                   this.props.onChange();
-                  this.setState({ }, () => {
-                    // this.api.updateObject(this.props.obj).then((res: any) => {
-                    // });
-                  });
+                  this.setState({ });
                 }} 
               />
             );
@@ -622,10 +606,7 @@ class CharacterSpellDetails extends Component<Props, State> {
                   }
                 }
                 this.props.onChange();
-                this.setState({ }, () => {
-                  // this.api.updateObject(this.props.obj).then((res: any) => {
-                  // });
-                });
+                this.setState({ });
               }} 
             />
           );
@@ -655,8 +636,6 @@ class CharacterSpellDetails extends Component<Props, State> {
                             }
                           }
                           this.props.onChange();
-                          // this.api.updateObject(this.props.obj).then((res: any) => {
-                          // });
                         }} 
                       />
                     );
@@ -685,8 +664,6 @@ class CharacterSpellDetails extends Component<Props, State> {
                           }
                         }
                         this.props.onChange();
-                        // this.api.updateObject(this.props.obj).then((res: any) => {
-                        // });
                       }} 
                     />
                   );
@@ -757,7 +734,6 @@ class CharacterSpellDetails extends Component<Props, State> {
         let damage_rolls: RollPlus[] = [];
         if (potence) {
           const roll_plus = new RollPlus(potence.rolls);
-          // roll_plus.ability_score = spell.spellcasting_ability
           damage_rolls.push(roll_plus);
         }
         damage_rolls = [...damage_rolls,...spell.attack.damage_rolls];

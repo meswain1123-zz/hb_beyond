@@ -3,7 +3,6 @@ import { connect, ConnectedProps } from 'react-redux';
 import { RouteComponentProps } from 'react-router';
 import { Redirect } from "react-router-dom";
 import {
-  // Add, Edit,
   ArrowBack
 } from "@material-ui/icons";
 import {
@@ -11,35 +10,23 @@ import {
   Link,
   Button, 
   Tooltip, Fab,
-  // FormControl, InputLabel,
-  // OutlinedInput, FormHelperText
 } from "@material-ui/core";
-// import KeyboardArrowDownIcon from '@material-ui/icons/KeyboardArrowDown';
-// import KeyboardArrowRightIcon from '@material-ui/icons/KeyboardArrowRight';
 import { 
   GameClass, FeatureBase, StartEquipmentChoice
 } from "../../models";
 import { 
-  // DAMAGE_TYPES, 
-  // DURATIONS,
-  // COMPONENTS,
-  // CASTING_TIMES,
-  // RESOURCES,
   ABILITY_SCORES 
 } from "../../models/Constants";
 import StringBox from "../../components/input/StringBox";
 import FeatureBasesInput from "../../components/model_inputs/feature/FeatureBases";
 import FeatureBaseInput from "../../components/model_inputs/feature/FeatureBase";
 import StartEquipmentChoices from "../../components/model_inputs/equipment/StartEquipmentChoices";
-// import SelectBox from "../../components/input/SelectBox";
 import SelectStringBox from "../../components/input/SelectStringBox";
-// import CheckBox from "../../components/input/CheckBox";
 import API from "../../utilities/smart_api";
 import { APIClass } from "../../utilities/smart_api_class";
 
 
 interface AppState {
-  // game_classes: GameClass[] | null;
   height: number;
   width: number;
 }
@@ -53,14 +40,11 @@ interface MatchParams {
 }
 
 const mapState = (state: RootState) => ({
-  // objects: state.app.game_classes,
   height: state.app.height,
   width: state.app.width
 })
 
 const mapDispatch = {
-  // setGameClasses: (objects: GameClass[]) => ({ type: 'SET', dataType: 'game_classes', payload: objects }),
-  // addGameClass: (object: GameClass) => ({ type: 'ADD', dataType: 'game_classes', payload: object })
 }
 
 const connector = connect(mapState, mapDispatch)
@@ -300,7 +284,6 @@ class GameClassEdit extends Component<Props, State> {
               </Button>
               <Button
                 variant="contained"
-                // color="primary"
                 disabled={this.state.processing}
                 style={{ marginLeft: "4px" }}
                 onClick={ () => { 

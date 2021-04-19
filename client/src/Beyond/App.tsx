@@ -55,10 +55,7 @@ class AppLayout extends Component<Props, State> {
       innerWidth: 0,
       marginLeft: 220
     };
-    // this.api = API.getInstance();
   }
-
-  // api: APIClass;
 
   props: any;
 
@@ -84,13 +81,9 @@ class AppLayout extends Component<Props, State> {
   }
 
   render() {
-    // if (this.props.api === null) {
-    //   this.props.setAPI(this.api);
-    // }
     return (
       <Router>
         <Helmet>
-          {/* <link rel="icon" id="favicon" href="/skullicon.ico" /> */}
           <title>Homebrew Beyond</title>
         </Helmet>
         {this.props.menuOpen &&

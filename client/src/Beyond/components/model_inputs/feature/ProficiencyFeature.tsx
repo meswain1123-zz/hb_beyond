@@ -1,34 +1,14 @@
 import React, { Component } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
-// import { RouteComponentProps } from 'react-router';
+
 import {
   Grid, 
-  // Fab, Tooltip, Button
 } from "@material-ui/core";
-// import {
-//   DeleteForever
-// } from "@material-ui/icons";
 
 import { 
-  // Feature, 
-  // Modifier, 
   Proficiency, 
-  // Ability,
-  // ResourceFeature,
-  // Advantage,
-  // DamageMultiplier,
-  // Language,
-  // Skill,
-  // ArmorType,
-  // WeaponKeyword,
-  // ModelBase,
 } from "../../../models";
 import { 
-  // DAMAGE_TYPES, 
-  // DURATIONS,
-  // COMPONENTS,
-  // CASTING_TIMES,
-  // RESOURCES,
   ABILITY_SCORES 
 } from "../../../models/Constants";
 
@@ -41,15 +21,10 @@ import SelectArmorTypeBox from "../select/SelectArmorTypeBox";
 import SelectWeaponKeywordBox from "../select/SelectWeaponKeywordBox";
 import SelectSpecialFeatureBox from "../select/SelectSpecialFeatureBox";
 import SelectBaseItemBox from "../select/SelectBaseItemBox";
-// import SelectLanguageBox from "../select/SelectLanguageBox";
 import CheckBox from '../../input/CheckBox';
 
 
 interface AppState {
-  // skills: Skill[]; 
-  // armor_types: ArmorType[];
-  // weapon_keywords: WeaponKeyword[];
-  // languages: Language[];
 }
 
 interface RootState {
@@ -57,14 +32,10 @@ interface RootState {
 }
 
 const mapState = (state: RootState) => ({
-  // skills: state.app.skills,
-  // armor_types: state.app.armor_types,
-  // weapon_keywords: state.app.weapon_keywords,
-  // languages: state.app.languages
 })
 
 const mapDispatch = {
-  // setAbilities: (objects: Ability[]) => ({ type: 'SET', dataType: 'abilities', payload: objects })
+  
 }
 
 const connector = connect(mapState, mapDispatch)
@@ -73,8 +44,6 @@ type PropsFromRedux = ConnectedProps<typeof connector>
 
 type Props = PropsFromRedux & {
   proficiency: Proficiency;
-  // onNameChange: (name: string) => void; 
-  // onDescriptionChange: (description: string) => void; 
   onChange: (proficiency: Proficiency) => void; 
 }
 
@@ -84,9 +53,6 @@ export interface State {
 }
 
 class ProficiencyFeatureInput extends Component<Props, State> {
-  // public static defaultProps = {
-  //   choice_name: null
-  // };
   constructor(props: Props) {
     super(props);
     this.state = {

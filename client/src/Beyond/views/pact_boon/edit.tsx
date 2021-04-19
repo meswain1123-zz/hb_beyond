@@ -3,42 +3,25 @@ import { connect, ConnectedProps } from 'react-redux';
 import { RouteComponentProps } from 'react-router';
 import { Redirect } from "react-router-dom";
 import {
-  // Add, Edit,
   ArrowBack
 } from "@material-ui/icons";
 import {
   Grid, 
-  // List, ListItem, 
   Button, 
   Tooltip, Fab,
-  // FormControl, InputLabel,
-  // OutlinedInput, FormHelperText
 } from "@material-ui/core";
-// import KeyboardArrowDownIcon from '@material-ui/icons/KeyboardArrowDown';
-// import KeyboardArrowRightIcon from '@material-ui/icons/KeyboardArrowRight';
 import { 
   PactBoon, Feature
 } from "../../models";
 import StringBox from "../../components/input/StringBox";
 import FeatureListInput from "../../components/model_inputs/feature/FeatureList";
 import FeatureInput from "../../components/model_inputs/feature/FeatureMain";
-// import SelectBox from "../../components/input/SelectBox";
-// import SelectStringBox from "../../components/input/SelectStringBox";
-// import CheckBox from "../../components/input/CheckBox";
-// import { 
-//   // DAMAGE_TYPES, 
-//   // DURATIONS,
-//   // COMPONENTS,
-//   // CASTING_TIMES,
-//   // RESOURCES,
-//   ABILITY_SCORES 
-// } from "../../models/Constants";
+
 import API from "../../utilities/smart_api";
 import { APIClass } from "../../utilities/smart_api_class";
 
 
 interface AppState {
-  // pact_boons: PactBoon[] | null;
   height: number;
   width: number;
 }
@@ -52,14 +35,11 @@ interface MatchParams {
 }
 
 const mapState = (state: RootState) => ({
-  // objects: state.app.pact_boons,
   height: state.app.height,
   width: state.app.width
 })
 
 const mapDispatch = {
-  // setPactBoons: (objects: PactBoon[]) => ({ type: 'SET', dataType: 'pact_boons', payload: objects }),
-  // addPactBoon: (object: PactBoon) => ({ type: 'ADD', dataType: 'pact_boons', payload: object })
 }
 
 const connector = connect(mapState, mapDispatch)
@@ -274,7 +254,6 @@ class PactBoonEdit extends Component<Props, State> {
               </Button>
               <Button
                 variant="contained"
-                // color="primary"
                 disabled={this.state.processing}
                 style={{ marginLeft: "4px" }}
                 onClick={ () => { 

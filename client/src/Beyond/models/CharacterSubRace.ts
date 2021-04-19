@@ -46,7 +46,6 @@ export class CharacterSubRace {
     for (let i = 0; i < subrace.features.length; i++) {
       const fb = subrace.features[i];
       const char_feature_base = new CharacterFeatureBase();
-      // char_feature_base.id = this.features.length;
       char_feature_base.copyFeatureBase(fb);
       this.features.push(char_feature_base);
     }

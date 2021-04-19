@@ -1,18 +1,11 @@
 import React, { Component } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
-// import {
-//   ExpandMore
-// } from "@material-ui/icons";
 import {
   Grid, 
-  // Accordion,
-  // AccordionSummary,
-  // AccordionDetails
 } from "@material-ui/core";
 
 import { 
   Character,
-  // Creature,
   CharacterClass,
   Spell,
   SpellList
@@ -22,8 +15,6 @@ import {
 } from "../../../models/Constants";
 
 import StringBox from "../../input/StringBox";
-// import SelectStringBox from "../../input/SelectStringBox";
-// import CheckBox from "../../input/CheckBox";
 import ToggleButtonBox from "../../input/ToggleButtonBox";
 
 import ViewSpell from "../ViewSpell";
@@ -63,8 +54,6 @@ export interface State {
   spell_lists: SpellList[] | null;
   my_spell_lists: any;
   my_always_known: any;
-  // my_book_spells: any;
-  // my_prepared_spells: any;
   loading: boolean;
   reloading: boolean;
   search_string: string;
@@ -77,9 +66,6 @@ export interface State {
 }
 
 class CharacterManageSpells extends Component<Props, State> {
-  // public static defaultProps = {
-  //   value: null,
-  // };
   constructor(props: Props) {
     super(props);
     
@@ -88,8 +74,6 @@ class CharacterManageSpells extends Component<Props, State> {
       spell_lists: null,
       my_spell_lists: {},
       my_always_known: {},
-      // my_book_spells: {},
-      // my_prepared_spells: {},
       loading: false,
       reloading: false,
       search_string: "",
@@ -115,8 +99,6 @@ class CharacterManageSpells extends Component<Props, State> {
         const spell_lists: SpellList[] = res.spell_list;
         const my_spell_lists: any = {};
         const my_always_known: any = {};
-        // const my_book_spells: any = {};
-        // const my_prepared_spells: any = {};
         
         if (this.props.obj instanceof Character) {
           this.props.obj.classes.forEach(char_class => {
@@ -147,8 +129,6 @@ class CharacterManageSpells extends Component<Props, State> {
         this.setState({ 
           my_spell_lists,
           my_always_known,
-          // my_book_spells,
-          // my_prepared_spells,
           spells,
           spell_lists,
           loading: false 
@@ -180,10 +160,8 @@ class CharacterManageSpells extends Component<Props, State> {
             style={{ 
               backgroundColor: "white",
               color: "black",
-              // border: "1px solid blue",
               minHeight: "800px",
               width: "316px",
-              // overflowX: "hidden"
             }}>
             <Grid item style={{ fontSize: "18px", fontWeight: "bold", width: "316px" }}>
               Manage Spells
@@ -283,10 +261,6 @@ class CharacterManageSpells extends Component<Props, State> {
             name={`${level}`}
             height={15}
             lineHeight={1.5}
-            // border=""
-            // color="gray"
-            // width={30}
-            // bold
             value={this.state.levels.includes(level)}
             onToggle={() => {
               let levels = this.state.levels;

@@ -5,7 +5,6 @@ import {
   FormControl,
   OutlinedInput,
   InputLabel,
-  // FormHelperText,
   Button, Grid
 } from "@material-ui/core";
 import { User } from "../models";

@@ -36,7 +36,6 @@ export class CharacterBackground {
     this.features = [];
     for (let i = 0; i < background.features.length; i++) {
       const char_feature_base = new CharacterFeatureBase();
-      // char_feature_base.id = this.features.length;
       char_feature_base.copyFeatureBase(background.features[i]);
       this.features.push(char_feature_base);
     }

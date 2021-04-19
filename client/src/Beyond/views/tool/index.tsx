@@ -4,28 +4,18 @@ import { Redirect } from "react-router-dom";
 import {
   Add, 
   Edit,
-  // GetApp,
-  // ArrowBack
 } from "@material-ui/icons";
 import {
   Grid, 
-  // List, ListItem, 
   Button, 
   Tooltip, Fab,
-  // Checkbox,
   Link
 } from "@material-ui/core";
-// import KeyboardArrowDownIcon from '@material-ui/icons/KeyboardArrowDown';
-// import KeyboardArrowRightIcon from '@material-ui/icons/KeyboardArrowRight';
+
 import { Tool } from "../../models";
-// import { 
-//   SCHOOLS 
-// } from "../../models/Constants";
 
 import StringBox from "../../components/input/StringBox";
-// import SelectBox from "../../components/input/SelectBox";
-// import SelectStringBox from "../../components/input/SelectStringBox";
-// import CheckBox from "../../components/input/CheckBox";
+
 import SelectToolTypeBox from "../../components/model_inputs/select/SelectToolTypeBox";
 
 import API from "../../utilities/smart_api";

@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
-// import { RouteComponentProps } from 'react-router';
 import {
   FormControl, 
   InputLabel,
@@ -20,19 +19,15 @@ import { APIClass } from "../../utilities/smart_api_class";
 
 
 interface AppState {
-  // abilities: Ability[] | null;
 }
 
 interface RootState {
-  // app: AppState
 }
 
 const mapState = (state: RootState) => ({
-  // abilities: state.app.abilities
 })
 
 const mapDispatch = {
-  // setAbilities: (objects: Ability[]) => ({ type: 'SET', dataType: 'abilities', payload: objects })
 }
 
 const connector = connect(mapState, mapDispatch)
@@ -47,7 +42,7 @@ type Props = PropsFromRedux & {
   allow_all: boolean;
   allow_none: boolean;
   name: string;
-  onChange: Function; // ((id: string) => void) | ((id: string[]) => void); 
+  onChange: Function;
   labelWidth: number | null;
   color: string;
 }

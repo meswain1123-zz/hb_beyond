@@ -43,9 +43,6 @@ export interface State {
 }
 
 class DisplaySpellcasting extends Component<Props, State> {
-  // public static defaultProps = {
-  //   choice_name: null
-  // };
   constructor(props: Props) {
     super(props);
     this.state = {

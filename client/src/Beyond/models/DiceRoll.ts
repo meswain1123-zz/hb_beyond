@@ -5,13 +5,11 @@ export class DiceRoll {
   true_id: string;
   size: number;
   count: number;
-  // bonus: number;
 
   constructor(obj?: any) {
     this.true_id = obj && obj.true_id ? obj.true_id : uuidv4().toString();
     this.size = obj ? obj.size : 4;
     this.count = obj ? obj.count : 0;
-    // this.bonus = obj && obj.bonus ? obj.bonus : 0;
   }
 
   toDBObj = () => {
@@ -19,7 +17,6 @@ export class DiceRoll {
       true_id: this.true_id,
       size: this.size,
       count: this.count,
-      // bonus: this.bonus,
     };
   }
 

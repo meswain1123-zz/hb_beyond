@@ -37,9 +37,6 @@ export interface State {
 }
 
 class DisplayObjects extends Component<Props, State> {
-  // public static defaultProps = {
-  //   choice_name: null
-  // };
   constructor(props: Props) {
     super(props);
     this.state = {
@@ -76,13 +73,6 @@ class DisplayObjects extends Component<Props, State> {
       const obj_finder = this.state.objects.filter(o => 
         this.props.ids.includes(o._id));
       const details = obj_finder.map(o => o.name).join(", ");
-      // let details = "";
-      // obj_finder.forEach(obj => {
-      //   if (details.length > 0) {
-      //     details += ", ";
-      //   }
-      //   details += obj.name;
-      // });
       return (
         <span>{ details }</span>
       );

@@ -1,9 +1,8 @@
 import React, { Component } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
-// import { RouteComponentProps } from 'react-router';
+
 import {
   Grid, 
-  // Button, Link, Tooltip
 } from "@material-ui/core";
 
 import { 
@@ -11,30 +10,9 @@ import {
   Language,
   Character,
   CharacterBackground,
-  // CharacterFeature,
-  // CharacterFeatureBase,
-  // CharacterFeatureChoice,
-  // FeatureBase,
-  // Feature,
-  // FeatureChoice,
-  // CharacterASIBaseFeature,
-  // CharacterASIFeature,
-  // CharacterLanguageFeature
 } from "../../../models";
-// import { 
-//   // DAMAGE_TYPES, 
-//   // DURATIONS,
-//   // COMPONENTS,
-//   // CASTING_TIMES,
-//   // RESOURCES,
-//   ABILITY_SCORES 
-// } from "../../../models/Constants";
 
-// import StringBox from "../../input/StringBox";
-// import SelectBox from "../../input/SelectBox";
-// import SelectStringBox from "../../input/SelectStringBox"; 
 import SelectBackgroundBox from "../select/SelectBackgroundBox";
-// import CharacterFeatureBaseInput from "./CharacterFeatureBase";
 import CharacterFeatureBasesInput from "./CharacterFeatureBases";
 
 import API from "../../../utilities/smart_api";
@@ -42,7 +20,6 @@ import { APIClass } from "../../../utilities/smart_api_class";
 
 
 interface AppState {
-  // templates: TemplateBase[]
   width: number;
 }
 
@@ -51,12 +28,10 @@ interface RootState {
 }
 
 const mapState = (state: RootState) => ({
-  // templates: state.app.templates
   width: state.app.width
 })
 
 const mapDispatch = {
-  // addTemplate: (obj: TemplateBase) => ({ type: 'ADD', dataType: 'templates', payload: obj })
 }
 
 const connector = connect(mapState, mapDispatch)
@@ -64,9 +39,7 @@ const connector = connect(mapState, mapDispatch)
 type PropsFromRedux = ConnectedProps<typeof connector>
 
 type Props = PropsFromRedux & {
-  // name: string;
   obj: Character;
-  // backgrounds: Background[] | null;
   onChange: (changed: CharacterBackground) => void;
 }
 
@@ -78,9 +51,6 @@ export interface State {
 }
 
 class CharacterBackgroundInput extends Component<Props, State> {
-  // public static defaultProps = {
-  //   value: null,
-  // };
   constructor(props: Props) {
     super(props);
     this.state = {

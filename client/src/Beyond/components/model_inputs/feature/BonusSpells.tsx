@@ -1,30 +1,20 @@
 import React, { Component } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
-// import { RouteComponentProps } from 'react-router';
+
 import {
   Grid, 
   Link
 } from "@material-ui/core";
-// import {
-//   DeleteForever
-// } from "@material-ui/icons";
 
 import { 
   Spell, 
-  // SpellList, 
   BonusSpells
 } from "../../../models";
 import { 
-  // DAMAGE_TYPES, 
-  // DURATIONS,
-  // COMPONENTS,
-  // CASTING_TIMES,
-  // RESOURCES,
   SCHOOLS 
 } from "../../../models/Constants";
 
 import StringBox from "../../input/StringBox";
-// import SelectBox from "../input/SelectBox";
 import SelectStringBox from "../../input/SelectStringBox";
 import CheckBox from "../../input/CheckBox";
 import ToggleButtonBox from "../../input/ToggleButtonBox";
@@ -36,7 +26,6 @@ import { APIClass } from "../../../utilities/smart_api_class";
 
 
 interface AppState {
-  // resources: Resource[] | null;
 }
 
 interface RootState {
@@ -44,11 +33,10 @@ interface RootState {
 }
 
 const mapState = (state: RootState) => ({
-  // resources: state.app.resources
 })
 
 const mapDispatch = {
-  // setAbilities: (objects: Ability[]) => ({ type: 'SET', dataType: 'abilities', payload: objects })
+  
 }
 
 const connector = connect(mapState, mapDispatch)
@@ -72,9 +60,6 @@ export interface State {
 }
 
 class BonusSpellsInput extends Component<Props, State> {
-  // public static defaultProps = {
-  //   choice_name: null
-  // };
   constructor(props: Props) {
     super(props);
     this.state = {
@@ -144,91 +129,6 @@ class BonusSpellsInput extends Component<Props, State> {
       );
     }
   }
-
-  // renderSpells() {
-  //   const page_size = 7;
-  //   const filtered: any[] = this.state.spells ? this.state.spells.filter(o => 
-  //     (this.state.level === "ALL" || this.state.level === `${o.level}`) && 
-  //     (this.state.school === "ALL" || this.state.school === `${o.school}`) && 
-  //     (this.state.start_letter === "" || o.name.toUpperCase().startsWith(this.state.start_letter)) && 
-  //     (this.state.search_string === "" || o.name.toLowerCase().includes(this.state.search_string.toLowerCase()) || o.description.toLowerCase().includes(this.state.search_string.toLowerCase()))).sort((a,b) => {return a.name.localeCompare(b.name)}) : [];
-  //   const page_count = Math.ceil(filtered.length / page_size);
-  //   const filtered_and_paged: any[] = filtered.slice(page_size * this.state.page_num, page_size * (this.state.page_num + 1));
-  //   return ( 
-  //     <Grid item container spacing={1} direction="column">
-  //       <Grid item container spacing={1} direction="row">
-  //         <Grid item xs={3}>
-  //           <span className={"MuiTypography-root MuiListItemText-primary header"}>
-  //             Spells
-  //           </span>
-  //         </Grid>
-  //         <Grid item xs={3}>
-  //           <StringBox
-  //             name="Search"
-  //             value={`${this.state.search_string}`}
-  //             onBlur={(search_string: string) => {
-  //               this.setState({ search_string });
-  //             }}
-  //           />
-  //         </Grid>
-  //         <Grid item xs={3}>
-  //           <SelectStringBox
-  //             name="Level"
-  //             options={["ALL","0","1","2","3","4","5","6","7","8","9"]}
-  //             value={this.state.level}
-  //             onChange={(level: string) => {
-  //               this.setState({ level });
-  //             }}
-  //           />
-  //         </Grid>
-  //         <Grid item xs={3}>
-  //           <SelectStringBox
-  //             name="School"
-  //             options={["ALL",...SCHOOLS]}
-  //             value={this.state.school}
-  //             onChange={(school: string) => {
-  //               this.setState({ school });
-  //             }}
-  //           />
-  //         </Grid>
-  //       </Grid>
-  //       <Grid item>
-  //         <Grid container spacing={1} direction="column">
-  //           { filtered_and_paged.map((o, key) => {
-  //             return (
-  //               <Grid key={key} item>
-  //                 <CheckBox 
-  //                   name={o.name}
-  //                   value={ this.props.obj.spell_ids.includes(o._id)}
-  //                   onChange={(value: boolean) => {
-  //                     if (this.state.spells) {
-  //                       const obj = this.props.obj;
-  //                       if (value) {
-  //                         if (!obj.spell_ids.includes(o._id)) {
-  //                           obj.spell_ids.push(o._id);
-  //                           this.props.onChange(obj);
-  //                         }
-  //                       } else {
-  //                         obj.spell_ids = obj.spell_ids.filter(s => s !== o._id);
-  //                         this.props.onChange(obj);
-  //                       }
-  //                     }
-  //                   }}
-  //                 />
-  //               </Grid>
-  //             );
-  //           }) }
-  //           <Grid item>
-  //             { this.renderPageLinks(page_count) }
-  //           </Grid>
-  //           <Grid item>
-  //             { this.renderLetterLinks() }
-  //           </Grid>
-  //         </Grid>
-  //       </Grid>
-  //     </Grid>
-  //   ); 
-  // }
 
   renderSpells() {
     const page_size = 7;

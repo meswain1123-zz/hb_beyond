@@ -3,34 +3,27 @@ import { connect, ConnectedProps } from 'react-redux';
 import { RouteComponentProps } from 'react-router';
 import { Redirect } from "react-router-dom";
 import {
-  // Add, Edit,
   ArrowBack
 } from "@material-ui/icons";
 import {
   Grid, 
-  // List, ListItem, 
   Button, 
   Tooltip, Fab,
-  // FormControl, InputLabel,
-  // OutlinedInput, FormHelperText
 } from "@material-ui/core";
-// import KeyboardArrowDownIcon from '@material-ui/icons/KeyboardArrowDown';
-// import KeyboardArrowRightIcon from '@material-ui/icons/KeyboardArrowRight';
+
 import {  
   MagicItemKeyword, 
-  // TemplateBase,
-  // MagicItemKeywordTemplate,
   FeatureBase
 } from "../../models";
 import StringBox from "../../components/input/StringBox";
-// import SelectBox from "../../components/input/SelectBox";
+
 import SelectStringBox from "../../components/input/SelectStringBox";
 import CheckBox from "../../components/input/CheckBox";
 import FeatureBasesInput from "../../components/model_inputs/feature/FeatureBases";
 import FeatureBaseInput from "../../components/model_inputs/feature/FeatureBase";
 import SelectArmorTypeBox from "../../components/model_inputs/select/SelectArmorTypeBox";
 import SelectBaseItemBox from "../../components/model_inputs/select/SelectBaseItemBox";
-// import TemplateBox from "../../components/model_inputs/TemplateBox";
+
 import { 
   ITEM_TYPES
 } from "../../models/Constants";
@@ -39,8 +32,6 @@ import { APIClass } from "../../utilities/smart_api_class";
 
 
 interface AppState {
-  // magic_item_keywords: MagicItemKeyword[] | null;
-  // skills: Skill[] | null;
   height: number;
   width: number;
 }
@@ -54,16 +45,11 @@ interface MatchParams {
 }
 
 const mapState = (state: RootState) => ({
-  // magic_item_keywords: state.app.magic_item_keywords,
-  // skillsMB: state.app.skills as ModelBase[],
-  // skills: state.app.skills,
   height: state.app.height,
   width: state.app.width
 })
 
 const mapDispatch = {
-  // setMagicItemKeywords: (objects: MagicItemKeyword[]) => ({ type: 'SET', dataType: 'magic_item_keywords', payload: objects }),
-  // addMagicItemKeyword: (object: MagicItemKeyword) => ({ type: 'ADD', dataType: 'magic_item_keywords', payload: object })
 }
 
 const connector = connect(mapState, mapDispatch)
@@ -78,7 +64,6 @@ export interface State {
   processing: boolean;
   expanded_feature_base: FeatureBase | null;
   child_names_valid: boolean;
-  // skills: Skill[] | null;
   magic_item_keywords: MagicItemKeyword[] | null;
   loading: boolean;
 }
@@ -92,7 +77,6 @@ class MagicItemKeywordEdit extends Component<Props, State> {
       processing: false,
       expanded_feature_base: null,
       child_names_valid: true,
-      // skills: null,
       magic_item_keywords: null,
       loading: false
     };
@@ -215,21 +199,6 @@ class MagicItemKeywordEdit extends Component<Props, State> {
                   </Fab>
                 </Tooltip> 
               </Grid>
-              {/* <Grid item xs={9}>
-                <TemplateBox
-                  obj={this.state.obj}
-                  type="MagicItemKeyword"
-                  useTemplate={(template: TemplateBase) => {
-                    const magic_item_keyword_template: MagicItemKeywordTemplate = template as MagicItemKeywordTemplate;
-                    const obj = this.state.obj;
-                    obj.copyTemplate(magic_item_keyword_template);
-                    // this.props.onChange(feature);
-                    this.setState({ obj, loading: true }, () => {
-                      this.setState({ loading: false });
-                    });
-                  }}
-                />
-              </Grid> */}
             </Grid>
             <Grid item>
               <span className={"MuiTypography-root MuiListItemText-primary header"}>
@@ -409,7 +378,6 @@ class MagicItemKeywordEdit extends Component<Props, State> {
               </Button>
               <Button
                 variant="contained"
-                // color="primary"
                 disabled={this.state.processing}
                 style={{ marginLeft: "4px" }}
                 onClick={ () => { 

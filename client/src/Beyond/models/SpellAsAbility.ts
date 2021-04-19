@@ -25,14 +25,6 @@ export class SpellAsAbility {
   _name: string;
   description: string;
   spell_id: string | null;
-  // saving_throw_ability_score: string | null; // SpellAsAbility Score saving throw the target(s) have to make
-  // effect: AbilityEffect; // Formula for how much damage/healing to do
-  // effect_2: AbilityEffect; // Some abilities have a second (like Ice Knife or Booming Blade or things that do different types of damage)
-  // range: string | null; // Self, Touch, or a number
-  // range_2: string | null; // For some there are multiple ranges.  It can be an AoE size, or sometimes something else.
-  // concentration: boolean;
-  // notes: string | null;
-  // duration: string;
   components_override: string[]; // VSM
   material_component_override: string;
   casting_time_override: string; // A, BA, RA, X minute(s), etc
@@ -55,14 +47,6 @@ export class SpellAsAbility {
     this._name = obj ? obj.name : "";
     this.description = obj ? obj.description : "";
     this.spell_id = obj ? obj.spell_id : "";
-    // this.saving_throw_ability_score = obj?.saving_throw_ability_score;
-    // this.effect = obj ? new AbilityEffect(obj.effect) : new AbilityEffect();
-    // this.effect_2 = obj ? new AbilityEffect(obj.effect_2) : new AbilityEffect();
-    // this.range = obj?.range;
-    // this.range_2 = obj?.range_2;
-    // this.concentration = obj ? obj.concentration : false;
-    // this.notes = obj?.notes;
-    // this.duration = obj ? obj.duration : "Instantaneous";
     this.components_override = obj ? [...obj.components_override] : [];
     this.material_component_override = obj ? obj.material_component_override : "";
     this.casting_time_override = obj ? obj.casting_time_override : "Normal";
@@ -115,14 +99,6 @@ export class SpellAsAbility {
       name: this._name,
       description: this.description,
       spell_id: this.spell_id,
-      // saving_throw_ability_score: this.saving_throw_ability_score,
-      // effect: this.effect.toDBObj(),
-      // effect_2: this.effect_2.toDBObj(),
-      // range: this.range,
-      // range_2: this.range_2,
-      // concentration: this.concentration,
-      // notes: this.notes,
-      // duration: this.duration,
       components_override: this.components_override,
       material_component_override: this.material_component_override,
       casting_time_override: this.casting_time_override,
@@ -145,14 +121,6 @@ export class SpellAsAbility {
     this.name = copyMe.name;
     this.description = copyMe.description;
     this.spell_id = copyMe.spell_id;
-    // this.saving_throw_ability_score = copyMe.saving_throw_ability_score;
-    // this.effect = copyMe.effect;
-    // this.effect_2 = copyMe.effect_2;
-    // this.range = copyMe.range;
-    // this.range_2 = copyMe.range_2;
-    // this.concentration = copyMe.concentration;
-    // this.notes = copyMe.notes;
-    // this.duration = copyMe.duration;
     this.components_override = [...copyMe.components_override];
     this.material_component_override = copyMe.material_component_override;
     this.casting_time_override = copyMe.casting_time_override;
@@ -169,14 +137,6 @@ export class SpellAsAbility {
     this.name = copyMe.name;
     this.description = copyMe.description;
     this.spell_id = copyMe.spell_id;
-    // this.saving_throw_ability_score = copyMe.saving_throw_ability_score;
-    // this.effect = copyMe.effect;
-    // this.effect_2 = copyMe.effect_2;
-    // this.range = copyMe.range;
-    // this.range_2 = copyMe.range_2;
-    // this.concentration = copyMe.concentration;
-    // this.notes = copyMe.notes;
-    // this.duration = copyMe.duration;
     this.components_override = [...copyMe.components_override];
     this.material_component_override = copyMe.material_component_override;
     this.casting_time_override = copyMe.casting_time_override;

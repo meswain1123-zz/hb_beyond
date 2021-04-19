@@ -38,7 +38,6 @@ import d8 from "../assets/img/dice/d8_white.png";
 import d10 from "../assets/img/dice/d10_white.png";
 import d12 from "../assets/img/dice/d12_white.png";
 import d100 from "../assets/img/dice/d100.png";
-// import nat1 from "../assets/img/dice/nat1.png";
 import nat20 from "../assets/img/dice/d20_white.png";
 
 // "Damage" Types

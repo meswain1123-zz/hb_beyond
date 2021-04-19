@@ -38,8 +38,6 @@ import { APIClass } from "../../../utilities/smart_api_class";
 
 
 interface AppState {
-  // height: number;
-  // width: number;
 }
 
 interface RootState {
@@ -48,8 +46,6 @@ interface RootState {
 
 
 const mapState = (state: RootState) => ({
-  // height: state.app.height,
-  // width: state.app.width
 })
 
 const mapDispatch = {
@@ -635,7 +631,6 @@ class SummonStatBlockInput extends Component<Props, State> {
         </Grid>
       ); 
     }
-    // return null;
   }
 
   render_attributes() {

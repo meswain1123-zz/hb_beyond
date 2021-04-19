@@ -153,11 +153,4 @@ export class CharacterItem {
       }
     });
   }
-
-  // applyMagicItemKeyword(copyMe: MagicItemKeyword) {
-  //   this.magic = true;
-  //   this.magic_item_keyword_ids.push(copyMe._id);
-  //   this.magic_item_keywords.push(copyMe);
-
-  // }
 }

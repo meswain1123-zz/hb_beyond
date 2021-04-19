@@ -58,7 +58,6 @@ class NavBar extends Component<Props, State> {
   api: APIClass;
 
   componentDidMount() {
-    // this.props.loadFromStorage();
   }
 
   render() {

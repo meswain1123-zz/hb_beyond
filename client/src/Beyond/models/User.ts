@@ -1,8 +1,5 @@
 
 import { ModelBase } from "./ModelBase";
-// import { PlayToken } from "./PlayToken";
-// import { Mask } from "./Mask";
-// import { Campaign } from "./Campaign";
 
 export class User extends ModelBase {
   email: string;

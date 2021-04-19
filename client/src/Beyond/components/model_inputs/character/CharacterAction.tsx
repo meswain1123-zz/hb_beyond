@@ -1,8 +1,5 @@
 import React, { Component } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
-// import {
-//   Clear, 
-// } from "@material-ui/icons";
 import {
   Grid, 
   Drawer,
@@ -260,36 +257,8 @@ class CharacterAction extends Component<Props, State> {
           <Grid item xs={2}>
           </Grid>
           <Grid item xs={1}>
-            {/* { spell.use_spell_attack ?
-              <ButtonBox
-                name={ spell.attack_string }
-                onClick={(event: React.MouseEvent<HTMLDivElement>) => {
-                  this.setState({ popoverAction: spell, popoverActionLevel: level, popoverMode: "Attack" })
-                  this.setPopoverAnchorEl(event.currentTarget);
-                }} 
-              />
-            :
-              <span>
-                { spell.attack_string }
-              </span> 
-            } */}
           </Grid>
           <Grid item xs={1}>
-            {/* { !["Control","Utility"].includes(spell.effect_string) ?
-              <ButtonBox
-                fontSize={9}
-                name={ spell.get_potence_string(level, this.props.obj) }
-                image={ spell.effect_string }
-                onClick={(event: React.MouseEvent<HTMLDivElement>) => {
-                  this.setState({ popoverAction: spell, popoverActionLevel: level, popoverMode: "Damage" })
-                  this.setPopoverAnchorEl(event.currentTarget);
-                }} 
-              />
-            :
-              <span>
-                { spell.effect_string }
-              </span> 
-            } */}
           </Grid>
           { this.renderExtras() }
         </Grid>
@@ -331,7 +300,6 @@ class CharacterAction extends Component<Props, State> {
         }
       </Drawer>,
       <Popover key="cast_options"
-        // id={id}
         open={ this.state.popoverAnchorEl !== null && this.state.popoverMode === "Cast" }
         anchorEl={this.state.popoverAnchorEl}
         onClose={() => {
@@ -349,7 +317,6 @@ class CharacterAction extends Component<Props, State> {
         { this.renderCastOptions() }
       </Popover>,
       <Popover key="rolls"
-        // id={id}
         open={ this.state.popoverAnchorEl !== null && this.state.popoverMode !== "Cast" }
         anchorEl={this.state.popoverAnchorEl}
         onClose={() => {
@@ -786,7 +753,6 @@ class CharacterAction extends Component<Props, State> {
           let damage_rolls: RollPlus[] = [];
           if (potence) {
             const roll_plus = new RollPlus(potence.rolls);
-            // roll_plus.ability_score = spell.spellcasting_ability
             damage_rolls.push(roll_plus);
           }
           damage_rolls = [...damage_rolls,...spell.attack.damage_rolls];

@@ -1,17 +1,8 @@
 
 import { Feature } from "./Feature";
 // None of these have options or special resources
-// import { CharacterModifier } from "./CharacterModifier";
-// import { CharacterSpellModifier } from "./CharacterSpellModifier";
-// import { CharacterProficiency } from "./CharacterProficiency";
-// import { CharacterBonusSpells } from "./CharacterBonusSpells";
-// import { CharacterResourceFeature } from "./CharacterResourceFeature";
-// import { CharacterAdvantage } from "./CharacterAdvantage";
-// import { CharacterDamageMultiplier } from "./CharacterDamageMultiplier";
 // These may have special resources
 import { Proficiency } from "./Proficiency";
-// import { SpellAsAbility } from "./SpellAsAbility";
-// import { ItemAffectingAbility } from "./ItemAffectingAbility";
 // These may have options
 import { ASIBaseFeature } from "./ASIBaseFeature";
 import { CharacterASIBaseFeature } from "./CharacterASIBaseFeature";
@@ -27,11 +18,6 @@ import { PactBoon } from "./PactBoon";
 import { SpecialFeature } from "./SpecialFeature";
 import { SpellcastingFeature } from "./SpellcastingFeature";
 import { CharacterSpellcasting } from "./CharacterSpellcasting";
-// import { SpellBook } from "./SpellBook";
-// import {
-//   CharacterSense
-// } from ".";
-
 
 /**
  * This represents a feature 
@@ -131,7 +117,6 @@ export class CharacterFeature {
           feature_options.push((this.feature_options[0] as CharacterSpecialFeature).toDBObj());
         break;
         case "Sense":
-          // feature_options.push((this.feature_options[0] as CharacterSense).toDBObj());
         break;
         case "Skill Proficiency Choices": // It's the ids of the specific skills they choose
           for (let i = 0; i < this.feature_options.length; i++) {
@@ -168,7 +153,6 @@ export class CharacterFeature {
       special_resource: this.special_resource,
       special_resource_max: this.special_resource_max,
       feature_options,
-      // the_feature
     };
   }
 
@@ -199,7 +183,6 @@ export class CharacterFeature {
         this.feature_options.push(new CharacterSpecialFeature());
       }
     } else if (copyMe.feature_type === "Sense") {
-      // this.feature_options.push(new CharacterSense());
     } else if (copyMe.feature_type === "Skill Proficiency Choices") {
       const prof = copyMe.the_feature as Proficiency;
       for (let i = 0; i < prof.choice_count; i++) {
@@ -251,40 +234,5 @@ export class CharacterFeature {
         opt.connectFeature(this);
       }
     }
-    // switch(copyMe.feature_type) {
-    //   case "Language":
-    //     // No need to connect
-    //     // const language_feature = copyMe.the_feature as LanguageFeature;
-    //     // const char_language_feature = this.feature_options[0] as CharacterLanguageFeature;
-    //     // char_language_feature.connectLanguageFeature(language_feature);
-    //   break;
-    //   case "Ability Score Improvement":
-    //     // No need to connect
-    //     // const asi = copyMe.the_feature as ASIBaseFeature;
-    //     // const char_asi = this.feature_options[0] as CharacterASIBaseFeature;
-    //     // char_asi.connectASIBaseFeature(asi);
-    //   break;
-    //   case "Special Feature":
-    //     // It's a string of the id, so no need to connect
-    //   break;
-    //   case "Skill Proficiency Choices": // It's the ids of the specific skills they choose
-    //     // It's a generic object, so no need to connect
-    //     // const prof = copyMe.the_feature as Proficiency;
-    //     // for (let i = 0; i < prof.choice_count; i++) {
-    //     //   this.feature_options.push({ id: i, skill_id: "" });
-    //     // }
-    //   break;
-    //   case "Expertise": // It's the ids of the specific skills they choose
-    //     // It's a generic object, so no need to connect
-    //     // const expertises = copyMe.the_feature as number;
-    //     // for (let i = 0; i < expertises; i++) {
-    //     //   this.feature_options.push({ id: i, skill_id: "" });
-    //     // }
-    //   break;
-    //   case "Feat": // It's the id of the specific feat they choose
-    //     // No need to connect?
-    //     // this.feature_options.push(new CharacterFeat());
-    //   break;
-    // }
   }
 }

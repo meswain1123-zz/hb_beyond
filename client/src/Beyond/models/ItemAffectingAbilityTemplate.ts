@@ -1,7 +1,5 @@
 
 import { TemplateBase } from "./TemplateBase";
-// import { Skill } from "./Skill";
-// import { AbilityEffect } from "./AbilityEffect";
 import { ItemAffectingAbility } from "./ItemAffectingAbility";
 
 

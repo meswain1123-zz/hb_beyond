@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
-// import { RouteComponentProps } from 'react-router';
+
 import {
   Grid, Button, Link, Tooltip
 } from "@material-ui/core";
@@ -9,36 +9,19 @@ import {
 } from "@material-ui/icons";
 
 import { 
-  // ArmorType,
   Race, 
   Subrace,
-  // Language,
   Character,
   CharacterClass,
-  // CharacterRace,
   CharacterFeature,
   CharacterFeatureBase,
   GameClass,
   Subclass,
-  // CharacterFeatureChoice,
   FeatureBase,
   Feature,
-  // FeatureChoice,
-  // CharacterASIBaseFeature,
-  // CharacterASIFeature,
-  // CharacterLanguageFeature
 } from "../../../models";
-// import { 
-//   // DAMAGE_TYPES, 
-//   // DURATIONS,
-//   // COMPONENTS,
-//   // CASTING_TIMES,
-//   // RESOURCES,
-//   ABILITY_SCORES 
-// } from "../../../models/Constants";
 
 import StringBox from "../../input/StringBox";
-// import SelectBox from "../../input/SelectBox";
 import SelectStringBox from "../../input/SelectStringBox"; 
 import CharacterFeatureBasesInput from "./CharacterFeatureBases";
 
@@ -47,7 +30,6 @@ import { APIClass } from "../../../utilities/smart_api_class";
 
 
 interface AppState {
-  // templates: TemplateBase[]
   width: number;
 }
 
@@ -56,12 +38,10 @@ interface RootState {
 }
 
 const mapState = (state: RootState) => ({
-  // templates: state.app.templates
   width: state.app.width
 })
 
 const mapDispatch = {
-  // addTemplate: (obj: TemplateBase) => ({ type: 'ADD', dataType: 'templates', payload: obj })
 }
 
 const connector = connect(mapState, mapDispatch)
@@ -69,9 +49,7 @@ const connector = connect(mapState, mapDispatch)
 type PropsFromRedux = ConnectedProps<typeof connector>
 
 type Props = PropsFromRedux & {
-  // name: string;
   obj: Character;
-  // races: Race[] | null;
   onChange: (changed: Character) => void;
 }
 
@@ -80,8 +58,6 @@ export interface State {
   subclasses: Subclass[] | null;
   races: Race[] | null;
   subraces: Subrace[] | null;
-  // armor_types: ArmorType[] | null;
-  // languages: Language[] | null;
   search_string: string;
   page_num: number;
   start_letter: string;
@@ -92,9 +68,6 @@ export interface State {
 }
 
 class CharacterClassInput extends Component<Props, State> {
-  // public static defaultProps = {
-  //   value: null,
-  // };
   constructor(props: Props) {
     super(props);
     this.state = {
@@ -102,8 +75,6 @@ class CharacterClassInput extends Component<Props, State> {
       subclasses: null,
       races: null,
       subraces: null,
-      // armor_types: null,
-      // languages: null,
       search_string: "",
       page_num: 0,
       start_letter: "",
@@ -158,8 +129,6 @@ class CharacterClassInput extends Component<Props, State> {
           expanded_class_id: (obj.classes.length === 1 ? obj.classes[0].game_class_id : ""),
           game_classes, 
           subclasses,
-          // armor_types: res.armor_type,
-          // languages: res.language,
           loading: false 
         });
       });
@@ -291,9 +260,6 @@ class CharacterClassInput extends Component<Props, State> {
                         }
                         char_class.level = level;
                         const obj = this.props.obj;
-                        // if (this.state.armor_types) {
-                        //   obj.recalcAll(this.state.armor_types);
-                        // }
                         this.props.onChange(obj);
                       }}
                     />
@@ -494,9 +460,6 @@ class CharacterClassInput extends Component<Props, State> {
                 char_class.level = 1;
                 obj.classes.push(char_class);
                 
-                // if (this.state.armor_types) {
-                //   obj.recalcAll(this.state.armor_types);
-                // }
                 this.props.onChange(obj);
                 this.setState({ new_class: false, expanded_class_id: game_class._id });
               }}>
@@ -521,9 +484,6 @@ class CharacterClassInput extends Component<Props, State> {
                   char_class.level = 1;
                   obj.classes.push(char_class);
                   
-                  // if (this.state.armor_types) {
-                  //   obj.recalcAll(this.state.armor_types);
-                  // }
                   this.props.onChange(obj);
                   this.setState({ new_class: false, expanded_class_id: game_class._id });
                 }}>

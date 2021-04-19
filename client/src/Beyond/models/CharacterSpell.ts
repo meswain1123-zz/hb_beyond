@@ -4,7 +4,6 @@ import {
   Spell, 
   SpellAsAbility, 
   Character,
-  // Creature,
   CharacterClass, 
   CharacterFeat, 
   CharacterItem, 
@@ -67,7 +66,6 @@ export class CharacterSpell {
     this.attack_string = "";
     this.damage_string = "";
     this.recalc_attack_string(null);
-    // this.recalc_damage_string(null);
   }
 
   get the_spell(): Spell | null {
@@ -202,39 +200,6 @@ export class CharacterSpell {
       this.attack_string = "--";
     }
   }
-
-  // recalc_damage_string(ability_scores: AbilityScores | null): void {
-  //   if (this.the_spell && !["Control","Utility"].includes(this.effect_string)) {
-  //     let damage_string = "";
-  //     let damage_bonus = 0;
-  //     this.attack.damage_rolls.forEach(roll_plus => {
-  //       damage_bonus += roll_plus.flat;
-  //       if (ability_scores && !["","None","undefined"].includes(roll_plus.ability_score)) {
-  //         const mod = ability_scores.getModifier(roll_plus.ability_score);
-  //         if (mod) {
-  //           damage_bonus += mod;
-  //         }
-  //       }
-  //       if (roll_plus.size === 1) {
-  //         damage_bonus += roll_plus.count;
-  //       } else {
-  //         if (roll_plus.count > 0) {
-  //           damage_string += `+${roll_plus.count}d${roll_plus.size}`;
-  //         } else {
-  //           damage_string += `${roll_plus.count}d${roll_plus.size}`;
-  //         }
-  //       }
-  //     });
-  //     if (damage_bonus > 0) {
-  //       damage_string += `+${damage_bonus}`;
-  //     } else if (damage_bonus < 0) {
-  //       damage_string += `${damage_bonus}`;
-  //     }
-  //     this.damage_string = damage_string;
-  //   } else {
-  //     this.damage_string = this.effect_string;
-  //   }
-  // }
 
   get range_string(): string {
     let range_string = "--";
@@ -373,8 +338,6 @@ export class CharacterSpell {
           } else {
             potence.rolls.ability_score = "";
           }
-          // console.log(this.the_spell.effect.add_modifier);
-          // console.log(potence);
           return potence;
         }
       }

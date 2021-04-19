@@ -7,7 +7,6 @@ import {
 
 import { 
   Character,
-  // Creature
 } from "../../../models";
 
 import DisplayObjects from '../display/DisplayObjects';
@@ -47,9 +46,6 @@ export interface State {
 }
 
 class CharacterProficiencies extends Component<Props, State> {
-  // public static defaultProps = {
-  //   value: null,
-  // };
   constructor(props: Props) {
     super(props);
     this.state = {

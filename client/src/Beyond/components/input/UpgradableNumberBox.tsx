@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
-// import { RouteComponentProps } from 'react-router';
+
 import {
   ArrowBack
 } from "@material-ui/icons";
@@ -17,19 +17,19 @@ import {
 import StringBox from "./StringBox";
 
 interface AppState {
-  // abilities: Ability[] | null;
+  
 }
 
 interface RootState {
-  // app: AppState
+  
 }
 
 const mapState = (state: RootState) => ({
-  // abilities: state.app.abilities
+  
 })
 
 const mapDispatch = {
-  // setAbilities: (objects: Ability[]) => ({ type: 'SET', dataType: 'abilities', payload: objects })
+  
 }
 
 const connector = connect(mapState, mapDispatch)
@@ -46,8 +46,6 @@ type Props = PropsFromRedux & {
 }
 
 export interface State { 
-  // value: string;
-  // values: string[];
   labelWidth: number;
   editing: string;
 }

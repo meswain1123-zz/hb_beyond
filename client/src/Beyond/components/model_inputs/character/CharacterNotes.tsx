@@ -2,14 +2,12 @@ import React, { Component } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
 import {
   Grid, 
-  // Drawer,
 } from "@material-ui/core";
 
 import { 
   Character,
 } from "../../../models";
 
-// import DisplayObjects from '../display/DisplayObjects';
 import StringBox from '../../input/StringBox';
 import ToggleButtonBox from '../../input/ToggleButtonBox';
 
@@ -49,9 +47,6 @@ export interface State {
 }
 
 class CharacterNotes extends Component<Props, State> {
-  // public static defaultProps = {
-  //   value: null,
-  // };
   constructor(props: Props) {
     super(props);
     this.state = {

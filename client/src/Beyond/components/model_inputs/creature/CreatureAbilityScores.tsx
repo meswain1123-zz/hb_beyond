@@ -1,11 +1,7 @@
 import React, { Component } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
-// import {
-//   Clear, 
-// } from "@material-ui/icons";
 import {
   Grid, 
-  // Drawer,
   Popover,
 } from "@material-ui/core";
 
@@ -14,7 +10,6 @@ import {
   RollPlus
 } from "../../../models";
 
-// import StringBox from "../../input/StringBox";
 import ButtonBox from "../../input/ButtonBox";
 
 import Roller from "../Roller";
@@ -51,19 +46,14 @@ type Props = PropsFromRedux & {
 }
 
 export interface State {
-  // drawer: string;
   popoverAnchorEl: HTMLDivElement | null;
   popoverAbility: string;
 }
 
 class CreatureInstanceAbilityScores extends Component<Props, State> {
-  // public static defaultProps = {
-  //   value: null,
-  // };
   constructor(props: Props) {
     super(props);
     this.state = {
-      // drawer: "",
       popoverAnchorEl: null,
       popoverAbility: ""
     };
@@ -119,7 +109,6 @@ class CreatureInstanceAbilityScores extends Component<Props, State> {
                   textAlign: "center",
                   cursor: "pointer"
                 }} onClick={() => {
-                  // this.setState({ drawer: ability });
                 }}>
                   { ability }
                 </div>
@@ -149,7 +138,6 @@ class CreatureInstanceAbilityScores extends Component<Props, State> {
                   textAlign: "center",
                   cursor: "pointer"
                 }} onClick={() => {
-                  // this.setState({ drawer: ability });
                 }}>
                   { score }
                 </div>
@@ -164,15 +152,7 @@ class CreatureInstanceAbilityScores extends Component<Props, State> {
 
   renderExtras() {
     return [
-      // <Drawer key="drawer" anchor="right" 
-      //   open={ this.state.drawer !== "" } 
-      //   onClose={() => {
-      //     this.setState({ drawer: "" });
-      //   }}>
-      //   { this.renderDetails() }
-      // </Drawer>,
       <Popover key="rolls"
-        // id={id}
         open={ this.state.popoverAnchorEl !== null && this.state.popoverAbility !== "" }
         anchorEl={this.state.popoverAnchorEl}
         onClose={() => {
@@ -196,17 +176,7 @@ class CreatureInstanceAbilityScores extends Component<Props, State> {
     const rolls: RollPlus[] = [];
     const roll_plus = new RollPlus();
     roll_plus.ability_score = this.state.popoverAbility;
-    // if (this.props.obj.saving_throw_proficiencies.includes(this.state.popoverSave)) {
-    //   roll_plus.flat = this.props.obj.proficiency_modifier;
-    // }
     rolls.push(roll_plus);
-    // if (this.props.obj instanceof CreatureInstance) {
-    //   this.props.obj.check_bonuses.forEach(bonus => {
-    //     if (bonus.types.includes(this.state.popoverAbility)) {
-    //       rolls.push(bonus.rolls);
-    //     }
-    //   });
-    // }
     return (
       <Roller 
         name={this.state.popoverAbility}

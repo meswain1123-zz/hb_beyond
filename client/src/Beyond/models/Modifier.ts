@@ -1,8 +1,4 @@
 
-// import { Map } from "./Subclass";
-// import { PlayToken } from "./Ability";
-// import { Mask } from "./Mask";
-
 /**
  * This is supposed to represent a modification to something as part
  * of a Feature.  It modifies the thing in the modifies property,

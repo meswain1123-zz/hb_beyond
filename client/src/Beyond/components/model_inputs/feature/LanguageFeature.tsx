@@ -1,32 +1,15 @@
 import React, { Component } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
-// import { RouteComponentProps } from 'react-router';
+
 import {
   Grid, 
-  // Link
 } from "@material-ui/core";
-// import {
-//   DeleteForever
-// } from "@material-ui/icons";
 
 import { 
-  // Spell, 
-  // SpellList, 
   LanguageFeature
 } from "../../../models";
-// import { 
-//   // DAMAGE_TYPES, 
-//   // DURATIONS,
-//   // COMPONENTS,
-//   // CASTING_TIMES,
-//   // RESOURCES,
-//   SCHOOLS 
-// } from "../../../models/Constants";
 
-// import StringBox from "../input/StringBox";
-// import SelectBox from "../input/SelectBox";
 import SelectStringBox from "../../input/SelectStringBox";
-// import CheckBox from "../input/CheckBox";
 import SelectLanguageBox from "../select/SelectLanguageBox";
 
 import API from "../../../utilities/smart_api";
@@ -34,7 +17,6 @@ import { APIClass } from "../../../utilities/smart_api_class";
 
 
 interface AppState {
-  // resources: Resource[] | null;
 }
 
 interface RootState {
@@ -42,11 +24,9 @@ interface RootState {
 }
 
 const mapState = (state: RootState) => ({
-  // resources: state.app.resources
 })
 
-const mapDispatch = {
-  // setAbilities: (objects: Ability[]) => ({ type: 'SET', dataType: 'abilities', payload: objects })
+const mapDispatch = {  
 }
 
 const connector = connect(mapState, mapDispatch)
@@ -62,9 +42,6 @@ export interface State {
 }
 
 class LanguageInput extends Component<Props, State> {
-  // public static defaultProps = {
-  //   choice_name: null
-  // };
   constructor(props: Props) {
     super(props);
     this.state = {

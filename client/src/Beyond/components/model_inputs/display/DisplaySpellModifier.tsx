@@ -10,8 +10,6 @@ import {
   SpellModifier
 } from "../../../models";
 
-// import CheckBox from "../../input/CheckBox";
-
 import API from "../../../utilities/smart_api";
 import { APIClass } from "../../../utilities/smart_api_class";
 
@@ -35,24 +33,18 @@ type PropsFromRedux = ConnectedProps<typeof connector>
 
 type Props = PropsFromRedux & {
   modifier: SpellModifier;
-  // onChange: () => void;
 }
 
 export interface State { 
   loading: boolean;
-  // reloading: boolean;
   spells: Spell[] | null;
 }
 
 class DisplaySpellModifier extends Component<Props, State> {
-  // public static defaultProps = {
-  //   choice_name: null
-  // };
   constructor(props: Props) {
     super(props);
     this.state = {
       loading: false,
-      // reloading: false,
       spells: null
     };
     this.api = API.getInstance();

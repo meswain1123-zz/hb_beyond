@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
-// import { RouteComponentProps } from 'react-router';
+
 import {
   Grid,
   Tooltip,
@@ -17,7 +17,6 @@ import {
 } from "../../../models";
 
 import StringBox from "../../input/StringBox";
-// import SelectBox from "../input/SelectBox";
 import SelectStringBox from "../../input/SelectStringBox"; 
 import ToggleButtonBox from "../../input/ToggleButtonBox"; 
 
@@ -34,7 +33,6 @@ import { APIClass } from "../../../utilities/smart_api_class";
 
 
 interface AppState {
-  // templates: TemplateBase[]
 }
 
 interface RootState {
@@ -42,11 +40,9 @@ interface RootState {
 }
 
 const mapState = (state: RootState) => ({
-  // templates: state.app.templates
 })
 
 const mapDispatch = {
-  // addTemplate: (obj: TemplateBase) => ({ type: 'ADD', dataType: 'templates', payload: obj })
 }
 
 const connector = connect(mapState, mapDispatch)
@@ -61,15 +57,10 @@ type Props = PropsFromRedux & {
 }
 
 export interface State { 
-  // loading: boolean;
-  // type: string;
   expanded_option: string;
 }
 
 class AbilityPotenceCreaturesInput extends Component<Props, State> {
-  // public static defaultProps = {
-  //   choice_name: null
-  // };
   constructor(props: Props) {
     super(props);
     this.state = {
@@ -324,37 +315,6 @@ class AbilityPotenceCreaturesInput extends Component<Props, State> {
                       this.props.onChange(obj);
                     }}
                   />
-                  {/* name: string;
-                  description: string;
-                  connected: boolean;
-                  image_url: string;
-                  // home
-                  challenge_rating: UpgradableNumber;
-                  creature_type: string; // Beast, Dragon, Humanoid, etc.
-                  subtype: string; // Drow, Bronze, etc.
-                  hit_dice_size: UpgradableNumber;
-                  hit_dice_count: UpgradableNumber;
-                  max_hit_points: UpgradableNumber;
-                  initiative_modifier: UpgradableNumber;
-                  armor_class: UpgradableNumber;
-                  size: string;
-                  alignment: string;
-                  // attributes
-                  speed: IStringNumHash;
-                  senses: CharacterSense[];
-                  passives: IStringNumHash;
-                  condition_immunities: string[];
-                  damage_multipliers: DamageMultiplier[];
-                  tool_proficiencies: IStringNumHash;
-                  skill_proficiencies: IStringNumHash;
-                  saving_throws: IStringNumHash;
-                  languages: string;
-                  
-                  ability_scores: AbilityScores;
-
-                  actions: Feature[];
-                  legendary_actions: Feature[];
-                  special_abilities: Feature[]; */}
                 </Grid>
               }
             </Grid>

@@ -1,8 +1,5 @@
 import React, { Component } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
-// import {
-//   Clear, 
-// } from "@material-ui/icons";
 import {
   Grid, 
 } from "@material-ui/core";
@@ -68,9 +65,6 @@ export interface State {
 }
 
 class CharacterActions extends Component<Props, State> {
-  // public static defaultProps = {
-  //   value: null,
-  // };
   constructor(props: Props) {
     super(props);
     this.state = {
@@ -278,9 +272,6 @@ class CharacterActions extends Component<Props, State> {
                   group={group2}
                   onChange={() => {
                     this.props.onChange();
-                    // this.setState({ reloading: true }, () => {
-                    //   this.setState({ reloading: false });
-                    // });
                   }}
                 />
               );

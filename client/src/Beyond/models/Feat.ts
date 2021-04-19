@@ -1,5 +1,4 @@
 
-// import { Map } from "./Subclass";
 import { ModelBase } from "./ModelBase";
 import { FeatureBase } from "./FeatureBase";
 

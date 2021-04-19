@@ -1,7 +1,6 @@
 
 import { SpecialFeature } from "./SpecialFeature";
 import { CharacterFeature } from "./CharacterFeature";
-// import { Mask } from "./Mask";
 
 export class CharacterSpecialFeature {
   id: number;

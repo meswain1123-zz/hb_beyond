@@ -1,6 +1,5 @@
 
 import { ModelBase } from "./ModelBase";
-// import { Ability } from "./Ability";
 
 /**
  * 
@@ -11,26 +10,10 @@ export class SpellList extends ModelBase {
   constructor(obj?: any) {
     super(obj);
     this.data_type = "spell_list";
-    // if (obj && obj.spells && obj.spells.length > 0) {
-    //   if (obj.spells[0] instanceof Ability) {
-    //     this.spells = obj ? [...obj.spells] : [];
-    //   } else {
-    //     this.spells = [];
-    //     obj.spells.forEach((o: any) => {
-    //       this.spells.push(new Ability(o));
-    //     });
-    //   }
-    // } else {
-    //   this.spells = [];
-    // }
     this.spell_ids = obj ? [...obj.spell_ids] : [];
   }
 
   toDBObj = () => {
-    // const spell_ids: any[] = [];
-    // this.spells.forEach(o => {
-    //   spell_ids.push(o._id);
-    // });
     return {
       _id: this._id,
       name: this.name,

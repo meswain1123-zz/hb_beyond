@@ -1,36 +1,23 @@
 import React, { Component } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
-// import { RouteComponentProps } from 'react-router';
+
 import {
   Grid, 
-  // Fab, Tooltip, 
-  // Button
 } from "@material-ui/core";
-// import {
-//   DeleteForever
-// } from "@material-ui/icons";
 
 import { 
-  // Ability,
-  // AbilityEffect,
-  // AbilityTemplate,
   TemplateBase,
-  // Spell,
   ItemAffectingAbility,
   ItemAffectingAbilityTemplate
 } from "../../../models";
 import { 
   ITEM_TYPES,
-  // RESOURCES,
   REFRESH_RULES
 } from "../../../models/Constants";
 
 import StringBox from "../../input/StringBox";
-// import SelectBox from "../input/SelectBox";
 import SelectStringBox from "../../input/SelectStringBox";
-// import CheckBox from "../input/CheckBox";
 import TemplateBox from "../TemplateBox";
-// import SelectSpellBox from "./SelectSpellBox";
 import SelectWeaponKeywordBox from "../select/SelectWeaponKeywordBox";
 import SelectArmorTypeBox from "../select/SelectArmorTypeBox";
 import SelectResourceBox from "../select/SelectResourceBox";
@@ -57,28 +44,20 @@ const connector = connect(mapState, mapDispatch)
 type PropsFromRedux = ConnectedProps<typeof connector>
 
 type Props = PropsFromRedux & {
-  // choice_name: string | null;
   obj: ItemAffectingAbility;
   onChange: (changed: ItemAffectingAbility) => void; 
 }
 
 export interface State { 
-  // obj: ItemAffectingAbility;
-  // loading: boolean;
   reloading: boolean;
   show_effect: number;
   special_refresh_rule: boolean;
 }
 
 class ItemAffectingAbilityInput extends Component<Props, State> {
-  // public static defaultProps = {
-  //   choice_name: null
-  // };
   constructor(props: Props) {
     super(props);
     this.state = {
-      // obj: new ItemAffectingAbility(),
-      // loading: false,
       reloading: false,
       show_effect: 0,
       special_refresh_rule: false
@@ -109,9 +88,6 @@ class ItemAffectingAbilityInput extends Component<Props, State> {
                 const obj = this.props.obj;
                 obj.copyTemplate(ability_template);
                 this.props.onChange(obj);
-                // this.setState({ obj, reloading: true }, () => {
-                //   this.setState({ reloading: false });
-                // });
               }}
             />
           </Grid>
@@ -193,7 +169,6 @@ class ItemAffectingAbilityInput extends Component<Props, State> {
                   obj.special_resource_refresh_rule = "Long Rest";
                 }
                 this.props.onChange(obj);
-                // this.props.onChange(obj);
               }}
             /> 
           </Grid>
@@ -207,7 +182,6 @@ class ItemAffectingAbilityInput extends Component<Props, State> {
                   const obj = this.props.obj;
                   obj.amount_consumed = value;
                   this.props.onChange(obj);
-                  // this.props.onChange(obj);
                 }}
               />
             </Grid>
@@ -221,7 +195,6 @@ class ItemAffectingAbilityInput extends Component<Props, State> {
                   const obj = this.props.obj;
                   obj.special_resource_amount = value;
                   this.props.onChange(obj);
-                  // this.props.onChange(obj);
                 }}
               />
             </Grid>

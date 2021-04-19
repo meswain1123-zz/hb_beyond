@@ -20,9 +20,7 @@ export class Attack {
     this.bonus_action = obj ? obj.bonus_action : false;
     this.type = obj ? obj.type : "";
     this.attack_rolls = [];
-    // obj ? new RollPlus(obj.attack_rolls) : new RollPlus();
     this.damage_rolls = []; 
-    // obj ? new RollPlus(obj.damage_rolls) : new RollPlus();
     this.attack_string = "";
     this.damage_string = "";
     this.data_util = DataUtilities.getInstance();

@@ -1,8 +1,5 @@
 import React, { Component } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
-// import {
-//   FontDownload
-// } from "@material-ui/icons";
 import {
   Grid, 
 } from "@material-ui/core";
@@ -11,16 +8,13 @@ import {
   CritSuccess, 
   D20,
   D4, D6, D8, 
-  D10, // D100,
+  D10,
   D12
 } from "../../models/Images";
 
 import { 
   Character,
   CreatureInstance,
-  // BaseItem,
-  // MagicItem,
-  // Attack,
   RollPlus
 } from "../../models";
 
@@ -51,7 +45,6 @@ type PropsFromRedux = ConnectedProps<typeof connector>
 
 type Props = PropsFromRedux & {
   rolls: RollPlus[];
-  // modifier: number;
   char: Character | CreatureInstance | null; // I may make this optional in the future.
   name: string;
   type: string;
@@ -63,14 +56,10 @@ export interface State {
 class Roller extends Component<Props, State> {
   public static defaultProps = {
     char: null
-    // modifier: 0
   };
   constructor(props: Props) {
     super(props);
     this.state = {
-      // drawer: "",
-      // popoverAnchorEl: null,
-      // popoverAbility: ""
     };
     this.data_util = DataUtilities.getInstance();
   }
@@ -79,21 +68,6 @@ class Roller extends Component<Props, State> {
 
   componentDidMount() {
   }
-
-  // get_detail(item: BaseItem) {
-  //   let detail = "";
-  //   if (item.item_type === "Armor") {
-  //     detail = item.armor_type_name;
-  //   } else if (item.item_type === "Weapon") {
-  //     item.weapon_keyword_names.forEach(wk => {
-  //       if (detail.length > 0) {
-  //         detail += ", ";
-  //       }
-  //       detail += wk;
-  //     });
-  //   }
-  //   return detail;
-  // }
 
   render() {
     if (this.props.type === "Attack") { 
@@ -138,8 +112,7 @@ class Roller extends Component<Props, State> {
     const d20_rolls: number[] = [];
     let roll_used = 0;
     d20_rolls.push(Math.ceil(Math.random() * 20));
-    // TODO: Make this check char.advantages as well
-    if (this.props.char && this.props.char instanceof Character && this.props.char.advantage === true) { // 
+    if (this.props.char && this.props.char instanceof Character && this.props.char.advantage === true) {
       d20_rolls.push(Math.ceil(Math.random() * 20));
       // TODO: Check for Elven Accuracy Feat
       roll_used = Math.max(...d20_rolls);
@@ -253,8 +226,7 @@ class Roller extends Component<Props, State> {
     const d20_rolls: number[] = [];
     let roll_used = 0;
     d20_rolls.push(Math.ceil(Math.random() * 20));
-    // TODO: Make this check char.advantages as well
-    if (this.props.char && this.props.char instanceof Character && this.props.char.advantage === true) { // 
+    if (this.props.char && this.props.char instanceof Character && this.props.char.advantage === true) {
       d20_rolls.push(Math.ceil(Math.random() * 20));
       // TODO: Check for Elven Accuracy Feat
       roll_used = Math.max(...d20_rolls);
@@ -337,7 +309,6 @@ class Roller extends Component<Props, State> {
     let grand_total = 0;
 
     const roll_renders: any[] = [];
-    // let bonus = 0;
     rolls.forEach(roll_plus => {
       const roll_render = this.renderRollPlus(roll_plus, true);
       roll_renders.push(roll_render.render);
@@ -394,7 +365,6 @@ class Roller extends Component<Props, State> {
     let grand_total = 0;
 
     const roll_renders: any[] = [];
-    // let bonus = 0;
     rolls.forEach(roll_plus => {
       const roll_render = this.renderRollPlus(roll_plus, true);
       roll_renders.push(roll_render.render);
@@ -544,11 +514,6 @@ class Roller extends Component<Props, State> {
           total -= roll2;
         } else {
           roll_string = this.data_util.add_plus_maybe_2_strings(roll_string, roll2);
-          // if (roll_string.length > 0) {
-          //   roll_string += `+${roll2}`;
-          // } else {
-          //   roll_string += `${roll2}`;
-          // }
           total += roll2;
         }
       }

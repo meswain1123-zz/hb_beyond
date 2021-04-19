@@ -3,40 +3,22 @@ import { connect, ConnectedProps } from 'react-redux';
 import { RouteComponentProps } from 'react-router';
 import { Redirect } from "react-router-dom";
 import {
-  // Add, 
   Edit, ArrowBack, DeleteForever
 } from "@material-ui/icons";
 import {
   Grid, 
-  // List, ListItem, 
-  // Button, 
   Tooltip, Fab,
-  // FormControl, InputLabel,
-  // OutlinedInput, FormHelperText
 } from "@material-ui/core";
-// import KeyboardArrowDownIcon from '@material-ui/icons/KeyboardArrowDown';
-// import KeyboardArrowRightIcon from '@material-ui/icons/KeyboardArrowRight';
+
 import { 
   MagicItemKeyword
 } from "../../models";
-// import StringBox from "../../components/input/StringBox";
-// import SelectBox from "../../components/input/SelectBox";
-// import SelectStringBox from "../../components/input/SelectStringBox";
-// import CheckBox from "../../components/input/CheckBox";
-// import { 
-//   // DAMAGE_TYPES, 
-//   // DURATIONS,
-//   // COMPONENTS,
-//   // CASTING_TIMES,
-//   // RESOURCES,
-//   ABILITY_SCORES 
-// } from "../../models/Constants";
+
 import API from "../../utilities/smart_api";
 import { APIClass } from "../../utilities/smart_api_class";
 
 
 interface AppState {
-  // magic_item_keywords: MagicItemKeyword[] | null;
   height: number;
   width: number;
 }
@@ -50,14 +32,11 @@ interface MatchParams {
 }
 
 const mapState = (state: RootState) => ({
-  // objects: state.app.magic_item_keywords,
   height: state.app.height,
   width: state.app.width
 })
 
 const mapDispatch = {
-  // setMagicItemKeywords: (objects: MagicItemKeyword[]) => ({ type: 'SET', dataType: 'magic_item_keywords', payload: objects }),
-  // addMagicItemKeyword: (obj: MagicItemKeyword) => ({ type: 'ADD', dataType: 'magic_item_keywords', payload: obj })
 }
 
 const connector = connect(mapState, mapDispatch)

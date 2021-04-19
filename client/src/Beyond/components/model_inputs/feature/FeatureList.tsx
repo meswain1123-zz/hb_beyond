@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
-// import { RouteComponentProps } from 'react-router';
+
 import {
   Grid,
   Tooltip,
@@ -12,14 +12,9 @@ import {
 
 import { Feature } from "../../../models";
 
-// import StringBox from "../input/StringBox";
-// import SelectBox from "../input/SelectBox";
-// import SelectStringBox from "../input/SelectStringBox";
-// import FeatureInput from "./Feature";
-
 
 interface AppState {
-  // abilities: Ability[] | null;
+  
   width: number
 }
 
@@ -28,12 +23,12 @@ interface RootState {
 }
 
 const mapState = (state: RootState) => ({
-  // abilities: state.app.abilities
+  
   width: state.app.width
 })
 
 const mapDispatch = {
-  // setAbilities: (objects: Ability[]) => ({ type: 'SET', dataType: 'abilities', payload: objects })
+  
 }
 
 const connector = connect(mapState, mapDispatch)
@@ -46,8 +41,6 @@ type Props = PropsFromRedux & {
   parent_type: string;
   parent_id: string;
   features: Feature[];
-  // onNameChange: (name: string) => void; 
-  // onDescriptionChange: (description: string) => void; 
   onChange: (features: Feature[]) => void; 
   onExpand: (feature: Feature) => void;
   onAdd: () => void;

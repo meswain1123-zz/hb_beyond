@@ -1,7 +1,5 @@
 
 import { ModelBase } from "./ModelBase";
-// import { PlayToken } from "./Ability";
-// import { Mask } from "./Mask";
 
 export class Skill extends ModelBase {
   use_ability_score: string;
@@ -33,7 +31,6 @@ export class Skill extends ModelBase {
   }
 
   copy5e(copyMe: any): void {
-    // console.log(copyMe);
     this.name = copyMe.name;
     this.description = "";
     if (copyMe.desc) {

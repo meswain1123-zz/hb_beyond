@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
-// import { RouteComponentProps } from 'react-router';
+
 import {
   Grid,
   Tooltip,
@@ -23,9 +23,7 @@ import {
 } from "../../../models/Constants";
 
 import StringBox from "../../input/StringBox";
-// import SelectBox from "../input/SelectBox";
 import SelectStringBox from "../../input/SelectStringBox";
-// import FeatureBaseInput from "./FeatureBase";
 import SelectBaseItemBox from "../select/SelectBaseItemBox";
 import SelectEquipmentPackBox from "../select/SelectEquipmentPackBox";
 import SelectWeaponKeywordBox from "../select/SelectWeaponKeywordBox";
@@ -36,7 +34,7 @@ import { APIClass } from "../../../utilities/smart_api_class";
 
 
 interface AppState {
-  // abilities: Ability[] | null;
+  
   width: number
 }
 
@@ -45,12 +43,12 @@ interface RootState {
 }
 
 const mapState = (state: RootState) => ({
-  // abilities: state.app.abilities
+  
   width: state.app.width
 })
 
 const mapDispatch = {
-  // setAbilities: (objects: Ability[]) => ({ type: 'SET', dataType: 'abilities', payload: objects })
+  
 }
 
 const connector = connect(mapState, mapDispatch)
@@ -59,11 +57,7 @@ type PropsFromRedux = ConnectedProps<typeof connector>
 
 type Props = PropsFromRedux & {
   choices: StartEquipmentChoice[];
-  // onNameChange: (name: string) => void; 
-  // onDescriptionChange: (description: string) => void; 
   onChange: (choices: StartEquipmentChoice[]) => void; 
-  // onExpand: (start_equipment_choice: StartEquipmentChoice) => void;
-  // onAdd: () => void;
 }
 
 export interface State { 
@@ -73,9 +67,6 @@ export interface State {
 }
 
 class StartEquipmentChoicesInput extends Component<Props, State> {
-  // public static defaultProps = {
-  //   labelWidth: null
-  // };
   constructor(props: Props) {
     super(props);
     this.state = {

@@ -4,38 +4,26 @@ import { RouteComponentProps } from 'react-router';
 import { Redirect } from "react-router-dom";
 import {
   Add, 
-  // Edit,
   ArrowBack
 } from "@material-ui/icons";
 import {
   Grid, 
-  // List, ListItem, 
   Button, 
   Tooltip, Fab,
-  // FormControl, InputLabel,
-  // OutlinedInput, FormHelperText
 } from "@material-ui/core";
-// import KeyboardArrowDownIcon from '@material-ui/icons/KeyboardArrowDown';
-// import KeyboardArrowRightIcon from '@material-ui/icons/KeyboardArrowRight';
 import { 
-  // ModelBase, 
   SpellSlotType, 
   SpellSlotTableEntry
 } from "../../models";
 import StringBox from "../../components/input/StringBox";
-// import SelectBox from "../../components/input/SelectBox";
+
 import SelectStringBox from "../../components/input/SelectStringBox";
-// import CheckBox from "../../components/input/CheckBox";
-// import { 
-//   REFRESH_RULES
-// } from "../../models/Constants";
+
 import API from "../../utilities/smart_api";
 import { APIClass } from "../../utilities/smart_api_class";
 
 
 interface AppState {
-  // spell_slot_types: SpellSlotType[] | null;
-  // skills: Skill[] | null;
   height: number;
   width: number;
 }
@@ -49,16 +37,11 @@ interface MatchParams {
 }
 
 const mapState = (state: RootState) => ({
-  // spell_slot_types: state.app.spell_slot_types,
-  // skillsMB: state.app.skills as ModelBase[],
-  // skills: state.app.skills,
   height: state.app.height,
   width: state.app.width
 })
 
 const mapDispatch = {
-  // setSpellSlotTableEntries: (objects: SpellSlotType[]) => ({ type: 'SET', dataType: 'spell_slot_types', payload: objects }),
-  // addSpellSlotType: (object: SpellSlotType) => ({ type: 'ADD', dataType: 'spell_slot_types', payload: object })
 }
 
 const connector = connect(mapState, mapDispatch)
@@ -71,7 +54,6 @@ export interface State {
   redirectTo: string | null;
   table: SpellSlotType;
   processing: boolean;
-  // skills: Skill[] | null;
   spell_slot_types: SpellSlotType[] | null;
   loading: boolean;
 }
@@ -83,7 +65,6 @@ class SpellSlotTypeEdit extends Component<Props, State> {
       redirectTo: null,
       table: new SpellSlotType(),
       processing: false,
-      // skills: null,
       spell_slot_types: null,
       loading: false
     };
@@ -254,7 +235,6 @@ class SpellSlotTypeEdit extends Component<Props, State> {
               </Button>
               <Button
                 variant="contained"
-                // color="primary"
                 disabled={this.state.processing}
                 style={{ marginLeft: "4px" }}
                 onClick={ () => { 

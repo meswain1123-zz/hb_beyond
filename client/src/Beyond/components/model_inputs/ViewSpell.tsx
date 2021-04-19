@@ -1,9 +1,5 @@
 import React, { Component } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
-// import {
-//   Copyright,
-
-// } from "@material-ui/icons";
 import {
   Grid, 
 } from "@material-ui/core";
@@ -52,7 +48,7 @@ class ViewSpell extends Component<Props, State> {
   public static defaultProps = {
     show_level: false,
     fontSize: 11,
-    fontWeight: undefined // "inherit"
+    fontWeight: undefined
   };
   componentDidMount() {
   }
@@ -108,7 +104,6 @@ class ViewSpell extends Component<Props, State> {
           detail += spell.spell.name;
         }
         concentration = spell.spell.concentration;
-        // ritual = spell.spell.ritual;
         if (spell.spell.level) {
           level = spell.spell.level;
         }

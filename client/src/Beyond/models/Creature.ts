@@ -11,7 +11,6 @@ import {
   Sense,
   CharacterSense,
   DamageMultiplier,
-  // RollPlus,
   CreatureAbility
 } from ".";
 

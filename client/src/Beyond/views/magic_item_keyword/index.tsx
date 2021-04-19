@@ -4,23 +4,15 @@ import { Redirect } from "react-router-dom";
 import {
   Add, 
   Edit,
-  // GetApp,
-  // ArrowBack,
-  // VpnKey
 } from "@material-ui/icons";
 import {
   Grid, 
-  // List, ListItem, 
   Button, 
   Tooltip, Fab,
-  // Checkbox,
   Link
 } from "@material-ui/core";
-// import KeyboardArrowDownIcon from '@material-ui/icons/KeyboardArrowDown';
-// import KeyboardArrowRightIcon from '@material-ui/icons/KeyboardArrowRight';
+
 import { 
-  // MagicItem, 
-  // BaseItem,
   MagicItemKeyword 
 } from "../../models";
 import { 
@@ -28,9 +20,7 @@ import {
 } from "../../models/Constants";
 
 import StringBox from "../../components/input/StringBox";
-// import SelectBox from "../../components/input/SelectBox";
 import SelectStringBox from "../../components/input/SelectStringBox";
-// import CheckBox from "../../components/input/CheckBox";
 
 import API from "../../utilities/smart_api";
 import { APIClass } from "../../utilities/smart_api_class";
@@ -68,7 +58,6 @@ export interface State {
   page_num: number;
   start_letter: string;
   magic_item_keywords: MagicItemKeyword[] | null;
-  // base_items: BaseItem[] | null;
   loading: boolean;
   item_type: string;
 }
@@ -109,21 +98,8 @@ class MagicItemKeywordIndex extends Component<Props, State> {
   load() {
     this.setState({ loading: true }, () => {
       this.api.getObjects("magic_item_keyword").then((res: any) => {
-        // const magic_item_keywords: MagicItemKeyword[] = res.magic_item_keyword ? res.magic_item_keyword : [];
-        // const base_items: BaseItem[] = res.base_item ? res.base_item : [];
-
-        // magic_item_keywords.forEach(o => {
-        //   if (o.base_item === null) {
-        //     const objFinder = base_items.filter(b => b._id === o.base_item_id);
-        //     if (objFinder.length === 1) {
-        //       o.base_item = objFinder[0];
-        //     }
-        //   }
-        // });
-
         this.setState({ 
           magic_item_keywords: res,
-          // base_items, 
           loading: false 
         });
       });

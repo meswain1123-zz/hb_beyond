@@ -4,33 +4,18 @@ import { Redirect } from "react-router-dom";
 import {
   Add, 
   Edit,
-  // GetApp,
-  // ArrowBack,
-  // VpnKey
 } from "@material-ui/icons";
 import {
   Grid, 
-  // List, ListItem, 
   Button, 
   Tooltip, Fab,
-  // Checkbox,
   Link
 } from "@material-ui/core";
-// import KeyboardArrowDownIcon from '@material-ui/icons/KeyboardArrowDown';
-// import KeyboardArrowRightIcon from '@material-ui/icons/KeyboardArrowRight';
 import { 
-  // MagicItem, 
-  // BaseItem,
   Character 
 } from "../../models";
-// import { 
-//   ITEM_TYPES 
-// } from "../../models/Constants";
 
 import StringBox from "../../components/input/StringBox";
-// import SelectBox from "../../components/input/SelectBox";
-// import SelectStringBox from "../../components/input/SelectStringBox";
-// import CheckBox from "../../components/input/CheckBox";
 
 import API from "../../utilities/smart_api";
 import { APIClass } from "../../utilities/smart_api_class";
@@ -51,7 +36,6 @@ const mapState = (state: RootState) => ({
 })
 
 const mapDispatch = {
-  // setItemType: (item_type: string) => ({ type: 'SET', dataType: 'item_type', payload: item_type })
 }
 
 const connector = connect(mapState, mapDispatch)
@@ -66,7 +50,6 @@ export interface State {
   page_num: number;
   start_letter: string;
   characters: Character[] | null;
-  // base_items: BaseItem[] | null;
   loading: boolean;
 }
 
@@ -107,7 +90,6 @@ class CharacterIndex extends Component<Props, State> {
       this.api.getObjects("character").then((res: any) => {
         this.setState({ 
           characters: res,
-          // base_items, 
           loading: false 
         });
       });
@@ -182,26 +164,6 @@ class CharacterIndex extends Component<Props, State> {
                       </Tooltip> 
                     </Grid>
                     <Grid item xs={1}>
-                      {/* <Tooltip title={`Convert ${o.name} to Character`}>
-                        <Fab size="small" color="primary" 
-                          style={{marginLeft: "8px"}}
-                          onClick={ () => {
-                            const item = new MagicItem();
-                            item.copyFromKeyword(o);
-                            this.api.createObject("magic_item", item).then((res: any) => {
-                              if (res && res.id) {
-                                this.api.deleteObject("character", o._id).then((res2: any) => {
-                                  if (this.state.characters) {
-                                    const characters = this.state.characters.filter(i => i._id !== o._id);
-                                    this.setState({ characters });
-                                  }
-                                });
-                              }
-                            });
-                          }}>
-                          <VpnKey/>
-                        </Fab>
-                      </Tooltip>  */}
                     </Grid>
                     <Grid item xs={8}>
                       <Tooltip title={o.description}>

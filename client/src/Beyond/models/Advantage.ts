@@ -1,6 +1,4 @@
 
-// import { Ability } from "./Ability";
-
 export class Advantage {
   type: string; // What do they get advantage on
   disadvantage: boolean; // True if it's disadvantage instead of advantage
