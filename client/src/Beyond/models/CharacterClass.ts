@@ -114,8 +114,6 @@ export class CharacterClass {
   copyGameClass = (game_class: GameClass, level: number) => {
     this.game_class_id = game_class._id;
     this.game_class = game_class;
-    console.log(this.position);
-    console.log(game_class);
     if (this.level > level) {
       this.class_features = this.class_features.filter(fb => fb.feature_base && fb.feature_base.level <= level);
     } else {

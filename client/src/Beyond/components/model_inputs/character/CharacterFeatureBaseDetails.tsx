@@ -14,6 +14,7 @@ import {
   CharacterRace,
   CharacterSubRace,
   CharacterEldritchInvocation,
+  CharacterFightingStyle,
   CharacterLanguageFeature,
   Proficiency,
   SpellcastingFeature,
@@ -23,7 +24,9 @@ import {
   SenseFeature,
   Advantage,
   CharacterASIBaseFeature,
-  SpellAsAbility
+  SpellAsAbility,
+  // UpgradableNumber,
+  IStringHash
 } from "../../../models";
 
 import DisplayObjects from "../display/DisplayObjects";
@@ -335,6 +338,47 @@ class CharacterFeatureBaseDetails extends Component<Props, State> {
           /> */}
         </Grid>
       );
+    } else if (feature.feature_type === "Extra Attacks") {
+      const attacks = feature.feature.the_feature as number;
+      return (
+        <Grid item key={key}>
+          { attacks }
+        </Grid>
+      );
+    } else if (feature.feature_type === "Unarmed Strike Size") {
+      const size = feature.feature.the_feature as number;
+      return (
+        <Grid item key={key}>
+          { size }
+        </Grid>
+      );
+    } else if (feature.feature_type === "Unarmed Strike Count") {
+      const count = feature.feature.the_feature as number;
+      return (
+        <Grid item key={key}>
+          { count }
+        </Grid>
+      );
+    } else if (feature.feature_type === "Unarmed Strike Bonus Action") {
+      return (
+        <Grid item key={key}>
+          You can make an unarmed strike as a Bonus Action.
+        </Grid>
+      );
+    } else if (feature.feature_type === "Unarmed Strike Damage Type") {
+      const damage_type = feature.feature.the_feature as string;
+      return (
+        <Grid item key={key}>
+          Your Unarmed Strikes can deal { damage_type } damage.
+        </Grid>
+      );
+    } else if (feature.feature_type === "Unarmed Strike Score") {
+      const score = feature.feature.the_feature as string;
+      return (
+        <Grid item key={key}>
+          Your Unarmed Strikes can use your { score } modifier.
+        </Grid>
+      );
     } else if (feature.feature_type === "Spell as Ability") {
       const ability = feature.feature.the_feature as SpellAsAbility;
       return (
@@ -350,6 +394,24 @@ class CharacterFeatureBaseDetails extends Component<Props, State> {
     } else if (feature.feature_type === "Eldritch Invocation") {
       const ei = feature.feature_options[0] as CharacterEldritchInvocation;
       return this.renderEldritchInvocation(ei, key);
+    } else if (feature.feature_type === "Fighting Style") {
+      const ei = feature.feature_options[0] as CharacterFightingStyle;
+      return this.renderFightingStyle(ei, key);
+    } else if (feature.feature_type === "Cantrips from List") {
+      const cfl = feature.feature.the_feature as IStringHash;
+      const cantrip_ids = feature.feature_options as string[];
+      return (
+        <Grid item key={key} container spacing={1} direction="column">
+          <Grid item>
+            You learn { cfl.count } cantrips of your choice from the <DisplayObjects type="spell_list" ids={[cfl.list_id]} /> spell list. 
+            { cfl.spellcasting_ability } is your spellcasting ability for them. 
+            Whenever you gain a level in this class, you can replace one of these cantrips with another cantrip from the <DisplayObjects type="spell_list" ids={[cfl.list_id]} /> spell list. 
+          </Grid>
+          <Grid item>
+          <DisplayObjects type="spell" ids={cantrip_ids} />
+          </Grid>
+        </Grid>
+      );
     } else {
       let ids: string[] = [];
       let type = "";
@@ -386,6 +448,27 @@ class CharacterFeatureBaseDetails extends Component<Props, State> {
         <Grid item key={key1} container spacing={0} direction="row">
           <Grid item xs={12}>
             <b>{ ei.eldritch_invocation.name }:</b>&nbsp;{ ei.eldritch_invocation.description }
+          </Grid>
+          <Grid item xs={1} container spacing={0} direction="row">
+            <Grid item xs={6} style={{ borderRight: "1px solid lightgray" }}></Grid>
+            <Grid item xs={6}></Grid>
+          </Grid>
+          <Grid item xs={11} container spacing={0} direction="column">
+            { ei.features.map((f, key) => {
+              return this.renderFeature(f, key);
+            })}
+          </Grid>
+        </Grid>
+      );
+    } else return null;
+  }
+
+  renderFightingStyle(ei: CharacterFightingStyle, key1: number) {
+    if (ei.fighting_style) {
+      return (
+        <Grid item key={key1} container spacing={0} direction="row">
+          <Grid item xs={12}>
+            <b>{ ei.fighting_style.name }:</b>&nbsp;{ ei.fighting_style.description }
           </Grid>
           <Grid item xs={1} container spacing={0} direction="row">
             <Grid item xs={6} style={{ borderRight: "1px solid lightgray" }}></Grid>

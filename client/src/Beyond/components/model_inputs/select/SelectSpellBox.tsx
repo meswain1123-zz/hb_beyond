@@ -6,7 +6,8 @@ import {
 } from "@material-ui/core";
 
 import { 
-  Spell
+  Spell,
+  SpellList
 } from "../../../models";
 import { 
   SCHOOLS 
@@ -41,11 +42,14 @@ type Props = PropsFromRedux & {
   name: string;
   value: string;
   spells: Spell[] | null;
+  level: number;
+  spell_list_id: string;
   onChange: (id: string) => void;
 }
 
 export interface State {
   spells: Spell[] | null;
+  spell_lists: SpellList[] | null;
   search_string: string;
   level: string;
   school: string;
@@ -54,12 +58,15 @@ export interface State {
 
 class SelectSpellBox extends Component<Props, State> {
   public static defaultProps = {
-    spells: null
+    spells: null,
+    level: -1,
+    spell_list_id: ""
   };
   constructor(props: Props) {
     super(props);
     this.state = {
       spells: null,
+      spell_lists: null,
       search_string: "",
       level: "ALL",
       school: "ALL",
@@ -75,10 +82,12 @@ class SelectSpellBox extends Component<Props, State> {
 
   load() {
     this.setState({ loading: true }, () => {
-      this.api.getObjects("spell").then((res: any) => {
-        if (res && !res.error) {
-          this.setState({ spells: res, loading: false });
-        }
+      this.api.getSetOfObjects(["spell","spell_list"]).then((res: any) => {
+        this.setState({ 
+          spells: res.spell,
+          spell_lists: res.spell_list, 
+          loading: false 
+        });
       });
     });
   }
@@ -86,18 +95,29 @@ class SelectSpellBox extends Component<Props, State> {
   render() {
     if (this.state.loading) {
       return <span>Loading</span>;
-    } else if (this.state.spells === null) {
+    } else if (this.state.spells === null || this.state.spell_lists === null) {
       this.load();
       return <span>Loading</span>;
     } else {
-      const filtered: any[] = this.state.spells ? this.state.spells.filter(o => 
-        (this.state.level === "ALL" || this.state.level === `${o.level}`) && 
-        (this.state.school === "ALL" || this.state.school === `${o.school}`) && 
-        (this.state.search_string === "" || o.name.toLowerCase().includes(this.state.search_string.toLowerCase()) || o.description.toLowerCase().includes(this.state.search_string.toLowerCase()))).sort((a,b) => {return a.name.localeCompare(b.name)}) : [];
+      const level = this.props.level === -1 ? this.state.level : `${this.props.level}`;
+      const school = this.state.school;
+      let spell_list: SpellList | null = null;
+      const spell_list_finder = this.state.spell_lists.filter(o => o._id === this.props.spell_list_id);
+      if (spell_list_finder.length === 1) {
+        spell_list = spell_list_finder[0];
+      }
+      const filtered = this.state.spells.filter(o => 
+        (!spell_list || spell_list.spell_ids.includes(o._id)) &&
+        (level === "ALL" || level === `${o.level}`) && 
+        (school === "ALL" || school === `${o.school}`) && 
+        (this.state.search_string === "" || 
+          o.name.toLowerCase().includes(this.state.search_string.toLowerCase()) || 
+            o.description.toLowerCase().includes(this.state.search_string.toLowerCase())))
+        .sort((a,b) => {return a.name.localeCompare(b.name)});
       
       return (
         <Grid container spacing={1} direction="row">
-          <Grid item xs={3}>
+          <Grid item xs={ this.props.level === -1 ? 3 : 6 }>
             <StringBox
               name="Search"
               value={`${this.state.search_string}`}
@@ -106,16 +126,18 @@ class SelectSpellBox extends Component<Props, State> {
               }}
             />
           </Grid>
-          <Grid item xs={3}>
-            <SelectStringBox
-              name="Level"
-              options={["ALL","0","1","2","3","4","5","6","7","8","9"]}
-              value={this.state.level}
-              onChange={(level: string) => {
-                this.setState({ level });
-              }}
-            />
-          </Grid>
+          { this.props.level === -1 &&
+            <Grid item xs={3}>
+              <SelectStringBox
+                name="Level"
+                options={["ALL","0","1","2","3","4","5","6","7","8","9"]}
+                value={this.state.level}
+                onChange={(level: string) => {
+                  this.setState({ level });
+                }}
+              />
+            </Grid>
+          }
           <Grid item xs={3}>
             <SelectStringBox
               name="School"
@@ -127,7 +149,7 @@ class SelectSpellBox extends Component<Props, State> {
             />
           </Grid>
           <Grid item xs={3}>
-            { filtered.length > 20 ?
+            { filtered.length > 50 ?
               <span>Too many spells { filtered.length }</span>
             :
               <SelectBox 

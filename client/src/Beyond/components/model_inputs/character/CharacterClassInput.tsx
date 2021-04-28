@@ -226,9 +226,9 @@ class CharacterClassInput extends Component<Props, State> {
     return (
       <Grid item container spacing={1} direction="column">
         { this.props.obj.classes.map((char_class, key) => {
-          let other_class_levels = 0;
+          let other_class_levels = this.props.obj.character_level - char_class.level;
           const class_levels: string[] = [];
-          for (let i = 1; i < (20 - other_class_levels); i++) {
+          for (let i = 1; i <= (20 - other_class_levels); ++i) {
             class_levels.push(`${i}`);
           }
           if (char_class.game_class) {

@@ -8,7 +8,8 @@ import {
 import { 
   TemplateBase,
   SpellAsAbility,
-  SpellAsAbilityTemplate
+  SpellAsAbilityTemplate,
+  UpgradableNumber
 } from "../../../models";
 import { 
   ABILITY_SCORES, 
@@ -22,6 +23,8 @@ import SelectStringBox from "../../input/SelectStringBox";
 import TemplateBox from "../TemplateBox";
 import SelectSpellBox from "../select/SelectSpellBox";
 import SelectResourceBox from "../select/SelectResourceBox";
+
+import UpgradableNumberBox from "../../input/UpgradableNumberBox";
 
 import API from "../../../utilities/smart_api";
 import { APIClass } from "../../../utilities/smart_api_class";
@@ -173,6 +176,7 @@ class SpellAsAbilityInput extends Component<Props, State> {
                 name="Resource Consumed"
                 allow_special
                 allow_none
+                allow_slot
                 value={ this.props.obj.resource_consumed ? this.props.obj.resource_consumed : "None" }
                 onChange={(value: string) => {
                   const obj = this.props.obj;
@@ -201,10 +205,10 @@ class SpellAsAbilityInput extends Component<Props, State> {
           }
           { this.props.obj.slot_override !== "Normal" && this.props.obj.slot_override !== "At Will" && this.props.obj.resource_consumed && this.props.obj.resource_consumed === "Special" &&
             <Grid item>
-              <StringBox 
-                value={`${this.props.obj.special_resource_amount}`} 
-                name="Total Amount"
-                onBlur={(value: string) => {
+              <UpgradableNumberBox 
+                name="Special Resource Amount"
+                value={this.props.obj.special_resource_amount} 
+                onChange={(value: UpgradableNumber) => {
                   const obj = this.props.obj;
                   obj.special_resource_amount = value;
                   this.props.onChange(obj);

@@ -551,7 +551,6 @@ export class Creature extends ModelBase {
         if (action.name === "Multiattack") {
 
         } else {
-          console.log(action);
           const ability = new CreatureAbility();
           ability.name = action.name;
           ability.description = action.desc;

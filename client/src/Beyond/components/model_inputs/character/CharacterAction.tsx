@@ -8,13 +8,16 @@ import {
 
 import { 
   Attack,
+  Ability,
   Character,
   CharacterAbility,
   CharacterItem,
   CharacterSpell,
   INumHash,
   ItemAffectingAbility,
-  RollPlus
+  SpellAsAbility,
+  RollPlus,
+  Reroll
 } from "../../../models";
 
 import ButtonBox from "../../input/ButtonBox";
@@ -70,8 +73,9 @@ export interface State {
   concentration: boolean;
   ritual: boolean;
   popoverAnchorEl: HTMLDivElement | null;
-  popoverAction: CharacterSpell | Attack | null;
+  popoverAction: CharacterSpell | Attack | CharacterAbility | null;
   popoverActionLevel: number;
+  popoverWeapon: CharacterItem | null;
   popoverMode: string;
 }
 
@@ -95,6 +99,7 @@ class CharacterAction extends Component<Props, State> {
       popoverAnchorEl: null,
       popoverAction: null,
       popoverActionLevel: -1,
+      popoverWeapon: null,
       popoverMode: ""
     };
     this.api = API.getInstance();
@@ -114,6 +119,7 @@ class CharacterAction extends Component<Props, State> {
           popoverAnchorEl: null, 
           popoverAction: null, 
           popoverActionLevel: -1, 
+          popoverWeapon: null,
           popoverMode: "", 
           reloading: true 
         }, () => {
@@ -126,6 +132,7 @@ class CharacterAction extends Component<Props, State> {
           popoverAnchorEl: null, 
           popoverAction: null, 
           popoverActionLevel: -1, 
+          popoverWeapon: null,
           popoverMode: ""
         }, () => {
           this.props.onChange();
@@ -185,56 +192,19 @@ class CharacterAction extends Component<Props, State> {
           </Grid>
           { this.props.show_casting_time ? 
             <Grid item xs={2} container spacing={0} direction="row">
-              <Grid item xs={6} style={{ display: "flex", justifyContent: "center" }}>
+              <Grid item xs={6}>
                 { spell.casting_time_string }
               </Grid>
-              <Grid item xs={6} style={{ display: "flex", justifyContent: "center" }}>
+              <Grid item xs={6}>
                 { spell.range_string }
               </Grid>
             </Grid>
           :
-            <Grid item xs={2} style={{ display: "flex", justifyContent: "center" }}>
+            <Grid item xs={2}>
               { spell.range_string }
             </Grid>
           }
-          <Grid item xs={3} style={{
-              display: "flex",
-              justifyContent: "center"
-            }}>
-            { spell.use_spell_attack ?
-              <ButtonBox
-                name={ spell.attack_string }
-                onClick={(event: React.MouseEvent<HTMLDivElement>) => {
-                  this.setState({ popoverAction: spell, popoverActionLevel: level2, popoverMode: "Attack" })
-                  this.setPopoverAnchorEl(event.currentTarget);
-                }} 
-              />
-            :
-              <span>
-                { spell.attack_string }
-              </span> 
-            }
-          </Grid>
-          <Grid item xs={3} style={{
-              display: "flex",
-              justifyContent: "center"
-            }}>
-            { !["Control","Utility","Summon","Transform"].includes(spell.effect_string) ?
-              <ButtonBox
-                fontSize={9}
-                name={ spell.get_potence_string(level2, this.props.obj) }
-                image={ spell.effect_string }
-                onClick={(event: React.MouseEvent<HTMLDivElement>) => {
-                  this.setState({ popoverAction: spell, popoverActionLevel: level, popoverMode: "Damage" })
-                  this.setPopoverAnchorEl(event.currentTarget);
-                }} 
-              />
-            :
-              <span>
-                { spell.effect_string }
-              </span> 
-            }
-          </Grid>
+          { this.renderSpellAttacks(spell, level2) }
           { this.renderExtras() }
         </Grid>
       );
@@ -244,7 +214,7 @@ class CharacterAction extends Component<Props, State> {
           <Grid item xs={1}>
             { this.renderUseButton(action) }
           </Grid>
-          <Grid item xs={7} container spacing={0} direction="column" onClick={() => this.setState({ drawer: "details", selected_ability: action })}>
+          <Grid item xs={3} container spacing={0} direction="column" onClick={() => this.setState({ drawer: "details", selected_ability: action })}>
             <Grid item>{ action.name }</Grid>
             <Grid item style={{ 
               lineHeight: "1.1",
@@ -254,12 +224,27 @@ class CharacterAction extends Component<Props, State> {
               { action.source_name }
             </Grid>
           </Grid>
-          <Grid item xs={2}>
-          </Grid>
-          <Grid item xs={1}>
-          </Grid>
-          <Grid item xs={1}>
-          </Grid>
+          { this.props.show_casting_time && (action.the_ability instanceof Ability) ? 
+            <Grid item xs={2} container spacing={0} direction="row">
+              <Grid item xs={6}>
+                { action.the_ability.casting_time }
+              </Grid>
+              <Grid item xs={6}>
+                { action.the_ability.range }
+              </Grid>
+            </Grid>
+          : (action.the_ability instanceof Ability) ?
+            <Grid item xs={2}>
+              { action.the_ability.range }
+            </Grid>
+          : (action.the_ability instanceof SpellAsAbility) ?
+            <Grid item xs={2}>
+              { action.the_ability.spell && action.the_ability.spell.range }
+            </Grid>
+          :
+            <Grid item xs={2}></Grid>
+          }
+          { this.renderSpellAttacks(action, action.level) }
           { this.renderExtras() }
         </Grid>
       );
@@ -358,7 +343,7 @@ class CharacterAction extends Component<Props, State> {
                     name={ attack.damage_string }
                     find_images
                     onClick={(event: React.MouseEvent<HTMLDivElement>) => {
-                      this.setState({ popoverAction: attack, popoverMode: "Damage" });
+                      this.setState({ popoverAction: attack, popoverMode: "Damage", popoverWeapon: weapon });
                       this.setPopoverAnchorEl(event.currentTarget);
                     }} 
                   />
@@ -369,6 +354,52 @@ class CharacterAction extends Component<Props, State> {
         </Grid>
       );
     } else return null;
+  }
+
+  renderSpellAttacks(spell: CharacterSpell | CharacterAbility, level2: number) {
+    // console.log(spell);
+    return (
+      <Grid item xs={6} container spacing={0} direction="row">
+        <Grid item xs={6} style={{
+            display: "flex",
+            justifyContent: "center"
+          }}>
+          { spell.use_attack ?
+            <ButtonBox
+              name={ spell.attack_string }
+              onClick={(event: React.MouseEvent<HTMLDivElement>) => {
+                this.setState({ popoverAction: spell, popoverActionLevel: level2, popoverMode: "Attack" })
+                this.setPopoverAnchorEl(event.currentTarget);
+              }} 
+            />
+          :
+            <span>
+              { spell.attack_string }
+            </span> 
+          }
+        </Grid>
+        <Grid item xs={6} style={{
+            display: "flex",
+            justifyContent: "center"
+          }}>
+          { !["Control","Utility","Summon","Transform"].includes(spell.effect_string) ?
+            <ButtonBox
+              fontSize={9}
+              name={ spell.get_potence_string(level2, this.props.obj) }
+              image={ spell.effect_string }
+              onClick={(event: React.MouseEvent<HTMLDivElement>) => {
+                this.setState({ popoverAction: spell, popoverActionLevel: level2, popoverMode: "Damage" })
+                this.setPopoverAnchorEl(event.currentTarget);
+              }} 
+            />
+          :
+            <span>
+              { spell.effect_string }
+            </span> 
+          }
+        </Grid>
+      </Grid>
+    );
   }
 
   renderCastButton(spell: CharacterSpell, level: number) {
@@ -526,82 +557,126 @@ class CharacterAction extends Component<Props, State> {
     let return_me: any = null;
     const the_ability = ability.the_ability;
     if (the_ability) {
-      const self_condition_ids = ability.self_condition();
       if (the_ability.resource_consumed && the_ability.resource_consumed !== "None") {
         return_me =
         (
           <ButtonBox name={ability.use_string(this.props.obj)}
             disabled={ability.disabled(this.props.obj)}
-            onClick={() => {
-              if (!(the_ability instanceof ItemAffectingAbility) && the_ability.concentration) {
-                // Set the concentration
-                this.props.obj.concentrating_on = ability;
-              }
-              if (self_condition_ids.length > 0) {
-                // Apply the conditions
-                const obj = this.props.obj;
-                self_condition_ids.forEach(cond_id => {
-                  obj.conditions.push(cond_id);
-                });
-                if (obj instanceof Character) {
-                  this.char_util.recalcAll(obj);
-                }
-              }
+            onClick={(event: React.MouseEvent<HTMLDivElement>) => {
+              let go = false;
               // Increment the resource
               if (the_ability.resource_consumed === "Special") {
                 ability.special_resource_used++;
+                go = true;
+              } else if (the_ability.resource_consumed === "Slot") {
+                // Look for slots of the appropriate level and type
+                if (the_ability instanceof Ability || 
+                  the_ability instanceof ItemAffectingAbility || 
+                  the_ability instanceof SpellAsAbility) {
+                  const filtered_slots = this.props.obj.slots.filter(o => 
+                    o.level === the_ability.slot_level &&
+                    (the_ability.slot_type === "" || o.type_id === the_ability.slot_type)
+                  );
+                  if (filtered_slots.length === 1) {
+                    const slot = filtered_slots[0];
+                    slot.used++;
+                    go = true;
+                  } else if (filtered_slots.length > 1) {
+                    // Cast Options
+                    this.setState({ popoverAction: ability, popoverActionLevel: the_ability.slot_level, popoverMode: "Cast" });
+                    this.setPopoverAnchorEl(event.currentTarget);
+                  }
+                }
               } else {
                 const resource_finder = this.props.obj.resources.filter(o => 
                   o.type_id === the_ability.resource_consumed);
                 if (resource_finder.length === 1) {
                   const resource = resource_finder[0];
                   resource.used++;
+                  go = true;
                 }
               }
-              this.updateCharacter(true);
+              if (go) {
+                this.triggerAbilityEffect(ability);
+              }
             }} 
           />
         );
       } else if (!(the_ability instanceof ItemAffectingAbility) && the_ability.concentration) {
         return_me = (
           <ButtonBox name="Use" 
-            onClick={() => {
-              // Set the concentration
-              this.props.obj.concentrating_on = ability;
-              if (self_condition_ids.length > 0) {
-                // Apply the conditions
-                const obj = this.props.obj;
-                self_condition_ids.forEach(cond_id => {
-                  obj.conditions.push(cond_id);
-                });
-                if (obj instanceof Character) {
-                  this.char_util.recalcAll(obj);
+            onClick={(event: React.MouseEvent<HTMLDivElement>) => {
+              let go = false;
+              // Increment the resource
+              if (the_ability.resource_consumed === "Special") {
+                ability.special_resource_used++;
+                go = true;
+              } else if (the_ability.resource_consumed === "Slot") {
+                // Look for slots of the appropriate level and type
+                if (the_ability instanceof Ability || 
+                  the_ability instanceof ItemAffectingAbility || 
+                  the_ability instanceof SpellAsAbility) {
+                  const filtered_slots = this.props.obj.slots.filter(o => 
+                    o.level === the_ability.slot_level &&
+                    (the_ability.slot_type === "" || o.type_id === the_ability.slot_type)
+                  );
+                  if (filtered_slots.length === 1) {
+                    const slot = filtered_slots[0];
+                    slot.used++;
+                    go = true;
+                  } else if (filtered_slots.length > 1) {
+                    // Cast Options
+                    this.setState({ popoverAction: ability, popoverActionLevel: the_ability.slot_level, popoverMode: "Cast" });
+                    this.setPopoverAnchorEl(event.currentTarget);
+                  }
+                }
+              } else {
+                const resource_finder = this.props.obj.resources.filter(o => 
+                  o.type_id === the_ability.resource_consumed);
+                if (resource_finder.length === 1) {
+                  const resource = resource_finder[0];
+                  resource.used++;
+                  go = true;
                 }
               }
-              this.updateCharacter(true);
+              if (go) {
+                this.triggerAbilityEffect(ability);
+              }
             }} 
           />
         );
       } else {
         return_me = (
           <ButtonBox name="At Will" 
-            disabled={self_condition_ids.length === 0}
+            disabled={ability.self_condition().length === 0}
             onClick={() => {
-              // Apply the conditions
-              const obj = this.props.obj;
-              self_condition_ids.forEach(cond_id => {
-                obj.conditions.push(cond_id);
-              });
-              if (obj instanceof Character) {
-                this.char_util.recalcAll(obj);
-              }
-              this.updateCharacter(true);
+              this.triggerAbilityEffect(ability);
             }} 
           />
         );
       }
     }
     return return_me;
+  }
+
+  triggerAbilityEffect(ability: CharacterAbility) {
+    const self_condition_ids = ability.self_condition();
+    const the_ability = ability.the_ability;
+    if (the_ability) {
+      if (!(the_ability instanceof ItemAffectingAbility) && the_ability.concentration) {
+        // Set the concentration
+        this.props.obj.concentrating_on = ability;
+      }
+      if (self_condition_ids.length > 0) {
+        // Apply the conditions
+        const obj = this.props.obj;
+        self_condition_ids.forEach(cond_id => {
+          obj.conditions.push(cond_id);
+        });
+        this.char_util.recalcAll(obj);
+      }
+      this.updateCharacter(true);
+    }
   }
 
   renderCastOptions() {
@@ -730,6 +805,194 @@ class CharacterAction extends Component<Props, State> {
       } else {
         return null;
       }
+    } else if (this.state.popoverAction instanceof CharacterAbility) {
+      const ability = this.state.popoverAction;
+      const the_ability = ability.the_ability;
+      const self_condition_ids = ability.self_condition();
+      
+      if (the_ability && !(the_ability instanceof ItemAffectingAbility)) {
+        if (the_ability.resource_consumed === "Slot") {
+          // Get the slots for the level
+          const level = this.state.popoverActionLevel;
+          const slots = this.props.obj.slots.filter(o => o.level === level);
+          
+          if (slots.length === 1) {
+            const slot = slots[0];
+            if (the_ability.concentration && this.props.obj.concentrating_on) {
+              return (
+                <div>
+                  You're already concentrating on <ViewSpell spell={this.props.obj.concentrating_on} show_ritual />
+                  <ButtonBox name={ "Use Anyway" }
+                    disabled={slot.used + the_ability.amount_consumed >= slot.total}
+                    onClick={() => {
+                      slot.used += the_ability.amount_consumed;
+                      this.props.obj.concentrating_on = ability;
+                      if (self_condition_ids.length > 0) {
+                        // Apply the conditions
+                        const obj = this.props.obj;
+                        self_condition_ids.forEach(cond_id => {
+                          obj.conditions.push(cond_id);
+                        });
+                        if (obj instanceof Character) {
+                          this.char_util.recalcAll(obj);
+                        }
+                      }
+                      this.updateCharacter(slot.used + the_ability.amount_consumed >= slot.total);
+                    }} 
+                  />
+                </div>
+              );
+            } else {
+              // It will never go here because then it wouldn't have done cast options
+            }
+          } else {
+            if (the_ability.concentration && this.props.obj.concentrating_on) {
+              return (
+                <div>
+                  You're already concentrating on <ViewSpell spell={this.props.obj.concentrating_on} show_ritual />
+                  <div>
+                    { slots.map((slot, key) => {
+                      return (
+                        <ButtonBox key={key} name={slot.slot_name}
+                          disabled={slot.used === slot.total}
+                          onClick={() => {
+                            slot.used++;
+                            this.props.obj.concentrating_on = ability;
+                            if (self_condition_ids.length > 0) {
+                              // Apply the conditions
+                              const obj = this.props.obj;
+                              self_condition_ids.forEach(cond_id => {
+                                obj.conditions.push(cond_id);
+                              });
+                              if (obj instanceof Character) {
+                                this.char_util.recalcAll(obj);
+                              }
+                            }
+                            this.updateCharacter(slot.used === slot.total);
+                          }} 
+                        />
+                      );
+                    })}
+                  </div>
+                </div>
+              );
+            } else {
+              return (
+                <div>
+                  { slots.map((slot, key) => {
+                    return (
+                      <ButtonBox key={key} name={slot.slot_name}
+                        disabled={slot.used + the_ability.amount_consumed >= slot.total}
+                        onClick={() => {
+                          slot.used += the_ability.amount_consumed;
+                          if (self_condition_ids.length > 0) {
+                            // Apply the conditions
+                            const obj = this.props.obj;
+                            self_condition_ids.forEach(cond_id => {
+                              obj.conditions.push(cond_id);
+                            });
+                            if (obj instanceof Character) {
+                              this.char_util.recalcAll(obj);
+                            }
+                          }
+                          this.updateCharacter(slot.used + the_ability.amount_consumed >= slot.total);
+                        }} 
+                      />
+                    );
+                  })}
+                </div>
+              );
+            }
+          }
+        } else if (the_ability.resource_consumed === "Special") {
+          if (the_ability.concentration && this.props.obj.concentrating_on) {
+            return (
+              <div>
+                You're already concentrating on <ViewSpell spell={this.props.obj.concentrating_on} show_ritual />
+                <ButtonBox name={ "Use Anyway" }
+                  disabled={ability.special_resource_used + the_ability.amount_consumed >= ability.special_resource_amount}
+                  onClick={() => {
+                    ability.special_resource_used += the_ability.amount_consumed;
+                    this.props.obj.concentrating_on = ability;
+                    if (self_condition_ids.length > 0) {
+                      // Apply the conditions
+                      const obj = this.props.obj;
+                      self_condition_ids.forEach(cond_id => {
+                        obj.conditions.push(cond_id);
+                      });
+                      if (obj instanceof Character) {
+                        this.char_util.recalcAll(obj);
+                      }
+                    }
+                    this.updateCharacter(ability.special_resource_used + the_ability.amount_consumed >= ability.special_resource_amount);
+                  }} 
+                />
+              </div>
+            );
+          } else {
+            // It will never go here because then it wouldn't have done cast options
+          }
+        } else if (the_ability.resource_consumed === "None") {
+          if (this.props.obj.concentrating_on) {
+            return (
+              <div>
+                You're already concentrating on <ViewSpell spell={this.props.obj.concentrating_on} show_ritual />
+                <ButtonBox name={ "Use Anyway" }
+                  disabled={ability.special_resource_used === ability.special_resource_amount}
+                  onClick={() => {
+                    this.props.obj.concentrating_on = ability;
+                    if (self_condition_ids.length > 0) {
+                      // Apply the conditions
+                      const obj = this.props.obj;
+                      self_condition_ids.forEach(cond_id => {
+                        obj.conditions.push(cond_id);
+                      });
+                      if (obj instanceof Character) {
+                        this.char_util.recalcAll(obj);
+                      }
+                    }
+                  }} 
+                />
+              </div>
+            );
+          }
+        } else {
+          // Get the resources
+          const resources = this.props.obj.resources.filter(o => the_ability.resource_consumed);
+          
+          if (resources.length === 1) {
+            const resource = resources[0];
+            if (the_ability.concentration && this.props.obj.concentrating_on) {
+              return (
+                <div>
+                  You're already concentrating on <ViewSpell spell={this.props.obj.concentrating_on} show_ritual />
+                  <ButtonBox name={ "Use Anyway" }
+                    disabled={resource.used + the_ability.amount_consumed >= resource.total}
+                    onClick={() => {
+                      resource.used += the_ability.amount_consumed;
+                      this.props.obj.concentrating_on = ability;
+                      if (self_condition_ids.length > 0) {
+                        // Apply the conditions
+                        const obj = this.props.obj;
+                        self_condition_ids.forEach(cond_id => {
+                          obj.conditions.push(cond_id);
+                        });
+                        if (obj instanceof Character) {
+                          this.char_util.recalcAll(obj);
+                        }
+                      }
+                      this.updateCharacter(resource.used + the_ability.amount_consumed >= resource.total);
+                    }} 
+                  />
+                </div>
+              );
+            } else {
+              // It will never go here because then it wouldn't have done cast options
+            }
+          }
+        }
+      }
+      return null;
     }
   }
 
@@ -756,12 +1019,63 @@ class CharacterAction extends Component<Props, State> {
             damage_rolls.push(roll_plus);
           }
           damage_rolls = [...damage_rolls,...spell.attack.damage_rolls];
+          
+          const rerolls: Reroll[] = [];
+          this.props.obj.rerolls.forEach(r => {
+            let good = false;
+            if (r.allowed_armor_types.includes("All")) {
+              // Check for required
+              if (r.required_armor_types.includes("None")) {
+                good = true;
+              } else if (r.required_armor_types.includes("Any")) {
+                good = this.props.obj.equipped_items.filter(o => 
+                  o.base_item &&
+                  o.base_item.item_type === "Armor" &&
+                  o.base_item.name !== "Shield"
+                ).length > 0;
+              } else {
+                const missing_armor_types = r.required_armor_types.filter(a =>
+                  this.props.obj.equipped_items.filter(o =>
+                    o.base_item &&
+                    o.base_item.item_type === "Armor" &&
+                    o.base_item.armor_type_id === a).length === 0);
+                good = missing_armor_types.length === 0;
+              }
+            } else if (r.allowed_armor_types.includes("None")) {
+              good = this.props.obj.equipped_items.filter(o => 
+                o.base_item &&
+                o.base_item.item_type === "Armor" &&
+                o.base_item.name !== "Shield"
+              ).length === 0;
+            } else {
+              const bad_armor_items = this.props.obj.equipped_items.filter(o =>
+                o.base_item &&
+                o.base_item.item_type === "Armor" &&
+                !r.allowed_armor_types.includes(o.base_item.armor_type_id));
+    
+              good = bad_armor_items.length === 0;
+            }
+            if (good) {
+              if (!r.required_weapon_keywords.includes("None")) {
+              } else if (!r.allowed_damage_types.includes("All")) {
+                good = false;
+                for (let i = 0; i < damage_rolls.length; ++i) {
+                  if (r.allowed_damage_types.includes(damage_rolls[i].type)) {
+                    good = true;
+                    break;
+                  }
+                }
+              }
+              rerolls.push(r);
+            }
+          });
           if (["Healing","Temp HP","Max HP"].includes(spell.effect_string)) {
             return (
               <Roller 
                 name={spell.name}
                 char={this.props.obj}
                 rolls={damage_rolls} 
+                rerolls={rerolls}
                 type={spell.effect_string} 
               />
             );
@@ -771,6 +1085,7 @@ class CharacterAction extends Component<Props, State> {
                 name={spell.name}
                 char={this.props.obj}
                 rolls={damage_rolls} 
+                rerolls={rerolls}
                 type="Damage" 
               />
             );
@@ -789,14 +1104,275 @@ class CharacterAction extends Component<Props, State> {
           />
         );
       } else if (mode === "Damage") {
+        const weapon = this.state.popoverWeapon;
+        const rerolls: Reroll[] = [];
+        if (weapon) {
+          this.props.obj.rerolls.forEach(r => {
+            let good = false;
+            if (r.allowed_armor_types.includes("All")) {
+              // Check for required
+              if (r.required_armor_types.includes("None")) {
+                good = true;
+              } else if (r.required_armor_types.includes("Any")) {
+                good = this.props.obj.equipped_items.filter(o => 
+                  o.base_item &&
+                  o.base_item.item_type === "Armor" &&
+                  o.base_item.name !== "Shield"
+                ).length > 0;
+              } else {
+                const missing_armor_types = r.required_armor_types.filter(a =>
+                  this.props.obj.equipped_items.filter(o =>
+                    o.base_item &&
+                    o.base_item.item_type === "Armor" &&
+                    o.base_item.armor_type_id === a).length === 0);
+                good = missing_armor_types.length === 0;
+              }
+            } else if (r.allowed_armor_types.includes("None")) {
+              good = this.props.obj.equipped_items.filter(o => 
+                o.base_item &&
+                o.base_item.item_type === "Armor" &&
+                o.base_item.name !== "Shield"
+              ).length === 0;
+            } else {
+              const bad_armor_items = this.props.obj.equipped_items.filter(o =>
+                o.base_item &&
+                o.base_item.item_type === "Armor" &&
+                !r.allowed_armor_types.includes(o.base_item.armor_type_id));
+    
+              good = bad_armor_items.length === 0;
+            }
+            if (good) {
+              if (!r.required_weapon_keywords.includes("None")) {
+                for (let i = 0; i < r.required_weapon_keywords.length; ++i) {
+                  if (weapon.weapon_keywords.filter(o => o._id === r.required_weapon_keywords[i]).length === 0) {
+                    good = false;
+                    break;
+                  }
+                }
+              }
+              if (good) {
+                if (!r.excluded_weapon_keywords.includes("None")) {
+                  for (let i = 0; i < weapon.weapon_keywords.length; ++i) {
+                    if (r.excluded_weapon_keywords.includes(weapon.weapon_keywords[i]._id)) {
+                      good = false;
+                      break;
+                    }
+                  }
+                }
+              }
+              if (good) {
+                if (!r.allowed_damage_types.includes("All")) {
+                  good = false;
+                  for (let i = 0; i < attack.damage_rolls.length; ++i) {
+                    if (r.allowed_damage_types.includes(attack.damage_rolls[i].type)) {
+                      good = true;
+                      break;
+                    }
+                  }
+                }
+              }
+              if (good) {
+                rerolls.push(r);
+              }
+            }
+          });
+        }
         return (
           <Roller 
             name={attack.type}
             char={this.props.obj}
             rolls={attack.damage_rolls} 
+            rerolls={rerolls}
             type="Damage" 
           />
         );
+      }
+    } else {
+      const ability = this.state.popoverAction;
+      if (ability) {
+        if (ability.spell) {
+          if (mode === "Attack") {
+            return (
+              <Roller 
+                name={ability.name}
+                char={this.props.obj}
+                rolls={ability.attack.attack_rolls} 
+                type="Attack" 
+              />
+            );
+          } else if (mode === "Damage") {
+            const level = this.state.popoverActionLevel;
+            const potence = ability.get_potence(level, this.props.obj);
+            let damage_rolls: RollPlus[] = [];
+            if (potence) {
+              const roll_plus = new RollPlus(potence.rolls);
+              damage_rolls.push(roll_plus);
+            }
+            damage_rolls = [...damage_rolls,...ability.attack.damage_rolls];
+            
+            const rerolls: Reroll[] = [];
+            this.props.obj.rerolls.forEach(r => {
+              let good = false;
+              if (r.allowed_armor_types.includes("All")) {
+                // Check for required
+                if (r.required_armor_types.includes("None")) {
+                  good = true;
+                } else if (r.required_armor_types.includes("Any")) {
+                  good = this.props.obj.equipped_items.filter(o => 
+                    o.base_item &&
+                    o.base_item.item_type === "Armor" &&
+                    o.base_item.name !== "Shield"
+                  ).length > 0;
+                } else {
+                  const missing_armor_types = r.required_armor_types.filter(a =>
+                    this.props.obj.equipped_items.filter(o =>
+                      o.base_item &&
+                      o.base_item.item_type === "Armor" &&
+                      o.base_item.armor_type_id === a).length === 0);
+                  good = missing_armor_types.length === 0;
+                }
+              } else if (r.allowed_armor_types.includes("None")) {
+                good = this.props.obj.equipped_items.filter(o => 
+                  o.base_item &&
+                  o.base_item.item_type === "Armor" &&
+                  o.base_item.name !== "Shield"
+                ).length === 0;
+              } else {
+                const bad_armor_items = this.props.obj.equipped_items.filter(o =>
+                  o.base_item &&
+                  o.base_item.item_type === "Armor" &&
+                  !r.allowed_armor_types.includes(o.base_item.armor_type_id));
+      
+                good = bad_armor_items.length === 0;
+              }
+              if (good) {
+                if (!r.required_weapon_keywords.includes("None")) {
+                } else if (!r.allowed_damage_types.includes("All")) {
+                  good = false;
+                  for (let i = 0; i < damage_rolls.length; ++i) {
+                    if (r.allowed_damage_types.includes(damage_rolls[i].type)) {
+                      good = true;
+                      break;
+                    }
+                  }
+                }
+                rerolls.push(r);
+              }
+            });
+            if (["Healing","Temp HP","Max HP"].includes(ability.effect_string)) {
+              return (
+                <Roller 
+                  name={ability.name}
+                  char={this.props.obj}
+                  rolls={damage_rolls} 
+                  rerolls={rerolls}
+                  type={ability.effect_string} 
+                />
+              );
+            } else {
+              return (
+                <Roller 
+                  name={ability.name}
+                  char={this.props.obj}
+                  rolls={damage_rolls} 
+                  rerolls={rerolls}
+                  type="Damage" 
+                />
+              );
+            }
+          }
+        } else if (ability.the_ability instanceof Ability) {
+          if (mode === "Attack") {
+            return (
+              <Roller 
+                name={ability.name}
+                char={this.props.obj}
+                rolls={ability.attack.attack_rolls} 
+                type="Attack" 
+              />
+            );
+          } else if (mode === "Damage") {
+            const level = this.state.popoverActionLevel;
+            const potence = ability.get_potence(level, this.props.obj);
+            let damage_rolls: RollPlus[] = [];
+            if (potence) {
+              const roll_plus = new RollPlus(potence.rolls);
+              damage_rolls.push(roll_plus);
+            }
+            damage_rolls = [...damage_rolls,...ability.attack.damage_rolls];
+            
+            const rerolls: Reroll[] = [];
+            this.props.obj.rerolls.forEach(r => {
+              let good = false;
+              if (r.allowed_armor_types.includes("All")) {
+                // Check for required
+                if (r.required_armor_types.includes("None")) {
+                  good = true;
+                } else if (r.required_armor_types.includes("Any")) {
+                  good = this.props.obj.equipped_items.filter(o => 
+                    o.base_item &&
+                    o.base_item.item_type === "Armor" &&
+                    o.base_item.name !== "Shield"
+                  ).length > 0;
+                } else {
+                  const missing_armor_types = r.required_armor_types.filter(a =>
+                    this.props.obj.equipped_items.filter(o =>
+                      o.base_item &&
+                      o.base_item.item_type === "Armor" &&
+                      o.base_item.armor_type_id === a).length === 0);
+                  good = missing_armor_types.length === 0;
+                }
+              } else if (r.allowed_armor_types.includes("None")) {
+                good = this.props.obj.equipped_items.filter(o => 
+                  o.base_item &&
+                  o.base_item.item_type === "Armor" &&
+                  o.base_item.name !== "Shield"
+                ).length === 0;
+              } else {
+                const bad_armor_items = this.props.obj.equipped_items.filter(o =>
+                  o.base_item &&
+                  o.base_item.item_type === "Armor" &&
+                  !r.allowed_armor_types.includes(o.base_item.armor_type_id));
+      
+                good = bad_armor_items.length === 0;
+              }
+              if (good) {
+                if (!r.required_weapon_keywords.includes("None")) {
+                } else if (!r.allowed_damage_types.includes("All")) {
+                  good = false;
+                  for (let i = 0; i < damage_rolls.length; ++i) {
+                    if (r.allowed_damage_types.includes(damage_rolls[i].type)) {
+                      good = true;
+                      break;
+                    }
+                  }
+                }
+                rerolls.push(r);
+              }
+            });
+            if (["Healing","Temp HP","Max HP"].includes(ability.effect_string)) {
+              return (
+                <Roller 
+                  name={ability.name}
+                  char={this.props.obj}
+                  rolls={damage_rolls} 
+                  rerolls={rerolls}
+                  type={ability.effect_string} 
+                />
+              );
+            } else {
+              return (
+                <Roller 
+                  name={ability.name}
+                  char={this.props.obj}
+                  rolls={damage_rolls} 
+                  rerolls={rerolls}
+                  type="Damage" 
+                />
+              );
+            }
+          }
+        }
       }
     }
     return null;

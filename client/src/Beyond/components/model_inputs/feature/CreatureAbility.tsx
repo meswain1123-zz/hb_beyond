@@ -74,7 +74,6 @@ class CreatureAbilityInput extends Component<Props, State> {
   }
 
   render() {
-    console.log(this.props.obj);
     if (this.state.reloading) {
       return (
         <Grid item>Loading</Grid>
@@ -265,6 +264,7 @@ class CreatureAbilityInput extends Component<Props, State> {
               name="Resource Consumed"
               allow_special
               allow_none
+              // allow_slot
               value={ this.props.obj.resource_consumed ? this.props.obj.resource_consumed : "None" }
               onChange={(value: string) => {
                 const obj = this.props.obj;

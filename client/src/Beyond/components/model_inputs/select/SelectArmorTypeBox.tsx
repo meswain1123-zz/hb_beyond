@@ -36,6 +36,7 @@ type Props = PropsFromRedux & {
   armor_types: ArmorType[] | null;
   allow_all: boolean;
   allow_none: boolean;
+  allow_any: boolean;
   onChange: Function;
 }
 
@@ -51,7 +52,8 @@ class SelectArmorTypeBox extends Component<Props, State> {
     values: [],
     multiple: false,
     allow_all: false,
-    allow_none: false
+    allow_none: false,
+    allow_any: false
   };
   constructor(props: Props) {
     super(props);
@@ -90,6 +92,7 @@ class SelectArmorTypeBox extends Component<Props, State> {
           multiple
           allow_all={this.props.allow_all}
           allow_none={this.props.allow_none}
+          allow_any={this.props.allow_any}
           values={this.props.values} 
           name={this.props.name}
           onChange={(ids: string[]) => {
@@ -103,6 +106,9 @@ class SelectArmorTypeBox extends Component<Props, State> {
           options={this.state.armor_types}
           value={this.props.value} 
           name={this.props.name}
+          allow_all={this.props.allow_all}
+          allow_none={this.props.allow_none}
+          allow_any={this.props.allow_any}
           onChange={(id: string) => {
             const objFinder = this.state.armor_types ? this.state.armor_types.filter(o => o._id === id) : [];
             if (objFinder.length === 1) {

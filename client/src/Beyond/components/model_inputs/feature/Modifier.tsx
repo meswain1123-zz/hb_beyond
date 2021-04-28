@@ -19,6 +19,7 @@ import ToggleButtonBox from "../../input/ToggleButtonBox";
 
 import SelectResourceBox from "../select/SelectResourceBox";
 import SelectArmorTypeBox from "../select/SelectArmorTypeBox";
+import SelectWeaponKeywordBox from "../select/SelectWeaponKeywordBox";
 
 import API from "../../../utilities/smart_api";
 import { APIClass } from "../../../utilities/smart_api_class";
@@ -171,7 +172,7 @@ class ModifierInput extends Component<Props, State> {
           <Grid item>
             <SelectStringBox 
               name="Attack Type" 
-              options={["Strength","Dexterity","Melee","Ranged","2nd Weapon","Cantrip Attacks","Spell Attacks","Cantrip Saves","Spell Saves"]}
+              options={["Strength","Dexterity","Melee","Ranged","Versatile","2nd Weapon","Cantrip Attacks","Spell Attacks","Cantrip Saves","Spell Saves"]}
               values={this.props.obj.modifies_details} 
               multiple
               onChange={(values: string[]) => {
@@ -215,6 +216,7 @@ class ModifierInput extends Component<Props, State> {
             values={this.props.obj.required_armor_types} 
             multiple
             allow_none
+            allow_any
             onChange={(values: string[]) => {
               const obj = this.props.obj;
               obj.required_armor_types = values;
@@ -222,10 +224,43 @@ class ModifierInput extends Component<Props, State> {
             }} 
           />
         </Grid>
+        { this.props.obj.modifies === "Damage" && 
+          <Grid item>
+            <SelectWeaponKeywordBox 
+              name="Excluded Weapon Keywords" 
+              values={this.props.obj.excluded_weapon_keywords} 
+              multiple
+              allow_none
+              allow_any
+              allow_all
+              onChange={(values: string[]) => {
+                const obj = this.props.obj;
+                obj.excluded_weapon_keywords = values;
+                this.props.onChange(obj);
+              }} 
+            />
+          </Grid>
+        }
+        { this.props.obj.modifies === "Damage" && 
+          <Grid item>
+            <SelectWeaponKeywordBox 
+              name="Required Weapon Keywords" 
+              values={this.props.obj.required_weapon_keywords} 
+              multiple
+              allow_none
+              allow_any
+              onChange={(values: string[]) => {
+                const obj = this.props.obj;
+                obj.required_weapon_keywords = values;
+                this.props.onChange(obj);
+              }} 
+            />
+          </Grid>
+        }
         <Grid item>
           <SelectStringBox 
             name="Modification Type" 
-            options={["Flat","Character Level","Class Level",...ABILITY_SCORES]}
+            options={["Flat","Attack Ability Modifier","Character Level","Class Level",...ABILITY_SCORES]}
             value={this.props.obj.type} 
             onChange={(value: string) => {
               const obj = this.props.obj;

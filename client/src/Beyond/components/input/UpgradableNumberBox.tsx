@@ -13,8 +13,12 @@ import {
 import { 
   UpgradableNumber
 } from "../../models";
+import { 
+  ABILITY_SCORES
+} from "../../models/Constants";
 
 import StringBox from "./StringBox";
+import SelectStringBox from "./SelectStringBox";
 
 interface AppState {
   
@@ -48,6 +52,7 @@ type Props = PropsFromRedux & {
 export interface State { 
   labelWidth: number;
   editing: string;
+  mod: boolean;
 }
 
 
@@ -61,7 +66,8 @@ class UpgradableNumberBox extends Component<Props, State> {
     super(props);
     this.state = {
       labelWidth: this.getLabelWidth(props.name),
-      editing: ""
+      editing: "",
+      mod: true
     };
   }
 
@@ -124,12 +130,36 @@ class UpgradableNumberBox extends Component<Props, State> {
               onClick={() => {
                 this.setState({ editing: "Prof" });
               }}>{ this.props.value.add_prof_bonus_mult } * Prof. Bonus</span> +
+            <span style={{ cursor: "pointer" }} 
+              onClick={() => {
+                this.setState({ editing: "Ability Score" });
+              }}>{ this.props.value.add_ability_score }</span> 
+            { this.props.value.add_ability_score !== "None" &&
+              <span style={{ cursor: "pointer" }} 
+                onClick={() => {
+                  const value = this.props.value;
+                  value.add_ability_mod_mult = 0;
+                  value.add_ability_score_mult = 0;
+                  this.props.onChange(value);
+                  this.setState({ mod: !this.state.mod });
+                }}>({ this.state.mod ? "Mod" : "Score" })</span> 
+            }
+            { this.props.value.add_ability_score !== "None" &&
+              <span style={{ cursor: "pointer" }} 
+                onClick={() => {
+                  this.setState({ editing: "AS Amount" });
+                }}> * { this.state.mod ? this.props.value.add_ability_mod_mult : this.props.value.add_ability_score_mult }</span> 
+            }
             { this.props.slot_level > 0 &&
               <span style={{ cursor: "pointer" }} 
               onClick={() => {
                 this.setState({ editing: "Upcast" });
-              }}>(Slot Level - { this.props.slot_level }) * { this.props.value.add_slot_level_mult }</span>
+              }}> + (Slot Level - { this.props.slot_level }) * { this.props.value.add_slot_level_mult }</span>
             }
+            <span style={{ cursor: "pointer" }} 
+              onClick={() => {
+                this.setState({ editing: "Min" });
+              }}>&nbsp;(Min={ this.props.value.min })</span>
           </Grid>
         }
         { this.state.editing !== "" &&
@@ -179,7 +209,33 @@ class UpgradableNumberBox extends Component<Props, State> {
                     this.props.onChange(value);
                   }}
                 />
-              : this.state.editing === "Upcast" &&
+              : this.state.editing === "Ability Score" ?
+                <SelectStringBox
+                  name="Ability Score"
+                  value={this.props.value.add_ability_score}
+                  options={["Spellcasting",...ABILITY_SCORES]}
+                  onChange={(changed: string) => {
+                    const value = this.props.value;
+                    value.add_ability_score = changed;
+                    this.props.onChange(value);
+                  }}
+                />
+              : this.state.editing === "AS Amount" ?
+                <StringBox
+                  name={ this.state.mod ? `${this.props.value.add_ability_score} Modifier` : `${this.props.value.add_ability_score} Score` }
+                  value={ this.state.mod ? `${this.props.value.add_ability_mod_mult}` : `${this.props.value.add_ability_score_mult}` }
+                  type="number"
+                  onBlur={(changed: string) => {
+                    const value = this.props.value;
+                    if (this.state.mod) {
+                      value.add_ability_mod_mult = +changed;
+                    } else {
+                      value.add_ability_score_mult = +changed;
+                    }
+                    this.props.onChange(value);
+                  }}
+                />
+              : this.state.editing === "Upcast" ?
                 <StringBox
                   name="Upcast Multiplier"
                   value={`${this.props.value.add_slot_level_mult}`}
@@ -187,6 +243,17 @@ class UpgradableNumberBox extends Component<Props, State> {
                   onBlur={(changed: string) => {
                     const value = this.props.value;
                     value.add_slot_level_mult = +changed;
+                    this.props.onChange(value);
+                  }}
+                />
+              : this.state.editing === "Min" &&
+                <StringBox
+                  name="Minimum"
+                  value={`${this.props.value.min}`}
+                  type="number"
+                  onBlur={(changed: string) => {
+                    const value = this.props.value;
+                    value.min = +changed;
                     this.props.onChange(value);
                   }}
                 />

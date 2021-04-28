@@ -226,11 +226,15 @@ class CharacterActions extends Component<Props, State> {
     if (!found) {
       found = this.props.obj.actions[`spells_${group2}`].length > 0 || this.props.obj.actions[`abilities_${group2}`].length > 0;
     }
+    let extra_attacks = "";
+    if (this.props.obj.extra_attacks > 0) {
+      extra_attacks = `${this.props.obj.extra_attacks + 1} Attacks per Action`;
+    }
     if (found) {
       return (
         <Grid item container spacing={1} direction="column">
           <Grid item style={{ fontWeight: "bold", fontSize: "15px" }}>
-            { group }
+            { group } { extra_attacks }
           </Grid>
           { this.renderActionsOfType(group2, "Weapon Attacks") }
           { this.renderActionsOfType(group2, "Spells") }

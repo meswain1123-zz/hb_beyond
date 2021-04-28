@@ -4,6 +4,7 @@ import {
   AbilityTemplate,
   AbilityEffect 
 } from ".";
+import { UpgradableNumber } from "./UpgradableNumber";
 
 
 /**
@@ -57,8 +58,10 @@ export class Ability {
   material_component: string;
   casting_time: string; // A, BA, RA, X minute(s), etc
   resource_consumed: string | null; // Slot-X, Ki, Lay on Hands, Charge, etc.
-  amount_consumed: number | null;
-  special_resource_amount: string;
+  amount_consumed: number;
+  slot_level: number; // If it consumes slots then this is the minimum level of the slot
+  slot_type: string; // If it consumes a specific type of slot (usually Pact) then this holds that
+  special_resource_amount: UpgradableNumber;
   special_resource_refresh_rule: string; // Short Rest, Long Rest, Dawn, 1 Hour, 8 Hours, 24 Hours
   attack_bonus: number;
   dc: number;
@@ -73,7 +76,7 @@ export class Ability {
     this.feature_id = obj ? obj.feature_id : 0;
     this.name = obj ? obj.name : "";
     this.description = obj ? obj.description : "";
-    this.saving_throw_ability_score = obj ? obj.saving_throw_ability_score : "";
+    this.saving_throw_ability_score = obj && obj.saving_throw_ability_score !== "undefined" ? obj.saving_throw_ability_score : "";
     this.effect = obj ? new AbilityEffect(obj.effect) : new AbilityEffect();
     this.effect_2 = obj ? new AbilityEffect(obj.effect_2) : new AbilityEffect();
     this.range = obj ? obj.range : null;
@@ -82,11 +85,21 @@ export class Ability {
     this.notes = obj?.notes;
     this.duration = obj ? obj.duration : "Instantaneous";
     this.components = obj ? [...obj.components] : [];
-    this.material_component = obj ? obj.material_component : "";
+    this.material_component = obj && obj.material_component !== "undefined" ? obj.material_component : "";
     this.casting_time = obj ? obj.casting_time : "A";
     this.resource_consumed = obj ? obj.resource_consumed : "None";
-    this.amount_consumed = obj ? obj.amount_consumed : 0;
-    this.special_resource_amount = obj ? obj.special_resource_amount : "0";
+    this.amount_consumed = obj && obj.amount_consumed ? obj.amount_consumed : 0;
+    this.slot_level = obj && obj.slot_level ? obj.slot_level : 1;
+    this.slot_type = obj && obj.slot_type ? obj.slot_type : "";
+    if (obj && obj.special_resource_amount && obj.special_resource_amount.base === undefined) {
+      // Translate old set up to new
+      this.special_resource_amount = new UpgradableNumber();
+      this.special_resource_amount.base = obj.special_resource_amount;
+    } else if (obj && obj.special_resource_amount) {
+      this.special_resource_amount = new UpgradableNumber(obj.special_resource_amount);
+    } else {
+      this.special_resource_amount = new UpgradableNumber();
+    }
     this.special_resource_refresh_rule = obj ? obj.special_resource_refresh_rule : "";
     this.attack_bonus = obj && obj.attack_bonus ? obj.attack_bonus : 0;
     this.dc = obj && obj.dc ? obj.dc : 0;
@@ -110,7 +123,9 @@ export class Ability {
       casting_time: this.casting_time,
       resource_consumed: this.resource_consumed,
       amount_consumed: this.amount_consumed,
-      special_resource_amount: this.special_resource_amount,
+      slot_level: this.slot_level,
+      slot_type: this.slot_type,
+      special_resource_amount: this.special_resource_amount.toDBObj(),
       special_resource_refresh_rule: this.special_resource_refresh_rule,
       attack_bonus: this.attack_bonus,
       dc: this.dc
@@ -139,7 +154,9 @@ export class Ability {
     this.casting_time = copyMe.casting_time;
     this.resource_consumed = copyMe.resource_consumed;
     this.amount_consumed = copyMe.amount_consumed;
-    this.special_resource_amount = copyMe.special_resource_amount;
+    this.slot_level = copyMe.slot_level;
+    this.slot_type = copyMe.slot_type;
+    this.special_resource_amount = new UpgradableNumber(copyMe.special_resource_amount);
     this.special_resource_refresh_rule = copyMe.special_resource_refresh_rule;
     this.attack_bonus = copyMe.attack_bonus;
     this.dc = copyMe.dc;
@@ -161,7 +178,9 @@ export class Ability {
     this.casting_time = copyMe.casting_time;
     this.resource_consumed = copyMe.resource_consumed;
     this.amount_consumed = copyMe.amount_consumed;
-    this.special_resource_amount = copyMe.special_resource_amount;
+    this.slot_level = copyMe.slot_level;
+    this.slot_type = copyMe.slot_type;
+    this.special_resource_amount = new UpgradableNumber(copyMe.special_resource_amount);
     this.special_resource_refresh_rule = copyMe.special_resource_refresh_rule;
     this.attack_bonus = copyMe.attack_bonus;
     this.dc = copyMe.dc;

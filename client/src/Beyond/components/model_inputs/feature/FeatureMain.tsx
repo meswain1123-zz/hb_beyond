@@ -28,18 +28,26 @@ import {
   SpellBook,
   LanguageFeature,
   SenseFeature,
-  SpellcastingFeature
+  SpellcastingFeature,
+  UpgradableNumber,
+  IStringHash,
+  Reroll
 } from "../../../models";
 import { 
   FEATURE_TYPES,
+  DAMAGE_TYPES,
+  ABILITY_SCORES
 } from "../../../models/Constants";
 
 import StringBox from "../../input/StringBox";
 import SelectStringBox from "../../input/SelectStringBox";
+import UpgradableNumberBox from "../../input/UpgradableNumberBox";
+
 import ProficiencyFeatureInput from "./ProficiencyFeature";
 import ASIBaseFeatureInput from "./ASIBaseFeature";
 import ResourceFeatureInput from "./ResourceFeature";
 import ModifierInput from "./Modifier";
+import RerollInput from "./Reroll";
 import LanguageFeatureInput from "./LanguageFeature";
 import SpellModifierInput from "./SpellModifier";
 import AdvantageInput from "./Advantage";
@@ -53,6 +61,8 @@ import TemplateBox from "../TemplateBox";
 import SpellBookInput from "./SpellBook";
 import SelectSpecialFeatureTypeBox from "../select/SelectSpecialFeatureTypeBox";
 import SelectSpecialFeatureBox from "../select/SelectSpecialFeatureBox";
+import SelectFightingStyleBox from "../select/SelectFightingStyleBox";
+import SelectSpellListBox from "../select/SelectSpellListBox";
 import DamageMultiplierInput from "./DamageMultiplier";
 import SpellcastingFeatureInput from "./SpellcastingFeature";
 import SenseFeatureInput from "./SenseFeature";
@@ -85,6 +95,7 @@ type Props = PropsFromRedux & {
   base_name: string | null;
   choice_name: string | null;
   feature: Feature;
+  slot_level: number;
   onChange: (feature: Feature) => void; 
   onDelete: () => void; 
   onDone: (target: string) => void;
@@ -98,7 +109,8 @@ export interface State {
 
 class FeatureInput extends Component<Props, State> {
   public static defaultProps = {
-    choice_name: null
+    choice_name: null,
+    slot_level: -1
   };
   constructor(props: Props) {
     super(props);
@@ -236,6 +248,12 @@ class FeatureInput extends Component<Props, State> {
                   case "Eldritch Invocation":
                     the_feature = "Eldritch Invocation";
                   break;
+                  case "Fighting Style":
+                    the_feature = [];
+                  break;
+                  case "Reroll":
+                    the_feature = new Reroll();
+                  break;
                   case "Modifier":
                     the_feature = new Modifier();
                   break;
@@ -298,6 +316,27 @@ class FeatureInput extends Component<Props, State> {
                   case "Creature Ability":
                     the_feature = new CreatureAbility();
                   break;
+                  case "Unarmed Strike Size":
+                    the_feature = 4;
+                  break;
+                  case "Unarmed Strike Count":
+                    the_feature = 1;
+                  break;
+                  case "Unarmed Strike Bonus Action":
+                    the_feature = true;
+                  break;
+                  case "Unarmed Strike Damage Type":
+                    the_feature = "Bludgeoning";
+                  break;
+                  case "Unarmed Strike Score":
+                    the_feature = "STR";
+                  break;
+                  case "Extra Attacks":
+                    the_feature = 1;
+                  break;
+                  case "Minion Extra Attacks":
+                    the_feature = new UpgradableNumber();
+                  break;
                   case "Minion Ability":
                     the_feature = new MinionAbility();
                   break;
@@ -327,6 +366,13 @@ class FeatureInput extends Component<Props, State> {
                   break;
                   case "Cantrips":
                     the_feature = 0;
+                  break;
+                  case "Cantrips from List":
+                    the_feature = {
+                      list_id: "",
+                      count: "0",
+                      spellcasting_ability: ""
+                    };
                   break;
                   case "Ritual Casting":
                     the_feature = "Ritual Casting";
@@ -380,6 +426,36 @@ class FeatureInput extends Component<Props, State> {
           if (typeof this.state.feature.the_feature === "string") {
             feature_details = 
               <span>The player will be able to choose an Eldritch Invocation</span>;
+          }
+        break;
+        case "Fighting Style":
+          if (typeof this.state.feature.the_feature === "object") {
+            const choices: string[] = this.state.feature.the_feature as string[];
+            feature_details = 
+              <SelectFightingStyleBox
+                name="Fighting Style Options"
+                values={choices}
+                multiple
+                onChange={(changed: string[]) => {
+                  const feature = this.state.feature;
+                  feature.the_feature = changed;
+                  this.setState({ feature });
+                }}
+              />;
+          }
+        break;
+        case "Reroll":
+          if (this.state.feature.the_feature instanceof Reroll) {
+            const reroll: Reroll = this.state.feature.the_feature;
+            feature_details = 
+              <RerollInput
+                obj={reroll}
+                onChange={(changed: Reroll) => {
+                  const feature = this.state.feature;
+                  feature.the_feature = changed;
+                  this.setState({ feature });
+                }}
+              />;
           }
         break;
         case "Modifier":
@@ -616,7 +692,108 @@ class FeatureInput extends Component<Props, State> {
             feature_details =
               <MinionAbilityInput 
                 obj={ability}
+                slot_level={this.props.slot_level}
                 onChange={(changed: MinionAbility) => {
+                  const feature = this.state.feature;
+                  feature.the_feature = changed;
+                  this.setState({ feature });
+                }}
+              />;
+          }
+        break;
+        case "Unarmed Strike Size":
+          if (typeof this.state.feature.the_feature === "number") {
+            const size: number = this.state.feature.the_feature;
+            feature_details =
+              <StringBox 
+                name="Unarmed Strike Size"
+                value={`${size}`}
+                type="number"
+                onBlur={(changed: string) => {
+                  const feature = this.state.feature;
+                  feature.the_feature = +changed;
+                  this.setState({ feature });
+                }}
+              />;
+          }
+        break;
+        case "Unarmed Strike Count":
+          if (typeof this.state.feature.the_feature === "number") {
+            const count: number = this.state.feature.the_feature;
+            feature_details =
+              <StringBox 
+                name="Unarmed Strike Count"
+                value={`${count}`}
+                type="number"
+                onBlur={(changed: string) => {
+                  const feature = this.state.feature;
+                  feature.the_feature = +changed;
+                  this.setState({ feature });
+                }}
+              />;
+          }
+        break;
+        case "Unarmed Strike Bonus Action":
+          feature_details =
+            <span>They can do an Unarmed Strike as a Bonus Action</span>;
+        break;
+        case "Unarmed Strike Damage Type":
+          if (typeof this.state.feature.the_feature === "string") {
+            const type: string = this.state.feature.the_feature;
+            feature_details =
+              <SelectStringBox 
+                options={DAMAGE_TYPES}
+                name="Unarmed Strike Damage Type"
+                value={type}
+                onChange={(changed: string) => {
+                  const feature = this.state.feature;
+                  feature.the_feature = changed;
+                  this.setState({ feature });
+                }}
+              />;
+          }
+        break;
+        case "Unarmed Strike Score":
+          if (typeof this.state.feature.the_feature === "string") {
+            const type: string = this.state.feature.the_feature;
+            feature_details =
+              <SelectStringBox 
+                options={ABILITY_SCORES}
+                name="Unarmed Strike Score"
+                value={type}
+                onChange={(changed: string) => {
+                  const feature = this.state.feature;
+                  feature.the_feature = changed;
+                  this.setState({ feature });
+                }}
+              />;
+          }
+        break;
+        case "Extra Attacks":
+          if (typeof this.state.feature.the_feature === "number") {
+            const attacks: number = this.state.feature.the_feature;
+            feature_details =
+              <StringBox 
+                name="Extra Attacks"
+                value={`${attacks}`}
+                type="number"
+                onBlur={(changed: string) => {
+                  const feature = this.state.feature;
+                  feature.the_feature = +changed;
+                  this.setState({ feature });
+                }}
+              />;
+          }
+        break;
+        case "Minion Extra Attacks":
+          if (this.state.feature.the_feature instanceof UpgradableNumber) {
+            const attacks: UpgradableNumber = this.state.feature.the_feature;
+            feature_details =
+              <UpgradableNumberBox 
+                name="Minion Extra Attacks"
+                slot_level={this.props.slot_level}
+                value={attacks} 
+                onChange={(changed: UpgradableNumber) => {
                   const feature = this.state.feature;
                   feature.the_feature = changed;
                   this.setState({ feature });
@@ -749,6 +926,50 @@ class FeatureInput extends Component<Props, State> {
                 this.setState({ feature });
               }} 
             />;
+        break;
+        case "Cantrips from List":
+          const cantrips_hash: IStringHash = this.state.feature.the_feature as IStringHash;
+          feature_details = 
+            <Grid container spacing={1} direction="row">
+              <Grid item xs={4}>
+                <SelectSpellListBox
+                  name="Spell List"
+                  value={cantrips_hash.list_id} 
+                  onChange={(value: string) => {
+                    const feature = this.state.feature;
+                    cantrips_hash.list_id = value;
+                    feature.the_feature = cantrips_hash;
+                    this.setState({ feature });
+                  }} 
+                />
+              </Grid>
+              <Grid item xs={4}>
+                <StringBox
+                  name="Count"
+                  value={cantrips_hash.count} 
+                  type="number"
+                  onBlur={(value: string) => {
+                    const feature = this.state.feature;
+                    cantrips_hash.count = value;
+                    feature.the_feature = cantrips_hash;
+                    this.setState({ feature });
+                  }} 
+                />
+              </Grid>
+              <Grid item xs={4}>
+                <SelectStringBox
+                  name="Spellcasting Ability"
+                  options={ABILITY_SCORES}
+                  value={cantrips_hash.spellcasting_ability} 
+                  onChange={(value: string) => {
+                    const feature = this.state.feature;
+                    cantrips_hash.spellcasting_ability = value;
+                    feature.the_feature = cantrips_hash;
+                    this.setState({ feature });
+                  }} 
+                />
+              </Grid>
+            </Grid>;
         break;
         case "Ritual Casting":
         break;

@@ -35,6 +35,7 @@ type Props = PropsFromRedux & {
   uses_dice_only: boolean;
   allow_special: boolean;
   allow_none: boolean;
+  allow_slot: boolean;
 }
 
 export interface State {
@@ -46,7 +47,8 @@ class SelectResourceBox extends Component<Props, State> {
   public static defaultProps = {
     uses_dice_only: false,
     allow_special: false,
-    allow_none: false
+    allow_none: false,
+    allow_slot: false
   };
   constructor(props: Props) {
     super(props);
@@ -85,6 +87,12 @@ class SelectResourceBox extends Component<Props, State> {
         none._id = "None";
         none.name = "None";
         resources.push(none);
+      }
+      if (this.props.allow_slot) {
+        const slot = new Resource();
+        slot._id = "Slot";
+        slot.name = "Slot";
+        resources.push(slot);
       }
       if (this.props.allow_special) {
         const special = new Resource();

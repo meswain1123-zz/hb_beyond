@@ -31,6 +31,8 @@ export class Modifier {
   amount: string;
   allowed_armor_types: string[];
   required_armor_types: string[];
+  excluded_weapon_keywords: string[];
+  required_weapon_keywords: string[];
 
   constructor(obj?: any) {
     this.modifies = obj ? `${obj.modifies}` : "";
@@ -46,6 +48,8 @@ export class Modifier {
     this.amount = obj && obj.amount ? `${obj.amount}` : "0";
     this.allowed_armor_types = obj && obj.allowed_armor_types ? [...obj.allowed_armor_types] : ["All"];
     this.required_armor_types = obj && obj.required_armor_types ? [...obj.required_armor_types] : ["None"];
+    this.excluded_weapon_keywords = obj && obj.excluded_weapon_keywords ? [...obj.excluded_weapon_keywords] : ["Any"];
+    this.required_weapon_keywords = obj && obj.required_weapon_keywords ? [...obj.required_weapon_keywords] : ["Any"];
   }
 
   toDBObj = () => {
@@ -57,7 +61,9 @@ export class Modifier {
       type: this.type,
       amount: this.amount,
       allowed_armor_types: this.allowed_armor_types,
-      required_armor_types: this.required_armor_types
+      required_armor_types: this.required_armor_types,
+      excluded_weapon_keywords: this.excluded_weapon_keywords,
+      required_weapon_keywords: this.required_weapon_keywords
     };
   }
 }

@@ -156,7 +156,6 @@ class CreatureEdit extends Component<Props, State> {
         this.load_object(id);
         return (<span>Loading...</span>);
       } else {
-        console.log(this.state.obj);
         const formHeight = this.props.height - (this.props.width > 600 ? 228 : 228);
         return (
           <Grid container spacing={1} direction="column">

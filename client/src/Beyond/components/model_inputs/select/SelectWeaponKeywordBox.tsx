@@ -34,6 +34,9 @@ type Props = PropsFromRedux & {
   multiple: boolean;
   values: string[];
   weapon_keywords: WeaponKeyword[] | null;
+  allow_all: boolean;
+  allow_none: boolean;
+  allow_any: boolean;
   onChange: Function;
 }
 
@@ -47,7 +50,10 @@ class SelectWeaponKeywordBox extends Component<Props, State> {
     weapon_keywords: null,
     value: null,
     values: [],
-    multiple: false
+    multiple: false,
+    allow_all: false,
+    allow_none: false,
+    allow_any: false
   };
   constructor(props: Props) {
     super(props);
@@ -84,6 +90,9 @@ class SelectWeaponKeywordBox extends Component<Props, State> {
         <SelectBox 
           options={this.state.weapon_keywords}
           multiple
+          allow_all={this.props.allow_all}
+          allow_none={this.props.allow_none}
+          allow_any={this.props.allow_any}
           values={this.props.values} 
           name={this.props.name}
           onChange={(ids: string[]) => {
@@ -97,6 +106,9 @@ class SelectWeaponKeywordBox extends Component<Props, State> {
           options={this.state.weapon_keywords}
           value={this.props.value} 
           name={this.props.name}
+          allow_all={this.props.allow_all}
+          allow_none={this.props.allow_none}
+          allow_any={this.props.allow_any}
           onChange={(id: string) => {
             const objFinder = this.state.weapon_keywords ? this.state.weapon_keywords.filter(o => o._id === id) : [];
             if (objFinder.length === 1) {

@@ -100,6 +100,11 @@ const menuRoutes = {
       
     },
     {
+      path: "/beyond/fighting_style",
+      name: "Fighting Styles",
+      
+    },
+    {
       path: "/beyond/pact_boon",
       name: "Pact Boons",
       

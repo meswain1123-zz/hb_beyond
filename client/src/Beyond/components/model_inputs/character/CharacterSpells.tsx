@@ -8,6 +8,7 @@ import {
 import { 
   Character,
   CharacterSpell,
+  CharacterAbility,
   CharacterSlot,
   Spell,
   INumHash,
@@ -56,7 +57,7 @@ export interface State {
   search_string: string;
   view: string;
   edit_view: string;
-  selected_spell: CharacterSpell | null;
+  selected_spell: CharacterSpell | CharacterAbility | null;
   selected_level: number | null;
   spells: Spell[] | null;
   levels: INumHash;
@@ -439,7 +440,7 @@ class CharacterSpells extends Component<Props, State> {
     );
   }
 
-  renderSpellsForLevelHead(filtered: CharacterSpell[], level: number) {
+  renderSpellsForLevelHead(filtered: (CharacterSpell | CharacterAbility)[], level: number) {
     const slots = this.props.obj.slots.filter(o => o.level === level);
     if (slots.length > 0 || (level === 0 && filtered.filter(o => o.level === level).length > 0)) {
       return [
@@ -531,8 +532,8 @@ class CharacterSpells extends Component<Props, State> {
     return return_me;
   }
 
-  renderSpellsForLevelBody(filtered: CharacterSpell[], level: number) {
-    let level_filtered: CharacterSpell[] = [];
+  renderSpellsForLevelBody(filtered: (CharacterSpell | CharacterAbility)[], level: number) {
+    let level_filtered: (CharacterSpell | CharacterAbility)[] = [];
     if (level === 0) {
       level_filtered = filtered.filter(o => 
         o.level === level).sort((a,b) => { 

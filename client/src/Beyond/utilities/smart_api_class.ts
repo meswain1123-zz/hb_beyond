@@ -14,6 +14,7 @@ import {
   Character,
   Creature,
   EldritchInvocation,
+  FightingStyle,
   EquipmentPack,
   PactBoon,
   Feat,
@@ -67,6 +68,7 @@ export class APIClass {
   characters: Character[] | null;
   creatures: Creature[] | null;
   eldritch_invocations: EldritchInvocation[] | null;
+  fighting_styles: FightingStyle[] | null;
   equipment_packs: EquipmentPack[] | null;
   pact_boons: PactBoon[] | null;
   feats: Feat[] | null;
@@ -100,6 +102,7 @@ export class APIClass {
     this.characters = null;
     this.creatures = null;
     this.eldritch_invocations = null;
+    this.fighting_styles = null;
     this.equipment_packs = null;
     this.pact_boons = null;
     this.feats = null;
@@ -215,6 +218,9 @@ export class APIClass {
         break;
         case "eldritch_invocation": 
           data = this.eldritch_invocations;
+        break;
+        case "fighting_style": 
+          data = this.fighting_styles;
         break;
         case "equipment_pack": 
           data = this.equipment_packs;
@@ -486,6 +492,14 @@ export class APIClass {
             data = this.eldritch_invocations.filter(o => o._id === id);
           }
         break;
+        case "fighting_style": 
+          if (!this.fighting_styles) {
+            await this.getObjects("fighting_style");
+          }
+          if (this.fighting_styles) {
+            data = this.fighting_styles.filter(o => o._id === id);
+          }
+        break;
         case "equipment_pack": 
           if (!this.equipment_packs) {
             await this.getObjects("equipment_pack");
@@ -749,6 +763,11 @@ export class APIClass {
               this.eldritch_invocations.push(obj as EldritchInvocation);
             }
           break;
+          case "fighting_style": 
+            if (this.fighting_styles) {
+              this.fighting_styles.push(obj as FightingStyle);
+            }
+          break;
           case "equipment_pack": 
             if (this.equipment_packs) {
               this.equipment_packs.push(obj as EquipmentPack);
@@ -927,6 +946,11 @@ export class APIClass {
           case "eldritch_invocation": 
             if (this.eldritch_invocations) {
               this.eldritch_invocations = this.eldritch_invocations.filter(o => o._id !== object_id);
+            }
+          break;
+          case "fighting_style": 
+            if (this.fighting_styles) {
+              this.fighting_styles = this.fighting_styles.filter(o => o._id !== object_id);
             }
           break;
           case "equipment_pack": 
@@ -1170,6 +1194,17 @@ export class APIClass {
               }
             }
           break;
+          case "fighting_style": 
+            if (this.fighting_styles) {
+              const objects: FightingStyle[] = this.fighting_styles;
+              const objFinder = objects.filter(o => o._id === obj._id);
+              if (objFinder.length === 1) {
+                const updated = objFinder[0];
+                updated.copy(obj as FightingStyle);
+                this.fighting_styles = objects;
+              }
+            }
+          break;
           case "equipment_pack": 
             if (this.equipment_packs) {
               const objects: EquipmentPack[] = this.equipment_packs;
@@ -1397,13 +1432,11 @@ export class APIClass {
   upsertObject = async (obj: ModelBase) => {
     if (this.real) {
       if (obj._id && obj._id !== "") {
-        this.updateObject(obj).then((res: any) => {
-          return res;
-        });
+        const res = await this.updateObject(obj);
+        return res;
       } else {
-        this.createObject(obj).then((res: any) => {
-          return res;
-        });
+        const res = await this.createObject(obj);
+        return res;
       }
     } else {
       return -1;
@@ -1625,6 +1658,14 @@ export class APIClass {
             });
             this.eldritch_invocations = eldritch_invocations;
             response = eldritch_invocations;
+          break;
+          case "fighting_style": 
+            const fighting_styles: FightingStyle[] = [];
+            body.objects.forEach((o: any) => {
+              fighting_styles.push(new FightingStyle(o));
+            });
+            this.fighting_styles = fighting_styles;
+            response = fighting_styles;
           break;
           case "equipment_pack": 
             const equipment_packs: EquipmentPack[] = [];

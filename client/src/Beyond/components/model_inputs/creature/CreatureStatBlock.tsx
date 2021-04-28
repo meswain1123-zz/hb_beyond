@@ -128,7 +128,6 @@ class CreatureStatBlock extends Component<Props, State> {
     } else if (this.state.redirectTo !== null) {
       return <Redirect to={this.state.redirectTo} />;
     } else { 
-      console.log(this.props.obj);
       return (
         <Grid container spacing={1} direction="column" 
           style={{ 

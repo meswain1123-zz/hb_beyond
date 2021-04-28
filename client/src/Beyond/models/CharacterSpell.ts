@@ -145,7 +145,7 @@ export class CharacterSpell {
     return "";
   }
 
-  get use_spell_attack(): boolean {
+  get use_attack(): boolean {
     if (this.the_spell && !["Summon"].includes(this.the_spell.effect.type) && !["None","undefined"].includes(this.the_spell.effect.attack_type)) {
       if (this.the_spell.effect.attack_type !== "Save") {
         return true;

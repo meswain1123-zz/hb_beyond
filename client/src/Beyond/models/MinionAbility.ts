@@ -2,7 +2,9 @@
 import { v4 as uuidv4 } from "uuid";
 import { 
   UpgradableNumber,
-  AbilityEffectUpgradable
+  AbilityEffectUpgradable,
+  Character,
+  CreatureAbility
 } from ".";
 
 
@@ -57,11 +59,11 @@ export class MinionAbility {
   material_component: string;
   casting_time: string; // A, BA, RA, X minute(s), etc
   resource_consumed: string | null; // Slot-X, Ki, Lay on Hands, Charge, etc.
-  amount_consumed: number | null;
+  amount_consumed: number;
   special_resource_amount: string;
   special_resource_refresh_rule: string; // Short Rest, Long Rest, Dawn, 1 Hour, 8 Hours, 24 Hours
   attack_bonus: UpgradableNumber;
-  dc: number;
+  dc: UpgradableNumber;
   
   
   constructor(obj?: any) {
@@ -85,11 +87,11 @@ export class MinionAbility {
     this.material_component = obj ? obj.material_component : "";
     this.casting_time = obj ? obj.casting_time : "A";
     this.resource_consumed = obj ? obj.resource_consumed : "None";
-    this.amount_consumed = obj ? obj.amount_consumed : 0;
+    this.amount_consumed = obj && obj.amount_consumed ? obj.amount_consumed : 0;
     this.special_resource_amount = obj ? obj.special_resource_amount : "0";
     this.special_resource_refresh_rule = obj ? obj.special_resource_refresh_rule : "";
-    this.attack_bonus = obj && obj.attack_bonus ? obj.attack_bonus : 0;
-    this.dc = obj && obj.dc ? obj.dc : 0;
+    this.attack_bonus = obj && obj.attack_bonus ? new UpgradableNumber(obj.attack_bonus) : new UpgradableNumber();
+    this.dc = obj && obj.dc ? new UpgradableNumber(obj.dc) : new UpgradableNumber();
   }
 
   toDBObj = () => {
@@ -143,5 +145,34 @@ export class MinionAbility {
     this.special_resource_refresh_rule = copyMe.special_resource_refresh_rule;
     this.attack_bonus = copyMe.attack_bonus;
     this.dc = copyMe.dc;
+  }
+
+  convert_to_creature_ability(char: Character, class_id: string, base_slot_level: number, slot_level: number): CreatureAbility {
+    const creature_ability = new CreatureAbility();
+    creature_ability.amount_consumed = this.amount_consumed;
+    creature_ability.attack_bonus = this.attack_bonus.value(char, class_id, base_slot_level, slot_level);
+    creature_ability.base_id = this.base_id;
+    creature_ability.casting_time = this.casting_time;
+    creature_ability.components = this.components;
+    creature_ability.concentration = this.concentration;
+    creature_ability.dc = this.dc.value(char, class_id, base_slot_level, slot_level);
+    creature_ability.description = this.description;
+    creature_ability.duration = this.duration;
+    creature_ability.effect = this.effect.convert_to_ability_effect(char, class_id, base_slot_level, slot_level);
+    creature_ability.effect_2 = this.effect_2.convert_to_ability_effect(char, class_id, base_slot_level, slot_level);
+    creature_ability.feature_id = this.feature_id;
+    creature_ability.material_component = this.material_component;
+    creature_ability.name = this.name;
+    creature_ability.notes = this.notes;
+    creature_ability.parent_id = this.parent_id;
+    creature_ability.parent_type = this.parent_type;
+    creature_ability.range = this.range;
+    creature_ability.range_2 = this.range_2;
+    creature_ability.resource_consumed = this.resource_consumed;
+    creature_ability.saving_throw_ability_score = this.saving_throw_ability_score;
+    creature_ability.special_resource_amount = this.special_resource_amount;
+    creature_ability.special_resource_refresh_rule = this.special_resource_refresh_rule;
+    creature_ability.true_id = this.true_id;
+    return creature_ability;
   }
 }

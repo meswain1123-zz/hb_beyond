@@ -11,11 +11,13 @@ import {
 } from "@material-ui/icons";
 
 import { 
-  PotenceUpgradable
+  PotenceUpgradable,
+  UpgradableNumber
 } from "../../../models";
 
 import StringBox from "../../input/StringBox";
 import SelectStringBox from "../../input/SelectStringBox"; 
+import UpgradableNumberBox from "../../input/UpgradableNumberBox";
 
 import API from "../../../utilities/smart_api";
 import { APIClass } from "../../../utilities/smart_api_class";
@@ -40,6 +42,7 @@ type PropsFromRedux = ConnectedProps<typeof connector>
 
 type Props = PropsFromRedux & {
   obj: PotenceUpgradable;
+  slot_level: number;
   onChange: (changed: PotenceUpgradable) => void;
   onDelete: () => void;
 }
@@ -87,39 +90,40 @@ class AbilityPotenceUpgradableInput extends Component<Props, State> {
           />
         </Grid>
         <Grid item xs={2}>
-          {/* <StringBox 
-            value={`${this.props.obj.rolls.flat}`} 
+          <UpgradableNumberBox 
             name="Flat"
-            onBlur={(changed: string) => {
+            slot_level={this.props.slot_level}
+            value={this.props.obj.rolls.flat} 
+            onChange={(value: UpgradableNumber) => {
               const obj = this.props.obj;
-              obj.rolls.flat = +changed;
+              obj.rolls.flat = value;
               this.props.onChange(obj);
             }}
-          /> */}
+          />
         </Grid>
         <Grid item xs={2}>
-          {/* <StringBox 
-            value={`${this.props.obj.rolls.count}`} 
+          <UpgradableNumberBox 
             name="Dice Count"
-            type="number"
-            onBlur={(changed: string) => {
+            slot_level={this.props.slot_level}
+            value={this.props.obj.rolls.count} 
+            onChange={(value: UpgradableNumber) => {
               const obj = this.props.obj;
-              obj.rolls.count = +changed;
+              obj.rolls.count = value;
               this.props.onChange(obj);
             }}
-          /> */}
+          />
         </Grid>
         <Grid item xs={2}>
-          {/* <StringBox 
-            value={`${this.props.obj.rolls.size}`} 
+          <UpgradableNumberBox 
             name="Dice Size"
-            type="number"
-            onBlur={(changed: string) => {
+            slot_level={this.props.slot_level}
+            value={this.props.obj.rolls.size} 
+            onChange={(value: UpgradableNumber) => {
               const obj = this.props.obj;
-              obj.rolls.size = +changed;
+              obj.rolls.size = value;
               this.props.onChange(obj);
             }}
-          /> */}
+          />
         </Grid>
         <Grid item xs={2}>
           <StringBox 

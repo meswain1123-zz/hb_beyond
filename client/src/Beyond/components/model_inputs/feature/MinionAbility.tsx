@@ -9,6 +9,7 @@ import {
 import { 
   MinionAbility,
   AbilityEffectUpgradable, 
+  UpgradableNumber
 } from "../../../models";
 import { 
   ABILITY_SCORES, 
@@ -21,6 +22,7 @@ import {
 import StringBox from "../../input/StringBox";
 import SelectStringBox from "../../input/SelectStringBox";
 import CheckBox from "../../input/CheckBox";
+import UpgradableNumberBox from "../../input/UpgradableNumberBox";
 
 import SelectResourceBox from "../select/SelectResourceBox";
 
@@ -49,6 +51,7 @@ type PropsFromRedux = ConnectedProps<typeof connector>
 
 type Props = PropsFromRedux & {
   obj: MinionAbility;
+  slot_level: number;
   onChange: (changed: MinionAbility) => void; 
 }
 
@@ -75,7 +78,6 @@ class MinionAbilityInput extends Component<Props, State> {
   }
 
   render() {
-    console.log(this.props.obj);
     if (this.state.reloading) {
       return (
         <Grid item>Loading</Grid>
@@ -98,15 +100,16 @@ class MinionAbilityInput extends Component<Props, State> {
               /> 
             </Grid>
             <Grid item xs={2}>
-              {/* <StringBox
+              <UpgradableNumberBox 
                 name="Attack Bonus"
-                value={`${this.props.obj.attack_bonus}`}
-                onBlur={(value: string) => {
+                slot_level={this.props.slot_level}
+                value={this.props.obj.attack_bonus} 
+                onChange={(value: UpgradableNumber) => {
                   const obj = this.props.obj;
-                  obj.attack_bonus = +value;
+                  obj.attack_bonus = value;
                   this.props.onChange(obj);
                 }}
-              /> */}
+              />
             </Grid>
             <Grid item xs={4} container spacing={1} direction="row">
               <Grid item xs={6}>
@@ -187,7 +190,7 @@ class MinionAbilityInput extends Component<Props, State> {
                 </Grid>
               } 
             </Grid>
-            <Grid item xs={4}>
+            <Grid item xs={2}>
               <SelectStringBox 
                 name="Saving Throw"
                 options={ABILITY_SCORES}
@@ -198,6 +201,18 @@ class MinionAbilityInput extends Component<Props, State> {
                   this.props.onChange(obj);
                 }}
               /> 
+            </Grid>
+            <Grid item xs={2}>
+              <UpgradableNumberBox 
+                name="DC"
+                slot_level={this.props.slot_level}
+                value={this.props.obj.dc} 
+                onChange={(value: UpgradableNumber) => {
+                  const obj = this.props.obj;
+                  obj.dc = value;
+                  this.props.onChange(obj);
+                }}
+              />
             </Grid>
             <Grid item xs={4} container spacing={1} direction="row">
               <Grid item xs={6}>
@@ -239,6 +254,7 @@ class MinionAbilityInput extends Component<Props, State> {
             <Grid item>
               <AbilityEffectUpgradableInput 
                 obj={this.props.obj.effect}
+                slot_level={this.props.slot_level}
                 name="Effect 1"
                 onChange={(changed: AbilityEffectUpgradable) => {
                   const obj = this.props.obj;
@@ -252,6 +268,7 @@ class MinionAbilityInput extends Component<Props, State> {
             <Grid item>
               <AbilityEffectUpgradableInput 
                 obj={this.props.obj.effect_2}
+                slot_level={this.props.slot_level}
                 name="Effect 2"
                 onChange={(changed: AbilityEffectUpgradable) => {
                   const obj = this.props.obj;

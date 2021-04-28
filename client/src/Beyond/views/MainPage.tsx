@@ -52,6 +52,10 @@ import EldritchInvocationIndex from "./eldritch_invocation";
 import EldritchInvocationEdit from "./eldritch_invocation/edit";
 import EldritchInvocationDetails from "./eldritch_invocation/details";
 
+import FightingStyleIndex from "./fighting_style";
+import FightingStyleEdit from "./fighting_style/edit";
+import FightingStyleDetails from "./fighting_style/details";
+
 import ConditionIndex from "./condition";
 import ConditionEdit from "./condition/edit";
 import ConditionDetails from "./condition/details";
@@ -246,6 +250,11 @@ class MainPage extends Component<Props, State> {
           <Route exact path="/beyond/eldritch_invocation/details/:id" component={EldritchInvocationDetails} />
           <Route exact path="/beyond/eldritch_invocation/create" component={EldritchInvocationEdit} />
           <Route exact path="/beyond/eldritch_invocation/edit/:id" component={EldritchInvocationEdit} />
+
+          <Route exact path="/beyond/fighting_style" component={FightingStyleIndex} />
+          <Route exact path="/beyond/fighting_style/details/:id" component={FightingStyleDetails} />
+          <Route exact path="/beyond/fighting_style/create" component={FightingStyleEdit} />
+          <Route exact path="/beyond/fighting_style/edit/:id" component={FightingStyleEdit} />
 
           <Route exact path="/beyond/condition" component={ConditionIndex} />
           <Route exact path="/beyond/condition/details/:id" component={ConditionDetails} />

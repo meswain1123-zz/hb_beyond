@@ -172,7 +172,7 @@ class CharacterSpellDetails extends Component<Props, State> {
                   { this.renderLevelOptions() }
                 </Grid>
               </Grid>
-              { spell.use_spell_attack &&
+              { spell.use_attack &&
                 <Grid item style={{
                   display: "flex",
                   justifyContent: "center"
@@ -228,7 +228,6 @@ class CharacterSpellDetails extends Component<Props, State> {
                       disabled={ this.state.selected_option === null }
                       name={spell.effect_string}
                       onClick={() => {
-                        console.log(this.state.selected_option);
                         for (let i = 0; i < this.state.selected_option.count; ++i) {
                           const creature_instance = new CreatureInstance();
                           if (this.state.selected_option.creature) {
@@ -417,7 +416,7 @@ class CharacterSpellDetails extends Component<Props, State> {
               <Grid item>
                 <b>Duration: </b><em style={{ fontStyle: "normal" }}>{ this.props.spell.duration_string }</em>
               </Grid>
-              { this.props.spell.use_spell_attack &&
+              { this.props.spell.use_attack &&
                 <Grid item>
                   <b>Attack/Save: </b>
                   <em style={{ fontStyle: "normal" }}>

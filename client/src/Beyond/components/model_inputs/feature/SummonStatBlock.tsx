@@ -130,7 +130,6 @@ class SummonStatBlockInput extends Component<Props, State> {
                 const the_template: SummonStatBlockTemplate = template as SummonStatBlockTemplate;
                 const obj = this.props.obj;
                 obj.copyTemplate(the_template);
-                console.log(obj);
                 this.props.onChange(obj);
                 this.setState({ reloading: true }, () => {
                   this.setState({ reloading: false });
@@ -243,6 +242,7 @@ class SummonStatBlockInput extends Component<Props, State> {
         return (
           <FeatureInput
             label="Action"
+            slot_level={this.props.slot_level}
             parent_name={this.props.obj.name}
             base_name={null}
             feature={this.state.expanded_feature} 
@@ -316,6 +316,7 @@ class SummonStatBlockInput extends Component<Props, State> {
         return (
           <FeatureInput
             label="Legendary Action"
+            slot_level={this.props.slot_level}
             parent_name={this.props.obj.name}
             base_name={null}
             feature={this.state.expanded_feature} 
@@ -392,6 +393,7 @@ class SummonStatBlockInput extends Component<Props, State> {
         return (
           <FeatureInput
             label="Special Ability"
+            slot_level={this.props.slot_level}
             parent_name={this.props.obj.name}
             base_name={null}
             feature={this.state.expanded_feature} 

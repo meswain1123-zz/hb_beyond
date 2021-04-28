@@ -1,6 +1,9 @@
 
 import { v4 as uuidv4 } from "uuid";
-import { Spell } from ".";
+import { 
+  Spell,
+  UpgradableNumber
+} from ".";
 import { SpellAsAbilityTemplate } from "./SpellAsAbilityTemplate";
 
 
@@ -30,10 +33,15 @@ export class SpellAsAbility {
   casting_time_override: string; // A, BA, RA, X minute(s), etc
   slot_override: string;
   resource_consumed: string | null; // Slot-X, Ki, Lay on Hands, Charge, etc.
-  amount_consumed: number | null;
-  special_resource_amount: string;
+  amount_consumed: number;
+  slot_level: number; // If it consumes slots then this is the minimum level of the slot
+  slot_type: string; // If it consumes a specific type of slot (usually Pact) then this holds that
+  special_resource_amount: UpgradableNumber;
   special_resource_refresh_rule: string; // Short Rest, Long Rest, Dawn, 1 Hour, 8 Hours, 24 Hours
   spellcasting_ability: string;
+  ritual: boolean;
+  ritual_only: boolean;
+  at_will: boolean;
   spell: Spell | null;
   
   
@@ -52,10 +60,23 @@ export class SpellAsAbility {
     this.casting_time_override = obj ? obj.casting_time_override : "Normal";
     this.slot_override = obj ? obj.slot_override : "Normal";
     this.resource_consumed = obj ? obj.resource_consumed : "None";
-    this.amount_consumed = obj?.amount_consumed;
-    this.special_resource_amount = obj ? obj.special_resource_amount : "0";
+    this.amount_consumed = obj && obj.amount_consumed ? obj.amount_consumed : 0;
+    this.slot_level = obj && obj.slot_level ? obj.slot_level : 1;
+    this.slot_type = obj && obj.slot_type ? obj.slot_type : "";
+    if (obj && obj.special_resource_amount && obj.special_resource_amount.base === undefined) {
+      // Translate old set up to new
+      this.special_resource_amount = new UpgradableNumber();
+      this.special_resource_amount.base = obj.special_resource_amount;
+    } else if (obj && obj.special_resource_amount) {
+      this.special_resource_amount = new UpgradableNumber(obj.special_resource_amount);
+    } else {
+      this.special_resource_amount = new UpgradableNumber();
+    }
     this.special_resource_refresh_rule = obj ? obj.special_resource_refresh_rule : "";
     this.spellcasting_ability = obj && obj.spellcasting_ability ? obj.spellcasting_ability : "CON";
+    this.ritual = obj && obj.ritual ? obj.ritual : false;
+    this.ritual_only = this.ritual && obj && obj.ritual_only ? obj.ritual_only : false;
+    this.at_will = obj && obj.at_will ? obj.at_will : false;
     this.spell = null;
   }
 
@@ -79,13 +100,6 @@ export class SpellAsAbility {
     return false;
   }
 
-  get ritual(): boolean {
-    if (this.spell) {
-      return this.spell.ritual;
-    }
-    return false;
-  }
-
   get level(): number {
     if (this.spell) {
       return this.spell.level;
@@ -105,9 +119,14 @@ export class SpellAsAbility {
       slot_override: this.slot_override,
       resource_consumed: this.resource_consumed,
       amount_consumed: this.amount_consumed,
-      special_resource_amount: this.special_resource_amount,
+      slot_level: this.slot_level,
+      slot_type: this.slot_type,
+      special_resource_amount: this.special_resource_amount.toDBObj(),
       special_resource_refresh_rule: this.special_resource_refresh_rule,
-      spellcasting_ability: this.spellcasting_ability
+      spellcasting_ability: this.spellcasting_ability,
+      ritual: this.ritual,
+      ritual_only: this.ritual_only,
+      at_will: this.at_will
     };
   }
 
@@ -127,9 +146,14 @@ export class SpellAsAbility {
     this.slot_override = copyMe.slot_override;
     this.resource_consumed = copyMe.resource_consumed;
     this.amount_consumed = copyMe.amount_consumed;
-    this.special_resource_amount = copyMe.special_resource_amount;
+    this.slot_level = copyMe.slot_level;
+    this.slot_type = copyMe.slot_type;
+    this.special_resource_amount = new UpgradableNumber(copyMe.special_resource_amount);
     this.special_resource_refresh_rule = copyMe.special_resource_refresh_rule;
     this.spellcasting_ability = copyMe.spellcasting_ability;
+    this.ritual = copyMe.ritual;
+    this.ritual_only = copyMe.ritual_only;
+    this.at_will = copyMe.at_will;
     this.spell = copyMe.spell;
   }
 
@@ -143,9 +167,14 @@ export class SpellAsAbility {
     this.slot_override = copyMe.slot_override;
     this.resource_consumed = copyMe.resource_consumed;
     this.amount_consumed = copyMe.amount_consumed;
-    this.special_resource_amount = copyMe.special_resource_amount;
+    this.slot_level = copyMe.slot_level;
+    this.slot_type = copyMe.slot_type;
+    this.special_resource_amount = new UpgradableNumber(copyMe.special_resource_amount);
     this.special_resource_refresh_rule = copyMe.special_resource_refresh_rule;
     this.spellcasting_ability = copyMe.spellcasting_ability;
+    this.ritual = copyMe.ritual;
+    this.ritual_only = copyMe.ritual_only;
+    this.at_will = copyMe.at_will;
   }
 
   connectSpell(spell: Spell) {

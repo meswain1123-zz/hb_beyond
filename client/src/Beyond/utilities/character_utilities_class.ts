@@ -13,6 +13,7 @@ import {
   CharacterEldritchInvocation,
   CharacterFeat,
   CharacterFeature,
+  CharacterFightingStyle,
   CharacterItem,
   CharacterLanguageFeature,
   CharacterPactBoon,
@@ -26,9 +27,11 @@ import {
   DamageMultiplier,
   DamageMultiplierSimple,
   EldritchInvocation,
+  FightingStyle,
   HitDice,
   Modifier,
   Proficiency,
+  Reroll,
   ResourceFeature,
   SenseFeature,
   Spell,
@@ -40,7 +43,8 @@ import {
   WeaponKeyword,
   Attack,
   RollPlus,
-  IStringNumHash
+  IStringNumHash,
+  IStringHash
 } from "../models";
 
 import API from "./smart_api";
@@ -50,6 +54,7 @@ export class CharacterUtilitiesClass {
   conditions: Condition[] | null;
   spells: Spell[] | null;
   eldritch_invocations: EldritchInvocation[] | null;
+  fighting_styles: FightingStyle[] | null;
   weapon_keywords: WeaponKeyword[] | null;
   armor_types: ArmorType[] | null;
   spell_slot_types: SpellSlotType[] | null;
@@ -59,13 +64,15 @@ export class CharacterUtilitiesClass {
     this.conditions = null;
     this.spells = null;
     this.eldritch_invocations = null;
+    this.fighting_styles = null;
     this.weapon_keywords = null;
     this.armor_types = null;
     this.spell_slot_types = null;
-    this.api.getSetOfObjects(["condition","spell", "eldritch_invocation", "weapon_keyword","armor_type","spell_slot_type"]).then((res: any) => {
+    this.api.getSetOfObjects(["condition","spell", "eldritch_invocation", "weapon_keyword","armor_type","spell_slot_type","fighting_style"]).then((res: any) => {
       this.conditions = res.condition;
       this.spells = res.spell;
       this.eldritch_invocations = res.eldritch_invocation;
+      this.fighting_styles = res.fighting_style;
       this.weapon_keywords = res.weapon_keyword;
       this.armor_types = res.armor_type;
       this.spell_slot_types = res.spell_slot_type;
@@ -74,8 +81,7 @@ export class CharacterUtilitiesClass {
 
   api: APIClass;
 
-
-  get_weapon_attack(item: CharacterItem, char: Character, proficient: boolean, ba: boolean, type: string): Attack {
+  get_weapon_attack(item: CharacterItem, char: Character, proficient: boolean, ba: boolean, type: string, two_handed_id: string): Attack {
     let max_asm = char.current_ability_scores.getModifier(item.use_ability_score);
     if (!max_asm) {
       max_asm = 0;
@@ -164,13 +170,46 @@ export class CharacterUtilitiesClass {
       let good = false;
       if (db.types.includes(item.use_ability_score)) {
         good = true;
-      } else if (item.weapon_keywords.filter(o => db.types.includes(o.name))) {
-        good = true;
+      } else {
+        // Check the keywords
+        for (let i = 0; i < item.weapon_keywords.length; ++i) {
+          if (db.types.includes(item.weapon_keywords[i].name)) {
+            good = true;
+            break;
+          }
+        }
+        if (!good) {
+          // Check the damage types
+          for (let i = 0; i < attack.damage_rolls.length; ++i) {
+            if (db.types.includes(attack.damage_rolls[i].type)) {
+              good = true;
+              break;
+            }
+          }
+        }
+      }
+      if (good) {
+        good = false;
+        if (db.required.includes("Any") || item.weapon_keywords.filter(o => db.required.includes(o._id)).length > 0) {
+          if (db.excluded.includes("Any")) {
+            good = true;
+          } else if (item.weapon_keywords.filter(o => db.excluded.includes(o._id)).length === 0) {
+            if (type === "Versatile" && db.excluded.includes(two_handed_id)) {
+              // There's the possibility that Two Handed is excluded, and it's being allowed because it's Versatile.
+              // Two Handed exclusions are excluded for Versatile attacks.
+            } else {
+              good = true;
+            }
+          }
+        }
       }
 
       if (good) {
         attack.damage_rolls.push(db.rolls);
       }
+    });
+    attack.damage_rolls.filter(o => o.ability_score === "Attack Ability").forEach(roll_plus => {
+      roll_plus.ability_score = item.use_ability_score;
     });
     attack.recalc_attack_string(char.current_ability_scores);
     attack.recalc_damage_string(char.current_ability_scores);
@@ -178,7 +217,7 @@ export class CharacterUtilitiesClass {
     return attack;
   }
 
-  get_weapon_attacks(item: CharacterItem, char: Character): Attack[] {
+  get_weapon_attacks(item: CharacterItem, char: Character, two_handed_id: string): Attack[] {
     let max_asm = -5;
     let max_ability = "";
     // This is where I'll need to put checks for features like Hex Weapon
@@ -237,41 +276,117 @@ export class CharacterUtilitiesClass {
     // allow the creation of additional features 
     // akin to Dual Wielder and Crossbow Expert
     
-    attacks.push(this.get_weapon_attack(item, char, proficient, false, "Normal"));
+    attacks.push(this.get_weapon_attack(item, char, proficient, false, "Normal", two_handed_id));
     if (ba) {
-      attacks.push(this.get_weapon_attack(item, char, proficient, true, "Normal"));
+      attacks.push(this.get_weapon_attack(item, char, proficient, true, "Normal", two_handed_id));
     }
     if (item.weapon_keywords.filter(o => o.name === "Versatile").length > 0) {
       // If the weapon is Versatile then there's a SingleHanded and a TwoHanded.
-      attacks.push(this.get_weapon_attack(item, char, proficient, false, "Versatile"));
+      attacks.push(this.get_weapon_attack(item, char, proficient, false, "Versatile", two_handed_id));
     } else if (item.weapon_keywords.filter(o => o.name === "Great Weapon").length > 0) {
       // If it's a Great Weapon, 
       // and they have Great Weapon Master, 
       // then they have Normal and GWM attacks.
       if (char.feats.filter(o => o.feat && o.feat.name === "Great Weapon Master").length > 0) {
-        attacks.push(this.get_weapon_attack(item, char, proficient, false, "GWM"));
+        attacks.push(this.get_weapon_attack(item, char, proficient, false, "GWM", two_handed_id));
       }
     } else if (item.weapon_keywords.filter(o => o.name === "Ranged").length > 0) {
       // If it's a Ranged Weapon 
       // and they have Sharpshooter,
       // then they have Normal and SS attacks.
       if (char.feats.filter(o => o.feat && o.feat.name === "Sharp Shooter").length > 0) {
-        attacks.push(this.get_weapon_attack(item, char, proficient, false, "SS"));
+        attacks.push(this.get_weapon_attack(item, char, proficient, false, "SS", two_handed_id));
         if (ba) {
-          attacks.push(this.get_weapon_attack(item, char, proficient, true, "SS"));
+          attacks.push(this.get_weapon_attack(item, char, proficient, true, "SS", two_handed_id));
         }
       }
     }
     return attacks;
   }
+  
+  get_unarmed_strike(char: Character, score: string, ba: boolean, damage_type: string): Attack {
+    const attack = new Attack();
+
+    attack.attack_rolls = [];
+    const rolls = new RollPlus();
+    rolls.ability_score = score;
+    rolls.flat = char.proficiency_modifier;
+    attack.attack_rolls.push(rolls);
+    char.attack_bonuses.forEach(ab => {
+      let good = false;
+      if (ab.types.includes(score)) {
+        good = true;
+      }
+
+      if (good) {
+        attack.attack_rolls.push(ab.rolls);
+      }
+    });
+    attack.bonus_action = ba;
+    attack.damage_rolls = [];
+    const damage = new RollPlus();
+    damage.size = char.unarmed_strike_size;
+    damage.count = char.unarmed_strike_count;
+    damage.type = damage_type;
+    attack.damage_rolls.push(damage);
+    damage.ability_score = score;
+    char.damage_bonuses.forEach(db => {
+      let good = false;
+      if (db.types.includes(score)) {
+        good = true;
+      } else {
+        // Check the damage types
+        for (let i = 0; i < attack.damage_rolls.length; ++i) {
+          if (db.types.includes(attack.damage_rolls[i].type)) {
+            good = true;
+            break;
+          }
+        }
+      }
+
+      if (good) {
+        attack.damage_rolls.push(db.rolls);
+      }
+    });
+    attack.damage_rolls.filter(o => o.ability_score === "Attack Ability").forEach(roll_plus => {
+      roll_plus.ability_score = score;
+    });
+    attack.recalc_attack_string(char.current_ability_scores);
+    attack.recalc_damage_string(char.current_ability_scores);
+    attack.type = "Normal";
+    return attack;
+  }
+
+  get_unarmed_strikes(char: Character): Attack[] {
+    let max_asm = -5;
+    let max_score = "";
+    char.unarmed_strike_scores.forEach(score => {
+      const new_score = char.current_ability_scores.getModifier(score);
+      if (new_score && new_score > max_asm) {
+        max_asm = new_score;
+        max_score = score;
+      }
+    });
+    const attacks: Attack[] = [];
+    char.unarmed_strike_damage_types.forEach(damage_type => {
+      attacks.push(this.get_unarmed_strike(char, max_score, false, damage_type));
+    });
+    if (char.unarmed_strike_bonus_action) {
+      char.unarmed_strike_damage_types.forEach(damage_type => {
+        attacks.push(this.get_unarmed_strike(char, max_score, true, damage_type));
+      });
+    }
+    return attacks;
+  }
 
   recalcAll(char: Character): void {
-    if (this.armor_types && this.conditions && this.spells && this.spell_slot_types && this.weapon_keywords && this.eldritch_invocations) {
+    if (this.armor_types && this.conditions && this.spells && this.spell_slot_types && this.weapon_keywords && this.eldritch_invocations && this.fighting_styles) {
       const all_armor_types = this.armor_types;
       const all_spells = this.spells;
       const all_spell_slot_types = this.spell_slot_types;
       const all_conditions = this.conditions;
       const all_eldritch_invocations = this.eldritch_invocations;
+      const all_fighting_styles = this.fighting_styles;
       const all_weapon_keywords = this.weapon_keywords;
       // Proficiencies
       let skill_proficiencies: IStringNumHash = {};
@@ -287,6 +402,7 @@ export class CharacterUtilitiesClass {
       const ability_score_features: CharacterASIBaseFeature[] = [];
       // Warlock (usually) Specific Feature Holders
       const eldritch_invocations: CharacterEldritchInvocation[] = [];
+      const fighting_styles: CharacterFightingStyle[] = [];
       let pact_boon = new CharacterPactBoon();
 
       // Don't care about class
@@ -302,7 +418,7 @@ export class CharacterUtilitiesClass {
 
       // Ability, Spell As Ability, Item Affecting Ability
       const abilities: CharacterAbility[] = [];
-      const spell_as_abilities: CharacterSpell[] = [];
+      const spell_as_abilities: CharacterAbility[] = [];
 
       // Spell List, Ritual Casting, 
       // Spellcasting,
@@ -316,6 +432,7 @@ export class CharacterUtilitiesClass {
       const damage_bonuses: Bonus[] = [];
       const saving_throw_bonuses: Bonus[] = [];
       const check_bonuses: Bonus[] = [];
+      const rerolls: Reroll[] = [];
 
       const processCharacterFeature = (f: CharacterFeature, source_type: string, source_id: string, source_name: string) => {
         if (f.feature_type === "Special Feature Choices") {
@@ -329,6 +446,8 @@ export class CharacterUtilitiesClass {
           special_features.push(f.feature_options[0] as CharacterSpecialFeature);
         } else if (f.feature_type === "Modifier") {
           modifiers.push({ source_type, source_id, source_name, modifier: f.feature.the_feature as Modifier });
+        } else if (f.feature_type === "Reroll") {
+          rerolls.push(f.feature.the_feature as Reroll);
         } else if (f.feature_type === "Spell Modifier") {
           spell_modifiers.push({ source_type, source_id, source_name, modifier: f.feature.the_feature as SpellModifier });
         } else if (f.feature_type === "Damage Multiplier") {
@@ -403,8 +522,8 @@ export class CharacterUtilitiesClass {
             if (spell_finder.length === 1) {
               the_feature.connectSpell(spell_finder[0]);
             }
-            const char_ability = new CharacterSpell();
-            char_ability.copySpell(the_feature);
+            const char_ability = new CharacterAbility();
+            char_ability.the_ability = f.feature.the_feature;
             char_ability.source_type = source_type;
             char_ability.source_id = source_id;
             char_ability.source_name = source_name;
@@ -425,6 +544,22 @@ export class CharacterUtilitiesClass {
             char_spellcasting.copyFeature(f);
             spellcasting.push(char_spellcasting);
           }
+        } else if (f.feature_type === "Cantrips from List") {
+          f.feature_options.forEach((id: string) => {
+            const obj_finder = all_spells.filter(o => o._id === id);
+            if (obj_finder.length === 1) {
+              const cfl = f.feature.the_feature as IStringHash;
+              const char_spell = new CharacterAbility();
+              char_spell.the_ability = new SpellAsAbility();
+              char_spell.the_ability.spell = obj_finder[0];
+              char_spell.spellcasting_ability = cfl.spellcasting_ability;
+              char_spell.source_type = source_type;
+              char_spell.source_id = source_id;
+              char_spell.source_name = source_name;
+              // char_spell.connectSource(char_class);
+              spell_as_abilities.push(char_spell);
+            }
+          });
         } else if (f.feature_type === "Eldritch Invocation") {
           const cei = f.feature_options[0] as CharacterEldritchInvocation;
           if (!cei.eldritch_invocation) {
@@ -434,8 +569,32 @@ export class CharacterUtilitiesClass {
             }
           }
           eldritch_invocations.push(cei);
+        } else if (f.feature_type === "Fighting Style") {
+          const cei = f.feature_options[0] as CharacterFightingStyle;
+          cei.source_id = source_id;
+          cei.source_type = source_type;
+          cei.source_name = source_name;
+          if (!cei.fighting_style) {
+            const ei_finder = all_fighting_styles.filter(o => o._id === cei.fighting_style_id);
+            if (ei_finder.length === 1) {
+              cei.connectFightingStyle(ei_finder[0]);
+            }
+          }
+          fighting_styles.push(cei);
         } else if (f.feature_type === "Pact Boon") {
           pact_boon = f.feature_options[0] as CharacterPactBoon;
+        } else if (f.feature_type === "Extra Attacks") {
+          char.extra_attacks = Math.max(char.extra_attacks, f.feature.the_feature as number);
+        } else if (f.feature_type === "Unarmed Strike Size") {
+          char.unarmed_strike_size = Math.max(char.unarmed_strike_size, f.feature.the_feature as number);
+        } else if (f.feature_type === "Unarmed Strike Count") {
+          char.unarmed_strike_count = Math.max(char.unarmed_strike_count, f.feature.the_feature as number);
+        } else if (f.feature_type === "Unarmed Strike Bonus Action") {
+          char.unarmed_strike_bonus_action = true;
+        } else if (f.feature_type === "Unarmed Strike Damage Type") {
+          char.unarmed_strike_damage_types.push(f.feature.the_feature as string);
+        } else if (f.feature_type === "Unarmed Strike Score") {
+          char.unarmed_strike_scores.push(f.feature.the_feature as string);
         }
       }
 
@@ -580,7 +739,11 @@ export class CharacterUtilitiesClass {
         });
         pact_boon.features.forEach(f => { processCharacterFeature(f, "Pact Boon", pact_boon.pact_boon_id, pact_boon.pact_boon ? pact_boon.pact_boon.name : ""); });
         eldritch_invocations.forEach(ei => {
+          // I should do the same here that I did with fighting_styles for source
           ei.features.forEach(f => { processCharacterFeature(f, "Eldritch Invocation", ei.eldritch_invocation_id, ei.eldritch_invocation ? ei.eldritch_invocation.name : ""); });
+        });
+        fighting_styles.forEach(ei => {
+          ei.features.forEach(f => { processCharacterFeature(f, ei.source_type, ei.source_id, ei.source_name); });
         });
         // We don't need to make a CharacterCondition class
         // because the features on them are always simple, no choices
@@ -741,12 +904,18 @@ export class CharacterUtilitiesClass {
             }
           });
       }
-      const checkArmorRequirement = (me: Character, mod: Modifier) => {
+      const checkArmorRequirements = (me: Character, mod: Modifier) => {
         // Check if it matches the armor_requirement field
-        if (mod.allowed_armor_types.filter(o => o === "All").length === 1) {
+        if (mod.allowed_armor_types.includes("All")) {
           // Check for required
-          if (mod.required_armor_types.filter(o => o === "None").length === 1) {
+          if (mod.required_armor_types.includes("None")) {
             return true;
+          } else if (mod.required_armor_types.includes("Any")) {
+            return me.equipped_items.filter(o => 
+              o.base_item &&
+              o.base_item.item_type === "Armor" &&
+              o.base_item.name !== "Shield"
+            ).length > 0;
           } else {
             const missing_armor_types = mod.required_armor_types.filter(a =>
               me.equipped_items.filter(o =>
@@ -755,6 +924,12 @@ export class CharacterUtilitiesClass {
                 o.base_item.armor_type_id === a).length === 0);
             return missing_armor_types.length === 0;
           }
+        } else if (mod.allowed_armor_types.includes("None")) {
+          return me.equipped_items.filter(o => 
+            o.base_item &&
+            o.base_item.item_type === "Armor" &&
+            o.base_item.name !== "Shield"
+          ).length === 0;
         } else {
           const bad_armor_items = me.equipped_items.filter(o =>
             o.base_item &&
@@ -779,6 +954,8 @@ export class CharacterUtilitiesClass {
           } else {
             return "0";
           }
+        } else if (mod.type === "Attack Ability Modifier") {
+          return "Attack Ability Modifier";
         } else if (mod.type !== "None") {
           // It's based on an ability score modifier
           const amount = current.getModifier(mod.type);
@@ -797,14 +974,14 @@ export class CharacterUtilitiesClass {
             max_hit_points += +amount;
           }
         } else if (mod.modifies === "AC") {
-          if (checkArmorRequirement(char, mod)) {
+          if (checkArmorRequirements(char, mod)) {
             const amount = getModifierAmount(char, mod_obj);
             if (amount) {
               base_armor_class += +amount;
             }
           }
         } else if (mod.modifies === "Speed") {
-          if (checkArmorRequirement(char, mod)) {
+          if (checkArmorRequirements(char, mod)) {
             const amount = getModifierAmount(char, mod_obj);
             if (amount) {
               for (let i = 0; i < mod.modifies_details.length; i++) {
@@ -829,7 +1006,7 @@ export class CharacterUtilitiesClass {
             }
           }
         } else if (mod.modifies === "Saving Throw") {
-          if (checkArmorRequirement(char, mod)) {
+          if (checkArmorRequirements(char, mod)) {
             const amount = getModifierAmount(char, mod_obj);
             if (amount) {
               if (amount.includes("d")) {
@@ -848,7 +1025,7 @@ export class CharacterUtilitiesClass {
             }
           }
         } else if (mod.modifies === "Ability Check") {
-          if (checkArmorRequirement(char, mod)) {
+          if (checkArmorRequirements(char, mod)) {
             const amount = getModifierAmount(char, mod_obj);
             if (amount) {
               const bonus = new Bonus();
@@ -901,14 +1078,14 @@ export class CharacterUtilitiesClass {
             }
           }
         } else if (mod.modifies === "Initiative") {
-          if (checkArmorRequirement(char, mod)) {
+          if (checkArmorRequirements(char, mod)) {
             const amount = getModifierAmount(char, mod_obj);
             if (amount) {
               char.initiative_modifier += +amount;
             }
           }
         } else if (mod.modifies === "Attack") {
-          if (checkArmorRequirement(char, mod)) {
+          if (checkArmorRequirements(char, mod)) {
             const amount = getModifierAmount(char, mod_obj);
             if (amount) {
               const bonus = new Bonus();
@@ -925,7 +1102,7 @@ export class CharacterUtilitiesClass {
             }
           }
         } else if (mod.modifies === "Damage") {
-          if (checkArmorRequirement(char, mod)) {
+          if (checkArmorRequirements(char, mod)) {
             const amount = getModifierAmount(char, mod_obj);
             if (amount) {
               const bonus = new Bonus();
@@ -934,7 +1111,11 @@ export class CharacterUtilitiesClass {
               if (mod.modifies_detail_2 === "All") {
                 bonus.subtypes.push(mod.modifies_detail_2);
               }
-              if (amount.includes("d")) {
+              bonus.excluded = mod.excluded_weapon_keywords;
+              bonus.required = mod.required_weapon_keywords;
+              if (amount === "Attack Ability Modifier") {
+                bonus.rolls.ability_score = "Attack Ability";
+              } else if (amount.includes("d")) {
                 const pieces = amount.split("d");
                 bonus.rolls.count = +pieces[0];
                 bonus.rolls.size = +pieces[1];
@@ -1064,41 +1245,6 @@ export class CharacterUtilitiesClass {
           char_spell.connectSource(char_class);
         });
       });
-      abilities.forEach(ability => {
-        const a_finder = char.abilities.filter(o =>
-          o.source_type === ability.source_type &&
-          o.source_id === ability.source_id &&
-          o.ability_type === ability.ability_type &&
-          o.true_id === ability.true_id);
-        if (a_finder.length === 1) {
-          ability.customizations = a_finder[0].customizations;
-        }
-      });
-      char.abilities = abilities;
-      spell_as_abilities.forEach(ability => {
-        const a_finder = char.spell_as_abilities.filter(o =>
-          o.source_type === ability.source_type &&
-          o.source_id === ability.source_id &&
-          o.true_id === ability.true_id);
-        if (a_finder.length === 1) {
-          ability.customizations = a_finder[0].customizations;
-        }
-        const spellcasting_ability_modifier = current.getModifier(ability.spellcasting_ability);
-        if (spellcasting_ability_modifier) {
-          ability.spell_dc += 8 + char.proficiency_modifier + spellcasting_ability_modifier;
-          ability.spell_attack += char.proficiency_modifier + spellcasting_ability_modifier;
-        }
-      });
-      char.spell_as_abilities = spell_as_abilities;
-      if (char.concentrating_on) {
-        if (char.concentrating_on instanceof CharacterSpell) {
-          const spell_id = char.concentrating_on.spell_id;
-          const obj_finder = all_spells.filter(o => o._id === spell_id);
-          if (obj_finder.length === 1) {
-            char.concentrating_on.connectSpell(obj_finder[0]);
-          }
-        } 
-      }
 
       const type_levels: any = {
       };
@@ -1155,6 +1301,7 @@ export class CharacterUtilitiesClass {
         s.range += or_add_total - or_add_min;
       });
 
+      char.rerolls = rerolls;
       let weight_carried = 0;
       char.items.forEach(i => {
         if (i.base_item) {
@@ -1187,6 +1334,42 @@ export class CharacterUtilitiesClass {
           slot.used = slot_finder[0].used;
         }
       });
+      abilities.forEach(ability => {
+        ability.calc_special_resource_amount(char);
+        const a_finder = char.abilities.filter(o =>
+          o.source_type === ability.source_type &&
+          o.source_id === ability.source_id &&
+          o.ability_type === ability.ability_type &&
+          o.true_id === ability.true_id);
+        if (a_finder.length === 1) {
+          ability.customizations = a_finder[0].customizations;
+        }
+      });
+      char.abilities = abilities;
+      spell_as_abilities.forEach(ability => {
+        const a_finder = char.spell_as_abilities.filter(o =>
+          o.source_type === ability.source_type &&
+          o.source_id === ability.source_id &&
+          o.true_id === ability.true_id);
+        if (a_finder.length === 1) {
+          ability.customizations = a_finder[0].customizations;
+        }
+        const spellcasting_ability_modifier = current.getModifier(ability.spellcasting_ability);
+        if (spellcasting_ability_modifier) {
+          ability.spell_dc += 8 + char.proficiency_modifier + spellcasting_ability_modifier;
+          ability.spell_attack += char.proficiency_modifier + spellcasting_ability_modifier;
+        }
+      });
+      char.spell_as_abilities = spell_as_abilities;
+      if (char.concentrating_on) {
+        if (char.concentrating_on instanceof CharacterSpell) {
+          const spell_id = char.concentrating_on.spell_id;
+          const obj_finder = all_spells.filter(o => o._id === spell_id);
+          if (obj_finder.length === 1) {
+            char.concentrating_on.connectSpell(obj_finder[0]);
+          }
+        } 
+      }
       char.slots = slots;
 
       char.feats = feats;
@@ -1200,6 +1383,7 @@ export class CharacterUtilitiesClass {
       char.tool_proficiencies = tool_proficiencies;
       char.saving_throw_proficiencies = saving_throw_proficiencies;
       char.eldritch_invocation_ids = eldritch_invocations.map(o => o.eldritch_invocation_id);
+      char.fighting_style_ids = fighting_styles.map(o => o.fighting_style_id);
       char.pact_boon_id = pact_boon.pact_boon_id;
       char.senses = senses;
       char.advantages = advantages;
@@ -1322,25 +1506,130 @@ export class CharacterUtilitiesClass {
         // spell damages are based on levels, so calculated elsewhere
         // spell.recalc_damage_string(char.current_ability_scores);
       });
+      char.spell_as_abilities.forEach(spell => {
+        const attack = new Attack();
+        if (spell.spell) {
+          if (spell.level === 0) {
+            if (spell.spell.effect.attack_type === "Save") {
+              // It's a save attack
+              char.attack_bonuses.filter(o => o.types.includes("Cantrip Saves")).forEach(ab => {
+                const rolls = new RollPlus(ab.rolls);
+                attack.attack_rolls.push(rolls);
+              });
+              if (spell.spell_dc !== 0) {
+                const rolls = new RollPlus();
+                rolls.flat = spell.spell_dc;
+                attack.attack_rolls.push(rolls);
+              }
+              char.damage_bonuses.filter(o => 
+                o.types.includes("Cantrip Saves") &&
+                o.subtypes.includes(spell.effect_string)
+              ).forEach(db => {
+                const dmg = new RollPlus(db.rolls);
+                dmg.type = spell.effect_string;
+                attack.damage_rolls.push(dmg);
+              });
+            } else if (["Ranged Spell","Melee Spell"].includes(spell.spell.effect.attack_type)) {
+              // It's a spell attack
+              char.attack_bonuses.filter(o => o.types.includes("Cantrip Attacks")).forEach(ab => {
+                attack.attack_rolls.push(ab.rolls);
+              });
+              if (spell.spell_attack !== 0) {
+                const rolls = new RollPlus();
+                rolls.flat = spell.spell_attack;
+                attack.attack_rolls.push(rolls);
+              }
+              char.damage_bonuses.filter(o => 
+                o.types.includes("Cantrip Attacks") &&
+                o.subtypes.includes(spell.effect_string)
+              ).forEach(db => {
+                const dmg = new RollPlus(db.rolls);
+                dmg.type = spell.effect_string;
+                attack.damage_rolls.push(dmg);
+              });
+            }
+          } else {
+            if (spell.spell.effect.attack_type === "Save") {
+              // It's a save attack
+              char.attack_bonuses.filter(o => o.types.includes("Spell Saves")).forEach(ab => {
+                attack.attack_rolls.push(ab.rolls);
+              });
+              if (spell.spell_dc !== 0) {
+                const rolls = new RollPlus();
+                rolls.flat = spell.spell_dc;
+                attack.attack_rolls.push(rolls);
+              }
+              char.damage_bonuses.filter(o => 
+                o.types.includes("Spell Saves") &&
+                o.subtypes.includes(spell.effect_string)
+              ).forEach(db => {
+                const dmg = new RollPlus(db.rolls);
+                dmg.type = spell.effect_string;
+                attack.damage_rolls.push(dmg);
+              });
+            } else if (["Ranged Spell","Melee Spell"].includes(spell.spell.effect.attack_type)) {
+              // It's a spell attack
+              char.attack_bonuses.filter(o => 
+                o.types.includes("Spell Attacks")).forEach(ab => {
+                const rolls = new RollPlus(ab.rolls);
+                attack.attack_rolls.push(rolls);
+              });
+              if (spell.spell_attack !== 0) {
+                const rolls = new RollPlus();
+                rolls.flat = spell.spell_attack;
+                attack.attack_rolls.push(rolls);
+              }
+              char.damage_bonuses.filter(o => 
+                o.types.includes("Spell Attacks") &&
+                o.subtypes.includes(spell.effect_string)
+              ).forEach(db => {
+                const dmg = new RollPlus(db.rolls);
+                dmg.type = spell.effect_string;
+                attack.damage_rolls.push(dmg);
+              });
+            }
+          }
+          spell_modifiers.filter(o => spell.spell && o.modifier.spell_id === spell.spell._id).forEach((mod_obj: any) => {
+            const mod = mod_obj.modifier as SpellModifier;
+            if (mod.modifies === "Include Modifier") {
+              spell.use_spellcasting_modifier = true;
+            } else {
+              console.log(mod_obj);
+            }
+          });
+        }
+        attack.type = "Spell";
+        spell.attack = attack;
+        spell.recalc_attack_string(char.current_ability_scores);
+        // spell damages are based on levels, so calculated elsewhere
+        // spell.recalc_damage_string(char.current_ability_scores);
+      });
 
       // Go through weapons
       const item_actions = char.items.filter(o =>
         o.base_item &&
         o.base_item.item_type === "Weapon" &&
         o.equipped);
+      let two_handed_id = "";
+      const two_handed_finder = all_weapon_keywords.filter(o => o.name === "Two-Handed");
+      if (two_handed_finder.length === 1) {
+        two_handed_id = two_handed_finder[0]._id;
+      }
       item_actions.forEach(weapon => {
         weapon.weapon_keywords = all_weapon_keywords.filter(o => weapon.base_item && weapon.base_item.weapon_keyword_ids.includes(o._id));
-        weapon.attacks = this.get_weapon_attacks(weapon, char);
+        weapon.attacks = this.get_weapon_attacks(weapon, char, two_handed_id);
       });
       char.actions.item_actions = item_actions;
+      // Do Unarmed Strike
+      char.actions.unarmed = this.get_unarmed_strikes(char);
       // Go through spells
       const spell_actions = char.spells.filter(o =>
         o.spell && o.spell instanceof Spell && o.spell.effect.type !== "None");
-      const spell_ability_actions = char.spells.filter(o =>
-        o.spell && o.spell instanceof SpellAsAbility && o.spell.spell && o.spell.spell.effect.type !== "None");
+      const spell_ability_actions = char.spell_as_abilities.filter(o =>
+        o.spell && o.spell.effect.type !== "None");
       char.actions.spells_actions = [
         ...spell_actions.filter(o => o.spell && o.spell instanceof Spell && o.spell.casting_time === "A"),
-        ...spell_ability_actions.filter(o => o.spell && o.spell instanceof SpellAsAbility && o.spell.spell && o.spell.spell.casting_time === "A")
+        ...spell_ability_actions.filter(o => o.spell && o.spell.casting_time === "A")
       ];
       char.actions.spells_bonus_actions = [
         ...spell_actions.filter(o => o.spell && o.spell instanceof Spell && o.spell.casting_time === "BA"),

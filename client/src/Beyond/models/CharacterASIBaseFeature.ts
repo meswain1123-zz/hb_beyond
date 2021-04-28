@@ -68,7 +68,6 @@ export class CharacterASIBaseFeature {
   }
 
   connectASIBaseFeature(copyMe: ASIBaseFeature): void {
-    console.log(copyMe);
     this.asi_base_feature = new ASIBaseFeature(copyMe);
     this.asi_features.forEach(f => {
       const objFinder = copyMe.asi_features.filter(f2 => f2.id === f.id);

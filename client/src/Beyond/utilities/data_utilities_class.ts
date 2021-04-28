@@ -80,7 +80,9 @@ export class DataUtilitiesClass {
       }
     } else {
       if (first.length > 0) {
-        if ((typeof second === "number" && second < 0) || (typeof second === "string" && second.length > 0 && second[0] === "-")) {
+        if (first[first.length - 1] === ")") {
+          return `${first} ${second}`;
+        } else if ((typeof second === "number" && second < 0) || (typeof second === "string" && second.length > 0 && second[0] === "-")) {
           return `${first}${second}`;
         } else {
           return `${first}+${second}`;

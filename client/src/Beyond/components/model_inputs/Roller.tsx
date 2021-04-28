@@ -15,7 +15,8 @@ import {
 import { 
   Character,
   CreatureInstance,
-  RollPlus
+  RollPlus,
+  Reroll
 } from "../../models";
 
 import DamageTypeImage from "./display/DamageTypeImage";
@@ -48,6 +49,7 @@ type Props = PropsFromRedux & {
   char: Character | CreatureInstance | null; // I may make this optional in the future.
   name: string;
   type: string;
+  rerolls: Reroll[];
 }
 
 export interface State {
@@ -55,7 +57,8 @@ export interface State {
 
 class Roller extends Component<Props, State> {
   public static defaultProps = {
-    char: null
+    char: null,
+    rerolls: []
   };
   constructor(props: Props) {
     super(props);
@@ -311,6 +314,7 @@ class Roller extends Component<Props, State> {
     const roll_renders: any[] = [];
     rolls.forEach(roll_plus => {
       const roll_render = this.renderRollPlus(roll_plus, true);
+
       roll_renders.push(roll_render.render);
       grand_total += roll_render.total;
     });
@@ -507,8 +511,18 @@ class Roller extends Component<Props, State> {
         count *= -1;
         reverse = true;
       }
+      let reroll_threshold = 0;
+      this.props.rerolls.forEach(r => {
+        if (r.allowed_damage_types.includes("All") || r.allowed_damage_types.includes(dr.type)) {
+          reroll_threshold = Math.max(reroll_threshold, r.threshold);
+        }
+      });
       for (let i = 0; i < count; ++i) {
-        const roll2 = Math.ceil(Math.random() * dr.size);
+        let roll2 = Math.ceil(Math.random() * dr.size);
+        if (roll2 <= reroll_threshold) {
+          roll_string += `(${roll2} Reroll)`;
+          roll2 = Math.ceil(Math.random() * dr.size);
+        }
         if (reverse) {
           roll_string += `-${roll2}`;
           total -= roll2;

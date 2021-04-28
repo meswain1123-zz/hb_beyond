@@ -8,6 +8,7 @@ import { CharacterFeat } from "./CharacterFeat";
 import { CharacterFeatureChoice } from "./CharacterFeatureChoice";
 import { CharacterLanguageFeature } from "./CharacterLanguageFeature";
 import { CharacterEldritchInvocation } from "./CharacterEldritchInvocation";
+import { CharacterFightingStyle } from "./CharacterFightingStyle";
 import { CharacterSpecialFeature } from "./CharacterSpecialFeature";
 
 /**
@@ -271,6 +272,35 @@ export class CharacterFeatureBase {
                 if (this.needs_attention) {
                   break;
                 }
+              } else if (feat_feature.feature.feature_type === "Fighting Style") {
+                const fighting_style = feat_feature.feature_options[0] as CharacterFightingStyle;
+                if (fighting_style.fighting_style_id === "") {
+                  this.needs_attention = true;
+                  break;
+                } else {
+                  for (let k = 0; k < fighting_style.features.length; k++) {
+                    const ei_feature = fighting_style.features[k];
+                    for (let j = 0; j < ei_feature.feature_options.length; j++) {
+                      const ei_opt: any = ei_feature.feature_options[j];
+                      if (ei_opt === "") {
+                        this.needs_attention = true;
+                        break;
+                      }
+                    }
+                    if (this.needs_attention) {
+                      break;
+                    }
+                  }
+                }
+                if (this.needs_attention) {
+                  break;
+                }
+              } else if (feat_feature.feature.feature_type === "Cantrips from List") {
+                const cantrip_ids = feat_feature.feature_options as string[];
+                if (cantrip_ids.filter(o => o === "").length > 0) {
+                  this.needs_attention = true;
+                  break;
+                }
               } else if (feat_feature.feature.feature_type === "Special Feature") {
                 const special_feature = feat_feature.feature_options[0] as CharacterSpecialFeature;
                 if (special_feature.special_feature_id === "") {
@@ -333,6 +363,35 @@ export class CharacterFeatureBase {
           }
         }
         if (this.needs_attention) {
+          break;
+        }
+      } else if (feature.feature.feature_type === "Fighting Style") {
+        const fighting_style = feature.feature_options[0] as CharacterFightingStyle;
+        if (fighting_style.fighting_style_id === "") {
+          this.needs_attention = true;
+          break;
+        } else {
+          for (let k = 0; k < fighting_style.features.length; k++) {
+            const ei_feature = fighting_style.features[k];
+            for (let j = 0; j < ei_feature.feature_options.length; j++) {
+              const ei_opt: any = ei_feature.feature_options[j];
+              if (ei_opt === "") {
+                this.needs_attention = true;
+                break;
+              }
+            }
+            if (this.needs_attention) {
+              break;
+            }
+          }
+        }
+        if (this.needs_attention) {
+          break;
+        }
+      } else if (feature.feature.feature_type === "Cantrips from List") {
+        const cantrip_ids = feature.feature_options as string[];
+        if (cantrip_ids.filter(o => o === "").length > 0) {
+          this.needs_attention = true;
           break;
         }
       } else if (feature.feature.feature_type === "Special Feature") {

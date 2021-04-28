@@ -1,26 +1,28 @@
 
 import { v4 as uuidv4 } from "uuid";
-import { Modifier } from "./Modifier";
-import { SpellModifier } from "./SpellModifier";
-import { Proficiency } from "./Proficiency";
-import { Ability } from "./Ability";
-import { SpellAsAbility } from "./SpellAsAbility";
-import { ItemAffectingAbility } from "./ItemAffectingAbility";
-import { BonusSpells } from "./BonusSpells";
-import { ResourceFeature } from "./ResourceFeature";
-import { Advantage } from "./Advantage";
-import { DamageMultiplier } from "./DamageMultiplier";
-import { LanguageFeature } from "./LanguageFeature";
-import { ASIBaseFeature } from "./ASIBaseFeature";
-import { FeatureTemplate } from "./FeatureTemplate";
-import { SpellBook } from "./SpellBook";
-import { SpellcastingFeature } from "./SpellcastingFeature";
-import {
+import { 
+  Reroll,
+  Modifier,
+  SpellModifier,
+  Proficiency,
+  Ability,
+  SpellAsAbility,
+  ItemAffectingAbility,
+  BonusSpells,
+  ResourceFeature,
+  Advantage,
+  DamageMultiplier,
+  LanguageFeature,
+  ASIBaseFeature,
+  FeatureTemplate,
+  SpellBook,
+  SpellcastingFeature,
   SenseFeature,
   CreatureAbility,
-  MinionAbility
+  MinionAbility,
+  UpgradableNumber,
+  IStringHash
 } from ".";
-
 
 /**
  * This represents a specific thing that a character can have.
@@ -38,7 +40,7 @@ export class Feature {
   name: string;
   description: string;
   feature_type: string;
-  the_feature: Modifier | LanguageFeature | SpellModifier | Proficiency | Advantage | DamageMultiplier | ResourceFeature | ASIBaseFeature | Ability | CreatureAbility | MinionAbility | SpellAsAbility | ItemAffectingAbility | BonusSpells | SpellBook | SpellcastingFeature | SenseFeature | boolean | number | string | null;
+  the_feature: Modifier | Reroll | LanguageFeature | SpellModifier | Proficiency | Advantage | DamageMultiplier | ResourceFeature | ASIBaseFeature | Ability | CreatureAbility | MinionAbility | SpellAsAbility | ItemAffectingAbility | BonusSpells | SpellBook | SpellcastingFeature | SenseFeature | UpgradableNumber | IStringHash | boolean | number | string | string[] | null;
 
   constructor(obj?: any) {
     this.parent_type = obj ? obj.parent_type : "";
@@ -59,6 +61,12 @@ export class Feature {
         break;
         case "Eldritch Invocation":
           this.the_feature = obj.the_feature;
+        break;
+        case "Fighting Style":
+          this.the_feature = obj.the_feature;
+        break;
+        case "Reroll":
+          this.the_feature = new Reroll(obj.the_feature);
         break;
         case "Modifier":
           this.the_feature = new Modifier(obj.the_feature);
@@ -87,6 +95,27 @@ export class Feature {
         break;
         case "Feat":
           this.the_feature = "Feat";
+        break;
+        case "Unarmed Strike Size":
+          this.the_feature = obj.the_feature as number;
+        break;
+        case "Unarmed Strike Count":
+          this.the_feature = obj.the_feature as number;
+        break;
+        case "Unarmed Strike Bonus Action":
+          this.the_feature = obj.the_feature as boolean;
+        break;
+        case "Unarmed Strike Damage Type":
+          this.the_feature = obj.the_feature as string;
+        break;
+        case "Unarmed Strike Score":
+          this.the_feature = obj.the_feature as string;
+        break;
+        case "Extra Attacks":
+          this.the_feature = obj.the_feature as number;
+        break;
+        case "Minion Extra Attacks":
+          this.the_feature = new UpgradableNumber(obj.the_feature);
         break;
         case "Ability":
           this.the_feature = new Ability(obj.the_feature);
@@ -134,6 +163,9 @@ export class Feature {
         case "Cantrips":
           this.the_feature = obj.the_feature as number;
         break;
+        case "Cantrips from List":
+          this.the_feature = obj.the_feature as IStringHash;
+        break;
         case "Ritual Casting":
           this.the_feature = "Ritual Casting";
         break;
@@ -167,6 +199,12 @@ export class Feature {
       case "Eldritch Invocation":
         the_feature = this.the_feature as string;
       break;
+      case "Fighting Style":
+        the_feature = this.the_feature as string[];
+      break;
+      case "Reroll":
+        the_feature = (this.the_feature as Reroll).toDBObj();
+      break;
       case "Modifier":
         the_feature = (this.the_feature as Modifier).toDBObj();
       break;
@@ -194,6 +232,27 @@ export class Feature {
       break;
       case "Feat":
         the_feature = "Feat";
+      break;
+      case "Unarmed Strike Size":
+        the_feature = this.the_feature as number;
+      break;
+      case "Unarmed Strike Count":
+        the_feature = this.the_feature as number;
+      break;
+      case "Unarmed Strike Bonus Action":
+        the_feature = this.the_feature as boolean;
+      break;
+      case "Unarmed Strike Damage Type":
+        the_feature = this.the_feature as string;
+      break;
+      case "Unarmed Strike Score":
+        the_feature = this.the_feature as string;
+      break;
+      case "Extra Attacks":
+        the_feature = this.the_feature as number;
+      break;
+      case "Minion Extra Attacks":
+        the_feature = (this.the_feature as UpgradableNumber).toDBObj();
       break;
       case "Ability":
         the_feature = (this.the_feature as Ability).toDBObj();
@@ -230,6 +289,9 @@ export class Feature {
       break;
       case "Cantrips":
         the_feature = this.the_feature as number;
+      break;
+      case "Cantrips from List":
+        the_feature = this.the_feature as IStringHash;
       break;
       case "Ritual Casting":
         the_feature = "Ritual Casting";
@@ -268,13 +330,16 @@ export class Feature {
     switch(this.feature_type) {
       case "Language":
         this.the_feature = new LanguageFeature(copyMe.the_feature);
-        break;
+      break;
+      case "Reroll":
+        this.the_feature = new Reroll(copyMe.the_feature);
+      break;
       case "Modifier":
         this.the_feature = new Modifier(copyMe.the_feature);
-        break;
+      break;
       case "Spell Modifier":
         this.the_feature = new SpellModifier(copyMe.the_feature);
-        break;
+      break;
       case "Skill Proficiencies":
       case "Skill Proficiency Choices":
       case "Tool Proficiency":
@@ -283,43 +348,64 @@ export class Feature {
       case "Special Weapon Proficiencies":
       case "Saving Throw Proficiencies":
         this.the_feature = new Proficiency(copyMe.the_feature);
-        break;
+      break;
+      case "Unarmed Strike Size":
+        this.the_feature = copyMe.the_feature as number;
+      break;
+      case "Unarmed Strike Count":
+        this.the_feature = copyMe.the_feature as number;
+      break;
+      case "Unarmed Strike Bonus Action":
+        this.the_feature = copyMe.the_feature as boolean;
+      break;
+      case "Unarmed Strike Damage Type":
+        this.the_feature = copyMe.the_feature as string;
+      break;
+      case "Unarmed Strike Score":
+        this.the_feature = copyMe.the_feature as string;
+      break;
+      case "Extra Attacks":
+        this.the_feature = copyMe.the_feature as number;
+      break;
+      case "Minion Extra Attacks":
+        this.the_feature = new UpgradableNumber(copyMe.the_feature);
+      break;
       case "Ability":
         this.the_feature = new Ability(copyMe.the_feature);
-        break;
+      break;
       case "Creature Ability":
         this.the_feature = new CreatureAbility(copyMe.the_feature);
-        break;
+      break;
       case "Minion Ability":
         this.the_feature = new MinionAbility(copyMe.the_feature);
-        break;
+      break;
       case "Spell as Ability":
         this.the_feature = new SpellAsAbility(copyMe.the_feature);
-        break;
+      break;
       case "Item Affecting Ability":
         this.the_feature = new ItemAffectingAbility(copyMe.the_feature);
-        break;
+      break;
       case "Advantage":
         this.the_feature = new Advantage(copyMe.the_feature);
-        break;
+      break;
       case "Damage Multiplier":
         this.the_feature = new DamageMultiplier(copyMe.the_feature);
-        break;
+      break;
       case "Bonus Spells":
         this.the_feature = new BonusSpells(copyMe.the_feature);
-        break;
+      break;
       case "Spell Book":
         this.the_feature = new SpellBook(copyMe.the_feature);
-        break;
+      break;
       case "Resource":
         this.the_feature = new ResourceFeature(copyMe.the_feature);
-        break;
+      break;
       case "Ability Score Improvement":
         this.the_feature = new ASIBaseFeature(copyMe.the_feature);
-        break;
+      break;
       default:
         this.the_feature = copyMe.the_feature;
-        break;
+      break;
     }
   }
 }

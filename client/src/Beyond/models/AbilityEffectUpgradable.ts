@@ -1,6 +1,10 @@
 
 import {
   PotenceUpgradable,
+  Potence,
+  AbilityEffect,
+  Character,
+  RollPlus
 } from ".";
 
 export class AbilityEffectUpgradable {
@@ -62,5 +66,41 @@ export class AbilityEffectUpgradable {
     this.use_formula = copyMe.use_formula;
     this.potence_formula = copyMe.potence_formula;
     this.conditions_applied = copyMe.conditions_applied;
+  }
+
+  convert_to_ability_effect(char: Character, class_id: string, base_slot_level: number, slot_level: number): AbilityEffect {
+    const ability_effect = new AbilityEffect();
+    ability_effect.add_modifier = this.add_modifier;
+    ability_effect.attack_type = this.attack_type;
+    ability_effect.conditions_applied = this.conditions_applied;
+    ability_effect.potence_formula = this.potence_formula;
+    ability_effect.potence_type = this.potence_type;
+    ability_effect.potences = [];
+    this.potences.forEach(p => {
+      const potence = new Potence();
+      potence.extra = p.extra;
+      potence.level = p.level;
+      potence.rolls = new RollPlus();
+      potence.rolls.ability_score = p.rolls.ability_score;
+      potence.rolls.count = p.rolls.count.value(char, class_id, base_slot_level, slot_level);
+      potence.rolls.flat = p.rolls.flat.value(char, class_id, base_slot_level, slot_level);
+      potence.rolls.size = p.rolls.size.value(char, class_id, base_slot_level, slot_level);
+      if (potence.rolls.count > 0) {
+        if (potence.rolls.flat > 0) {
+          potence.rolls.as_string = `${potence.rolls.count}d${potence.rolls.size}+${potence.rolls.flat}`;
+        } else {
+          potence.rolls.as_string = `${potence.rolls.count}d${potence.rolls.size}`;
+        }
+      } else if (potence.rolls.flat > 0) {
+        potence.rolls.as_string = `${potence.rolls.flat}`;
+      }
+      potence.rolls.type = p.rolls.type;
+      potence.rolls.true_id = p.rolls.true_id;
+      potence.true_id = p.true_id;
+      ability_effect.potences.push(potence);
+    });
+    ability_effect.type = this.type;
+    ability_effect.use_formula = this.use_formula;
+    return ability_effect;
   }
 }

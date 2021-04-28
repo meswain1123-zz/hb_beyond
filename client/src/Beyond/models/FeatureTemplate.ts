@@ -1,29 +1,32 @@
 
-import { Modifier } from "./Modifier";
-import { SpellModifier } from "./SpellModifier";
-import { Proficiency } from "./Proficiency";
-import { ResourceFeature } from "./ResourceFeature";
-import { Advantage } from "./Advantage";
-import { DamageMultiplier } from "./DamageMultiplier";
-import { ASIBaseFeature } from "./ASIBaseFeature";
-import { TemplateBase } from "./TemplateBase";
-import { Feature } from "./Feature";
-import { Ability } from "./Ability";
-import { SpellAsAbility } from "./SpellAsAbility";
-import { ItemAffectingAbility } from "./ItemAffectingAbility";
-import { BonusSpells } from "./BonusSpells";
-import { SpellBook } from "./SpellBook";
-import { SpellcastingFeature } from "./SpellcastingFeature";
-import { LanguageFeature } from "./LanguageFeature";
-import {
+import { 
+  Reroll,
+  Modifier,
+  SpellModifier,
+  Proficiency,
+  ResourceFeature,
+  Advantage,
+  DamageMultiplier,
+  ASIBaseFeature,
+  Ability,
+  SpellAsAbility,
+  ItemAffectingAbility,
+  BonusSpells,
+  SpellBook,
+  SpellcastingFeature,
+  LanguageFeature,
   SenseFeature,
   CreatureAbility,
-  MinionAbility
+  MinionAbility,
+  UpgradableNumber,
+  IStringHash
 } from ".";
+import { Feature } from "./Feature";
+import { TemplateBase } from "./TemplateBase";
 
 export class FeatureTemplate extends TemplateBase {
   feature_type: string;
-  the_feature: Modifier | LanguageFeature | SpellModifier | Proficiency | Advantage | DamageMultiplier | ResourceFeature | ASIBaseFeature | Ability | CreatureAbility | MinionAbility | SpellAsAbility | ItemAffectingAbility | BonusSpells | SpellBook | SpellcastingFeature | SenseFeature | boolean | number | string | null;
+  the_feature: Modifier | Reroll | LanguageFeature | SpellModifier | Proficiency | Advantage | DamageMultiplier | ResourceFeature | ASIBaseFeature | Ability | CreatureAbility | MinionAbility | SpellAsAbility | ItemAffectingAbility | BonusSpells | SpellBook | SpellcastingFeature | SenseFeature | UpgradableNumber | IStringHash | boolean | number | string | string[] | null;
   
   constructor(obj?: any) {
     super(obj);
@@ -39,6 +42,12 @@ export class FeatureTemplate extends TemplateBase {
         break;
         case "Eldritch Invocation":
           this.the_feature = obj.the_feature;
+        break;
+        case "Fighting Style":
+          this.the_feature = obj.the_feature as string[];
+        break;
+        case "Reroll":
+          this.the_feature = new Reroll(obj.the_feature);
         break;
         case "Modifier":
           this.the_feature = new Modifier(obj.the_feature);
@@ -67,6 +76,27 @@ export class FeatureTemplate extends TemplateBase {
         break;
         case "Feat":
           this.the_feature = "Feat";
+        break;
+        case "Unarmed Strike Size":
+          this.the_feature = obj.the_feature as number;
+        break;
+        case "Unarmed Strike Count":
+          this.the_feature = obj.the_feature as number;
+        break;
+        case "Unarmed Strike Bonus Action":
+          this.the_feature = obj.the_feature as boolean;
+        break;
+        case "Unarmed Strike Damage Type":
+          this.the_feature = obj.the_feature as string;
+        break;
+        case "Unarmed Strike Score":
+          this.the_feature = obj.the_feature as string;
+        break;
+        case "Extra Attacks":
+          this.the_feature = obj.the_feature as number;
+        break;
+        case "Minion Extra Attacks":
+          this.the_feature = new UpgradableNumber(obj.the_feature);
         break;
         case "Ability":
           this.the_feature = new Ability(obj.the_feature);
@@ -114,6 +144,9 @@ export class FeatureTemplate extends TemplateBase {
         case "Cantrips":
           this.the_feature = obj.the_feature as number;
         break;
+        case "Cantrips from List":
+          this.the_feature = obj.the_feature as IStringHash;
+        break;
         case "Ritual Casting":
           this.the_feature = "Ritual Casting";
         break;
@@ -147,6 +180,12 @@ export class FeatureTemplate extends TemplateBase {
       case "Eldritch Invocation":
         the_feature = this.the_feature as string;
       break;
+      case "Fighting Style":
+        the_feature = this.the_feature as string[];
+      break;
+      case "Reroll":
+        the_feature = (this.the_feature as Reroll).toDBObj();
+      break;
       case "Modifier":
         the_feature = (this.the_feature as Modifier).toDBObj();
       break;
@@ -174,6 +213,27 @@ export class FeatureTemplate extends TemplateBase {
       break;
       case "Feat":
         the_feature = "Feat";
+      break;
+      case "Unarmed Strike Size":
+        the_feature = this.the_feature as number;
+      break;
+      case "Unarmed Strike Count":
+        the_feature = this.the_feature as number;
+      break;
+      case "Unarmed Strike Bonus Action":
+        the_feature = this.the_feature as boolean;
+      break;
+      case "Unarmed Strike Damage Type":
+        the_feature = this.the_feature as string;
+      break;
+      case "Unarmed Strike Score":
+        the_feature = this.the_feature as string;
+      break;
+      case "Extra Attacks":
+        the_feature = this.the_feature as number;
+      break;
+      case "Minion Extra Attacks":
+        the_feature = (this.the_feature as UpgradableNumber).toDBObj();
       break;
       case "Ability":
         the_feature = (this.the_feature as Ability).toDBObj();
@@ -210,6 +270,9 @@ export class FeatureTemplate extends TemplateBase {
       break;
       case "Cantrips":
         the_feature = this.the_feature as number;
+      break;
+      case "Cantrips from List":
+        the_feature = this.the_feature as IStringHash;
       break;
       case "Ritual Casting":
         the_feature = "Ritual Casting";
@@ -254,6 +317,9 @@ export class FeatureTemplate extends TemplateBase {
       case "Language":
         this.the_feature = new LanguageFeature(copyMe.the_feature);
       break;
+      case "Reroll":
+        this.the_feature = new Reroll(copyMe.the_feature);
+      break;
       case "Modifier":
         this.the_feature = new Modifier(copyMe.the_feature);
       break;
@@ -268,6 +334,27 @@ export class FeatureTemplate extends TemplateBase {
       case "Special Weapon Proficiencies":
       case "Saving Throw Proficiencies":
         this.the_feature = new Proficiency(copyMe.the_feature);
+      break;
+      case "Unarmed Strike Size":
+        this.the_feature = copyMe.the_feature as number;
+      break;
+      case "Unarmed Strike Count":
+        this.the_feature = copyMe.the_feature as number;
+      break;
+      case "Unarmed Strike Bonus Action":
+        this.the_feature = copyMe.the_feature as boolean;
+      break;
+      case "Unarmed Strike Damage Type":
+        this.the_feature = copyMe.the_feature as string;
+      break;
+      case "Unarmed Strike Score":
+        this.the_feature = copyMe.the_feature as string;
+      break;
+      case "Extra Attacks":
+        this.the_feature = copyMe.the_feature as number;
+      break;
+      case "Minion Extra Attacks":
+        this.the_feature = new UpgradableNumber(copyMe.the_feature);
       break;
       case "Ability":
         this.the_feature = new Ability(copyMe.the_feature);

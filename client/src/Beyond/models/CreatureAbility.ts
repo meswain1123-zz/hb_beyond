@@ -56,7 +56,7 @@ export class CreatureAbility {
   material_component: string;
   casting_time: string; // A, BA, RA, X minute(s), etc
   resource_consumed: string | null; // Slot-X, Ki, Lay on Hands, Charge, etc.
-  amount_consumed: number | null;
+  amount_consumed: number;
   special_resource_amount: string;
   special_resource_refresh_rule: string; // Short Rest, Long Rest, Dawn, 1 Hour, 8 Hours, 24 Hours
   attack_bonus: number;
@@ -84,7 +84,7 @@ export class CreatureAbility {
     this.material_component = obj ? obj.material_component : "";
     this.casting_time = obj ? obj.casting_time : "A";
     this.resource_consumed = obj ? obj.resource_consumed : "None";
-    this.amount_consumed = obj ? obj.amount_consumed : 0;
+    this.amount_consumed = obj && obj.amount_consumed ? obj.amount_consumed : 0;
     this.special_resource_amount = obj ? obj.special_resource_amount : "0";
     this.special_resource_refresh_rule = obj ? obj.special_resource_refresh_rule : "";
     this.attack_bonus = obj && obj.attack_bonus ? obj.attack_bonus : 0;

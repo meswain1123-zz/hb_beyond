@@ -23,7 +23,8 @@ import {
   IStringNumHash, IStringHash,
   DamageMultiplierSimple,
   Bonus,
-  CreatureInstance
+  CreatureInstance,
+  Reroll
 } from ".";
 
 
@@ -71,7 +72,7 @@ export class Character extends ModelBase {
   spells: CharacterSpell[];
   concentrating_on: CharacterSpell | CharacterAbility | null;
   abilities: CharacterAbility[];
-  spell_as_abilities: CharacterSpell[];
+  spell_as_abilities: CharacterAbility[];
   advantage: boolean | null;
   minions: CreatureInstance[];
   transform: CreatureInstance | null;
@@ -94,6 +95,7 @@ export class Character extends ModelBase {
   feats: CharacterFeat[];
   feat_ids: string[];
   eldritch_invocation_ids: string[];
+  fighting_style_ids: string[];
   special_feature_ids: string[];
   pact_boon_id: string;
   speed: IStringNumHash;
@@ -111,6 +113,13 @@ export class Character extends ModelBase {
   advantages: Advantage[];
   damage_multipliers: DamageMultiplierSimple[];
   actions: any;
+  extra_attacks: number;
+  unarmed_strike_scores: string[];
+  unarmed_strike_bonus_action: boolean;
+  unarmed_strike_damage_types: string[];
+  unarmed_strike_size: number;
+  unarmed_strike_count: number;
+  rerolls: Reroll[];
 
   get proficiency_modifier(): number {
     if (this.character_level < 5) {
@@ -224,7 +233,7 @@ export class Character extends ModelBase {
     this.spell_as_abilities = [];
     if (obj && obj.spell_as_abilities && obj.spell_as_abilities.length > 0) {
       for (let i = 0; i < obj.spell_as_abilities.length; i++) {
-        const char_ability = new CharacterSpell(obj.spell_as_abilities[i]);
+        const char_ability = new CharacterAbility(obj.spell_as_abilities[i]);
         this.spell_as_abilities.push(char_ability);
       }
     }
@@ -303,6 +312,7 @@ export class Character extends ModelBase {
     this.feats = [];
     this.feat_ids = [];
     this.eldritch_invocation_ids = [];
+    this.fighting_style_ids = [];
     this.special_feature_ids = [];
     this.pact_boon_id = "";
     this.speed = {
@@ -330,6 +340,13 @@ export class Character extends ModelBase {
     this.advantages = [];
     this.damage_multipliers = [];
     this.actions = {};
+    this.extra_attacks = 0;
+    this.unarmed_strike_scores = ["STR"];
+    this.unarmed_strike_bonus_action = false;
+    this.unarmed_strike_damage_types = ["Bludgeoning"];
+    this.unarmed_strike_size = 4;
+    this.unarmed_strike_count = 1;
+    this.rerolls = [];
   }
 
   toDBObj = () => {

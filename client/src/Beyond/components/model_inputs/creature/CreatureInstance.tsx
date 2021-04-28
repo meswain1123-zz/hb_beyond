@@ -8,7 +8,9 @@ import {
 import { 
   ArmorType,
   Character,
+  CharacterFeature,
   CreatureInstance,
+  CreatureAbility,
   Condition,
   EldritchInvocation,
   Skill,
@@ -21,6 +23,7 @@ import StringBox from "../../input/StringBox";
 
 import CreatureInstanceSavingThrows from "./CreatureInstanceSavingThrows";
 import CreatureAbilityScores from "./CreatureAbilityScores";
+import CreatureAction from "./CreatureAction";
 
 import API from "../../../utilities/smart_api";
 import { APIClass } from "../../../utilities/smart_api_class";
@@ -248,12 +251,7 @@ class CreatureInstanceInput extends Component<Props, State> {
           { creature_instance.actions.length > 0 &&
             <Grid item style={{ borderTop: "1px solid blue" }}>
               { creature_instance.actions.map((feature, key) => {
-                console.log(feature);
-                return (
-                  <Grid item key={key}>
-                    <b>{ feature.name }</b> { feature.feature && feature.feature.description }
-                  </Grid>
-                );
+                return this.renderAction(feature, key);
               })}
             </Grid>
           }
@@ -268,11 +266,7 @@ class CreatureInstanceInput extends Component<Props, State> {
           { creature_instance.legendary_actions.length > 0 &&
             <Grid item style={{ borderTop: "1px solid blue" }}>
               { creature_instance.legendary_actions.map((feature, key) => {
-                return (
-                  <Grid item key={key}>
-                    <b>{ feature.name }</b> { feature.feature && feature.feature.description }
-                  </Grid>
-                );
+                return this.renderAction(feature, key);
               })}
             </Grid>
           }
@@ -292,6 +286,37 @@ class CreatureInstanceInput extends Component<Props, State> {
         </Grid>
       ); 
     }
+  }
+
+  renderAction(feature: CharacterFeature, key: number) {
+    return (
+      <Grid item key={key} container spacing={1} direction="column">
+        { feature.feature && feature.feature.the_feature && feature.feature.the_feature instanceof CreatureAbility ?
+          <Grid item container spacing={1} direction="column">
+            <Grid item>
+              <CreatureAction
+                obj={this.props.creature_instance}
+                action={feature.feature.the_feature as CreatureAbility}
+                onChange={() => {
+                  this.props.onChange();
+                }}
+              />
+            </Grid>
+            <Grid item>
+              { feature.feature && feature.feature.description }
+            </Grid>
+          </Grid>
+        : feature.feature && feature.feature.feature_type === "Extra Attacks" ?
+          <Grid item>
+            <b>{ feature.name }</b> { `${(Math.floor(feature.feature.the_feature as number)) + 1} Attacks per Action` }
+          </Grid>
+        : 
+          <Grid item>
+            <b>{ feature.name }</b> { feature.feature && feature.feature.description }
+          </Grid>
+        }
+      </Grid>
+    );
   }
 
   renderHPStuff() {

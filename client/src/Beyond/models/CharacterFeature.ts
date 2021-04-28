@@ -1,23 +1,26 @@
 
-import { Feature } from "./Feature";
-// None of these have options or special resources
-// These may have special resources
-import { Proficiency } from "./Proficiency";
-// These may have options
-import { ASIBaseFeature } from "./ASIBaseFeature";
-import { CharacterASIBaseFeature } from "./CharacterASIBaseFeature";
-import { LanguageFeature } from "./LanguageFeature";
-import { CharacterLanguageFeature } from "./CharacterLanguageFeature";
-import { CharacterFeat } from "./CharacterFeat";
-import { CharacterEldritchInvocation } from "./CharacterEldritchInvocation";
-import { CharacterPactBoon } from "./CharacterPactBoon";
-import { CharacterSpecialFeature } from "./CharacterSpecialFeature";
-import { Feat } from "./Feat";
-import { EldritchInvocation } from "./EldritchInvocation";
-import { PactBoon } from "./PactBoon";
-import { SpecialFeature } from "./SpecialFeature";
-import { SpellcastingFeature } from "./SpellcastingFeature";
-import { CharacterSpellcasting } from "./CharacterSpellcasting";
+import { 
+  Feature,
+  Proficiency,
+  ASIBaseFeature,
+  CharacterASIBaseFeature,
+  LanguageFeature,
+  CharacterLanguageFeature,
+  CharacterFeat,
+  CharacterEldritchInvocation,
+  CharacterFightingStyle,
+  CharacterPactBoon,
+  CharacterSpecialFeature,
+  Feat,
+  EldritchInvocation,
+  FightingStyle,
+  PactBoon,
+  SpecialFeature,
+  SpellcastingFeature, 
+  CharacterSpellcasting,
+  // CreatureAbility,
+  IStringHash
+} from ".";
 
 /**
  * This represents a feature 
@@ -87,15 +90,21 @@ export class CharacterFeature {
         case "Eldritch Invocation": // It's the id of the specific feat they choose
           this.feature_options.push(new CharacterEldritchInvocation(obj.feature_options[0]));
         break;
+        case "Fighting Style": // It's the id of the specific feat they choose
+          this.feature_options.push(new CharacterFightingStyle(obj.feature_options[0]));
+        break;
         case "Pact Boon": // It's the id of the specific feat they choose
           this.feature_options.push(new CharacterPactBoon(obj.feature_options[0]));
+        break;
+        case "Cantrips from List": // It's the id of the specific feat they choose
+          this.feature_options = obj.feature_options;
         break;
       }
     }
     this.feature = obj && obj.feature ? new Feature(obj.feature) : new Feature();
   }
 
-  toDBObj = () => {
+  toDBObj = (include_feature: boolean = false) => {
     let feature_options: any[] = [];
     if (this.feature_options.length > 0) {
       switch (this.feature_type) {
@@ -141,10 +150,20 @@ export class CharacterFeature {
         case "Eldritch Invocation": // It's the id of the specific feat they choose
           feature_options.push((this.feature_options[0] as CharacterEldritchInvocation).toDBObj());
         break;
+        case "Fighting Style": // It's the id of the specific feat they choose
+          feature_options.push((this.feature_options[0] as CharacterFightingStyle).toDBObj());
+        break;
         case "Pact Boon": // It's the id of the specific feat they choose
           feature_options.push((this.feature_options[0] as CharacterPactBoon).toDBObj());
         break;
+        case "Cantrips from List":
+          feature_options = this.feature_options;
+        break;
       }
+    }
+    let feature: any = null;
+    if (include_feature) {
+      feature = this.feature.toDBObj();
     }
     return {
       true_id: this.true_id,
@@ -153,6 +172,7 @@ export class CharacterFeature {
       special_resource: this.special_resource,
       special_resource_max: this.special_resource_max,
       feature_options,
+      feature
     };
   }
 
@@ -200,6 +220,8 @@ export class CharacterFeature {
       this.feature_options.push(new CharacterFeat());
     } else if (copyMe.feature_type === "Eldritch Invocation") {
       this.feature_options.push(new CharacterEldritchInvocation());
+    } else if (copyMe.feature_type === "Fighting Style") {
+      this.feature_options.push(new CharacterFightingStyle());
     } else if (copyMe.feature_type === "Pact Boon") {
       this.feature_options.push(new CharacterPactBoon());
     } else if (["Spell Book","Bonus Spells","Spellcasting","Spell List","Ritual Casting",
@@ -207,6 +229,13 @@ export class CharacterFeature {
       const spellcasting = new CharacterSpellcasting();
       spellcasting.copyFeature(this);
       this.feature_options.push(spellcasting);
+    } else if (copyMe.feature_type === "Cantrips from List") {
+      const cfl = copyMe.the_feature as IStringHash;
+      console.log(cfl);
+      for (let i = 0; i < +cfl.count; ++i) {
+        this.feature_options.push("");
+      }
+      console.log(this.feature_options);
     }
   }
 
@@ -222,6 +251,9 @@ export class CharacterFeature {
       } else if (copyMe.feature_type === "Eldritch Invocation" && obj instanceof EldritchInvocation) {
         const opt = this.feature_options[0] as CharacterEldritchInvocation;
         opt.connectEldritchInvocation(obj);
+      } else if (copyMe.feature_type === "Fighting Style" && obj instanceof FightingStyle) {
+        const opt = this.feature_options[0] as CharacterFightingStyle;
+        opt.connectFightingStyle(obj);
       } else if (copyMe.feature_type === "Special Feature" && obj instanceof SpecialFeature) {
         const opt = this.feature_options[0] as CharacterSpecialFeature;
         opt.connectSpecialFeature(obj);

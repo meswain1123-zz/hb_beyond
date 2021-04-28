@@ -8,9 +8,12 @@ import {
   CharacterSense,
   DamageMultiplier,
   Creature,
-  SummonStatBlock
+  SummonStatBlock,
+  Feature,
+  MinionAbility,
+  UpgradableNumber,
+  Character
 } from ".";
-import { Character } from "./Character";
 
 export class CreatureInstance {
   true_id: string;
@@ -161,15 +164,15 @@ export class CreatureInstance {
   toDBObj = () => {
     const actions: any[] = [];
     for (let i = 0; i < this.actions.length; i++) {
-      actions.push(this.actions[i].toDBObj());
+      actions.push(this.actions[i].toDBObj(true));
     }
     const legendary_actions: any[] = [];
     for (let i = 0; i < this.legendary_actions.length; i++) {
-      legendary_actions.push(this.legendary_actions[i].toDBObj());
+      legendary_actions.push(this.legendary_actions[i].toDBObj(true));
     }
     const special_abilities: any[] = [];
     for (let i = 0; i < this.special_abilities.length; i++) {
-      special_abilities.push(this.special_abilities[i].toDBObj());
+      special_abilities.push(this.special_abilities[i].toDBObj(true));
     }
     return {
       true_id: this.true_id,
@@ -541,9 +544,17 @@ export class CreatureInstance {
     this.armor_class = copyMe.armor_class.value(char, class_id, base_slot_level, slot_level);
     this.actions = [];
     if (copyMe.actions && copyMe.actions.length > 0) {
-      copyMe.actions.forEach((o: any) => {
+      copyMe.actions.forEach((o: Feature) => {
         const char_feat = new CharacterFeature();
         char_feat.copyFeature(o);
+        if (o.feature_type === "Minion Ability") {
+          const minion_ability = o.the_feature as MinionAbility;
+          char_feat.feature.feature_type = "Creature Ability";
+          char_feat.feature.the_feature = minion_ability.convert_to_creature_ability(char, class_id, base_slot_level, slot_level);
+        } else if (o.feature_type === "Minion Extra Attacks") {
+          char_feat.feature.feature_type = "Extra Attacks";
+          char_feat.feature.the_feature = (o.the_feature as UpgradableNumber).value(char, class_id, base_slot_level, slot_level);
+        }
         this.actions.push(char_feat);
       });
     }

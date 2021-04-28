@@ -36,6 +36,7 @@ type Props = PropsFromRedux & {
   options: ModelBase[];
   allow_all: boolean;
   allow_none: boolean;
+  allow_any: boolean;
   name: string;
   onChange: Function;
   labelWidth: number | null;
@@ -65,6 +66,7 @@ class SelectBox extends Component<Props, State> {
     values: [],
     allow_all: false,
     allow_none: false,
+    allow_any: false,
     color: ""
   };
   constructor(props: Props) {
@@ -147,6 +149,12 @@ class SelectBox extends Component<Props, State> {
             renderValue={ (selected) => this.renderValues(selected as string[]) }
             MenuProps={MenuProps}
           >
+            { this.props.allow_any && 
+              <MenuItem value="Any">
+                <Checkbox checked={ this.props.values.indexOf("Any") > -1 } />
+                <ListItemText primary="Any" />
+              </MenuItem>
+            }
             { this.props.allow_all && 
               <MenuItem value="All">
                 <Checkbox checked={ this.props.values.indexOf("All") > -1 } />
@@ -177,6 +185,9 @@ class SelectBox extends Component<Props, State> {
             fullWidth
             labelWidth={ this.props.labelWidth ? this.props.labelWidth : this.state.labelWidth }
           >
+            { this.props.allow_any && 
+              <MenuItem value="Any">Any</MenuItem>
+            }
             { this.props.allow_all && 
               <MenuItem value="All">All</MenuItem>
             }

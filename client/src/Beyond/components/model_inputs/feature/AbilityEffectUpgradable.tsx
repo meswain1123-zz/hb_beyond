@@ -173,8 +173,6 @@ class AbilityEffectUpgradableInput extends Component<Props, State> {
                   onClick={ () => {
                     const obj = this.props.obj;
                     let level = 1;
-                    let count = 1;
-                    let size = 1;
                     if (obj.potences.length > 0) {
                       const last = obj.potences[obj.potences.length - 1];
                       level = last.level + 1;
@@ -193,6 +191,7 @@ class AbilityEffectUpgradableInput extends Component<Props, State> {
                 <Grid item key={key}>
                   <AbilityPotenceUpgradableInput
                     obj={p}
+                    slot_level={this.props.slot_level}
                     onChange={(changed: PotenceUpgradable) => {
                       const obj = this.props.obj;
                       const objFinder = obj.potences.filter(p => p.true_id === changed.true_id);
