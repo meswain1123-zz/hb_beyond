@@ -32,6 +32,9 @@ type Props = PropsFromRedux & {
   name: string;
   value: string;
   spell_lists: SpellList[] | null;
+  allow_any: boolean;
+  allow_class: boolean;
+  allow_all: boolean;
   onChange: (id: string) => void;
 }
 
@@ -42,7 +45,10 @@ export interface State {
 
 class SelectSpellListBox extends Component<Props, State> {
   public static defaultProps = {
-    spell_lists: null
+    spell_lists: null,
+    allow_any: false,
+    allow_class: false,
+    allow_all: false
   };
   constructor(props: Props) {
     super(props);
@@ -75,10 +81,20 @@ class SelectSpellListBox extends Component<Props, State> {
       this.load();
       return <span>Loading</span>;
     } else {
+      const extra_options: string[] = [];
+      if (this.props.allow_all) {
+        extra_options.push("All");
+      }
+      if (this.props.allow_any) {
+        extra_options.push("Any");
+      }
+      if (this.props.allow_class) {
+        extra_options.push("Class");
+      }
       return (
         <SelectBox 
           options={this.state.spell_lists}
-          allow_all={true}
+          extra_options={extra_options}
           value={this.props.value} 
           name={this.props.name}
           onChange={(id: string) => {

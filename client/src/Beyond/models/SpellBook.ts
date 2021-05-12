@@ -24,8 +24,8 @@ export class SpellBook {
     this.spells_at_level_1 = obj ? obj.spells_at_level_1 : 0;
     this.spells_add_per_level = obj ? obj.spells_add_per_level : 0;
     this.extra_booked_from_ability = obj ? obj.extra_booked_from_ability : "INT";
-    this.limitations = obj ? `${obj.limitations}` : "No Cantrips";
-    this.spell_list = obj ? `${obj.spell_list}` : "All";
+    this.limitations = obj ? obj.limitations : "No Cantrips";
+    this.spell_list = obj ? obj.spell_list : "All";
   }
 
   toDBObj = () => {

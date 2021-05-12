@@ -5,13 +5,16 @@ import {
   List,
   ListItem,
   ListItemText,
-  Icon,
+  // Icon,
   Divider,
 } from "@material-ui/core";
 import { NavLink } from "react-router-dom";
 import { connect, ConnectedProps } from 'react-redux';
 
+import Home from "@material-ui/icons/Home";
+
 import menuRoutes from "./routes";
+
 import API from "../../utilities/smart_api";
 import { APIClass } from "../../utilities/smart_api_class";
 
@@ -69,14 +72,14 @@ class Sidebar extends Component<Props, State> {
         <ListItem key={key} className="curvedButton">
           <NavLink to={prop.path} className="MyButton" activeClassName="active">
             <ListItem button>
-              { prop.icon === undefined ?
+              {/* { prop.icon === undefined ?
                 <span></span>
               : typeof prop.icon === "string" ? (
                 <Icon className="marginLeft">{prop.icon}</Icon>
               ) : (
                 <prop.icon className="marginLeft" />
               )}
-              &nbsp;
+              &nbsp; */}
               <ListItemText primary={prop.name} className="marginLeft" />
             </ListItem>
           </NavLink>
@@ -89,6 +92,15 @@ class Sidebar extends Component<Props, State> {
     return (
       <List>
         {this.brand()}
+        
+        <ListItem className="curvedButton">
+          <NavLink to="/beyond/" className="MyButton" activeClassName="active">
+            <ListItem button>
+              <Home />
+              <ListItemText primary="Home" className="marginLeft" />
+            </ListItem>
+          </NavLink>
+        </ListItem>
         <Divider light />
         {this.links()}
       </List>

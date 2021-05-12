@@ -112,7 +112,7 @@ class SelectResourceBox extends Component<Props, State> {
           value={this.props.value} 
           name={this.props.name}
           onChange={(id: string) => {
-            const objFinder = this.state.resources ? this.state.resources.filter(o => o._id === id) : [];
+            const objFinder = resources.filter(o => o._id === id);
             if (objFinder.length === 1) {
               this.props.onChange(objFinder[0]._id);
             }

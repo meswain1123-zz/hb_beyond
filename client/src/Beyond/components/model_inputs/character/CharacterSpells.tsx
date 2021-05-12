@@ -412,7 +412,7 @@ class CharacterSpells extends Component<Props, State> {
   }
 
   renderSpellGroups() {
-    let filtered = [...this.props.obj.spells, ...this.props.obj.spell_as_abilities];
+    let filtered = [...this.props.obj.spells, ...this.props.obj.spell_as_abilities, ...this.props.obj.ritual_only];
     if (this.state.search_string.length > 0) {
       filtered = filtered.filter(o => 
         o.name.toLowerCase().includes(this.state.search_string.toLowerCase()));

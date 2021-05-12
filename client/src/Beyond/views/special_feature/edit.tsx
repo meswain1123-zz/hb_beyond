@@ -12,11 +12,17 @@ import {
 } from "@material-ui/core";
 
 import { 
-  SpecialFeature, Feature
+  SpecialFeature, 
+  // Feature, 
+  FeatureBase
 } from "../../models";
+
 import StringBox from "../../components/input/StringBox";
-import FeatureListInput from "../../components/model_inputs/feature/FeatureList";
-import FeatureInput from "../../components/model_inputs/feature/FeatureMain";
+
+import FeatureBasesInput from "../../components/model_inputs/feature/FeatureBases";
+import FeatureBaseInput from "../../components/model_inputs/feature/FeatureBase";
+// import FeatureListInput from "../../components/model_inputs/feature/FeatureList";
+// import FeatureInput from "../../components/model_inputs/feature/FeatureMain";
 
 import API from "../../utilities/smart_api";
 import { APIClass } from "../../utilities/smart_api_class";
@@ -57,7 +63,7 @@ export interface State {
   obj: SpecialFeature;
   processing: boolean;
   child_names_valid: boolean;
-  expanded_feature: Feature | null;
+  expanded_feature_base: FeatureBase | null;
   special_features: SpecialFeature[] | null;
   loading: boolean;
 }
@@ -70,7 +76,7 @@ class SpecialFeatureEdit extends Component<Props, State> {
       obj: new SpecialFeature(),
       processing: false,
       child_names_valid: true,
-      expanded_feature: null,
+      expanded_feature_base: null,
       special_features: null,
       loading: false
     };
@@ -122,32 +128,30 @@ class SpecialFeatureEdit extends Component<Props, State> {
       return <span>Loading</span>;
     } else if (this.state.redirectTo !== null) {
       return <Redirect to={this.state.redirectTo} />;
-    } else if (this.state.expanded_feature) {
+    } else if (this.state.expanded_feature_base) {
       return (
-        <FeatureInput
-          label="Feature"
+        <FeatureBaseInput
           parent_name={this.state.obj.name}
-          base_name={null}
-          feature={this.state.expanded_feature} 
-          onChange={(changed: Feature) => {
+          feature_base={this.state.expanded_feature_base} 
+          onChange={(changed: FeatureBase) => {
             const obj = this.state.obj;
             const objFinder = obj.features.filter(o => o.id === changed.id);
             if (objFinder.length === 1) {
-              const feature = objFinder[0];
-              feature.copy(changed);
+              const feature_base = objFinder[0];
+              feature_base.copy(changed);
               this.setState({ obj });
             }
           }}
           onDelete={() => {
-            if (this.state.expanded_feature) {
-              const id = this.state.expanded_feature.id;
+            if (this.state.expanded_feature_base) {
+              const id = this.state.expanded_feature_base.id;
               const obj = this.state.obj;
-              const features = obj.features.filter(o => o.id !== id);
-              features.filter(o => o.id > id).forEach(o => {
+              const feature_bases = obj.features.filter(o => o.id !== id);
+              feature_bases.filter(o => o.id > id).forEach(o => {
                 o.id--;
               });
-              obj.features = features;
-              this.setState({ expanded_feature: null, obj });
+              obj.features = feature_bases;
+              this.setState({ expanded_feature_base: null, obj });
             }
           }}
           onDone={() => {
@@ -157,11 +161,67 @@ class SpecialFeatureEdit extends Component<Props, State> {
               if (fb.name === "") {
                 child_names_valid = false;
                 break;
+              } else {
+                for (let j = 0; j < fb.features.length; j++) {
+                  if (fb.features[j].name === "") {
+                    child_names_valid = false;
+                    break;
+                  }
+                }
+                if (child_names_valid) {
+                  for (let j = 0; j < fb.feature_choices.length; j++) {
+                    if (fb.feature_choices[j].name === "") {
+                      child_names_valid = false;
+                      break;
+                    }
+                  }
+                }
+                if (!child_names_valid) {
+                  break;
+                }
               }
             }
-            this.setState({ expanded_feature: null, child_names_valid });
+            this.setState({ expanded_feature_base: null, child_names_valid });
           }}
         />
+        // <FeatureInput
+        //   label="Feature"
+        //   parent_name={this.state.obj.name}
+        //   base_name={null}
+        //   feature={this.state.expanded_feature} 
+        //   onChange={(changed: Feature) => {
+        //     const obj = this.state.obj;
+        //     const objFinder = obj.features.filter(o => o.id === changed.id);
+        //     if (objFinder.length === 1) {
+        //       const feature = objFinder[0];
+        //       feature.copy(changed);
+        //       this.setState({ obj });
+        //     }
+        //   }}
+        //   onDelete={() => {
+        //     if (this.state.expanded_feature) {
+        //       const id = this.state.expanded_feature.id;
+        //       const obj = this.state.obj;
+        //       const features = obj.features.filter(o => o.id !== id);
+        //       features.filter(o => o.id > id).forEach(o => {
+        //         o.id--;
+        //       });
+        //       obj.features = features;
+        //       this.setState({ expanded_feature: null, obj });
+        //     }
+        //   }}
+        //   onDone={() => {
+        //     let child_names_valid = true;
+        //     for (let i = 0; i < this.state.obj.features.length; i++) {
+        //       const fb = this.state.obj.features[i];
+        //       if (fb.name === "") {
+        //         child_names_valid = false;
+        //         break;
+        //       }
+        //     }
+        //     this.setState({ expanded_feature: null, child_names_valid });
+        //   }}
+        // />
       );
     } else { 
       let { id } = this.props.match.params;
@@ -230,7 +290,35 @@ class SpecialFeatureEdit extends Component<Props, State> {
                   />
                 </Grid>
                 <Grid item>
-                  <FeatureListInput 
+                  <FeatureBasesInput 
+                    feature_bases={this.state.obj.features} 
+                    parent_id={this.state.obj._id} 
+                    parent_type="Special Feature"
+                    onChange={(changed: FeatureBase[]) => {
+                      const obj = this.state.obj;
+                      obj.features = [];
+                      this.setState({ obj }, () => {
+                        obj.features = changed;
+                        this.setState({ obj });
+                      });
+                    }}
+                    onExpand={(expanded_feature_base: FeatureBase) => {
+                      this.setState({ expanded_feature_base });
+                    }}
+                    onAdd={() => {
+                      const obj = this.state.obj;
+                      const feature_base = new FeatureBase();
+                      feature_base.parent_type = "Special Feature";
+                      feature_base.parent_id = obj._id;
+                      feature_base.id = obj.features.length;
+                      obj.features.push(feature_base);
+                      this.setState({
+                        obj,
+                        expanded_feature_base: feature_base
+                      });
+                    }}
+                  />
+                  {/* <FeatureListInput 
                     label="Feature"
                     features={this.state.obj.features} 
                     parent_id={this.state.obj._id} 
@@ -258,7 +346,7 @@ class SpecialFeatureEdit extends Component<Props, State> {
                         expanded_feature: feature
                       });
                     }}
-                  />
+                  /> */}
                 </Grid>
               </Grid>
             </Grid>

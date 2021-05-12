@@ -2,7 +2,8 @@
 import { v4 as uuidv4 } from "uuid";
 import { 
   Spell,
-  UpgradableNumber
+  UpgradableNumber,
+  AbilityEffect
 } from ".";
 import { SpellAsAbilityTemplate } from "./SpellAsAbilityTemplate";
 
@@ -105,6 +106,20 @@ export class SpellAsAbility {
       return this.spell.level;
     }
     return -1;
+  }
+
+  get effect(): AbilityEffect {
+    if (this.spell) {
+      return this.spell.effect;
+    }
+    return new AbilityEffect();
+  }
+
+  get casting_time(): string {
+    if (this.spell) {
+      return this.spell.casting_time;
+    }
+    return "";
   }
 
   toDBObj = () => {

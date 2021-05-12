@@ -44,6 +44,9 @@ export class FeatureBase {
         feature.parent_id = this.parent_id;
         feature.base_id = this.id;
         feature.id = this.features.length;
+        if (feature.description.length === 0) {
+          feature.fake_description = this.description;
+        }
         this.features.push(feature);
       });
     }
@@ -117,6 +120,9 @@ export class FeatureBase {
       feature.parent_type = this.parent_type;
       feature.parent_id = this.parent_id;
       feature.base_id = this.id;
+      if (feature.description.length === 0) {
+        feature.fake_description = this.description;
+      }
       this.features.push(feature);
     });
     this.feature_choices = [];

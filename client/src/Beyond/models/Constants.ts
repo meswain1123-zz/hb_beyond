@@ -83,6 +83,8 @@ export const FEATURE_TYPES = [
     "Special Weapon Proficiencies",
     "Saving Throw Proficiencies",
     "Tool Proficiency",
+    "Tool Proficiencies",
+    "Tool Proficiency Choices",
     "Feat",
     "Expertise",
     "Advantage",
@@ -90,7 +92,7 @@ export const FEATURE_TYPES = [
     "Resource",
     "Language",
     "Ability Score Improvement",
-    "Unarmed Strike Size",
+    "Jack of All Trades",
     "Unarmed Strike Count",
     "Unarmed Strike Bonus Action",
     "Unarmed Strike Damage Type",
@@ -109,6 +111,7 @@ export const FEATURE_TYPES = [
     "Cantrips",
     "Cantrips from List",
     "Spells",
+    "Spells from List",
     "Bonus Spells",
     "Eldritch Invocation",
     "Fighting Style",
@@ -117,6 +120,8 @@ export const FEATURE_TYPES = [
     "Special Feature",
     "Special Feature Choices",
     "Mystic Arcanum",
+    "Spell Mastery",
+    "Special Spell",
     "Sense"
 ];
 export const ITEM_TYPES = [

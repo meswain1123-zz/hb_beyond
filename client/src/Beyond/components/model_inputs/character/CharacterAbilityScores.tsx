@@ -90,9 +90,12 @@ class CharacterAbilityScores extends Component<Props, State> {
   }
 
   renderAbility(ability: string) {
-    const modifier = this.props.obj.current_ability_scores.getModifier(ability);
+    let modifier = this.props.obj.current_ability_scores.getModifier(ability);
     const score = this.props.obj.current_ability_scores.getAbilityScore(ability);
     if (modifier !== null && score !== null) {
+      if (this.props.obj.jack_of_all_trades) {
+        modifier += Math.floor(this.props.obj.proficiency_modifier * 0.5);
+      }
       return (
         <Grid item xs={4} style={{
           display: "flex",

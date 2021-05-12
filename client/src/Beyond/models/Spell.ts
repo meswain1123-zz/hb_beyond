@@ -12,7 +12,7 @@ import {
  * because I want to use this for things that aren't spells
  * (like Battlemaster Maneuvers, Weapon Attacks, Sneak Attack, etc).
  * 
- * potence_formula is a string, but it's complicated, so I'm going to 
+ * bonus is a string, but it's complicated, so I'm going to 
  * define how it works here.
  * To help me make sure I understand it myself, I'm going to start
  * with some examples:
@@ -171,20 +171,20 @@ export class Spell extends ModelBase {
     // if (m) {
     //   Object.keys(m).forEach((key: string) => {
     //     if (this.effect && m[+key]) {
-    //       const potence_formula_mod = m[+key].split(" + ");
-    //       const potence_formula = potence_formula_mod[0].split("d");
-    //       if (potence_formula_mod.length > 1) {
+    //       const bonus_mod = m[+key].split(" + ");
+    //       const bonus = bonus_mod[0].split("d");
+    //       if (bonus_mod.length > 1) {
     //         this.effect.add_modifier = "true";
     //       }
-    //       const dice_count: number = +potence_formula[0];
-    //       const dice_size: number = potence_formula.length === 2 ? +potence_formula[1] : 1;
+    //       const dice_count: number = +bonus[0];
+    //       const dice_size: number = bonus.length === 2 ? +bonus[1] : 1;
     //       this.effect.potences.push(new AbilityPotence(this.effect.potences.length, +key, dice_count, dice_size));
     //     }
     //   });
     // }
     // this.effect_2 = new AbilityEffect();
     // // this.potence = copyMe.damage?.damage_type?.name;
-    // // this.potence_formula_2 = null; // copyMe.potence_formula_2;
+    // // this.bonus_2 = null; // copyMe.bonus_2;
     // // this.damage_type_2 = null; // copyMe.damage_type_2;
     // this.range = copyMe.range;
     // this.range_2 = null; // copyMe.range_2;

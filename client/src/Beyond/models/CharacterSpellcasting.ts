@@ -44,7 +44,8 @@ export class CharacterSpellcasting {
         feature.feature_type === "Ritual Casting") && typeof feature.feature.the_feature === "string") ||
       ((feature.feature_type === "Cantrips" ||
         feature.feature_type === "Spells" ||
-        feature.feature_type === "Mystic Arcanum") && (typeof feature.feature.the_feature === "number" || typeof feature.feature.the_feature === "string"))) {
+        feature.feature_type === "Mystic Arcanum" ||
+        feature.feature_type === "Spell Mastery") && (typeof feature.feature.the_feature === "number" || typeof feature.feature.the_feature === "string"))) {
       this.feature_type = feature.feature.feature_type;
       this.the_feature = feature.feature.the_feature;
     }

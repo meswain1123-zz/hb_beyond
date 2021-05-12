@@ -1,6 +1,7 @@
 
 import { ModelBase } from "./ModelBase";
 import { Feature } from "./Feature";
+import { FeatureBase } from "./FeatureBase";
 
 /**
  * This is a type of Feature with a little more
@@ -29,23 +30,31 @@ import { Feature } from "./Feature";
  */
 
 export class SpecialFeature extends ModelBase {
-  features: Feature[];
+  features: FeatureBase[];
   type: string;
 
   constructor(obj?: any) {
     super(obj);
     this.data_type = "special_feature";
+    this.features = [];
     if (obj && obj.features && obj.features.length > 0) {
-      if (obj.features[0] instanceof Feature) {
-        this.features = obj ? [...obj.features] : [];
-      } else {
-        this.features = [];
+      if (obj.features[0].feature_type) {
+        // It's in the old format, so convert it.
+        const fb = new FeatureBase();
+        fb.name = obj.features[0].name;
         obj.features.forEach((o: any) => {
-          this.features.push(new Feature(o));
+          const feature = new Feature(o);
+          if (feature.description.length === 0) {
+            feature.fake_description = fb.description;
+          }
+          fb.features.push(feature);
+        });
+        this.features.push(fb);
+      } else {
+        obj.features.forEach((o: any) => {
+          this.features.push(new FeatureBase(o));
         });
       }
-    } else {
-      this.features = [];
     }
     this.type = obj ? `${obj.type}` : "";
   }

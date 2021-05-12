@@ -11,15 +11,20 @@ import {
 } from "@material-ui/icons";
 
 import { 
-  AbilityEffect, Potence
+  AbilityEffect, 
+  Potence,
+  UpgradableNumber
 } from "../../../models";
 import { 
   DAMAGE_TYPES, 
 } from "../../../models/Constants";
 
 import StringBox from "../../input/StringBox";
-import CheckBox from "../../input/CheckBox";
 import SelectStringBox from "../../input/SelectStringBox"; 
+import UpgradableNumberBox from "../../input/UpgradableNumberBox";
+
+import SelectResourceBox from "../select/SelectResourceBox";
+
 import AbilityPotenceInput from "./AbilityPotence"; 
 import AbilityPotenceCreaturesInput from "./AbilityPotenceCreatures"; 
 import SelectConditionBox from "../select/SelectConditionBox";
@@ -87,7 +92,7 @@ class AbilityEffectInput extends Component<Props, State> {
       <Grid item container spacing={1} direction="column">
         <Grid item>
           <SelectStringBox 
-            options={["None","Control","Summon","Transform","Utility","Healing","Max HP","Temp HP","Bonus Roll","Self Condition",...DAMAGE_TYPES]}
+            options={["None","Control","Summon","Transform","Create Resource","Utility","Healing","Max HP","Temp HP","Bonus Roll","Self Condition",...DAMAGE_TYPES]}
             value={this.props.obj.type} 
             name="Effect"
             onChange={(changed: string) => {
@@ -97,7 +102,7 @@ class AbilityEffectInput extends Component<Props, State> {
             }}
           />
         </Grid>
-        { !["None","Control","Summon","Transform","Self Condition"].includes(this.props.obj.type) &&
+        { !["None","Control"].includes(this.props.obj.type) &&
           <Grid item>
             <SelectStringBox 
               options={["Slot","Character","Class","None"]}
@@ -111,7 +116,7 @@ class AbilityEffectInput extends Component<Props, State> {
             />
           </Grid>
         }
-        { !["None","Self Condition","Summon","Transform"].includes(this.props.obj.type) &&
+        { !["None","Self Condition","Summon"].includes(this.props.obj.type) &&
           <Grid item>
             <SelectStringBox 
               options={["Melee","Ranged","Melee Spell","Ranged Spell","Bonus","Save","None"]}
@@ -125,7 +130,7 @@ class AbilityEffectInput extends Component<Props, State> {
             />
           </Grid>
         }
-        { !["None","Control","Summon","Transform","Self Condition"].includes(this.props.obj.type) &&
+        { !["None","Control","Summon","Transform","Create Resource","Self Condition"].includes(this.props.obj.type) &&
           <Grid item>
             <StringBox 
               value={this.props.obj.add_modifier} 
@@ -138,32 +143,7 @@ class AbilityEffectInput extends Component<Props, State> {
             />
           </Grid>
         }
-        { !["None","Control","Summon","Transform","Self Condition"].includes(this.props.obj.type) &&
-          <Grid item>
-            <CheckBox 
-              value={this.props.obj.use_formula} 
-              name="Use Formula"
-              onChange={(changed: boolean) => {
-                const obj = this.props.obj;
-                obj.use_formula = changed;
-                this.props.onChange(obj);
-              }}
-            />
-          </Grid>
-        }
-        { !["None","Control","Summon","Transform","Self Condition"].includes(this.props.obj.type) && this.props.obj.use_formula ?
-          <Grid item>
-            <StringBox 
-              value={this.props.obj.potence_formula} 
-              name="Potence Formula"
-              onBlur={(changed: string) => {
-                const obj = this.props.obj;
-                obj.potence_formula = changed;
-                this.props.onChange(obj);
-              }}
-            />
-          </Grid>
-        : !["None","Control","Self Condition"].includes(this.props.obj.type) &&
+        { !["None","Control","Self Condition"].includes(this.props.obj.type) &&
           <Grid item container spacing={1} direction="column">
             <Grid item>
               <span className={"MuiTypography-root MuiListItemText-primary header"}>
@@ -194,7 +174,6 @@ class AbilityEffectInput extends Component<Props, State> {
               </Tooltip>
             </Grid>
             { this.props.obj.potences.map((p, key) => {
-              
               if (["Summon","Transform"].includes(this.props.obj.type)) {
                 return (
                   <Grid item key={key}>
@@ -248,6 +227,19 @@ class AbilityEffectInput extends Component<Props, State> {
             })}
           </Grid>
         }
+        { !["None","Control","Summon","Transform","Create Resource","Self Condition"].includes(this.props.obj.type) &&
+          <Grid item>
+            <UpgradableNumberBox 
+              value={this.props.obj.bonus} 
+              name="Bonus"
+              onChange={(changed: UpgradableNumber) => {
+                const obj = this.props.obj;
+                obj.bonus = changed;
+                this.props.onChange(obj);
+              }}
+            />
+          </Grid>
+        }
         { this.props.obj.type === "Self Condition" &&
           <Grid item>
             <SelectConditionBox
@@ -257,6 +249,49 @@ class AbilityEffectInput extends Component<Props, State> {
               onChange={(ids: string[]) => {
                 const obj = this.props.obj;
                 obj.conditions_applied = ids;
+                this.props.onChange(obj);
+              }}
+            />
+          </Grid>
+        }
+        { this.props.obj.type === "Create Resource" &&
+          <Grid item>
+            <SelectResourceBox 
+              name="Resource Created"
+              allow_none
+              allow_slot
+              value={ this.props.obj.create_resource_type }
+              onChange={(value: string) => {
+                const obj = this.props.obj;
+                obj.create_resource_type = value;
+                this.props.onChange(obj);
+              }}
+            /> 
+          </Grid>
+        }
+        { this.props.obj.type === "Create Resource" && this.props.obj.create_resource_type === "Slot" &&
+          <Grid item>
+            <StringBox 
+              name="Slot Level"
+              value={ `${this.props.obj.create_resource_level}` }
+              type="number"
+              onBlur={(value: string) => {
+                const obj = this.props.obj;
+                obj.create_resource_level = +value;
+                this.props.onChange(obj);
+              }}
+            /> 
+          </Grid>
+        }
+        { this.props.obj.type === "Create Resource" &&
+          <Grid item>
+            <UpgradableNumberBox 
+              value={this.props.obj.create_resource_amount} 
+              name="Amount Created"
+              slot_level={1}
+              onChange={(changed: UpgradableNumber) => {
+                const obj = this.props.obj;
+                obj.create_resource_amount = changed;
                 this.props.onChange(obj);
               }}
             />

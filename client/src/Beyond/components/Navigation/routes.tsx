@@ -1,14 +1,14 @@
 
-import Home from "@material-ui/icons/Home";
+// import Home from "@material-ui/icons/Home";
 
 
 const menuRoutes = {
   admin: [
-    {
-      path: "/beyond/",
-      name: "Home",
-      icon: Home,
-    },
+    // {
+    //   path: "/beyond/",
+    //   name: "Home",
+    //   icon: Home,
+    // },
     {
       path: "/beyond/spell",
       name: "Spells",

@@ -5,6 +5,7 @@ import { Redirect } from "react-router-dom";
 import GnomeRanger from "../../assets/img/characters/Gnome Ranger.png";
 import ShieldImage from "../../assets/img/Shield.png";
 import ListImage from "../../assets/img/List.png";
+import NumberedListImage from "../../assets/img/NumberedList.png";
 import PeopleImage from "../../assets/img/People.png";
 import {
   Settings,
@@ -28,7 +29,9 @@ import {
   Spell,
   SpellSlotType,
   DamageMultiplierSimple,
-  CreatureInstance
+  CreatureInstance,
+  CharacterResource,
+  CharacterSlot
 } from "../../models";
 import { 
   DAMAGE_TYPES
@@ -49,6 +52,8 @@ import CharacterAbilityScores from '../../components/model_inputs/character/Char
 import CharacterSavingThrows from '../../components/model_inputs/character/CharacterSavingThrows';
 import CharacterSenses from '../../components/model_inputs/character/CharacterSenses';
 import CharacterSkills from '../../components/model_inputs/character/CharacterSkills';
+import CharacterResourceBoxes from "../../components/model_inputs/character/CharacterResourceBoxes";
+import DisplayObjects from "../../components/model_inputs/display/DisplayObjects";
 
 import CreatureInstanceInput from '../../components/model_inputs/creature/CreatureInstance';
 
@@ -60,6 +65,8 @@ import imageAPI from "../../utilities/image_api";
 import { APIClass as ImageAPIClass } from "../../utilities/image_api_class";
 import CharacterUtilities from "../../utilities/character_utilities";
 import { CharacterUtilitiesClass } from "../../utilities/character_utilities_class";
+import DataUtilities from "../../utilities/data_utilities";
+import { DataUtilitiesClass } from "../../utilities/data_utilities_class";
 
 
 interface AppState {
@@ -123,19 +130,21 @@ class CharacterDetails extends Component<Props, State> {
       eldritch_invocations: null,
       loading: false,
       reloading: false,
-      view: "actions", // "main", // 
+      view: "spells", // "main", // 
       menu_open: "",
       minion: null,
-      bar3_mode: "Minions" // "Conditions" // 
+      bar3_mode: "Resources"
     };
     this.api = API.getInstance();
     this.image_api = imageAPI.getInstance();
     this.char_util = CharacterUtilities.getInstance();
+    this.data_util = DataUtilities.getInstance();
   }
 
   api: APIClass;
   image_api: ImageAPIClass;
   char_util: CharacterUtilitiesClass;
+  data_util: DataUtilitiesClass;
 
   componentDidMount() {
   }
@@ -158,9 +167,33 @@ class CharacterDetails extends Component<Props, State> {
       this.api.getSetOfObjects(["armor_type","condition","spell","skill","spell_slot_type","eldritch_invocation","weapon_keyword"]).then((res: any) => {
         const armor_types: ArmorType[] = res.armor_type;
         const spells: Spell[] = res.spell;
+        const all_conditions: Condition[] = res.condition;
+        let conditions: Condition[] = all_conditions.filter(o => o.class_ids.length === 0 && o.subclass_ids.length === 0);
+        if (conditions.length < all_conditions.length) {
+          const class_ids: string[] = this.state.obj.classes.map(o => { return o.game_class_id; });
+          const subclass_ids: string[] = this.state.obj.classes.map(o => { return o.subclass_id; });
+          all_conditions.filter(o => o.class_ids.length > 0 || o.subclass_ids.length > 0).forEach(condition => {
+            if (condition.subclass_ids.length > 0) {
+              for (let i = 0; i < subclass_ids.length; ++i) {
+                if (condition.subclass_ids.includes(subclass_ids[i])) {
+                  conditions.push(condition);
+                  break;
+                }
+              }
+            } else {
+              for (let i = 0; i < class_ids.length; ++i) {
+                if (condition.class_ids.includes(class_ids[i])) {
+                  conditions.push(condition);
+                  break;
+                }
+              }
+            }
+          });
+        }
+
         this.setState({ 
           armor_types,
-          conditions: res.condition,
+          conditions,
           spells,
           skills: res.skill,
           spell_slot_types: res.spell_slot_type,
@@ -1023,7 +1056,7 @@ class CharacterDetails extends Component<Props, State> {
                 fontWeight: "bold",
                 textAlign: "center"
               }}>
-                { this.state.obj.initiative_modifier >= 0 ? `+${this.state.obj.initiative_modifier}` : `${this.state.obj.initiative_modifier}` }
+                { this.render_initiative() }
               </div>
             </Grid>
             <Grid item>
@@ -1070,12 +1103,23 @@ class CharacterDetails extends Component<Props, State> {
       <Grid item key="options" xs={2} container spacing={0} direction="row" style={{ borderTop: "1px solid lightgray" }}>
         <Grid item xs={6}>
           <ToggleButtonBox 
+            name="Resources"
+            image={NumberedListImage}
+            color="white"
+            value={ this.state.bar3_mode === "Resources" }
+            onToggle={() => {
+              this.setState({ bar3_mode: (this.state.bar3_mode === "Resources" ? "Conditions" : "Resources") });
+            }}
+          />
+        </Grid>
+        <Grid item xs={6}>
+          <ToggleButtonBox 
             name="Defenses"
             image={ShieldImage}
             color="white"
             value={ this.state.bar3_mode === "Defenses" }
             onToggle={() => {
-              this.setState({ bar3_mode: (this.state.bar3_mode === "Defenses" ? "Conditions" : "Defenses") });
+              this.setState({ bar3_mode: (this.state.bar3_mode === "Defenses" ? "Resources" : "Defenses") });
             }}
           />
         </Grid>
@@ -1086,7 +1130,7 @@ class CharacterDetails extends Component<Props, State> {
             color="white"
             value={ this.state.bar3_mode === "Conditions" }
             onToggle={() => {
-              this.setState({ bar3_mode: (this.state.bar3_mode === "Defenses" ? "Conditions" : "Defenses") });
+              this.setState({ bar3_mode: (this.state.bar3_mode === "Conditions" ? "Resources" : "Conditions") });
             }}
           />
         </Grid>
@@ -1097,7 +1141,7 @@ class CharacterDetails extends Component<Props, State> {
             color="white"
             value={ this.state.bar3_mode === "Minions" }
             onToggle={() => {
-              this.setState({ bar3_mode: (this.state.bar3_mode === "Minions" ? "Conditions" : "Minions") });
+              this.setState({ bar3_mode: (this.state.bar3_mode === "Minions" ? "Resources" : "Minions") });
             }}
           />
         </Grid>
@@ -1105,8 +1149,16 @@ class CharacterDetails extends Component<Props, State> {
     ];
   }
 
+  render_initiative() {
+    let modifier = this.state.obj.initiative_modifier;
+    if (this.state.obj.jack_of_all_trades) {
+      modifier += Math.floor(this.state.obj.proficiency_modifier * 0.5);
+    }
+    return this.data_util.add_plus_maybe(modifier);
+  }
+
   renderBar3() {
-    const return_me: any[] = [];
+    let return_me: any[] = [];
     return_me.push(
       <span key="adv" style={{ 
         border: "1px solid lightgray" 
@@ -1289,6 +1341,15 @@ class CharacterDetails extends Component<Props, State> {
           return_me.push(this.renderCondition(cond, false));
         });
       }
+    } else if (this.state.bar3_mode === "Resources") {
+      const slot_types = Array.from(new Set(this.state.obj.slots.map(o => o.slot_name)));
+      slot_types.forEach(slot_name => {
+        return_me.push(this.renderSlotsForType(slot_name));
+      });
+      this.state.obj.resources.forEach(resource => {
+        return_me.push(this.renderResource(resource));
+      });
+      // return_me = [...return_me, ...this.renderSlots(), ...this.renderResources()]
     } else if (this.state.bar3_mode === "Minions") {
       // Iterate through character's minions
       this.state.obj.minions.forEach(minion => {
@@ -1308,6 +1369,128 @@ class CharacterDetails extends Component<Props, State> {
           { return_me }
         </div>
       </Grid>
+    );
+  }
+
+  // renderSlots() {
+  //   const slot_types = Array.from(new Set(this.state.obj.slots.map(o => o.slot_name)));
+  //   return slot_types.map((slot_name, key) => {
+  //     return this.renderSlotsForType(slot_name);
+  //   });
+  // }
+
+  renderSlotsForType(slot_name: string) {
+    const slots = this.state.obj.slots.filter(o => o.slot_name === slot_name);
+    const groups: any = [];
+    let group: any = [];
+    // const width = slots.length < 4 ? 12 : slots.length < 7 ? 6 : 4;
+    for (let i = 0; i < slots.length; ++i) {
+      const slot = slots[i];
+      group.push(this.renderSlot(slot));
+      if (i % 3 === 2 || i === slots.length - 1) {
+        groups.push(
+          <span key={i}>
+            { group }
+          </span>
+          // <Grid item xs={width} key={i}>
+          //   { group }
+          // </Grid>
+        );
+        group = [];
+      }
+    }
+    return (
+      <span key={slot_name} style={{ 
+        border: "1px solid lightgray" 
+      }}>
+        <Grid container spacing={0} direction="row">
+          <Grid item xs={12}
+            style={{
+              fontWeight: "bold"
+            }}>
+            { slot_name }
+          </Grid>
+          <Grid item xs={12}
+            style={{
+              display: "flex",
+              justifyContent: "center"
+            }}>
+            { groups }
+          </Grid>
+        </Grid>
+      </span>
+    );
+  }
+
+  renderSlot(slot: CharacterSlot) {
+    return (
+      <Grid item key={slot.level}>
+        <span
+          style={{
+            fontWeight: "bold"
+          }}>
+          { slot.level }&nbsp;
+        </span>
+        <CharacterResourceBoxes 
+          resource={slot}
+          show_type={false}
+          character={this.state.obj}
+          onChange={() => {
+            this.setState({ });
+          }}
+        />
+      </Grid>
+    );
+  }
+
+  // renderResources() {
+  //   return this.state.obj.resources.map((resource, key) => {
+  //     return (
+  //       <Grid item key={key} container spacing={0} direction="column">
+  //         <Grid item 
+  //           style={{
+  //             fontWeight: "bold"
+  //           }}>
+  //           <DisplayObjects type="resource" ids={[resource.type_id]} />
+  //         </Grid>
+  //         <Grid item>
+  //           <CharacterResourceBoxes 
+  //             resource={resource}
+  //             character={this.state.obj}
+  //             onChange={() => {
+  //               this.setState({ });
+  //             }}
+  //           />
+  //         </Grid>
+  //       </Grid>
+  //     );
+  //   });
+  // }
+
+  renderResource(resource: CharacterResource) {
+    return (
+      <span key={resource.type_id} style={{ 
+        border: "1px solid lightgray" 
+      }}>
+        <Grid container spacing={0} direction="column">
+          <Grid item 
+            style={{
+              fontWeight: "bold"
+            }}>
+            <DisplayObjects type="resource" ids={[resource.type_id]} />
+            { resource.size > 1 && ` (d${resource.size})` }
+          </Grid>
+          <Grid item>
+            <CharacterResourceBoxes 
+              resource={resource}
+              character={this.state.obj}
+              onChange={() => {
+                this.setState({ });
+              }}
+            />
+          </Grid>
+        </Grid>
+      </span>
     );
   }
 

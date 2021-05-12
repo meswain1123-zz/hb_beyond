@@ -7,6 +7,7 @@ import {
 import { 
   Character,
   CharacterClass,
+  CharacterSpell,
   Spell,
   SpellList
 } from "../../../models";
@@ -62,6 +63,7 @@ export interface State {
   schools: string[];
   concentration: boolean | null;
   ritual: boolean | null;
+  add_to_book: boolean;
   selected_class: CharacterClass | null;
 }
 
@@ -82,6 +84,7 @@ class CharacterManageSpells extends Component<Props, State> {
       schools: [],
       concentration: null,
       ritual: null,
+      add_to_book: true,
       selected_class: props.obj instanceof Character ? props.obj.classes.filter(o => o.position === 0)[0] : null
     };
     this.api = API.getInstance();
@@ -222,6 +225,28 @@ class CharacterManageSpells extends Component<Props, State> {
               <Grid item container spacing={0} direction="row">
                 { this.renderLevels() }
               </Grid>
+              { this.state.selected_class && this.state.selected_class.spell_book &&
+                <Grid item container spacing={0} direction="row">
+                  <Grid item xs={6}>
+                    <ToggleButtonBox 
+                      name="Add to Book"
+                      value={ this.state.add_to_book }
+                      onToggle={() => {
+                        this.setState({ add_to_book: !this.state.add_to_book });
+                      }}
+                    />
+                  </Grid>
+                  <Grid item xs={6}>
+                    <ToggleButtonBox 
+                      name="Prepare Spells"
+                      value={ !this.state.add_to_book }
+                      onToggle={() => {
+                        this.setState({ add_to_book: !this.state.add_to_book });
+                      }}
+                    />
+                  </Grid>
+                </Grid>
+              }
               { this.renderSpellsForClass() }
             </Grid>
           </Grid>
@@ -286,6 +311,10 @@ class CharacterManageSpells extends Component<Props, State> {
       const list: Spell[] = this.state.my_spell_lists[char_class.game_class_id];
       if (list) {
         let filtered = [...list];
+        if (char_class.spell_book && !this.state.add_to_book) {
+          const spell_book = char_class.spell_book;
+          filtered = filtered.filter(o => o.level === 0 || spell_book.spells.filter(o2 => o2.spell_id === o._id).length === 1);
+        }
 
         if (this.state.search_string.length > 0) {
           filtered = filtered.filter(o => o.name.toLowerCase().includes(this.state.search_string.toLowerCase()));
@@ -310,64 +339,234 @@ class CharacterManageSpells extends Component<Props, State> {
         if (this.state.schools.length > 0) {
           filtered = filtered.filter(o => o.school && this.state.schools.includes(o.school));
         }
-
-        if (filtered.length < 100) {
-          const always_known: Spell[] = this.state.my_always_known[char_class.game_class_id];
-          return (
-            <Grid item container spacing={0} direction="column">
-              { filtered.sort((a,b) => { 
-                if (a.level === b.level) {
-                  return a.name < b.name ? -1 : 1;
-                }
-                return a.level - b.level; 
-              }).map((spell, key) => {
-                return (
-                  <Grid item key={key} container spacing={0} direction="row">
-                    <Grid item xs={9} container spacing={0} direction="column">
-                      <ViewSpell spell={spell} 
-                        show_level 
-                        show_ritual={char_class.ritual_casting} 
-                      />
-                    </Grid>
-                    <Grid item xs={3} style={{ margin: "auto" }}>
-                      { !this.state.reloading && always_known.filter(o => o._id === spell._id).length > 0 ?
-                        <ButtonBox
-                          name="Always Known"
-                          fontSize={10}
-                          lineHeight={1.3}
-                          disabled
-                          onClick={() => {
-                          }}
-                        />
-                      : !this.state.reloading && ((spell.level === 0 && !char_class.cantrip_ids.includes(spell._id)) || (spell.level > 0 && !char_class.spell_ids.includes(spell._id)))  ?
-                        <ButtonBox
-                          name="Add"
-                          disabled={ 
-                            (spell.level === 0 && 
-                              (char_class.cantrips_max <= char_class.cantrip_ids.length)) || 
-                            (spell.level > 0 && 
-                              (char_class.spells_prepared_max <= char_class.spell_ids.length)) 
+        if (char_class.spell_book) {
+          const spell_book = char_class.spell_book;
+          if (this.state.add_to_book) {
+            if (filtered.length < 100) {
+              const always_known: Spell[] = this.state.my_always_known[char_class.game_class_id];
+              return (
+                <Grid item container spacing={0} direction="column">
+                  { filtered.sort((a,b) => { 
+                    if (a.level === b.level) {
+                      return a.name < b.name ? -1 : 1;
+                    }
+                    return a.level - b.level; 
+                  }).map((spell, key) => {
+                    let char_spell: CharacterSpell | null = null;
+                    const spell_finder = spell_book.spells.filter(o => o.spell_id === spell._id);
+                    if (spell_finder.length === 1) {
+                      char_spell = spell_finder[0];
+                    }
+                    return (
+                      <Grid item key={key} container spacing={0} direction="row">
+                        <Grid item xs={9} container spacing={0} direction="column">
+                          <ViewSpell spell={spell} 
+                            show_level 
+                            show_ritual={char_class.ritual_casting} 
+                          />
+                        </Grid>
+                        <Grid item xs={3} style={{ margin: "auto" }}>
+                          { !this.state.reloading && always_known.filter(o => o._id === spell._id).length > 0 ?
+                            <ButtonBox
+                              name="Always Known"
+                              fontSize={10}
+                              lineHeight={1.3}
+                              disabled
+                              onClick={() => {
+                              }}
+                            />
+                          : !this.state.reloading && (spell.level === 0 && !char_class.cantrip_ids.includes(spell._id)) ?
+                            <ButtonBox
+                              name="Add"
+                              disabled={ 
+                                (spell.level === 0 && 
+                                  (char_class.cantrips_max <= char_class.cantrip_ids.length)) || 
+                                (spell.level > 0 && 
+                                  (char_class.spells_prepared_max <= char_class.spell_ids.length)) 
+                              }
+                              onClick={() => {
+                                this.addSpell(spell, char_class);
+                              }}
+                            />
+                          : !this.state.reloading && (spell.level === 0 && char_class.cantrip_ids.includes(spell._id)) ?
+                            <ButtonBox
+                              name="Remove"
+                              onClick={() => {
+                                this.removeSpell(spell._id, char_class.game_class_id);
+                              }}
+                            />
+                          : !this.state.reloading && char_spell ?
+                            <ButtonBox
+                              name="Remove"
+                              onClick={() => {
+                                if (char_spell) {
+                                  this.removeSpellFromBook(char_spell, char_class);
+                                }
+                              }}
+                            />
+                          : !this.state.reloading && spell_book.unused_free_spells > 0 ?
+                            <ButtonBox
+                              name="Add Free"
+                              onClick={() => {
+                                this.addSpellToBook(spell, char_class, false);
+                              }}
+                            />
+                          : !this.state.reloading && // ((spell.level === 0 && !char_class.cantrip_ids.includes(spell._id)) || (spell.level > 0 && !char_class.spell_ids.includes(spell._id))) ?
+                            <ButtonBox
+                              name="Pay to Add"
+                              onClick={() => {
+                                this.addSpellToBook(spell, char_class, true);
+                              }}
+                            />
                           }
-                          onClick={() => {
-                            this.addSpell(spell, char_class);
-                          }}
-                        />
-                      : !this.state.reloading && 
-                        <ButtonBox
-                          name="Remove"
-                          onClick={() => {
-                            this.removeSpell(spell._id, char_class.game_class_id);
-                          }}
-                        />
-                      }
-                    </Grid>
-                  </Grid>
-                );
-              })}
-            </Grid>
-          );
+                        </Grid>
+                      </Grid>
+                    );
+                  })}
+                </Grid>
+              );
+            } else {
+              return (<Grid item>Too many results</Grid>);
+            }
+          } else {
+            if (filtered.length < 100) {
+              const always_known: Spell[] = this.state.my_always_known[char_class.game_class_id];
+              return (
+                <Grid item container spacing={0} direction="column">
+                  { filtered.sort((a,b) => { 
+                    if (a.level === b.level) {
+                      return a.name < b.name ? -1 : 1;
+                    }
+                    return a.level - b.level; 
+                  }).map((spell, key) => {
+                    return (
+                      <Grid item key={key} container spacing={0} direction="row">
+                        <Grid item xs={9} container spacing={0} direction="column">
+                          <ViewSpell spell={spell} 
+                            show_level 
+                            show_ritual={char_class.ritual_casting} 
+                          />
+                        </Grid>
+                        <Grid item xs={3} style={{ margin: "auto" }}>
+                          { !this.state.reloading && always_known.filter(o => o._id === spell._id).length > 0 ?
+                            <ButtonBox
+                              name="Always Known"
+                              fontSize={10}
+                              lineHeight={1.3}
+                              disabled
+                              onClick={() => {
+                              }}
+                            />
+                          : !this.state.reloading && (spell.level === 0 && !char_class.cantrip_ids.includes(spell._id)) ?
+                            <ButtonBox
+                              name="Add"
+                              disabled={ 
+                                (spell.level === 0 && 
+                                  (char_class.cantrips_max <= char_class.cantrip_ids.length)) || 
+                                (spell.level > 0 && 
+                                  (char_class.spells_prepared_max <= char_class.spell_ids.length)) 
+                              }
+                              onClick={() => {
+                                this.addSpell(spell, char_class);
+                              }}
+                            />
+                          : !this.state.reloading && (spell.level === 0 && char_class.cantrip_ids.includes(spell._id)) ?
+                            <ButtonBox
+                              name="Remove"
+                              onClick={() => {
+                                this.removeSpell(spell._id, char_class.game_class_id);
+                              }}
+                            />
+                          : !this.state.reloading && (spell.level > 0 && !char_class.spell_ids.includes(spell._id)) ?
+                            <ButtonBox
+                              name="Prepare"
+                              disabled={ 
+                                (spell.level === 0 && 
+                                  (char_class.cantrips_max <= char_class.cantrip_ids.length)) || 
+                                (spell.level > 0 && 
+                                  (char_class.spells_prepared_max <= char_class.spell_ids.length)) 
+                              }
+                              onClick={() => {
+                                this.addSpell(spell, char_class);
+                              }}
+                            />
+                          : !this.state.reloading &&
+                            <ButtonBox
+                              name="Unprepare"
+                              onClick={() => {
+                                this.removeSpell(spell._id, char_class.game_class_id);
+                              }}
+                            />
+                          }
+                        </Grid>
+                      </Grid>
+                    );
+                  })}
+                </Grid>
+              );
+            } else {
+              return (<Grid item>Too many results</Grid>);
+            }
+          }
         } else {
-          return (<Grid item>Too many results</Grid>);
+          if (filtered.length < 100) {
+            const always_known: Spell[] = this.state.my_always_known[char_class.game_class_id];
+            return (
+              <Grid item container spacing={0} direction="column">
+                { filtered.sort((a,b) => { 
+                  if (a.level === b.level) {
+                    return a.name < b.name ? -1 : 1;
+                  }
+                  return a.level - b.level; 
+                }).map((spell, key) => {
+                  return (
+                    <Grid item key={key} container spacing={0} direction="row">
+                      <Grid item xs={9} container spacing={0} direction="column">
+                        <ViewSpell spell={spell} 
+                          show_level 
+                          show_ritual={char_class.ritual_casting} 
+                        />
+                      </Grid>
+                      <Grid item xs={3} style={{ margin: "auto" }}>
+                        { !this.state.reloading && always_known.filter(o => o._id === spell._id).length > 0 ?
+                          <ButtonBox
+                            name="Always Known"
+                            fontSize={10}
+                            lineHeight={1.3}
+                            disabled
+                            onClick={() => {
+                            }}
+                          />
+                        : !this.state.reloading && ((spell.level === 0 && !char_class.cantrip_ids.includes(spell._id)) || (spell.level > 0 && !char_class.spell_ids.includes(spell._id))) ?
+                          <ButtonBox
+                            name="Add"
+                            disabled={ 
+                              (spell.level === 0 && 
+                                (char_class.cantrips_max <= char_class.cantrip_ids.length)) || 
+                              (spell.level > 0 && 
+                                (char_class.spells_prepared_max <= char_class.spell_ids.length)) 
+                            }
+                            onClick={() => {
+                              this.addSpell(spell, char_class);
+                            }}
+                          />
+                        : !this.state.reloading && 
+                          <ButtonBox
+                            name="Remove"
+                            onClick={() => {
+                              this.removeSpell(spell._id, char_class.game_class_id);
+                            }}
+                          />
+                        }
+                      </Grid>
+                    </Grid>
+                  );
+                })}
+              </Grid>
+            );
+          } else {
+            return (<Grid item>Too many results</Grid>);
+          }
         }
       }
     }
@@ -386,6 +585,22 @@ class CharacterManageSpells extends Component<Props, State> {
     const obj = this.props.obj;
     if (obj instanceof Character) {
       obj.remove_spell(spell_id, "Class", source_id);
+      this.update(obj);
+    }
+  }
+  
+  addSpellToBook(spell: Spell, source: CharacterClass, extra: boolean) {
+    const obj = this.props.obj;
+    if (obj instanceof Character) {
+      obj.add_spell_to_book(spell, source, extra);
+      this.update(obj);
+    }
+  }
+  
+  removeSpellFromBook(spell: CharacterSpell, source: CharacterClass) {
+    const obj = this.props.obj;
+    if (obj instanceof Character) {
+      obj.remove_spell_from_book(spell, source);
       this.update(obj);
     }
   }

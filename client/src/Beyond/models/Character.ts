@@ -24,7 +24,9 @@ import {
   DamageMultiplierSimple,
   Bonus,
   CreatureInstance,
-  Reroll
+  Reroll,
+  AbilityEffect,
+  CharacterSpecialSpell
 } from ".";
 
 
@@ -70,6 +72,8 @@ export class Character extends ModelBase {
   death_save_fails: number;
   death_save_successes: number;
   spells: CharacterSpell[];
+  ritual_only: CharacterSpell[];
+  special_spells: CharacterSpecialSpell[]; 
   concentrating_on: CharacterSpell | CharacterAbility | null;
   abilities: CharacterAbility[];
   spell_as_abilities: CharacterAbility[];
@@ -120,6 +124,7 @@ export class Character extends ModelBase {
   unarmed_strike_size: number;
   unarmed_strike_count: number;
   rerolls: Reroll[];
+  jack_of_all_trades: boolean = false;
 
   get proficiency_modifier(): number {
     if (this.character_level < 5) {
@@ -223,6 +228,13 @@ export class Character extends ModelBase {
         this.spells.push(char_spell);
       }
     }
+    this.special_spells = [];
+    if (obj && obj.special_spells && obj.special_spells.length > 0) {
+      for (let i = 0; i < obj.special_spells.length; i++) {
+        const char_spell = new CharacterSpecialSpell(obj.special_spells[i]);
+        this.special_spells.push(char_spell);
+      }
+    }
     this.abilities = [];
     if (obj && obj.abilities && obj.abilities.length > 0) {
       for (let i = 0; i < obj.abilities.length; i++) {
@@ -237,6 +249,7 @@ export class Character extends ModelBase {
         this.spell_as_abilities.push(char_ability);
       }
     }
+    this.ritual_only = [];
     this.concentrating_on = null;
     if (obj && obj.concentrating_on) {
       if (obj.concentrating_on.ability_type) {
@@ -370,6 +383,10 @@ export class Character extends ModelBase {
     for (let i = 0; i < this.spells.length; i++) {
       spells.push(this.spells[i].toDBObj());
     }
+    const special_spells: any[] = [];
+    for (let i = 0; i < this.special_spells.length; i++) {
+      special_spells.push(this.special_spells[i].toDBObj());
+    }
     const abilities: any[] = [];
     for (let i = 0; i < this.abilities.length; i++) {
       abilities.push(this.abilities[i].toDBObj());
@@ -428,6 +445,7 @@ export class Character extends ModelBase {
       attuned_items,
       max_attuned_items: this.max_attuned_items,
       spells,
+      special_spells,
       abilities,
       spell_as_abilities,
       money,
@@ -487,9 +505,11 @@ export class Character extends ModelBase {
     this.skill_overrides = copyMe.skill_overrides;
     this.proficiency_overrides = copyMe.proficiency_overrides;
     this.resources = copyMe.resources;
+    this.slots = copyMe.slots;
     this.items = copyMe.items;
     this.equipped_items = copyMe.equipped_items;
     this.spells = copyMe.spells;
+    this.special_spells = copyMe.special_spells;
     this.abilities = copyMe.abilities;
     this.spell_as_abilities = copyMe.spell_as_abilities;
     this.money = copyMe.money;
@@ -611,14 +631,29 @@ export class Character extends ModelBase {
   }
   
   add_spell_to_book(spell: Spell, 
-    source: CharacterClass | CharacterFeat | CharacterItem,
+    source: CharacterClass, // | CharacterFeat | CharacterItem,
     extra: boolean) {
-    const char_spell = new CharacterSpell();
-    char_spell.copySpell(spell);
-    char_spell.connectSource(source);
-    char_spell.prepared = false;
-    char_spell.extra = extra;
-    this.spells.push(char_spell);
+    if (source.spell_book) {
+      const char_spell = new CharacterSpell();
+      char_spell.copySpell(spell);
+      char_spell.connectSource(source);
+      char_spell.prepared = false;
+      char_spell.extra = extra;
+      if (!extra) {
+        source.spell_book.unused_free_spells--;
+      }
+      source.spell_book.spells.push(char_spell);
+    }
+  }
+  
+  remove_spell_from_book(spell: CharacterSpell, 
+    source: CharacterClass) {
+    if (source.spell_book) {
+      if (!spell.extra) {
+        source.spell_book.unused_free_spells++;
+      }
+      source.spell_book.spells = source.spell_book.spells.filter(o => o.true_id !== spell.true_id);
+    }
   }
   
   toggle_book_spell_prepared(spell: CharacterSpell) {
@@ -628,6 +663,24 @@ export class Character extends ModelBase {
       if (obj_finder.length === 1) {
         const char_spell = obj_finder[0];
         char_spell.prepared = !char_spell.prepared;
+      }
+    }
+  }
+
+  create_resource(effect: AbilityEffect, class_id: string, base_slot_level: number, slot_level: number) {
+    const amount = effect.create_resource_amount.value(this, class_id, base_slot_level, slot_level);
+    if (effect.create_resource_type === "Slot") {
+      const level = effect.create_resource_level;
+      const slots_finder = this.slots.filter(o => o.level === level && o.slot_name === "Slots");
+      if (slots_finder.length === 1) {
+        const slots = slots_finder[0];
+        slots.created += amount;
+      }
+    } else {
+      const resource_finder = this.resources.filter(o => o.type_id === effect.create_resource_type);
+      if (resource_finder.length === 1) {
+        const resource = resource_finder[0];
+        resource.created += amount;
       }
     }
   }

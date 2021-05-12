@@ -4,6 +4,7 @@ import {
   FormControl, InputLabel,
   OutlinedInput, FormHelperText
 } from "@material-ui/core";
+import { v4 as uuidv4 } from "uuid";
 
 
 interface AppState {
@@ -38,6 +39,7 @@ export interface State {
   value: string;
   labelWidth: number;
   typeTime: Date | null;
+  true_id: string;
 }
 
 class StringBox extends Component<Props, State> {
@@ -53,6 +55,7 @@ class StringBox extends Component<Props, State> {
   constructor(props: Props) {
     super(props);
     this.state = {
+      true_id: uuidv4().toString(),
       value: props.value ? props.value : "",
       labelWidth: this.getLabelWidth(props.name),
       typeTime: null
@@ -95,10 +98,10 @@ class StringBox extends Component<Props, State> {
   renderControl() {
     return (
       <FormControl variant="outlined" fullWidth>
-        <InputLabel htmlFor={`stringInput_${this.props.name}`}>{this.props.name}</InputLabel>
+        <InputLabel htmlFor={`stringInput_${this.state.true_id}`}>{this.props.name}</InputLabel>
         <OutlinedInput
-          id={`stringInput_${this.props.name}`}
-          name={`stringInput_${this.props.name}`}
+          id={`stringInput_${this.state.true_id}`}
+          name={`stringInput_${this.state.true_id}`}
           type={this.props.type}
           autoComplete="Off"
           value={this.state.value}

@@ -13,6 +13,7 @@ import {
 } from "../../../models";
 
 import SelectSpecialFeatureBox from "../select/SelectSpecialFeatureBox";
+import CharacterFeatureBasesInput from "./CharacterFeatureBases";
 
 import API from "../../../utilities/smart_api";
 import { APIClass } from "../../../utilities/smart_api_class";
@@ -94,6 +95,12 @@ class CharacterSpecialFeatureBox extends Component<Props, State> {
       this.load();
       return <span>Loading</span>;
     } else {
+      return this.render_main();
+    }
+  }
+
+  render_main() {
+    if (this.state.special_features) {
       const char_sf = this.props.obj.feature_options[0] as CharacterSpecialFeature;
       if (this.props.options.length > 0) {
         const options = this.state.special_features.filter(o => this.props.options.includes(o._id));
@@ -120,16 +127,7 @@ class CharacterSpecialFeatureBox extends Component<Props, State> {
                 }}
               />
             </Grid>
-            { this.state.special_feature &&
-              <Grid item container spacing={1} direction="column">
-                <Grid item>
-                  { this.state.special_feature.name }
-                </Grid>
-                <Grid item>
-                  { this.state.special_feature.description }
-                </Grid>
-              </Grid>
-            }
+            { this.render_features() }
           </Grid>
         );
       } else {
@@ -155,20 +153,27 @@ class CharacterSpecialFeatureBox extends Component<Props, State> {
                 }}
               />
             </Grid>
-            { this.state.special_feature &&
-              <Grid item container spacing={1} direction="column">
-                <Grid item>
-                  { this.state.special_feature.name }
-                </Grid>
-                <Grid item>
-                  { this.state.special_feature.description }
-                </Grid>
-              </Grid>
-            }
+            { this.render_features() }
           </Grid>
         );
       }
     }
+  }
+
+  render_features() {
+    if (this.state.special_feature) {
+      const char_sf = this.props.obj.feature_options[0] as CharacterSpecialFeature;
+      return (
+        <CharacterFeatureBasesInput 
+          character={this.props.character}
+          features={char_sf.features.sort((a, b) => (a.feature_base && b.feature_base && a.feature_base.level > b.feature_base.level) ? 1 : -1)}
+          onChange={() => {
+            this.props.onChange(this.props.obj);
+          }}
+        />
+      );
+    }
+    return null;
   }
 }
 

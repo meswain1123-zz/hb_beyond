@@ -21,7 +21,8 @@ import {
   CreatureAbility,
   MinionAbility,
   UpgradableNumber,
-  IStringHash
+  IStringHash,
+  SpecialSpellFeature
 } from ".";
 
 /**
@@ -38,9 +39,10 @@ export class Feature {
   
   true_id: string;
   name: string;
-  description: string;
+  true_description: string;
+  fake_description: string;
   feature_type: string;
-  the_feature: Modifier | Reroll | LanguageFeature | SpellModifier | Proficiency | Advantage | DamageMultiplier | ResourceFeature | ASIBaseFeature | Ability | CreatureAbility | MinionAbility | SpellAsAbility | ItemAffectingAbility | BonusSpells | SpellBook | SpellcastingFeature | SenseFeature | UpgradableNumber | IStringHash | boolean | number | string | string[] | null;
+  the_feature: Modifier | Reroll | LanguageFeature | SpellModifier | Proficiency | Advantage | DamageMultiplier | ResourceFeature | ASIBaseFeature | Ability | CreatureAbility | MinionAbility | SpellAsAbility | ItemAffectingAbility | BonusSpells | SpellBook | SpellcastingFeature | SenseFeature | SpecialSpellFeature | UpgradableNumber | IStringHash | boolean | number | string | string[] | null;
 
   constructor(obj?: any) {
     this.parent_type = obj ? obj.parent_type : "";
@@ -48,9 +50,11 @@ export class Feature {
     this.base_id = obj ? obj.base_id : 0;
     this.id = obj ? obj.id : 0;
     this.true_id = obj && obj.true_id ? obj.true_id : uuidv4().toString();
-    this.name = obj ? `${obj.name}` : "";
-    this.description = obj ? `${obj.description}` : "";
-    this.feature_type = obj ? `${obj.feature_type}` : "";
+    this.name = obj ? obj.name : "";
+    // console.log(obj);
+    this.true_description = obj ? obj.description : "";
+    this.fake_description = "";
+    this.feature_type = obj ? obj.feature_type : "";
     if (obj && obj.the_feature) {
       switch(this.feature_type) {
         case "Language":
@@ -84,6 +88,8 @@ export class Feature {
         case "Skill Proficiencies":
         case "Skill Proficiency Choices":
         case "Tool Proficiency":
+        case "Tool Proficiencies":
+        case "Tool Proficiency Choices":
         case "Armor Proficiencies":
         case "Weapon Proficiencies":
         case "Special Weapon Proficiencies":
@@ -166,6 +172,9 @@ export class Feature {
         case "Cantrips from List":
           this.the_feature = obj.the_feature as IStringHash;
         break;
+        case "Spells from List":
+          this.the_feature = obj.the_feature as IStringHash;
+        break;
         case "Ritual Casting":
           this.the_feature = "Ritual Casting";
         break;
@@ -177,6 +186,12 @@ export class Feature {
         break;
         case "Mystic Arcanum":
           this.the_feature = obj.the_feature as number;
+        break;
+        case "Spell Mastery":
+          this.the_feature = obj.the_feature as number;
+        break;
+        case "Special Spell":
+          this.the_feature = new SpecialSpellFeature(obj.the_feature);
         break;
         default:
           this.the_feature = null;
@@ -221,6 +236,8 @@ export class Feature {
       case "Skill Proficiencies":
       case "Skill Proficiency Choices":
       case "Tool Proficiency":
+      case "Tool Proficiencies":
+      case "Tool Proficiency Choices":
       case "Armor Proficiencies":
       case "Weapon Proficiencies":
       case "Special Weapon Proficiencies":
@@ -293,6 +310,9 @@ export class Feature {
       case "Cantrips from List":
         the_feature = this.the_feature as IStringHash;
       break;
+      case "Spells from List":
+        the_feature = this.the_feature as IStringHash;
+      break;
       case "Ritual Casting":
         the_feature = "Ritual Casting";
       break;
@@ -305,11 +325,17 @@ export class Feature {
       case "Mystic Arcanum":
         the_feature = this.the_feature as number;
       break;
+      case "Spell Mastery":
+        the_feature = this.the_feature as number;
+      break;
+      case "Special Spell":
+        the_feature = (this.the_feature as SpecialSpellFeature).toDBObj();
+      break;
     }
     return {
       true_id: this.true_id,
       name: this.name,
-      description: this.description,
+      description: this.true_description,
       feature_type: this.feature_type,
       the_feature
     };
@@ -318,14 +344,15 @@ export class Feature {
   copy(copyMe: Feature): void {
     this.id = copyMe.id;
     this.name = copyMe.name;
-    this.description = copyMe.description;
+    this.true_description = copyMe.true_description;
+    this.fake_description = copyMe.fake_description;
     this.feature_type = copyMe.feature_type;
     this.the_feature = copyMe.the_feature;
   }
 
   copyTemplate(copyMe: FeatureTemplate): void {
     this.name = copyMe.name;
-    this.description = copyMe.description;
+    this.true_description = copyMe.description;
     this.feature_type = copyMe.feature_type;
     switch(this.feature_type) {
       case "Language":
@@ -343,6 +370,8 @@ export class Feature {
       case "Skill Proficiencies":
       case "Skill Proficiency Choices":
       case "Tool Proficiency":
+      case "Tool Proficiencies":
+      case "Tool Proficiency Choices":
       case "Armor Proficiencies":
       case "Weapon Proficiencies":
       case "Special Weapon Proficiencies":
@@ -407,5 +436,22 @@ export class Feature {
         this.the_feature = copyMe.the_feature;
       break;
     }
+  }
+
+  get description(): string {
+    if (this.true_description) {
+      if (this.true_description.length > 0) {
+        return this.true_description;
+      } else {
+        return this.fake_description;
+      }
+    } else if (this.fake_description) {
+      return this.fake_description;
+    }
+    return "";
+  }
+
+  set description(value: string) {
+    this.true_description = value;
   }
 }

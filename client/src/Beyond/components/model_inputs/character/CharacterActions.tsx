@@ -102,9 +102,11 @@ class CharacterActions extends Component<Props, State> {
           fontSize: "11px"
         }}>
         <Grid item container spacing={0} direction="row">
-          <Grid item xs={3}>&nbsp;</Grid>
-          <Grid item xs={6} container spacing={1} direction="column">
-            <Grid item
+          <Grid item xs={3}>
+            
+          </Grid>
+          <Grid item xs={6}>
+            <div
               style={{
                 display: "flex",
                 justifyContent: "center",
@@ -114,92 +116,92 @@ class CharacterActions extends Component<Props, State> {
               <div>
                 Actions
               </div>
-            </Grid>
+            </div>
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "center"
+              }}>
+              <span>
+                <ToggleButtonBox 
+                  name="All"
+                  height={15}
+                  lineHeight={1.5}
+                  border=""
+                  color="gray"
+                  width={30}
+                  bold
+                  value={this.state.view === "All"}
+                  onToggle={() => {
+                    this.setState({ view: "All" });
+                  }}
+                />
+              </span>
+              <span>
+                <ToggleButtonBox 
+                  name="Action"
+                  height={15}
+                  lineHeight={1.5}
+                  border=""
+                  color="gray"
+                  width={30}
+                  bold
+                  value={this.state.view === "Action"}
+                  onToggle={() => {
+                    this.setState({ view: "Action" });
+                  }}
+                />
+              </span>
+              <span>
+                <ToggleButtonBox 
+                  name="Bonus Action"
+                  height={15}
+                  lineHeight={1.5}
+                  border=""
+                  color="gray"
+                  width={80}
+                  bold
+                  value={this.state.view === "Bonus Action"}
+                  onToggle={() => {
+                    this.setState({ view: "Bonus Action" });
+                  }}
+                />
+              </span>
+              <span>
+                <ToggleButtonBox 
+                  name="Reaction"
+                  height={15}
+                  lineHeight={1.5}
+                  border=""
+                  color="gray"
+                  width={40}
+                  bold
+                  value={this.state.view === "Reaction"}
+                  onToggle={() => {
+                    this.setState({ view: "Reaction" });
+                  }}
+                />
+              </span>
+              <span>
+                <ToggleButtonBox 
+                  name="Other"
+                  height={15}
+                  lineHeight={1.5}
+                  border=""
+                  color="gray"
+                  width={40}
+                  bold
+                  value={this.state.view === "Other"}
+                  onToggle={() => {
+                    this.setState({ view: "Other" });
+                  }}
+                />
+              </span>
+            </div>
           </Grid>
-          <Grid item xs={3}>&nbsp;</Grid>
-        </Grid>
-        <Grid item>
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "center"
-            }}>
-            <span>
-              <ToggleButtonBox 
-                name="All"
-                height={15}
-                lineHeight={1.5}
-                border=""
-                color="gray"
-                width={30}
-                bold
-                value={this.state.view === "All"}
-                onToggle={() => {
-                  this.setState({ view: "All" });
-                }}
-              />
-            </span>
-            <span>
-              <ToggleButtonBox 
-                name="Action"
-                height={15}
-                lineHeight={1.5}
-                border=""
-                color="gray"
-                width={30}
-                bold
-                value={this.state.view === "Action"}
-                onToggle={() => {
-                  this.setState({ view: "Action" });
-                }}
-              />
-            </span>
-            <span>
-              <ToggleButtonBox 
-                name="Bonus Action"
-                height={15}
-                lineHeight={1.5}
-                border=""
-                color="gray"
-                width={80}
-                bold
-                value={this.state.view === "Bonus Action"}
-                onToggle={() => {
-                  this.setState({ view: "Bonus Action" });
-                }}
-              />
-            </span>
-            <span>
-              <ToggleButtonBox 
-                name="Reaction"
-                height={15}
-                lineHeight={1.5}
-                border=""
-                color="gray"
-                width={40}
-                bold
-                value={this.state.view === "Reaction"}
-                onToggle={() => {
-                  this.setState({ view: "Reaction" });
-                }}
-              />
-            </span>
-            <span>
-              <ToggleButtonBox 
-                name="Other"
-                height={15}
-                lineHeight={1.5}
-                border=""
-                color="gray"
-                width={40}
-                bold
-                value={this.state.view === "Other"}
-                onToggle={() => {
-                  this.setState({ view: "Other" });
-                }}
-              />
-            </span>
-          </div>
+          <Grid item xs={3}>
+            
+          </Grid>
         </Grid>
         { (this.state.view === "All" || this.state.view === "Action") && 
           this.renderActionGroup("Actions") 

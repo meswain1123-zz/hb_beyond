@@ -436,7 +436,7 @@ export class Creature extends ModelBase {
     this.size = copyMe.size;
     this.armor_class = copyMe.armor_class;
     this.max_hit_points = copyMe.hit_points;
-    this.creature_type = data_util.capitalize_firsts(copyMe.creature_type);
+    this.creature_type = data_util.capitalize_firsts(copyMe.type);
     if (copyMe.subtype) {
       this.subtype = data_util.capitalize_firsts(copyMe.subtype);
     }

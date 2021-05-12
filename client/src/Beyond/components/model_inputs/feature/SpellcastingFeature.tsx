@@ -6,7 +6,8 @@ import {
 } from "@material-ui/core";
 
 import { 
-  SpellcastingFeature
+  SpellcastingFeature,
+  SpellBook
 } from "../../../models";
 import { 
   ABILITY_SCORES, 
@@ -19,6 +20,8 @@ import CheckBox from "../../input/CheckBox";
 
 import SelectSpellListBox from "../select/SelectSpellListBox";
 import SelectSpellSlotTypeBox from "../select/SelectSpellSlotTypeBox";
+
+import SpellBookInput from "./SpellBook";
 
 import API from "../../../utilities/smart_api";
 import { APIClass } from "../../../utilities/smart_api_class";
@@ -130,10 +133,27 @@ class SpellcastingFeatureInput extends Component<Props, State> {
               onChange={(value: string) => {
                 const obj = this.props.obj;
                 obj.knowledge_type = value;
+                if (value === "Spell Book") {
+                  obj.spell_book = new SpellBook();
+                } else {
+                  obj.spell_book = null;
+                }
                 this.props.onChange(obj);
               }} 
             />
           </Grid>
+          { this.props.obj.spell_book && 
+            <Grid item>
+              <SpellBookInput
+                obj={this.props.obj.spell_book} 
+                onChange={(changed: SpellBook) => {
+                  const obj = this.props.obj;
+                  obj.spell_book = changed;
+                  this.props.onChange(obj);
+                }} 
+              />
+            </Grid>
+          }
           <Grid item>
             <StringBox 
               name="Cantrips" 
@@ -142,6 +162,18 @@ class SpellcastingFeatureInput extends Component<Props, State> {
               onBlur={(value: string) => {
                 const obj = this.props.obj;
                 obj.cantrips_max = +value;
+                this.props.onChange(obj);
+              }} 
+            />
+          </Grid>
+          <Grid item>
+            <StringBox 
+              name="Starting Spell Count" 
+              type="number"
+              value={`${this.props.obj.base_spell_count}`} 
+              onBlur={(value: string) => {
+                const obj = this.props.obj;
+                obj.base_spell_count = +value;
                 this.props.onChange(obj);
               }} 
             />

@@ -25,14 +25,18 @@ export class CharacterFeatureBase {
   features: CharacterFeature[];
   feature_choices: CharacterFeatureChoice[];
   needs_attention: boolean;
+  source_id: string;
 
   constructor(obj?: any) {
     this.true_id = obj && obj.true_id ? obj.true_id : "";
     this.name = obj ? obj.name : "";
+    this.source_id = obj && obj.source_id ? obj.source_id : "";
     this.features = [];
     if (obj && obj.features && obj.features.length > 0) {
       for (let i = 0; i < obj.features.length; i++) {
-        this.features.push(new CharacterFeature(obj.features[i]));
+        const f = new CharacterFeature(obj.features[i]);
+        f.source_id = this.source_id;
+        this.features.push(f);
       }
     }
     this.feature_choices = [];
@@ -53,11 +57,13 @@ export class CharacterFeatureBase {
       true_id: this.true_id,
       name: this.name,
       features,
-      feature_choices
+      feature_choices,
+      source_id: this.source_id
     };
   }
 
-  copyFeatureBase = (copyMe: FeatureBase) => {
+  copyFeatureBase = (copyMe: FeatureBase, source_id: string = "") => {
+    this.source_id = source_id;
     this.feature_base = new FeatureBase(copyMe);
     this.true_id = copyMe.true_id;
     this.name = copyMe.name;
@@ -65,6 +71,7 @@ export class CharacterFeatureBase {
     copyMe.features.forEach((f: Feature) => {
       const char_feature = new CharacterFeature();
       char_feature.copyFeature(f);
+      char_feature.source_id = this.source_id;
       this.features.push(char_feature);
     });
     this.feature_choices = [];
@@ -108,6 +115,14 @@ export class CharacterFeatureBase {
             break;
           }
         }
+      } else if (feature.feature.feature_type === "Tool Proficiency Choices") {
+        for (let j = 0; j < feature.feature_options.length; j++) {
+          const opt: any = feature.feature_options[j];
+          if (opt.tool_id === "") {
+            this.needs_attention = true;
+            break;
+          }
+        }
       } else if (feature.feature.feature_type === "Language") {
         for (let j = 0; j < feature.feature_options.length; j++) {
           const opt = feature.feature_options[j] as CharacterLanguageFeature;
@@ -136,6 +151,14 @@ export class CharacterFeatureBase {
                   for (let j = 0; j < feat_feature.feature_options.length; j++) {
                     const feat_opt: any = feat_feature.feature_options[j];
                     if (feat_opt.skill_id === "") {
+                      this.needs_attention = true;
+                      break;
+                    }
+                  }
+                } else if (feat_feature.feature.feature_type === "Tool Proficiency Choices") {
+                  for (let j = 0; j < feat_feature.feature_options.length; j++) {
+                    const feat_opt: any = feat_feature.feature_options[j];
+                    if (feat_opt.tool_id === "") {
                       this.needs_attention = true;
                       break;
                     }
@@ -215,6 +238,14 @@ export class CharacterFeatureBase {
                 for (let j = 0; j < feat_feature.feature_options.length; j++) {
                   const opt: any = feat_feature.feature_options[j];
                   if (opt.skill_id === "") {
+                    this.needs_attention = true;
+                    break;
+                  }
+                }
+              } else if (feat_feature.feature.feature_type === "Tool Proficiency Choices") {
+                for (let j = 0; j < feat_feature.feature_options.length; j++) {
+                  const opt: any = feat_feature.feature_options[j];
+                  if (opt.tool_id === "") {
                     this.needs_attention = true;
                     break;
                   }
@@ -301,25 +332,32 @@ export class CharacterFeatureBase {
                   this.needs_attention = true;
                   break;
                 }
+              } else if (feat_feature.feature.feature_type === "Spells from List") {
+                const spell_ids = feat_feature.feature_options as string[];
+                if (spell_ids.filter(o => o === "").length > 0) {
+                  this.needs_attention = true;
+                  break;
+                }
               } else if (feat_feature.feature.feature_type === "Special Feature") {
                 const special_feature = feat_feature.feature_options[0] as CharacterSpecialFeature;
                 if (special_feature.special_feature_id === "") {
                   this.needs_attention = true;
                   break;
                 } else {
-                  for (let k = 0; k < special_feature.features.length; k++) {
-                    const sf_feature = special_feature.features[k];
-                    for (let j = 0; j < sf_feature.feature_options.length; j++) {
-                      const sf_opt: any = sf_feature.feature_options[j];
-                      if (sf_opt === "") {
-                        this.needs_attention = true;
-                        break;
-                      }
-                    }
-                    if (this.needs_attention) {
-                      break;
-                    }
-                  }
+                  // for (let k = 0; k < special_feature.features.length; k++) {
+                  //   const sf_feature = special_feature.features[k];
+                  //   console.log(sf_feature);
+                  //   for (let j = 0; j < sf_feature.feature_options.length; j++) {
+                  //     const sf_opt: any = sf_feature.feature_options[j];
+                  //     if (sf_opt === "") {
+                  //       this.needs_attention = true;
+                  //       break;
+                  //     }
+                  //   }
+                  //   if (this.needs_attention) {
+                  //     break;
+                  //   }
+                  // }
                 }
                 if (this.needs_attention) {
                   break;
@@ -394,25 +432,32 @@ export class CharacterFeatureBase {
           this.needs_attention = true;
           break;
         }
+      } else if (feature.feature.feature_type === "Spells from List") {
+        const spell_ids = feature.feature_options as string[];
+        if (spell_ids.filter(o => o === "").length > 0) {
+          this.needs_attention = true;
+          break;
+        }
       } else if (feature.feature.feature_type === "Special Feature") {
         const special_feature = feature.feature_options[0] as CharacterSpecialFeature;
         if (special_feature.special_feature_id === "") {
           this.needs_attention = true;
           break;
         } else {
-          for (let k = 0; k < special_feature.features.length; k++) {
-            const sf_feature = special_feature.features[k];
-            for (let j = 0; j < sf_feature.feature_options.length; j++) {
-              const sf_opt: any = sf_feature.feature_options[j];
-              if (sf_opt === "") {
-                this.needs_attention = true;
-                break;
-              }
-            }
-            if (this.needs_attention) {
-              break;
-            }
-          }
+          // for (let k = 0; k < special_feature.features.length; k++) {
+          //   const sf_feature = special_feature.features[k];
+          //   // console.log(sf_feature);
+          //   // for (let j = 0; j < sf_feature.feature_options.length; j++) {
+          //   //   const sf_opt: any = sf_feature.feature_options[j];
+          //   //   if (sf_opt === "") {
+          //   //     this.needs_attention = true;
+          //   //     break;
+          //   //   }
+          //   // }
+          //   if (this.needs_attention) {
+          //     break;
+          //   }
+          // }
         }
         if (this.needs_attention) {
           break;

@@ -4,7 +4,8 @@ import {
   Potence,
   AbilityEffect,
   Character,
-  RollPlus
+  RollPlus,
+  UpgradableNumber
 } from ".";
 
 export class AbilityEffectUpgradable {
@@ -13,8 +14,7 @@ export class AbilityEffectUpgradable {
   add_modifier: string; // boolean or condition
   attack_type: string; // melee, ranged, melee spell, ranged spell, bonus, save, or none
   potences: PotenceUpgradable[]; 
-  use_formula: boolean;
-  potence_formula: string;
+  bonus: UpgradableNumber;
   conditions_applied: string[];
 
   
@@ -31,8 +31,12 @@ export class AbilityEffectUpgradable {
         });
       }
     }
-    this.use_formula = obj && obj.use_formula ? obj.use_formula : false;
-    this.potence_formula = obj && obj.potence_formula ? obj.potence_formula : "";
+    this.bonus = new UpgradableNumber();
+    if (obj && obj.bonus) {
+      if (obj.bonus.base !== undefined) {
+        this.bonus = new UpgradableNumber(obj.bonus);
+      }
+    }
     this.conditions_applied = obj && obj.conditions_applied ? obj.conditions_applied : [];
   }
 
@@ -47,8 +51,7 @@ export class AbilityEffectUpgradable {
       add_modifier: this.add_modifier,
       attack_type: this.attack_type,
       potences,
-      use_formula: this.use_formula,
-      potence_formula: this.potence_formula,
+      bonus: this.bonus.toDBObj(),
       conditions_applied: this.conditions_applied
     };
   }
@@ -63,8 +66,7 @@ export class AbilityEffectUpgradable {
     this.add_modifier = copyMe.add_modifier;
     this.attack_type = copyMe.attack_type;
     this.potences = copyMe.potences;
-    this.use_formula = copyMe.use_formula;
-    this.potence_formula = copyMe.potence_formula;
+    this.bonus = copyMe.bonus;
     this.conditions_applied = copyMe.conditions_applied;
   }
 
@@ -73,7 +75,7 @@ export class AbilityEffectUpgradable {
     ability_effect.add_modifier = this.add_modifier;
     ability_effect.attack_type = this.attack_type;
     ability_effect.conditions_applied = this.conditions_applied;
-    ability_effect.potence_formula = this.potence_formula;
+    ability_effect.bonus = this.bonus;
     ability_effect.potence_type = this.potence_type;
     ability_effect.potences = [];
     this.potences.forEach(p => {
@@ -100,7 +102,6 @@ export class AbilityEffectUpgradable {
       ability_effect.potences.push(potence);
     });
     ability_effect.type = this.type;
-    ability_effect.use_formula = this.use_formula;
     return ability_effect;
   }
 }

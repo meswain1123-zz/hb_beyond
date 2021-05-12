@@ -2,6 +2,7 @@
 import {
   Potence,
   RollPlus,
+  UpgradableNumber
 } from ".";
 
 export class AbilityEffect {
@@ -10,9 +11,11 @@ export class AbilityEffect {
   add_modifier: string; // boolean or condition
   attack_type: string; // melee, ranged, melee spell, ranged spell, bonus, save, or none
   potences: Potence[]; 
-  use_formula: boolean;
-  potence_formula: string;
+  bonus: UpgradableNumber;
   conditions_applied: string[];
+  create_resource_type: string;
+  create_resource_level: number;
+  create_resource_amount: UpgradableNumber;
 
   
   constructor(obj?: any) {
@@ -41,9 +44,23 @@ export class AbilityEffect {
         });
       }
     }
-    this.use_formula = obj && obj.use_formula ? obj.use_formula : false;
-    this.potence_formula = obj && obj.potence_formula ? obj.potence_formula : "";
+    this.bonus = new UpgradableNumber();
+    if (obj && obj.bonus) {
+      if (obj.bonus.base !== undefined) {
+        this.bonus = new UpgradableNumber(obj.bonus);
+      }
+    }
     this.conditions_applied = obj && obj.conditions_applied ? obj.conditions_applied : [];
+    this.create_resource_type = obj && obj.create_resource_type ? obj.create_resource_type : "None";
+    this.create_resource_level = obj && obj.create_resource_level ? obj.create_resource_level : 1;
+    this.create_resource_amount = new UpgradableNumber();
+    if (obj && obj.create_resource_amount) {
+      if (obj.create_resource_amount.base !== undefined) {
+        this.create_resource_amount = new UpgradableNumber(obj.create_resource_amount);
+      } else {
+        this.create_resource_amount.base = obj.create_resource_amount;
+      }
+    }
   }
 
   toDBObj = () => {
@@ -62,9 +79,11 @@ export class AbilityEffect {
       add_modifier: this.add_modifier,
       attack_type: this.attack_type,
       potences,
-      use_formula: this.use_formula,
-      potence_formula: this.potence_formula,
-      conditions_applied: this.conditions_applied
+      bonus: this.bonus.toDBObj(),
+      conditions_applied: this.conditions_applied,
+      create_resource_type: this.create_resource_type,
+      create_resource_level: this.create_resource_level,
+      create_resource_amount: this.create_resource_amount.toDBObj()
     };
   }
 
@@ -78,8 +97,10 @@ export class AbilityEffect {
     this.add_modifier = copyMe.add_modifier;
     this.attack_type = copyMe.attack_type;
     this.potences = copyMe.potences;
-    this.use_formula = copyMe.use_formula;
-    this.potence_formula = copyMe.potence_formula;
+    this.bonus = copyMe.bonus;
     this.conditions_applied = copyMe.conditions_applied;
+    this.create_resource_type = copyMe.create_resource_type;
+    this.create_resource_level = copyMe.create_resource_level;
+    this.create_resource_amount = copyMe.create_resource_amount;
   }
 }

@@ -259,49 +259,6 @@ class BackgroundEdit extends Component<Props, State> {
                   </Grid>
                 </Grid>
                 { this.renderTab() }
-                {/* <Grid item>
-                  <StringBox 
-                    value={this.state.obj.description} 
-                    name="Description"
-                    multiline
-                    onBlur={(value: string) => {
-                      const obj = this.state.obj;
-                      obj.description = value;
-                      this.setState({ obj });
-                    }}
-                  />
-                </Grid>
-
-                <Grid item>
-                  <FeatureBasesInput 
-                    feature_bases={this.state.obj.features} 
-                    parent_id={this.state.obj._id} 
-                    parent_type="Background"
-                    onChange={(changed: FeatureBase[]) => {
-                      const obj = this.state.obj;
-                      obj.features = [];
-                      this.setState({ obj }, () => {
-                        obj.features = changed;
-                        this.setState({ obj });
-                      });
-                    }}
-                    onExpand={(expanded_feature_base: FeatureBase) => {
-                      this.setState({ expanded_feature_base });
-                    }}
-                    onAdd={() => {
-                      const obj = this.state.obj;
-                      const feature_base = new FeatureBase();
-                      feature_base.parent_type = "Background";
-                      feature_base.parent_id = obj._id;
-                      feature_base.id = obj.features.length;
-                      obj.features.push(feature_base);
-                      this.setState({
-                        obj,
-                        expanded_feature_base: feature_base
-                      });
-                    }}
-                  />
-                </Grid> */}
               </Grid>
             </Grid>
             <Grid item>

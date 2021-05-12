@@ -9,13 +9,11 @@ import {
   Character,
   CharacterFeat,
   CharacterFeature,
-  CharacterFeatureChoice,
   CharacterASIBaseFeature,
   CharacterLanguageFeature,
   CharacterSense,
   Proficiency,
   Subclass,
-  Sense,
   IStringHash
 } from "../../../models";
 
@@ -26,6 +24,7 @@ import CharacterFightingStyleBox from "./CharacterFightingStyleBox";
 import CharacterSpecialFeatureBox from "./CharacterSpecialFeatureBox";
 import CharacterPactBoonBox from "./CharacterPactBoonBox";
 import CharacterFeatBox from "./CharacterFeatBox";
+import CharacterSpecialSpellBox from "./CharacterSpecialSpellBox";
 import SelectToolBox from "../select/SelectToolBox";
 import SelectSkillBox from "../select/SelectSkillBox";
 import SelectSubclassBox from "../select/SelectSubclassBox";
@@ -63,7 +62,6 @@ type Props = PropsFromRedux & {
 
 export interface State {
   subclasses: Subclass[] | null;
-  senses: Sense[] | null;
   loading: boolean;
 }
 
@@ -72,7 +70,6 @@ class CharacterFeatureInput extends Component<Props, State> {
     super(props);
     this.state = {
       subclasses: null,
-      senses: null,
       loading: false
     };
     this.api = API.getInstance();
@@ -85,10 +82,9 @@ class CharacterFeatureInput extends Component<Props, State> {
 
   load() {
     this.setState({ loading: true }, () => {
-      this.api.getSetOfObjects(["subclass","sense"]).then((res: any) => {
+      this.api.getSetOfObjects(["subclass"]).then((res: any) => {
         this.setState({ 
           subclasses: res.subclass,
-          senses: res.sense,
           loading: false 
         });
       });
@@ -104,30 +100,37 @@ class CharacterFeatureInput extends Component<Props, State> {
       </Grid>;
     switch(feature.feature.feature_type) {
       case "Subclass":
-        details = 
-          <Grid item>
-            <SelectSubclassBox
-              name={feature.name}
-              game_class_id={feature.feature_options[0]}
-              value={feature.feature_options[1]}
-              color={feature.feature_options[1] === "" ? "blue" : ""}
-              onChange={(id: string) => {
-                if (this.props.character instanceof Character) {
-                  const class_finder = this.props.character.classes.filter(o => o.game_class_id === feature.feature_options[0]);
-                  if (class_finder.length === 1) {
-                    const char_class = class_finder[0];
-                    if (this.state.subclasses) {
-                      const subclass_finder = this.state.subclasses.filter(o => o._id === id);
-                      if (subclass_finder.length === 1) {
-                        char_class.copySubclass(subclass_finder[0], char_class.level);
+        if (this.state.loading) {
+          details = <Grid item>Loading</Grid>;
+        } else if (this.state.subclasses === null) {
+          this.load();
+          details = <Grid item>Loading</Grid>;
+        } else {
+          details = 
+            <Grid item>
+              <SelectSubclassBox
+                name={feature.name}
+                game_class_id={feature.feature_options[0]}
+                value={feature.feature_options[1]}
+                color={feature.feature_options[1] === "" ? "blue" : ""}
+                onChange={(id: string) => {
+                  if (this.props.character instanceof Character) {
+                    const class_finder = this.props.character.classes.filter(o => o.game_class_id === feature.feature_options[0]);
+                    if (class_finder.length === 1) {
+                      const char_class = class_finder[0];
+                      if (this.state.subclasses) {
+                        const subclass_finder = this.state.subclasses.filter(o => o._id === id);
+                        if (subclass_finder.length === 1) {
+                          char_class.copySubclass(subclass_finder[0], char_class.level);
+                        }
                       }
                     }
+                    this.props.onChange(this.props.obj);
                   }
-                  this.props.onChange(this.props.obj);
-                }
-              }}
-            />
-          </Grid>;
+                }}
+              />
+            </Grid>;
+        }
       break;
       case "Language":
         if (feature.feature_options[0] instanceof CharacterLanguageFeature) {
@@ -223,9 +226,9 @@ class CharacterFeatureInput extends Component<Props, State> {
         details = 
           <Grid item container spacing={1} direction="column">
             <Grid item>
-              You learn { cfl.count } cantrips of your choice from the <DisplayObjects type="spell_list" ids={[cfl.list_id]} /> spell list. 
+              You learn { cfl.count } cantrips of your choice from { cfl.list_id === "Any" ? <span>any</span> : <span>the <DisplayObjects type="spell_list" ids={[cfl.list_id]} /></span> } spell list. 
               { cfl.spellcasting_ability } is your spellcasting ability for them. 
-              Whenever you gain a level in this class, you can replace one of these cantrips with another cantrip from the <DisplayObjects type="spell_list" ids={[cfl.list_id]} /> spell list. 
+              Whenever you gain a level in this class, you can replace one of these cantrips with another cantrip from { cfl.list_id === "Any" ? <span>any</span> : <span>the <DisplayObjects type="spell_list" ids={[cfl.list_id]} /></span> } spell list. 
             </Grid>
             { cantrip_ids.map((cantrip_id, key) => {
               return (
@@ -239,6 +242,38 @@ class CharacterFeatureInput extends Component<Props, State> {
                       const obj = this.props.obj;
                       cantrip_ids[key] = id;
                       feature.feature_options = cantrip_ids;
+                      this.props.onChange(obj);
+                    }} 
+                  />
+                </Grid>
+              );
+            })}
+          </Grid>;
+      break;
+      case "Spells from List":
+        const sfl = feature.feature.the_feature as IStringHash;
+        const spell_ids = feature.feature_options as string[];
+        details = 
+          <Grid item container spacing={1} direction="column">
+            <Grid item>
+              You learn { sfl.count } spells of your choice from { sfl.list_id === "Any" ? <span>any</span> : <span>the <DisplayObjects type="spell_list" ids={[sfl.list_id]} /></span> } spell list. 
+              A spell you choose must be of a level you can cast, 
+              as shown on the <DisplayObjects type="game_class" ids={[sfl.count_as_class_id]} /> table, or a cantrip. 
+              The chosen spells count as <DisplayObjects type="game_class" ids={[sfl.count_as_class_id]} /> spells for you 
+              but don’t count against the number of <DisplayObjects type="game_class" ids={[sfl.count_as_class_id]} /> spells you know.
+            </Grid>
+            { spell_ids.map((spell_id, key) => {
+              return (
+                <Grid item key={key}>
+                  <SelectSpellBox 
+                    name={`Spell ${key + 1}`} 
+                    value={spell_id} 
+                    max_level={+sfl.max_level}
+                    spell_list_id={sfl.list_id}
+                    onChange={(id: string) => {
+                      const obj = this.props.obj;
+                      spell_ids[key] = id;
+                      feature.feature_options = spell_ids;
                       this.props.onChange(obj);
                     }} 
                   />
@@ -295,6 +330,29 @@ class CharacterFeatureInput extends Component<Props, State> {
             </Grid>;
         }
       break;
+      case "Tool Proficiency Choices":
+        let this_tool_prof = feature.feature.the_feature as Proficiency;
+        let feature_tools: string[] = this_tool_prof.the_proficiencies;
+        details = 
+          <Grid item>
+            { feature.feature_options.map((opt, key) => {
+              return (
+                <SelectToolBox
+                  key={key}
+                  name={`Tool ${opt.id + 1}`}
+                  value={opt.tool_id as string}
+                  color={opt.tool_id === "" ? "blue" : ""}
+                  options={feature_tools}
+                  ignore_us={Object.keys(this.props.character.tool_proficiencies).filter(id => id !== opt.tool_id)}
+                  onChange={(changed: string) => {
+                    feature.feature_options[opt.id].tool_id = changed;
+                    this.props.onChange(this.props.obj);
+                  }}
+                />
+              );
+            })}
+          </Grid>;
+      break;
       case "Expertise":
         details = 
           <Grid item>
@@ -333,6 +391,29 @@ class CharacterFeatureInput extends Component<Props, State> {
             })}
           </Grid>;
       break;
+      case "Spell Mastery":
+        details = 
+          <Grid item>
+            { feature.feature_options.map((opt, key) => {
+              return (
+                <span key={key}>Spell Mastery {opt.level}</span>
+              );
+            })}
+          </Grid>;
+      break;
+      case "Special Spell":
+        details = 
+          <Grid item>
+            <CharacterSpecialSpellBox
+              character={this.props.character}
+              obj={feature}
+              class_id={feature.source_id}
+              onChange={() => {
+                this.props.onChange(this.props.obj);
+              }}
+            />
+          </Grid>;
+      break;
       case "Feat":
         details = 
           <Grid item>
@@ -366,15 +447,6 @@ class CharacterFeatureInput extends Component<Props, State> {
           </Grid>;
       break;
     }
-    return details;
-  }
-
-  render_feature_choice(feature: CharacterFeatureChoice) {
-    // switch based on feature type
-    let details = 
-      <Grid item>
-        { feature.choice_count }
-      </Grid>;
     return details;
   }
 }

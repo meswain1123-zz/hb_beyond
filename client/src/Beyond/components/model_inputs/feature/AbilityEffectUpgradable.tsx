@@ -11,15 +11,18 @@ import {
 } from "@material-ui/icons";
 
 import { 
-  AbilityEffectUpgradable, PotenceUpgradable
+  AbilityEffectUpgradable, 
+  PotenceUpgradable,
+  UpgradableNumber
 } from "../../../models";
 import { 
   DAMAGE_TYPES, 
 } from "../../../models/Constants";
 
 import StringBox from "../../input/StringBox";
-import CheckBox from "../../input/CheckBox";
 import SelectStringBox from "../../input/SelectStringBox"; 
+import UpgradableNumberBox from "../../input/UpgradableNumberBox";
+
 import AbilityPotenceUpgradableInput from "./AbilityPotenceUpgradable"; 
 import SelectConditionBox from "../select/SelectConditionBox";
 
@@ -137,32 +140,7 @@ class AbilityEffectUpgradableInput extends Component<Props, State> {
             />
           </Grid>
         }
-        { !["None","Control","Summon","Transform","Self Condition"].includes(this.props.obj.type) &&
-          <Grid item>
-            <CheckBox 
-              value={this.props.obj.use_formula} 
-              name="Use Formula"
-              onChange={(changed: boolean) => {
-                const obj = this.props.obj;
-                obj.use_formula = changed;
-                this.props.onChange(obj);
-              }}
-            />
-          </Grid>
-        }
-        { !["None","Control","Summon","Transform","Self Condition"].includes(this.props.obj.type) && this.props.obj.use_formula ?
-          <Grid item>
-            <StringBox 
-              value={this.props.obj.potence_formula} 
-              name="Potence Formula"
-              onBlur={(changed: string) => {
-                const obj = this.props.obj;
-                obj.potence_formula = changed;
-                this.props.onChange(obj);
-              }}
-            />
-          </Grid>
-        : !["None","Control","Self Condition"].includes(this.props.obj.type) &&
+        { !["None","Control","Self Condition"].includes(this.props.obj.type) &&
           <Grid item container spacing={1} direction="column">
             <Grid item>
               <span className={"MuiTypography-root MuiListItemText-primary header"}>
@@ -214,6 +192,19 @@ class AbilityEffectUpgradableInput extends Component<Props, State> {
             })}
           </Grid>
         }
+        { !["None","Control","Summon","Transform","Self Condition"].includes(this.props.obj.type) &&
+          <Grid item>
+            <UpgradableNumberBox 
+              value={this.props.obj.bonus} 
+              name="Bonus"
+              onChange={(changed: UpgradableNumber) => {
+                const obj = this.props.obj;
+                obj.bonus = changed;
+                this.props.onChange(obj);
+              }}
+            />
+          </Grid>
+        } 
         { this.props.obj.type === "Self Condition" &&
           <Grid item>
             <SelectConditionBox

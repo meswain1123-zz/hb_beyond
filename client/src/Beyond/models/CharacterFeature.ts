@@ -19,7 +19,8 @@ import {
   SpellcastingFeature, 
   CharacterSpellcasting,
   // CreatureAbility,
-  IStringHash
+  IStringHash,
+  SpecialSpellFeature,
 } from ".";
 
 /**
@@ -41,6 +42,7 @@ export class CharacterFeature {
   // for SpellBook it will have objects with spell_id's, the level it was learned at, and whether it was learned at level up or from someting else (training, scroll, or spellbook)
   feature_options: any[]; 
   // the_feature: CharacterASIBaseFeature | CharacterAbility | CharacterSpellAsAbility | CharacterItemAffectingAbility | CharacterSpellBook | boolean | number | string | null;
+  source_id: string;
 
   constructor(obj?: any) {
     this.true_id = obj ? obj.true_id : "";
@@ -79,6 +81,11 @@ export class CharacterFeature {
         case "Tool Proficiency":
           this.feature_options.push({ type: obj.feature_options[0], tool_id: obj.feature_options[1] });
         break;
+        case "Tool Proficiency Choices": // It's the ids of the specific skills they choose
+          for (let i = 0; i < obj.feature_options.length; i++) {
+            this.feature_options.push({ id: i, tool_id: obj.feature_options[i] });
+          }
+        break;
         case "Expertise": // It's the ids of the specific skills they choose
           for (let i = 0; i < obj.feature_options.length; i++) {
             this.feature_options.push({ id: i, skill_id: obj.feature_options[i] });
@@ -96,12 +103,13 @@ export class CharacterFeature {
         case "Pact Boon": // It's the id of the specific feat they choose
           this.feature_options.push(new CharacterPactBoon(obj.feature_options[0]));
         break;
-        case "Cantrips from List": // It's the id of the specific feat they choose
+        default:
           this.feature_options = obj.feature_options;
         break;
       }
     }
     this.feature = obj && obj.feature ? new Feature(obj.feature) : new Feature();
+    this.source_id = obj && obj.source_id ? obj.source_id : "";
   }
 
   toDBObj = (include_feature: boolean = false) => {
@@ -138,6 +146,12 @@ export class CharacterFeature {
           feature_options.push(o.type as string);
           feature_options.push(o.tool_id as string);
         break;
+        case "Tool Proficiency Choices": // It's the ids of the specific skills they choose
+          for (let i = 0; i < this.feature_options.length; i++) {
+            const o = this.feature_options[i];
+            feature_options.push(o.tool_id as string);
+          }
+        break;
         case "Expertise": // It's the ids of the specific skills they choose
           for (let i = 0; i < this.feature_options.length; i++) {
             const o = this.feature_options[i];
@@ -156,7 +170,7 @@ export class CharacterFeature {
         case "Pact Boon": // It's the id of the specific feat they choose
           feature_options.push((this.feature_options[0] as CharacterPactBoon).toDBObj());
         break;
-        case "Cantrips from List":
+        default:
           feature_options = this.feature_options;
         break;
       }
@@ -172,7 +186,8 @@ export class CharacterFeature {
       special_resource: this.special_resource,
       special_resource_max: this.special_resource_max,
       feature_options,
-      feature
+      feature,
+      source_id: this.source_id
     };
   }
 
@@ -211,6 +226,11 @@ export class CharacterFeature {
     } else if (copyMe.feature_type === "Tool Proficiency") {
       const prof = copyMe.the_feature as Proficiency;
       this.feature_options.push({ id: 0, type: prof.the_proficiencies[0], tool_id: prof.the_proficiencies[1] });
+    } else if (copyMe.feature_type === "Tool Proficiency Choices") {
+      const prof = copyMe.the_feature as Proficiency;
+      for (let i = 0; i < prof.choice_count; i++) {
+        this.feature_options.push({ id: i, tool_id: "" });
+      }
     } else if (copyMe.feature_type === "Expertise") {
       const expertises = copyMe.the_feature as number;
       for (let i = 0; i < expertises; i++) {
@@ -220,27 +240,33 @@ export class CharacterFeature {
       this.feature_options.push(new CharacterFeat());
     } else if (copyMe.feature_type === "Eldritch Invocation") {
       this.feature_options.push(new CharacterEldritchInvocation());
+    } else if (copyMe.feature_type === "Special Spell") {
+      this.feature_options = [""];
     } else if (copyMe.feature_type === "Fighting Style") {
       this.feature_options.push(new CharacterFightingStyle());
     } else if (copyMe.feature_type === "Pact Boon") {
       this.feature_options.push(new CharacterPactBoon());
     } else if (["Spell Book","Bonus Spells","Spellcasting","Spell List","Ritual Casting",
-      "Cantrips","Spells","Mystic Arcanum"].includes(copyMe.feature_type)) {
+      "Cantrips","Spells","Mystic Arcanum","Spell Mastery"].includes(copyMe.feature_type)) {
       const spellcasting = new CharacterSpellcasting();
       spellcasting.copyFeature(this);
       this.feature_options.push(spellcasting);
     } else if (copyMe.feature_type === "Cantrips from List") {
       const cfl = copyMe.the_feature as IStringHash;
-      console.log(cfl);
       for (let i = 0; i < +cfl.count; ++i) {
         this.feature_options.push("");
       }
-      console.log(this.feature_options);
+    } else if (copyMe.feature_type === "Spells from List") {
+      const sfl = copyMe.the_feature as IStringHash;
+      for (let i = 0; i < +sfl.count; ++i) {
+        this.feature_options.push("");
+      }
     }
   }
 
-  connectFeature = (copyMe: Feature, obj: Feat | PactBoon | EldritchInvocation | SpecialFeature | ASIBaseFeature | SpellcastingFeature | null = null) => {
-    this.feature = new Feature(copyMe);
+  connectFeature = (copyMe: Feature, obj: Feat | PactBoon | EldritchInvocation | SpecialFeature | ASIBaseFeature | SpellcastingFeature | SpecialSpellFeature | null = null) => {
+    this.feature = new Feature();
+    this.feature.copy(copyMe);
     if (obj) {
       if (copyMe.feature_type === "Feat" && obj instanceof Feat) {
         const opt = this.feature_options[0] as CharacterFeat;
@@ -261,7 +287,7 @@ export class CharacterFeature {
         const opt = this.feature_options[0] as CharacterASIBaseFeature;
         opt.connectASIBaseFeature(obj);
       } else if (["Spell Book","Bonus Spells","Spellcasting","Spell List","Ritual Casting",
-        "Cantrips","Spells","Mystic Arcanum"].includes(copyMe.feature_type)) {
+        "Cantrips","Spells","Mystic Arcanum","Spell Mastery"].includes(copyMe.feature_type)) {
         const opt = this.feature_options[0] as CharacterSpellcasting;
         opt.connectFeature(this);
       }

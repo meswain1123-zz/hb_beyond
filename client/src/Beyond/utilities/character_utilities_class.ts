@@ -44,7 +44,10 @@ import {
   Attack,
   RollPlus,
   IStringNumHash,
-  IStringHash
+  IStringHash,
+  SpecialSpellFeature,
+  CharacterSpecialSpell,
+  CharacterSpellBook
 } from "../models";
 
 import API from "./smart_api";
@@ -423,9 +426,11 @@ export class CharacterUtilitiesClass {
       // Spell List, Ritual Casting, 
       // Spellcasting,
       // Spell Book, Spells/Cantrips Known/Prepared,
-      // Bonus Spells, Mystic Arcanum
+      // Bonus Spells
       const spellcasting: CharacterSpellcasting[] = [];
-
+      const special_spells: CharacterSpecialSpell[] = [];
+      const ritual_only: CharacterSpell[] = [];
+      
       const senses: CharacterSense[] = [];
       const sense_features: SenseFeature[] = [];
       const attack_bonuses: Bonus[] = [];
@@ -483,10 +488,21 @@ export class CharacterUtilitiesClass {
           f.feature_options.forEach((fo: any) => {
             tool_proficiencies[fo.tool_id] = 1;
           });
+        } else if (f.feature_type === "Tool Proficiencies") {
+          const prof = f.feature.the_feature as Proficiency;
+          prof.the_proficiencies.forEach(id => {
+            tool_proficiencies[id] = 1;
+          });
+        } else if (f.feature_type === "Tool Proficiency Choices") {
+          f.feature_options.forEach((fo: any) => {
+            tool_proficiencies[fo.tool_id] = 1;
+          });
         } else if (f.feature_type === "Expertise") {
           f.feature_options.forEach((fo: any) => {
             skill_proficiencies[fo.skill_id] = 2;
           });
+        } else if (f.feature_type === "Jack of All Trades") {
+          char.jack_of_all_trades = true;
         } else if (f.feature_type === "Armor Proficiencies") {
           const prof = f.feature.the_feature as Proficiency;
           armor_type_proficiencies = [...armor_type_proficiencies, ...prof.the_proficiencies];
@@ -504,7 +520,7 @@ export class CharacterUtilitiesClass {
         } else if (f.feature_type === "Resource") {
           if (f.feature.the_feature instanceof ResourceFeature) {
             const char_resource = new CharacterResource();
-            char_resource.copyResource(f.feature.the_feature);
+            char_resource.copyResource(f.feature.the_feature, char, source_id);
             resources.push(char_resource);
           }
         } else if (f.feature_type === "Ability" ||
@@ -537,13 +553,33 @@ export class CharacterUtilitiesClass {
           f.feature_type === "Spellcasting" ||
           f.feature_type === "Cantrips" ||
           f.feature_type === "Spells" ||
-          f.feature_type === "Mystic Arcanum") {
+          f.feature_type === "Mystic Arcanum" ||
+          f.feature_type === "Spell Mastery") {
           const char_spellcasting = new CharacterSpellcasting();
           if (source_type === "Class") {
             char_spellcasting.class_id = source_id;
             char_spellcasting.copyFeature(f);
             spellcasting.push(char_spellcasting);
           }
+        } else if (f.feature_type === "Special Spell") {
+          f.feature_options.forEach((id: string) => {
+            const obj_finder = all_spells.filter(o => o._id === id);
+            if (obj_finder.length === 1) {
+              const ssf = f.feature.the_feature as SpecialSpellFeature;
+              const ss_finder = char.special_spells.filter(o => o.special_spell_feature_id === ssf.true_id);
+              let char_spell = new CharacterSpecialSpell();
+              if (ss_finder.length === 1) {
+                char_spell = ss_finder[0];
+              } else {
+                char_spell = new CharacterSpecialSpell();
+                char.special_spells.push(char_spell);
+              }
+              char_spell.connectFeature(ssf, char, source_id);
+              char_spell.connectSpell(obj_finder[0]);
+              char_spell.description = f.feature.description;
+              special_spells.push(char_spell);
+            }
+          });
         } else if (f.feature_type === "Cantrips from List") {
           f.feature_options.forEach((id: string) => {
             const obj_finder = all_spells.filter(o => o._id === id);
@@ -558,6 +594,21 @@ export class CharacterUtilitiesClass {
               char_spell.source_name = source_name;
               // char_spell.connectSource(char_class);
               spell_as_abilities.push(char_spell);
+            }
+          });
+        } else if (f.feature_type === "Spells from List") {
+          f.feature_options.forEach((id: string) => {
+            const obj_finder = all_spells.filter(o => o._id === id);
+            const sfl = f.feature.the_feature as IStringHash;
+            const char_class_finder = char.classes.filter(o => o.game_class_id === sfl.count_as_class_id);
+            if (obj_finder.length === 1 && char_class_finder.length === 1) {
+              char.spells = char.spells.filter(o => o.spell_id !== id || o.source_id !== sfl.count_as_class_id);
+              
+              const char_spell = new CharacterSpell();
+              char_spell.copySpell(obj_finder[0]);
+              char_spell.always_known = true;
+              char_spell.connectSource(char_class_finder[0]);
+              char.spells.push(char_spell);
             }
           });
         } else if (f.feature_type === "Eldritch Invocation") {
@@ -745,6 +796,32 @@ export class CharacterUtilitiesClass {
         fighting_styles.forEach(ei => {
           ei.features.forEach(f => { processCharacterFeature(f, ei.source_type, ei.source_id, ei.source_name); });
         });
+        let processed_special_features = 0;
+        while (processed_special_features < special_features.length) {
+          // Special Features have to be processed differently because they have the ability to add other Special Features which also need to be processed
+          const sf = special_features[processed_special_features];
+          if (sf.special_feature) {
+            const the_sf = sf.special_feature;
+            sf.features.forEach(fb => {
+              let good = true;
+              if (fb.feature_base) {
+                if (fb.feature_base.required_condition_ids.length > 0 && fb.feature_base.required_condition_ids.filter(o => o !== "All").length > 0) {
+                  good = false;
+                  for (let i = 0; i < fb.feature_base.required_condition_ids.length; ++i) {
+                    if (me.conditions.includes(fb.feature_base.required_condition_ids[i])) {
+                      good = true;
+                      break;
+                    }
+                  }
+                }
+              }
+              if (good) {
+                fb.features.forEach(f => { processCharacterFeature(f, "Special Feature", sf.special_feature_id, the_sf.name); });
+              }
+            });
+          }
+          processed_special_features++;
+        }
         // We don't need to make a CharacterCondition class
         // because the features on them are always simple, no choices
         me.conditions.forEach(cond_id => {
@@ -982,8 +1059,11 @@ export class CharacterUtilitiesClass {
           }
         } else if (mod.modifies === "Speed") {
           if (checkArmorRequirements(char, mod)) {
-            const amount = getModifierAmount(char, mod_obj);
+            let amount = getModifierAmount(char, mod_obj);
             if (amount) {
+              if (amount === "-1") {
+                amount = `${char.speed.walk}`;
+              }
               for (let i = 0; i < mod.modifies_details.length; i++) {
                 switch (mod.modifies_details[i]) {
                   case "Walking":
@@ -1140,7 +1220,7 @@ export class CharacterUtilitiesClass {
             const feature = sc.the_feature as SpellcastingFeature;
             char_class.spellcasting_ability = feature.ability;
             const spellcasting_ability_modifier = current.getModifier(feature.ability);
-            if (spellcasting_ability_modifier) {
+            if (spellcasting_ability_modifier !== null) {
               // They can only have one Spellcasting feature per class
               char_class.spell_dc += 8 + char.proficiency_modifier + spellcasting_ability_modifier;
               char_class.spell_attack += char.proficiency_modifier + spellcasting_ability_modifier;
@@ -1150,6 +1230,7 @@ export class CharacterUtilitiesClass {
             }
             char_class.extra_prepared_from_ability = feature.extra_prepared_from_ability;
             char_class.knowledge_type = feature.knowledge_type;
+            char_class.base_spell_count = feature.base_spell_count;
             char_class.spell_count_per_level = feature.spell_count_per_level;
             char_class.spell_list_id = feature.spell_list_id;
             char_class.spell_table = feature.table;
@@ -1160,9 +1241,20 @@ export class CharacterUtilitiesClass {
             if (feature.ritual_casting) {
               char_class.ritual_casting = feature.ritual_casting;
             }
+            if (feature.spell_book) {
+              if (!char_class.spell_book) {
+                char_class.spell_book = new CharacterSpellBook();
+              }
+              char_class.spell_book.spell_book = feature.spell_book;
+            }
           } else if (sc.feature_type === "Spell Book") {
             const feature = sc.the_feature as SpellBook;
-            char_class.spell_book = feature;
+            if (char_class.spell_book) {
+              char_class.spell_book.spell_book = feature;
+            } else {
+              char_class.spell_book = new CharacterSpellBook();
+              char_class.spell_book.spell_book = feature;
+            }
           } else if (sc.feature_type === "Bonus Spells") {
             const feature = sc.the_feature as BonusSpells;
             if (feature.always_known) {
@@ -1209,11 +1301,18 @@ export class CharacterUtilitiesClass {
             const feature = sc.the_feature as number;
             extra_spells += +feature;
           } else if (sc.feature_type === "Mystic Arcanum") {
-            const feature = sc.the_feature as number;
-            char_class.mystic_arcanum_levels.push(feature);
+            // const feature = sc.the_feature as number;
+            // char_class.mystic_arcanum_levels.push(feature);
+          } else if (sc.feature_type === "Spell Mastery") {
+            // const feature = sc.the_feature as number;
+            // char_class.spell_mastery_levels.push(feature);
           }
         });
-        char_class.spells_prepared_max = char_class.spell_count_per_level * char_class.level;
+        if (char_class.base_spell_count === 0) {
+          char_class.spells_prepared_max = char_class.spell_count_per_level * char_class.level;
+        } else {
+          char_class.spells_prepared_max = char_class.base_spell_count + char_class.spell_count_per_level * (char_class.level - 1);
+        }
         const extra_from_ability = current.getModifier(char_class.extra_prepared_from_ability);
         if (extra_from_ability) {
           char_class.spells_prepared_max += extra_from_ability;
@@ -1244,8 +1343,36 @@ export class CharacterUtilitiesClass {
           }
           char_spell.connectSource(char_class);
         });
+        if (char_class.spell_book && char_class.spell_book.spell_book) {
+          const spell_book = char_class.spell_book;
+          const the_spell_book = char_class.spell_book.spell_book;
+
+          let free_spells = +the_spell_book.spells_at_level_1 + (+the_spell_book.spells_add_per_level * (char_class.level - 1));
+          char_class.spell_book.spells.forEach(char_spell => {
+            if (!char_spell.extra) {
+              free_spells--;
+            }
+            char_spell.connectSource(char_class);
+            if ((char_class.ritual_casting || the_spell_book.limitations.includes("Rituals Only")) &&
+              char.spells.filter(o => o.spell_id === char_spell.spell_id && o.source_id === char_class.game_class_id).length === 0) {
+              if (char_spell.spell === null) {
+                const obj_finder = all_spells.filter(o => o._id === char_spell.spell_id);
+                if (obj_finder.length === 1) {
+                  char_spell.connectSpell(obj_finder[0]);
+                }
+              }
+              if (char_spell.spell && char_spell.spell.ritual) {
+                char_spell.ritual_only = true;
+                char_spell.ritual = true;
+                ritual_only.push(char_spell);
+              }
+            }
+          });
+          spell_book.unused_free_spells = free_spells;
+        }
       });
 
+      char.ritual_only = ritual_only;
       const type_levels: any = {
       };
       char.classes.filter(o => o.spell_table !== "").forEach(game_class => {
@@ -1310,6 +1437,12 @@ export class CharacterUtilitiesClass {
       });
       char.weight_carried = weight_carried;
       char.current_ability_scores = current;
+      char.spells.filter(o => o.spellcasting_ability === "").forEach(char_spell => {
+        const class_finder = char.classes.filter(o => o.game_class_id === char_spell.source_id);
+        if (class_finder.length === 1) {
+          char_spell.connectSource(class_finder[0]);
+        }
+      });
       char.special_features = special_features;
       char.special_feature_ids = special_features.filter(o => o).map(o => o.special_feature_id);
       char.max_hit_points = max_hit_points;
@@ -1322,8 +1455,12 @@ export class CharacterUtilitiesClass {
       });
       char.hit_dice = hit_dice;
       resources.forEach(r => {
+        if (r.resource_feature) {
+          r.copyResource(r.resource_feature, char, r.class_id);
+        }
         const r_finder = char.resources.filter(o => o.type_id === r.type_id);
         if (r_finder.length === 1) {
+          r.created = r_finder[0].created;
           r.used = r_finder[0].used;
         }
       });
@@ -1331,6 +1468,7 @@ export class CharacterUtilitiesClass {
       slots.forEach(slot => {
         const slot_finder = char.slots.filter(o => o.type_id === slot.type_id && o.level === slot.level);
         if (slot_finder.length === 1) {
+          slot.created = slot_finder[0].created;
           slot.used = slot_finder[0].used;
         }
       });
@@ -1355,7 +1493,7 @@ export class CharacterUtilitiesClass {
           ability.customizations = a_finder[0].customizations;
         }
         const spellcasting_ability_modifier = current.getModifier(ability.spellcasting_ability);
-        if (spellcasting_ability_modifier) {
+        if (spellcasting_ability_modifier !== null) {
           ability.spell_dc += 8 + char.proficiency_modifier + spellcasting_ability_modifier;
           ability.spell_attack += char.proficiency_modifier + spellcasting_ability_modifier;
         }
@@ -1506,6 +1644,110 @@ export class CharacterUtilitiesClass {
         // spell damages are based on levels, so calculated elsewhere
         // spell.recalc_damage_string(char.current_ability_scores);
       });
+      let count = 0;
+      while (count < char.special_spells.length) {
+        const spell = char.special_spells[count];
+        
+        if (special_spells.filter(o => o.special_spell_feature_id === spell.special_spell_feature_id).length === 0) {
+          char.special_spells = char.special_spells.filter(o => o.special_spell_feature_id !== spell.special_spell_feature_id);
+        } else {
+          const attack = new Attack();
+          if (spell.the_spell) {
+            if (spell.level === 0) {
+              if (spell.the_spell.effect.attack_type === "Save") {
+                // It's a save attack
+                char.attack_bonuses.filter(o => o.types.includes("Cantrip Saves")).forEach(ab => {
+                  const rolls = new RollPlus(ab.rolls);
+                  attack.attack_rolls.push(rolls);
+                });
+                if (spell.spell_dc !== 0) {
+                  const rolls = new RollPlus();
+                  rolls.flat = spell.spell_dc;
+                  attack.attack_rolls.push(rolls);
+                }
+                char.damage_bonuses.filter(o => 
+                  o.types.includes("Cantrip Saves") &&
+                  o.subtypes.includes(spell.effect_string)
+                ).forEach(db => {
+                  const dmg = new RollPlus(db.rolls);
+                  dmg.type = spell.effect_string;
+                  attack.damage_rolls.push(dmg);
+                });
+              } else if (["Ranged Spell","Melee Spell"].includes(spell.the_spell.effect.attack_type)) {
+                // It's a spell attack
+                char.attack_bonuses.filter(o => o.types.includes("Cantrip Attacks")).forEach(ab => {
+                  attack.attack_rolls.push(ab.rolls);
+                });
+                if (spell.spell_attack !== 0) {
+                  const rolls = new RollPlus();
+                  rolls.flat = spell.spell_attack;
+                  attack.attack_rolls.push(rolls);
+                }
+                char.damage_bonuses.filter(o => 
+                  o.types.includes("Cantrip Attacks") &&
+                  o.subtypes.includes(spell.effect_string)
+                ).forEach(db => {
+                  const dmg = new RollPlus(db.rolls);
+                  dmg.type = spell.effect_string;
+                  attack.damage_rolls.push(dmg);
+                });
+              }
+            } else {
+              if (spell.the_spell.effect.attack_type === "Save") {
+                // It's a save attack
+                char.attack_bonuses.filter(o => o.types.includes("Spell Saves")).forEach(ab => {
+                  attack.attack_rolls.push(ab.rolls);
+                });
+                if (spell.spell_dc !== 0) {
+                  const rolls = new RollPlus();
+                  rolls.flat = spell.spell_dc;
+                  attack.attack_rolls.push(rolls);
+                }
+                char.damage_bonuses.filter(o => 
+                  o.types.includes("Spell Saves") &&
+                  o.subtypes.includes(spell.effect_string)
+                ).forEach(db => {
+                  const dmg = new RollPlus(db.rolls);
+                  dmg.type = spell.effect_string;
+                  attack.damage_rolls.push(dmg);
+                });
+              } else if (["Ranged Spell","Melee Spell"].includes(spell.the_spell.effect.attack_type)) {
+                // It's a spell attack
+                char.attack_bonuses.filter(o => 
+                  o.types.includes("Spell Attacks")).forEach(ab => {
+                  const rolls = new RollPlus(ab.rolls);
+                  attack.attack_rolls.push(rolls);
+                });
+                if (spell.spell_attack !== 0) {
+                  const rolls = new RollPlus();
+                  rolls.flat = spell.spell_attack;
+                  attack.attack_rolls.push(rolls);
+                }
+                char.damage_bonuses.filter(o => 
+                  o.types.includes("Spell Attacks") &&
+                  o.subtypes.includes(spell.effect_string)
+                ).forEach(db => {
+                  const dmg = new RollPlus(db.rolls);
+                  dmg.type = spell.effect_string;
+                  attack.damage_rolls.push(dmg);
+                });
+              }
+            }
+            spell_modifiers.filter(o => o.modifier.spell_id === spell.spell_id).forEach((mod_obj: any) => {
+              const mod = mod_obj.modifier as SpellModifier;
+              if (mod.modifies === "Include Modifier") {
+                spell.use_spellcasting_modifier = true;
+              } else {
+                console.log(mod_obj);
+              }
+            });
+          }
+          attack.type = "Spell";
+          spell.attack = attack;
+          spell.recalc_attack_string(char.current_ability_scores);
+          count++;
+        }
+      }
       char.spell_as_abilities.forEach(spell => {
         const attack = new Attack();
         if (spell.spell) {
@@ -1627,21 +1869,29 @@ export class CharacterUtilitiesClass {
         o.spell && o.spell instanceof Spell && o.spell.effect.type !== "None");
       const spell_ability_actions = char.spell_as_abilities.filter(o =>
         o.spell && o.spell.effect.type !== "None");
+      // TODO: Once I've got the rest of Wizard all working, I'll need to make it so special spells will work with spells that aren't always_known
+      const special_spell_actions = char.special_spells.filter(o =>
+        o.special_spell_feature && o.special_spell_feature.always_known &&
+        o.spell && o.spell.effect.type !== "None");
       char.actions.spells_actions = [
         ...spell_actions.filter(o => o.spell && o.spell instanceof Spell && o.spell.casting_time === "A"),
-        ...spell_ability_actions.filter(o => o.spell && o.spell.casting_time === "A")
+        ...spell_ability_actions.filter(o => o.spell && o.spell.casting_time === "A"),
+        ...special_spell_actions.filter(o => o.spell && o.spell.casting_time === "A")
       ];
       char.actions.spells_bonus_actions = [
         ...spell_actions.filter(o => o.spell && o.spell instanceof Spell && o.spell.casting_time === "BA"),
-        ...spell_ability_actions.filter(o => o.spell && o.spell instanceof SpellAsAbility && o.spell.spell && o.spell.spell.casting_time === "BA")
+        ...spell_ability_actions.filter(o => o.spell && o.spell.casting_time === "BA"),
+        ...special_spell_actions.filter(o => o.spell && o.spell.casting_time === "BA")
       ];
       char.actions.spells_reactions = [
-        ...spell_actions.filter(o => o.spell && o.spell instanceof Spell && o.spell.casting_time === "RA"),
-        ...spell_ability_actions.filter(o => o.spell && o.spell instanceof SpellAsAbility && o.spell.spell && o.spell.spell.casting_time === "RA")
+        ...spell_actions.filter(o => o.spell && o.spell.casting_time === "RA"),
+        ...spell_ability_actions.filter(o => o.spell && o.spell.casting_time === "RA"),
+        ...special_spell_actions.filter(o => o.spell && o.spell.casting_time === "RA")
       ];
       char.actions.spells_other_actions = [
-        ...spell_actions.filter(o => o.spell && o.spell instanceof Spell && !["A", "BA", "RA"].includes(o.spell.casting_time)),
-        ...spell_ability_actions.filter(o => o.spell && o.spell instanceof SpellAsAbility && o.spell.spell && !["A", "BA", "RA"].includes(o.spell.spell.casting_time))
+        ...spell_actions.filter(o => o.spell && !["A", "BA", "RA"].includes(o.spell.casting_time)),
+        ...spell_ability_actions.filter(o => o.spell && !["A", "BA", "RA"].includes(o.spell.casting_time)),
+        ...special_spell_actions.filter(o => o.spell && !["A", "BA", "RA"].includes(o.spell.casting_time))
       ];
       // Go through abilities
       const ability_actions = char.abilities.filter(o =>

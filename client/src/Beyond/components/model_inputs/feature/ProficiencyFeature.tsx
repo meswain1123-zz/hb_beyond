@@ -161,13 +161,38 @@ class ProficiencyFeatureInput extends Component<Props, State> {
                   this.setState({ obj });
                 }} 
               />
-            : this.state.obj.proficiency_type === "Tool Proficiency" &&
+            : this.state.obj.proficiency_type === "Tool Proficiency" ?
               <SelectToolTypeBox 
                 name="Tool Type" 
                 value={this.state.obj.the_proficiencies[0]} 
                 onChange={(type: string) => {
                   const obj = this.state.obj;
                   obj.the_proficiencies[0] = type;
+                  this.props.onChange(obj);
+                  this.setState({ obj });
+                }} 
+              />
+            : this.state.obj.proficiency_type === "Tool Proficiencies" ?
+              <SelectToolBox 
+                name="Tool Proficiencies"  
+                multiple
+                values={this.state.obj.the_proficiencies} 
+                onChange={(ids: string[]) => {
+                  const obj = this.state.obj;
+                  obj.the_proficiencies = [...ids];
+                  this.props.onChange(obj);
+                  this.setState({ obj });
+                }} 
+              />
+            : this.state.obj.proficiency_type === "Tool Proficiency Choices" &&
+              <SelectToolBox 
+                name="Tool Proficiency Options" 
+                allow_types
+                multiple
+                values={this.state.obj.the_proficiencies} 
+                onChange={(ids: string[]) => {
+                  const obj = this.state.obj;
+                  obj.the_proficiencies = [...ids];
                   this.props.onChange(obj);
                   this.setState({ obj });
                 }} 
@@ -189,7 +214,7 @@ class ProficiencyFeatureInput extends Component<Props, State> {
                 />
               </Grid>
             }
-            { (this.state.obj.proficiency_type === "Skill Proficiency Choices" || this.state.obj.proficiency_type === "Special Feature Choices") && 
+            { (["Skill Proficiency Choices","Tool Proficiency Choices","Special Feature Choices"].includes(this.state.obj.proficiency_type)) && 
               <Grid item>
                 <StringBox 
                   name="Choice Count"

@@ -112,6 +112,7 @@ class SelectStringBox extends Component<Props, State> {
               labelId={`selectInput_${this.props.name}`}
               id={`selectInput_${this.props.name}`}
               multiple
+              multiline
               fullWidth
               value={this.props.values}
               labelWidth={ this.props.labelWidth ? this.props.labelWidth : this.state.labelWidth }
@@ -159,6 +160,7 @@ class SelectStringBox extends Component<Props, State> {
               labelId={`selectInput_${this.props.name}`}
               id={`selectInput_${this.props.name}`}
               multiple
+              multiline
               fullWidth
               value={this.props.values}
               labelWidth={ this.props.labelWidth ? this.props.labelWidth : this.state.labelWidth }
@@ -203,6 +205,7 @@ class SelectStringBox extends Component<Props, State> {
               labelId={`selectInput_${this.props.name}`}
               id={`selectInput_${this.props.name}`}
               multiple
+              multiline
               fullWidth
               value={this.props.values}
               labelWidth={ this.props.labelWidth ? this.props.labelWidth : this.state.labelWidth }

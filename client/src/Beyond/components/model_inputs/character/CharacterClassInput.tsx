@@ -307,6 +307,7 @@ class CharacterClassInput extends Component<Props, State> {
       const combined_features = [...char_class.class_features,...char_class.subclass_features];
       if (char_class.level >= char_class.game_class.subclass_level) {
         const subclass_choice = new CharacterFeatureBase();
+        subclass_choice.source_id = char_class.game_class_id;
         subclass_choice.true_id = "Subclass";
         subclass_choice.feature_base = new FeatureBase();
         subclass_choice.feature_base.level = char_class.game_class.subclass_level;
@@ -320,6 +321,7 @@ class CharacterClassInput extends Component<Props, State> {
           subclass_feature.feature.name = char_class.game_class.subclasses_called;
           subclass_feature.feature.feature_type = "Subclass";
           subclass_feature.feature_options = [char_class.game_class_id, char_class.subclass_id];
+          subclass_feature.source_id = char_class.game_class_id;
           subclass_choice.features.push(subclass_feature);
         }
         combined_features.push(subclass_choice);

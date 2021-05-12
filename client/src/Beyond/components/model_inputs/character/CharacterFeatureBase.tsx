@@ -9,7 +9,6 @@ import {
   Character,
   CharacterFeature,
   CharacterFeatureBase,
-  CharacterFeatureChoice,
   Subclass,
   Sense,
 } from "../../../models";
@@ -112,30 +111,9 @@ class CharacterFeatureBaseInput extends Component<Props, State> {
               </Grid>
             );
           })}
-          { this.props.obj.feature_choices.map((feature_choice, key) => {
-            return (
-              <Grid item key={key}>
-                { feature_choice.feature_choice?.description !== "" &&
-                  <Grid item>
-                    { feature_choice.feature_choice?.description }
-                  </Grid>
-                }
-                { this.render_feature_choice(feature_choice) }
-              </Grid>
-            );
-          })}
         </Grid>
       );
     }
-  }
-
-  render_feature_choice(feature: CharacterFeatureChoice) {
-    // switch based on feature type
-    let details = 
-      <Grid item>
-        { feature.choice_count }
-      </Grid>;
-    return details;
   }
 }
 

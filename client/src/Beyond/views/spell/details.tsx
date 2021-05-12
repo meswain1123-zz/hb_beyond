@@ -165,7 +165,7 @@ class SpellDetails extends Component<Props, State> {
                   Potence Formula
                 </Grid>
                 <Grid item xs={9}>
-                  {this.state.obj.potence_formula}
+                  {this.state.obj.bonus}
                 </Grid>
                 <Grid item xs={3} className={"MuiTypography-root MuiListItemText-primary header"}>
                   Damage Type
@@ -177,7 +177,7 @@ class SpellDetails extends Component<Props, State> {
                   Potence Formula 2
                 </Grid>
                 <Grid item xs={9}>
-                  {this.state.obj.potence_formula_2}
+                  {this.state.obj.bonus_2}
                 </Grid>
                 <Grid item xs={3} className={"MuiTypography-root MuiListItemText-primary header"}>
                   Damage Type 2

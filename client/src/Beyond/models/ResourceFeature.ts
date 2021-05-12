@@ -1,5 +1,8 @@
 
-import { Resource } from ".";
+import { 
+  Resource, 
+  UpgradableNumber 
+} from ".";
 
 /**
  * This is a generic term for Spell Slots, Ki Points, Sorcery Points,
@@ -12,7 +15,7 @@ import { Resource } from ".";
  */
 export class ResourceFeature {
   type_id: string | null;
-  total: number;
+  total: UpgradableNumber;
   // If this is true then this 
   // gets added to others of the same type
   // instead of replacing it
@@ -21,7 +24,14 @@ export class ResourceFeature {
 
   constructor(obj?: any) {
     this.type_id = obj ? obj.type_id : null;
-    this.total = obj ? obj.total : 0;
+    this.total = new UpgradableNumber();
+    if (obj && obj.total) {
+      if (obj.total.base !== undefined) {
+        this.total = new UpgradableNumber(obj.total);
+      } else {
+        this.total.base = obj.total;
+      }
+    }
     this.extra = obj ? obj.extra : false;
     this.resource = null;
   }
@@ -29,7 +39,7 @@ export class ResourceFeature {
   toDBObj = () => {
     return {
       type_id: this.type_id,
-      total: this.total,
+      total: this.total.toDBObj(),
       extra: this.extra
     };
   }

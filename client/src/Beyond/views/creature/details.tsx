@@ -68,9 +68,6 @@ export interface State {
   eldritch_invocations: EldritchInvocation[] | null;
   loading: boolean;
   reloading: boolean;
-  view: string;
-  menu_open: string;
-  bar3_mode: string;
 }
 
 
@@ -89,9 +86,6 @@ class CreatureDetails extends Component<Props, State> {
       eldritch_invocations: null,
       loading: false,
       reloading: false,
-      view: "actions", // "main", // 
-      menu_open: "",
-      bar3_mode: "Conditions" // "Defenses"
     };
     this.api = API.getInstance();
     this.image_api = imageAPI.getInstance();

@@ -26,6 +26,7 @@ export class Modifier {
   modifies: string;
   modifies_details: string[];
   modifies_detail_2: string;
+  modifies_detail_3: string;
   type: string; // flat (default), char level, class level
   multiply: boolean;
   amount: string;
@@ -43,6 +44,7 @@ export class Modifier {
       this.modifies_details.push(`${obj.modifies_detail}`);
     }
     this.modifies_detail_2 = obj ? `${obj.modifies_detail_2}` : "";
+    this.modifies_detail_3 = obj ? `${obj.modifies_detail_3}` : "";
     this.multiply = obj && obj.multiply ? obj.multiply : false;
     this.type = obj && obj.type ? obj.type : "Flat";
     this.amount = obj && obj.amount ? `${obj.amount}` : "0";
@@ -57,6 +59,7 @@ export class Modifier {
       modifies: this.modifies,
       modifies_details: this.modifies_details,
       modifies_detail_2: this.modifies_detail_2,
+      modifies_detail_3: this.modifies_detail_3,
       multiply: this.multiply,
       type: this.type,
       amount: this.amount,

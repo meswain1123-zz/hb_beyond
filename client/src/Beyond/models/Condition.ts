@@ -24,6 +24,8 @@ import { Feature } from "./Feature";
 export class Condition extends ModelBase {
   immunity_exists: boolean;
   level: number;
+  class_ids: string[];
+  subclass_ids: string[];
   features: Feature[];
   
   constructor(obj?: any) {
@@ -31,13 +33,19 @@ export class Condition extends ModelBase {
     this.data_type = "condition";
     this.immunity_exists = obj && obj.immunity_exists ? obj.immunity_exists : false;
     this.level = obj && obj.level ? obj.level : -1;
+    this.class_ids = obj && obj.class_ids ? obj.class_ids : [];
+    this.subclass_ids = obj && obj.subclass_ids ? obj.subclass_ids : [];
     if (obj && obj.features && obj.features.length > 0) {
       if (obj.features[0] instanceof Feature) {
         this.features = obj ? [...obj.features] : [];
       } else {
         this.features = [];
         obj.features.forEach((o: any) => {
-          this.features.push(new Feature(o));
+          const feature = new Feature(o);
+          if (feature.description.length === 0) {
+            feature.fake_description = this.description;
+          }
+          this.features.push(feature);
         });
       }
     } else {
@@ -56,6 +64,8 @@ export class Condition extends ModelBase {
       description: this.description,
       immunity_exists: this.immunity_exists,
       level: this.level,
+      class_ids: this.class_ids,
+      subclass_ids: this.subclass_ids,
       features,
     };
   }
@@ -70,6 +80,8 @@ export class Condition extends ModelBase {
     this.description = copyMe.description;
     this.immunity_exists = copyMe.immunity_exists;
     this.level = copyMe.level;
+    this.class_ids = copyMe.class_ids;
+    this.subclass_ids = copyMe.subclass_ids;
     this.features = [...copyMe.features];
   }
 }

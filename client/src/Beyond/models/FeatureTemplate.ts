@@ -19,14 +19,15 @@ import {
   CreatureAbility,
   MinionAbility,
   UpgradableNumber,
-  IStringHash
+  IStringHash,
+  SpecialSpellFeature
 } from ".";
 import { Feature } from "./Feature";
 import { TemplateBase } from "./TemplateBase";
 
 export class FeatureTemplate extends TemplateBase {
   feature_type: string;
-  the_feature: Modifier | Reroll | LanguageFeature | SpellModifier | Proficiency | Advantage | DamageMultiplier | ResourceFeature | ASIBaseFeature | Ability | CreatureAbility | MinionAbility | SpellAsAbility | ItemAffectingAbility | BonusSpells | SpellBook | SpellcastingFeature | SenseFeature | UpgradableNumber | IStringHash | boolean | number | string | string[] | null;
+  the_feature: Modifier | Reroll | LanguageFeature | SpellModifier | Proficiency | Advantage | DamageMultiplier | ResourceFeature | ASIBaseFeature | Ability | CreatureAbility | MinionAbility | SpellAsAbility | ItemAffectingAbility | BonusSpells | SpellBook | SpellcastingFeature | SenseFeature | SpecialSpellFeature | UpgradableNumber | IStringHash | boolean | number | string | string[] | null;
   
   constructor(obj?: any) {
     super(obj);
@@ -65,6 +66,8 @@ export class FeatureTemplate extends TemplateBase {
         case "Skill Proficiencies":
         case "Skill Proficiency Choices":
         case "Tool Proficiency":
+        case "Tool Proficiencies":
+        case "Tool Proficiency Choices":
         case "Armor Proficiencies":
         case "Weapon Proficiencies":
         case "Special Weapon Proficiencies":
@@ -147,6 +150,9 @@ export class FeatureTemplate extends TemplateBase {
         case "Cantrips from List":
           this.the_feature = obj.the_feature as IStringHash;
         break;
+        case "Spells from List":
+          this.the_feature = obj.the_feature as IStringHash;
+        break;
         case "Ritual Casting":
           this.the_feature = "Ritual Casting";
         break;
@@ -158,6 +164,12 @@ export class FeatureTemplate extends TemplateBase {
         break;
         case "Mystic Arcanum":
           this.the_feature = obj.the_feature as number;
+        break;
+        case "Spell Mastery":
+          this.the_feature = obj.the_feature as number;
+        break;
+        case "Special Spell":
+          this.the_feature = new SpecialSpellFeature(obj.the_feature);
         break;
         default:
           this.the_feature = null;
@@ -202,6 +214,8 @@ export class FeatureTemplate extends TemplateBase {
       case "Skill Proficiencies":
       case "Skill Proficiency Choices":
       case "Tool Proficiency":
+      case "Tool Proficiencies":
+      case "Tool Proficiency Choices":
       case "Armor Proficiencies":
       case "Weapon Proficiencies":
       case "Special Weapon Proficiencies":
@@ -274,6 +288,9 @@ export class FeatureTemplate extends TemplateBase {
       case "Cantrips from List":
         the_feature = this.the_feature as IStringHash;
       break;
+      case "Spells from List":
+        the_feature = this.the_feature as IStringHash;
+      break;
       case "Ritual Casting":
         the_feature = "Ritual Casting";
       break;
@@ -285,6 +302,12 @@ export class FeatureTemplate extends TemplateBase {
       break;
       case "Mystic Arcanum":
         the_feature = this.the_feature as number;
+      break;
+      case "Spell Mastery":
+        the_feature = this.the_feature as number;
+      break;
+      case "Special Spell":
+        the_feature = (this.the_feature as SpecialSpellFeature).toDBObj();
       break;
     }
     return {
@@ -310,7 +333,7 @@ export class FeatureTemplate extends TemplateBase {
 
   copyObj(copyMe: Feature): void {
     this.name = copyMe.name;
-    this.description = copyMe.description;
+    this.description = copyMe.true_description;
     this.type = "Feature";
     this.feature_type = copyMe.feature_type;
     switch(this.feature_type) {
@@ -329,6 +352,8 @@ export class FeatureTemplate extends TemplateBase {
       case "Skill Proficiencies":
       case "Skill Proficiency Choices":
       case "Tool Proficiency":
+      case "Tool Proficiencies":
+      case "Tool Proficiency Choices":
       case "Armor Proficiencies":
       case "Weapon Proficiencies":
       case "Special Weapon Proficiencies":

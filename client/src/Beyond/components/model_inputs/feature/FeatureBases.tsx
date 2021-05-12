@@ -86,7 +86,9 @@ class FeatureBasesModal extends Component<Props, State> {
             </Fab>
           </Tooltip>
         </Grid>
-        { this.props.feature_bases.map((feature_base, key) => {
+        { this.props.feature_bases.sort((a, b) => { 
+          return +a.level < +b.level ? -1 : 1;
+        }).map((feature_base, key) => {
           return (
             <Grid item key={key} container spacing={1} direction="row" 
               onClick={() => {

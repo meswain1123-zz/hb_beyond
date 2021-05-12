@@ -13,11 +13,11 @@ import {
   CharacterAbility,
   CharacterItem,
   CharacterSpell,
+  CharacterSpecialSpell,
   INumHash,
-  ItemAffectingAbility,
   SpellAsAbility,
   RollPlus,
-  Reroll
+  Reroll,
 } from "../../../models";
 
 import ButtonBox from "../../input/ButtonBox";
@@ -25,6 +25,7 @@ import ButtonBox from "../../input/ButtonBox";
 import ViewSpell from "../ViewSpell";
 import CharacterSpellDetails from './CharacterSpellDetails';
 import CharacterAbilityDetails from './CharacterAbilityDetails';
+import CharacterCastButton from "./CharacterCastButton";
 
 import Roller from "../Roller";
 
@@ -163,7 +164,7 @@ class CharacterAction extends Component<Props, State> {
           { this.renderExtras() }
         </Grid>    
       );
-    } else if (action instanceof CharacterSpell) {
+    } else if (action instanceof CharacterSpecialSpell || action instanceof CharacterSpell) {
       const spell = action;
       const level = this.props.level === -1 ? spell.level : this.props.level;
       let slots = this.props.obj.slots.filter(o => o.level === level);
@@ -179,7 +180,14 @@ class CharacterAction extends Component<Props, State> {
       return (
         <Grid item container spacing={0} direction="row">
           <Grid item xs={1}>
-            { this.renderCastButton(spell, level2) }
+            <CharacterCastButton
+              obj={spell}
+              character={this.props.obj}
+              level={level2}
+              onChange={() => {
+                this.props.onChange();
+              }}
+            />
           </Grid>
           <Grid item xs={3} container spacing={0} direction="column" onClick={() => {
             this.setState({ 
@@ -210,9 +218,15 @@ class CharacterAction extends Component<Props, State> {
       );
     } else if (action instanceof CharacterAbility) {
       return (
-        <Grid item container spacing={1} direction="row">
+        <Grid item container spacing={0} direction="row">
           <Grid item xs={1}>
-            { this.renderUseButton(action) }
+            <CharacterCastButton
+              obj={action}
+              character={this.props.obj}
+              onChange={() => {
+                this.props.onChange();
+              }}
+            />
           </Grid>
           <Grid item xs={3} container spacing={0} direction="column" onClick={() => this.setState({ drawer: "details", selected_ability: action })}>
             <Grid item>{ action.name }</Grid>
@@ -284,23 +298,6 @@ class CharacterAction extends Component<Props, State> {
           />
         }
       </Drawer>,
-      <Popover key="cast_options"
-        open={ this.state.popoverAnchorEl !== null && this.state.popoverMode === "Cast" }
-        anchorEl={this.state.popoverAnchorEl}
-        onClose={() => {
-          this.setState({ popoverAnchorEl: null, popoverAction: null, popoverActionLevel: -1, popoverMode: "" });
-        }}
-        anchorOrigin={{
-          vertical: 'top',
-          horizontal: 'right',
-        }}
-        transformOrigin={{
-          vertical: 'top',
-          horizontal: 'left',
-        }}
-      >
-        { this.renderCastOptions() }
-      </Popover>,
       <Popover key="rolls"
         open={ this.state.popoverAnchorEl !== null && this.state.popoverMode !== "Cast" }
         anchorEl={this.state.popoverAnchorEl}
@@ -382,7 +379,7 @@ class CharacterAction extends Component<Props, State> {
             display: "flex",
             justifyContent: "center"
           }}>
-          { !["Control","Utility","Summon","Transform"].includes(spell.effect_string) ?
+          { !["Control","Utility","Summon","Transform","Create Resource"].includes(spell.effect_string) ?
             <ButtonBox
               fontSize={9}
               name={ spell.get_potence_string(level2, this.props.obj) }
@@ -400,600 +397,6 @@ class CharacterAction extends Component<Props, State> {
         </Grid>
       </Grid>
     );
-  }
-
-  renderCastButton(spell: CharacterSpell, level: number) {
-    const self_condition_ids = spell.self_condition();
-    if (spell.level === 0 || spell.at_will) {
-      if (spell.spell && spell.spell.concentration) {
-        if (this.props.obj.concentrating_on) {
-          return (
-            <ButtonBox name="At Will"
-              onClick={(event: React.MouseEvent<HTMLDivElement>) => {
-                this.setState({ popoverAction: spell, popoverActionLevel: level, popoverMode: "Cast" })
-                this.setPopoverAnchorEl(event.currentTarget);
-              }} 
-            />
-          );
-        } else {
-          return (
-            <ButtonBox name="At Will"
-              onClick={() => {
-                this.props.obj.concentrating_on = spell;
-                if (self_condition_ids.length > 0) {
-                  // Apply the conditions
-                  const obj = this.props.obj;
-                  self_condition_ids.forEach(cond_id => {
-                    obj.conditions.push(cond_id);
-                  });
-                  if (obj instanceof Character) {
-                    this.char_util.recalcAll(obj);
-                  }
-                }
-                this.updateCharacter(false);
-              }} 
-            />
-          );
-        }
-      } else {
-        return (
-          <ButtonBox 
-            disabled={self_condition_ids.length === 0}
-            name="At Will"
-            onClick={() => {
-              // Apply the conditions
-              const obj = this.props.obj;
-              self_condition_ids.forEach(cond_id => {
-                obj.conditions.push(cond_id);
-              });
-              if (obj instanceof Character) {
-                this.char_util.recalcAll(obj);
-              }
-            }}
-          />
-        );
-      }
-    } else if (spell.ritual_only) {
-      return (
-        <ButtonBox 
-          disabled={self_condition_ids.length === 0} 
-          name="Ritual Only" 
-          onClick={() => {
-            // Apply the conditions
-            const obj = this.props.obj;
-            self_condition_ids.forEach(cond_id => {
-              obj.conditions.push(cond_id);
-            });
-            if (obj instanceof Character) {
-              this.char_util.recalcAll(obj);
-            }
-          }}
-        />
-      );
-    } else {
-      // Get the slots for the level
-      const slots = this.props.obj.slots.filter(o => o.level === level);
-      if (slots.length === 1) {
-        const slot = slots[0];
-        if (spell.spell && spell.spell.concentration) { 
-          if (this.props.obj.concentrating_on) {
-            return (
-              <ButtonBox name={ spell.level < level ? "Upcast" : "Cast" }
-                disabled={slot.used === slot.total}
-                onClick={(event: React.MouseEvent<HTMLDivElement>) => {
-                  this.setState({ popoverAction: spell, popoverActionLevel: level, popoverMode: "Cast" })
-                  this.setPopoverAnchorEl(event.currentTarget);
-                }} 
-              />
-            );
-          } else {
-            return (
-              <ButtonBox name={ spell.level < level ? "Upcast" : "Cast" }
-                disabled={slot.used === slot.total}
-                onClick={() => {
-                  slot.used++;
-                  this.props.obj.concentrating_on = spell;
-                  if (self_condition_ids.length > 0) {
-                    // Apply the conditions
-                    const obj = this.props.obj;
-                    self_condition_ids.forEach(cond_id => {
-                      obj.conditions.push(cond_id);
-                    });
-                    if (obj instanceof Character) {
-                      this.char_util.recalcAll(obj);
-                    }
-                  }
-                  this.updateCharacter(slot.used === slot.total);
-                }} 
-              />
-            );
-          }
-        } else {
-          return (
-            <ButtonBox name={ spell.level < level ? "Upcast" : "Cast" }
-              disabled={slot.used === slot.total}
-              onClick={() => {
-                slot.used++;
-                if (self_condition_ids.length > 0) {
-                  // Apply the conditions
-                  const obj = this.props.obj;
-                  self_condition_ids.forEach(cond_id => {
-                    obj.conditions.push(cond_id);
-                  });
-                  if (obj instanceof Character) {
-                    this.char_util.recalcAll(obj);
-                  }
-                }
-                this.updateCharacter(slot.used === slot.total);
-              }} 
-            />
-          );
-        }
-      } else {
-        return (
-          <ButtonBox name={ spell.level < level ? "Upcast" : "Cast" }
-            disabled={slots.filter(o => o.used < o.total).length === 0}
-            onClick={(event: React.MouseEvent<HTMLDivElement>) => {
-              this.setState({ popoverAction: spell, popoverActionLevel: level, popoverMode: "Cast" })
-              this.setPopoverAnchorEl(event.currentTarget);
-            }} 
-          />
-        );
-      }
-    }
-  }
-
-  renderUseButton(ability: CharacterAbility) {
-    // Need to make it check if the ability 
-    // uses concentration or resources (or both)
-    // for concentration then on click it 
-    // sets concentrating_on to the ability.
-    // If it uses resources then display 
-    // them and on click 
-    // it uses one of the resources.
-    // If the resources are all used then 
-    // it's disabled.
-
-    let return_me: any = null;
-    const the_ability = ability.the_ability;
-    if (the_ability) {
-      if (the_ability.resource_consumed && the_ability.resource_consumed !== "None") {
-        return_me =
-        (
-          <ButtonBox name={ability.use_string(this.props.obj)}
-            disabled={ability.disabled(this.props.obj)}
-            onClick={(event: React.MouseEvent<HTMLDivElement>) => {
-              let go = false;
-              // Increment the resource
-              if (the_ability.resource_consumed === "Special") {
-                ability.special_resource_used++;
-                go = true;
-              } else if (the_ability.resource_consumed === "Slot") {
-                // Look for slots of the appropriate level and type
-                if (the_ability instanceof Ability || 
-                  the_ability instanceof ItemAffectingAbility || 
-                  the_ability instanceof SpellAsAbility) {
-                  const filtered_slots = this.props.obj.slots.filter(o => 
-                    o.level === the_ability.slot_level &&
-                    (the_ability.slot_type === "" || o.type_id === the_ability.slot_type)
-                  );
-                  if (filtered_slots.length === 1) {
-                    const slot = filtered_slots[0];
-                    slot.used++;
-                    go = true;
-                  } else if (filtered_slots.length > 1) {
-                    // Cast Options
-                    this.setState({ popoverAction: ability, popoverActionLevel: the_ability.slot_level, popoverMode: "Cast" });
-                    this.setPopoverAnchorEl(event.currentTarget);
-                  }
-                }
-              } else {
-                const resource_finder = this.props.obj.resources.filter(o => 
-                  o.type_id === the_ability.resource_consumed);
-                if (resource_finder.length === 1) {
-                  const resource = resource_finder[0];
-                  resource.used++;
-                  go = true;
-                }
-              }
-              if (go) {
-                this.triggerAbilityEffect(ability);
-              }
-            }} 
-          />
-        );
-      } else if (!(the_ability instanceof ItemAffectingAbility) && the_ability.concentration) {
-        return_me = (
-          <ButtonBox name="Use" 
-            onClick={(event: React.MouseEvent<HTMLDivElement>) => {
-              let go = false;
-              // Increment the resource
-              if (the_ability.resource_consumed === "Special") {
-                ability.special_resource_used++;
-                go = true;
-              } else if (the_ability.resource_consumed === "Slot") {
-                // Look for slots of the appropriate level and type
-                if (the_ability instanceof Ability || 
-                  the_ability instanceof ItemAffectingAbility || 
-                  the_ability instanceof SpellAsAbility) {
-                  const filtered_slots = this.props.obj.slots.filter(o => 
-                    o.level === the_ability.slot_level &&
-                    (the_ability.slot_type === "" || o.type_id === the_ability.slot_type)
-                  );
-                  if (filtered_slots.length === 1) {
-                    const slot = filtered_slots[0];
-                    slot.used++;
-                    go = true;
-                  } else if (filtered_slots.length > 1) {
-                    // Cast Options
-                    this.setState({ popoverAction: ability, popoverActionLevel: the_ability.slot_level, popoverMode: "Cast" });
-                    this.setPopoverAnchorEl(event.currentTarget);
-                  }
-                }
-              } else {
-                const resource_finder = this.props.obj.resources.filter(o => 
-                  o.type_id === the_ability.resource_consumed);
-                if (resource_finder.length === 1) {
-                  const resource = resource_finder[0];
-                  resource.used++;
-                  go = true;
-                }
-              }
-              if (go) {
-                this.triggerAbilityEffect(ability);
-              }
-            }} 
-          />
-        );
-      } else {
-        return_me = (
-          <ButtonBox name="At Will" 
-            disabled={ability.self_condition().length === 0}
-            onClick={() => {
-              this.triggerAbilityEffect(ability);
-            }} 
-          />
-        );
-      }
-    }
-    return return_me;
-  }
-
-  triggerAbilityEffect(ability: CharacterAbility) {
-    const self_condition_ids = ability.self_condition();
-    const the_ability = ability.the_ability;
-    if (the_ability) {
-      if (!(the_ability instanceof ItemAffectingAbility) && the_ability.concentration) {
-        // Set the concentration
-        this.props.obj.concentrating_on = ability;
-      }
-      if (self_condition_ids.length > 0) {
-        // Apply the conditions
-        const obj = this.props.obj;
-        self_condition_ids.forEach(cond_id => {
-          obj.conditions.push(cond_id);
-        });
-        this.char_util.recalcAll(obj);
-      }
-      this.updateCharacter(true);
-    }
-  }
-
-  renderCastOptions() {
-    if (this.state.popoverAction instanceof CharacterSpell) {
-      const spell = this.state.popoverAction;
-      const level = this.state.popoverActionLevel;
-      if (spell && spell.spell) {
-        const self_condition_ids = spell.self_condition();
-        if ((spell.level === 0 || spell.at_will) && spell.spell.concentration && this.props.obj.concentrating_on) {
-          return (
-            <div>
-              You're already concentrating on 
-              { (this.props.obj.concentrating_on instanceof CharacterSpell || this.props.obj.concentrating_on instanceof CharacterAbility) &&
-                <ViewSpell spell={this.props.obj.concentrating_on} show_ritual />
-              }
-              <ButtonBox name={ spell.level < level ? "Upcast Anyway" : "Cast Anyway" }
-                onClick={() => {
-                  this.props.obj.concentrating_on = spell;
-                  if (self_condition_ids.length > 0) {
-                    // Apply the conditions
-                    const obj = this.props.obj;
-                    self_condition_ids.forEach(cond_id => {
-                      obj.conditions.push(cond_id);
-                    });
-                    if (obj instanceof Character) {
-                      this.char_util.recalcAll(obj);
-                    }
-                  }
-                  this.updateCharacter(false);
-                }} 
-              />
-            </div>
-          );
-        } else if (spell.ritual_only) {
-          return null;
-        } else {
-          // Get the slots for the level
-          const slots = this.props.obj.slots.filter(o => o.level === level);
-          if (slots.length === 1) {
-            const slot = slots[0];
-            if (spell.spell.concentration && this.props.obj.concentrating_on) {
-              return (
-                <div>
-                  You're already concentrating on <ViewSpell spell={this.props.obj.concentrating_on} show_ritual />
-                  <ButtonBox name={ spell.level < level ? "Upcast Anyway" : "Cast Anyway" }
-                    disabled={slot.used === slot.total}
-                    onClick={() => {
-                      slot.used++;
-                      this.props.obj.concentrating_on = spell;
-                      if (self_condition_ids.length > 0) {
-                        // Apply the conditions
-                        const obj = this.props.obj;
-                        self_condition_ids.forEach(cond_id => {
-                          obj.conditions.push(cond_id);
-                        });
-                        if (obj instanceof Character) {
-                          this.char_util.recalcAll(obj);
-                        }
-                      }
-                      this.updateCharacter(slot.used === slot.total);
-                    }} 
-                  />
-                </div>
-              );
-            }
-          } else {
-            if (spell.spell.concentration && this.props.obj.concentrating_on) {
-              return (
-                <div>
-                  You're already concentrating on <ViewSpell spell={this.props.obj.concentrating_on} show_ritual />
-                  <div>
-                    { slots.map((slot, key) => {
-                      return (
-                        <ButtonBox key={key} name={slot.slot_name}
-                          disabled={slot.used === slot.total}
-                          onClick={() => {
-                            slot.used++;
-                            this.props.obj.concentrating_on = spell;
-                            if (self_condition_ids.length > 0) {
-                              // Apply the conditions
-                              const obj = this.props.obj;
-                              self_condition_ids.forEach(cond_id => {
-                                obj.conditions.push(cond_id);
-                              });
-                              if (obj instanceof Character) {
-                                this.char_util.recalcAll(obj);
-                              }
-                            }
-                            this.updateCharacter(slot.used === slot.total);
-                          }} 
-                        />
-                      );
-                    })}
-                  </div>
-                </div>
-              );
-            } else {
-              return (
-                <div>
-                  { slots.map((slot, key) => {
-                    return (
-                      <ButtonBox key={key} name={slot.slot_name}
-                        disabled={slot.used === slot.total}
-                        onClick={() => {
-                          slot.used++;
-                          if (self_condition_ids.length > 0) {
-                            // Apply the conditions
-                            const obj = this.props.obj;
-                            self_condition_ids.forEach(cond_id => {
-                              obj.conditions.push(cond_id);
-                            });
-                            if (obj instanceof Character) {
-                              this.char_util.recalcAll(obj);
-                            }
-                          }
-                          this.updateCharacter(slot.used === slot.total);
-                        }} 
-                      />
-                    );
-                  })}
-                </div>
-              );
-            }
-          }
-        }
-      } else {
-        return null;
-      }
-    } else if (this.state.popoverAction instanceof CharacterAbility) {
-      const ability = this.state.popoverAction;
-      const the_ability = ability.the_ability;
-      const self_condition_ids = ability.self_condition();
-      
-      if (the_ability && !(the_ability instanceof ItemAffectingAbility)) {
-        if (the_ability.resource_consumed === "Slot") {
-          // Get the slots for the level
-          const level = this.state.popoverActionLevel;
-          const slots = this.props.obj.slots.filter(o => o.level === level);
-          
-          if (slots.length === 1) {
-            const slot = slots[0];
-            if (the_ability.concentration && this.props.obj.concentrating_on) {
-              return (
-                <div>
-                  You're already concentrating on <ViewSpell spell={this.props.obj.concentrating_on} show_ritual />
-                  <ButtonBox name={ "Use Anyway" }
-                    disabled={slot.used + the_ability.amount_consumed >= slot.total}
-                    onClick={() => {
-                      slot.used += the_ability.amount_consumed;
-                      this.props.obj.concentrating_on = ability;
-                      if (self_condition_ids.length > 0) {
-                        // Apply the conditions
-                        const obj = this.props.obj;
-                        self_condition_ids.forEach(cond_id => {
-                          obj.conditions.push(cond_id);
-                        });
-                        if (obj instanceof Character) {
-                          this.char_util.recalcAll(obj);
-                        }
-                      }
-                      this.updateCharacter(slot.used + the_ability.amount_consumed >= slot.total);
-                    }} 
-                  />
-                </div>
-              );
-            } else {
-              // It will never go here because then it wouldn't have done cast options
-            }
-          } else {
-            if (the_ability.concentration && this.props.obj.concentrating_on) {
-              return (
-                <div>
-                  You're already concentrating on <ViewSpell spell={this.props.obj.concentrating_on} show_ritual />
-                  <div>
-                    { slots.map((slot, key) => {
-                      return (
-                        <ButtonBox key={key} name={slot.slot_name}
-                          disabled={slot.used === slot.total}
-                          onClick={() => {
-                            slot.used++;
-                            this.props.obj.concentrating_on = ability;
-                            if (self_condition_ids.length > 0) {
-                              // Apply the conditions
-                              const obj = this.props.obj;
-                              self_condition_ids.forEach(cond_id => {
-                                obj.conditions.push(cond_id);
-                              });
-                              if (obj instanceof Character) {
-                                this.char_util.recalcAll(obj);
-                              }
-                            }
-                            this.updateCharacter(slot.used === slot.total);
-                          }} 
-                        />
-                      );
-                    })}
-                  </div>
-                </div>
-              );
-            } else {
-              return (
-                <div>
-                  { slots.map((slot, key) => {
-                    return (
-                      <ButtonBox key={key} name={slot.slot_name}
-                        disabled={slot.used + the_ability.amount_consumed >= slot.total}
-                        onClick={() => {
-                          slot.used += the_ability.amount_consumed;
-                          if (self_condition_ids.length > 0) {
-                            // Apply the conditions
-                            const obj = this.props.obj;
-                            self_condition_ids.forEach(cond_id => {
-                              obj.conditions.push(cond_id);
-                            });
-                            if (obj instanceof Character) {
-                              this.char_util.recalcAll(obj);
-                            }
-                          }
-                          this.updateCharacter(slot.used + the_ability.amount_consumed >= slot.total);
-                        }} 
-                      />
-                    );
-                  })}
-                </div>
-              );
-            }
-          }
-        } else if (the_ability.resource_consumed === "Special") {
-          if (the_ability.concentration && this.props.obj.concentrating_on) {
-            return (
-              <div>
-                You're already concentrating on <ViewSpell spell={this.props.obj.concentrating_on} show_ritual />
-                <ButtonBox name={ "Use Anyway" }
-                  disabled={ability.special_resource_used + the_ability.amount_consumed >= ability.special_resource_amount}
-                  onClick={() => {
-                    ability.special_resource_used += the_ability.amount_consumed;
-                    this.props.obj.concentrating_on = ability;
-                    if (self_condition_ids.length > 0) {
-                      // Apply the conditions
-                      const obj = this.props.obj;
-                      self_condition_ids.forEach(cond_id => {
-                        obj.conditions.push(cond_id);
-                      });
-                      if (obj instanceof Character) {
-                        this.char_util.recalcAll(obj);
-                      }
-                    }
-                    this.updateCharacter(ability.special_resource_used + the_ability.amount_consumed >= ability.special_resource_amount);
-                  }} 
-                />
-              </div>
-            );
-          } else {
-            // It will never go here because then it wouldn't have done cast options
-          }
-        } else if (the_ability.resource_consumed === "None") {
-          if (this.props.obj.concentrating_on) {
-            return (
-              <div>
-                You're already concentrating on <ViewSpell spell={this.props.obj.concentrating_on} show_ritual />
-                <ButtonBox name={ "Use Anyway" }
-                  disabled={ability.special_resource_used === ability.special_resource_amount}
-                  onClick={() => {
-                    this.props.obj.concentrating_on = ability;
-                    if (self_condition_ids.length > 0) {
-                      // Apply the conditions
-                      const obj = this.props.obj;
-                      self_condition_ids.forEach(cond_id => {
-                        obj.conditions.push(cond_id);
-                      });
-                      if (obj instanceof Character) {
-                        this.char_util.recalcAll(obj);
-                      }
-                    }
-                  }} 
-                />
-              </div>
-            );
-          }
-        } else {
-          // Get the resources
-          const resources = this.props.obj.resources.filter(o => the_ability.resource_consumed);
-          
-          if (resources.length === 1) {
-            const resource = resources[0];
-            if (the_ability.concentration && this.props.obj.concentrating_on) {
-              return (
-                <div>
-                  You're already concentrating on <ViewSpell spell={this.props.obj.concentrating_on} show_ritual />
-                  <ButtonBox name={ "Use Anyway" }
-                    disabled={resource.used + the_ability.amount_consumed >= resource.total}
-                    onClick={() => {
-                      resource.used += the_ability.amount_consumed;
-                      this.props.obj.concentrating_on = ability;
-                      if (self_condition_ids.length > 0) {
-                        // Apply the conditions
-                        const obj = this.props.obj;
-                        self_condition_ids.forEach(cond_id => {
-                          obj.conditions.push(cond_id);
-                        });
-                        if (obj instanceof Character) {
-                          this.char_util.recalcAll(obj);
-                        }
-                      }
-                      this.updateCharacter(resource.used + the_ability.amount_consumed >= resource.total);
-                    }} 
-                  />
-                </div>
-              );
-            } else {
-              // It will never go here because then it wouldn't have done cast options
-            }
-          }
-        }
-      }
-      return null;
-    }
   }
 
   renderRoll() {

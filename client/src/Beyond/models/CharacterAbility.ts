@@ -414,9 +414,11 @@ export class CharacterAbility {
 
   use_string(obj: Character) {
     const the_ability = this.the_ability;
-    if (the_ability instanceof Ability && the_ability.resource_consumed) {
+    if ((the_ability instanceof Ability || the_ability instanceof SpellAsAbility) && the_ability.resource_consumed) {
       if (the_ability.resource_consumed === "Special") {
         return `${this.special_resource_used}/${this.special_resource_amount}`;
+      } else if (the_ability.resource_consumed === "None") {
+        return "At Will";
       } else {
         const resource_finder = obj.resources.filter(o => 
           o.type_id === the_ability.resource_consumed);
@@ -433,23 +435,25 @@ export class CharacterAbility {
     const the_ability = this.the_ability;
     if (the_ability instanceof Ability && the_ability.resource_consumed) {
       if (the_ability.resource_consumed === "Special") {
-        return this.special_resource_used >= +this.special_resource_amount;
+        return this.special_resource_used + +the_ability.amount_consumed > +this.special_resource_amount;
       } else if (the_ability.resource_consumed === "Slot") {
         if (level === -1) {
           level = the_ability.slot_level;
         }
         const filtered_slots = obj.slots.filter(o => 
-          o.used < o.total &&
           o.level === level &&
           (the_ability.slot_type === "" || o.type_id === the_ability.slot_type)
         );
-        return filtered_slots.length === 0;
+        if (filtered_slots.length === 1) {
+          const slot = filtered_slots[0];
+          return slot.used + +the_ability.amount_consumed > slot.total;
+        }
       } else {
         const resource_finder = obj.resources.filter(o => 
           o.type_id === the_ability.resource_consumed);
         if (resource_finder.length === 1) {
           const resource = resource_finder[0];
-          return resource.used >= resource.total;
+          return resource.used + +the_ability.amount_consumed > resource.total;
         }
       }
     }
@@ -509,6 +513,9 @@ export class CharacterAbility {
       feature.feature.the_feature instanceof ItemAffectingAbility) {
       this.ability_type = feature.feature.feature_type;
       this.the_ability = feature.feature.the_feature;
+      if (this.the_ability.description.length === 0) {
+        this.the_ability.description = feature.feature.description;
+      }
       this.true_id = feature.feature.the_feature.true_id;
     }
   }

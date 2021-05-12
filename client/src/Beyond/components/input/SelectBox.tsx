@@ -37,6 +37,7 @@ type Props = PropsFromRedux & {
   allow_all: boolean;
   allow_none: boolean;
   allow_any: boolean;
+  extra_options: string[];
   name: string;
   onChange: Function;
   labelWidth: number | null;
@@ -67,6 +68,7 @@ class SelectBox extends Component<Props, State> {
     allow_all: false,
     allow_none: false,
     allow_any: false,
+    extra_options: [],
     color: ""
   };
   constructor(props: Props) {
@@ -139,6 +141,7 @@ class SelectBox extends Component<Props, State> {
             labelId={`selectInput_${this.props.name}`}
             id={`selectInput_${this.props.name}`}
             multiple
+            multiline
             fullWidth
             value={this.props.values}
             labelWidth={ this.props.labelWidth ? this.props.labelWidth : this.state.labelWidth }
@@ -167,6 +170,12 @@ class SelectBox extends Component<Props, State> {
                 <ListItemText primary="None" />
               </MenuItem>
             }
+            { this.props.extra_options.map((opt: string, i: any) => (
+              <MenuItem key={i} value={opt}>
+                <Checkbox checked={ this.props.values.indexOf(opt) > -1 } />
+                <ListItemText primary={opt} />
+              </MenuItem>
+            ))}
             { this.props.options && this.props.options.map((opt: ModelBase, i: any) => (
               <MenuItem key={i} value={opt._id}>
                 <Checkbox checked={ this.props.values.indexOf(opt._id) > -1 } />
@@ -194,6 +203,9 @@ class SelectBox extends Component<Props, State> {
             { this.props.allow_none && 
               <MenuItem value="None">None</MenuItem>
             }
+            { this.props.extra_options.map((opt: string, i: any) => {
+              return (<MenuItem key={i} value={opt}>{opt}</MenuItem>);
+            })}
             { this.props.options && this.props.options.map((opt: ModelBase, i: any) => {
               return (<MenuItem key={i} value={opt._id}>{opt.name}</MenuItem>);
             })}

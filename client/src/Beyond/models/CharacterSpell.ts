@@ -154,6 +154,28 @@ export class CharacterSpell {
     return false;
   }
 
+  get concentration(): boolean {
+    if (this.the_spell) {
+      return this.the_spell.concentration;
+    } 
+    return false;
+  }
+
+  use_string(character: Character) {
+    console.log(character);
+    return "Cast";
+  }
+
+  disabled(character: Character, level: number = -1) {
+    if (this.spell) {
+      const filtered_slots = character.slots.filter(o => 
+        o.level === level && o.used < o.total
+      );
+      return filtered_slots.length > 0;
+    }
+    return true;
+  }
+
   recalc_attack_string(ability_scores: AbilityScores | null): void {
     if (this.the_spell && !["None","Utility","Healing","Max HP","Temp HP","Bonus Roll","Self Condition","Summon"].includes(this.effect_string)) {
       this.attack_string = "";

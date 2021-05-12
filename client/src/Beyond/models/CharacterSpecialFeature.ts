@@ -1,12 +1,13 @@
 
 import { SpecialFeature } from "./SpecialFeature";
-import { CharacterFeature } from "./CharacterFeature";
+// import { CharacterFeature } from "./CharacterFeature";
+import { CharacterFeatureBase } from "./CharacterFeatureBase";
 
 export class CharacterSpecialFeature {
   id: number;
   special_feature_id: string;
   special_feature: SpecialFeature | null;
-  features: CharacterFeature[];
+  features: CharacterFeatureBase[];
   level: number;
 
   constructor(obj?: any) {
@@ -15,7 +16,7 @@ export class CharacterSpecialFeature {
     this.features = [];
     if (obj && obj.features && obj.features.length > 0) {
       obj.features.forEach((o: any) => {
-        this.features.push(new CharacterFeature(o));
+        this.features.push(new CharacterFeatureBase(o));
       });
     }
     this.level = obj ? obj.level : 0;
@@ -40,8 +41,8 @@ export class CharacterSpecialFeature {
     if (special_feature) {
       this.special_feature = special_feature;
       special_feature.features.forEach(f => {
-        const char_feature = new CharacterFeature();
-        char_feature.copyFeature(f);
+        const char_feature = new CharacterFeatureBase();
+        char_feature.copyFeatureBase(f);
         this.features.push(char_feature);
       });
     }
@@ -52,7 +53,7 @@ export class CharacterSpecialFeature {
     this.features.forEach(f => {
       const objFinder = special_feature.features.filter(f2 => f2.true_id === f.true_id);
       if (objFinder.length === 1) {
-        f.connectFeature(objFinder[0]);
+        f.connectFeatureBase(objFinder[0]);
       }
     });
   }

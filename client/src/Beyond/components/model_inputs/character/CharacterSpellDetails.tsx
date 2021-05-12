@@ -13,6 +13,7 @@ import {
 
 import { 
   Character,
+  CharacterSpecialSpell,
   CharacterSpell,
   CreatureInstance,
   RollPlus,
@@ -26,6 +27,9 @@ import ViewSpell from "../ViewSpell";
 
 import Roller from "../Roller";
 import CharacterSummonTransformOptions from "./CharacterSummonTransformOptions";
+
+import CharacterCastButton from "./CharacterCastButton";
+import CharacterResourceBoxes from "./CharacterResourceBoxes";
 
 import API from "../../../utilities/smart_api";
 import { APIClass } from "../../../utilities/smart_api_class";
@@ -132,7 +136,8 @@ class CharacterSpellDetails extends Component<Props, State> {
       } 
       if (the_spell) {
         const spell = this.props.spell;
-        const potence = this.props.spell.get_potence(this.state.level, this.props.obj);
+        const level = this.state.level === -1 ? this.props.spell.level : this.state.level;
+        const potence = this.props.spell.get_potence(level, this.props.obj);
         return (
           <div 
             style={{ 
@@ -166,7 +171,15 @@ class CharacterSpellDetails extends Component<Props, State> {
               </Grid>
               <Grid item container spacing={0} direction="row">
                 <Grid item xs={6}>
-                  { this.renderCastButton() }
+                  <CharacterCastButton
+                    obj={this.props.spell}
+                    character={this.props.obj}
+                    level={level}
+                    onChange={() => {
+                      this.props.onChange();
+                    }}
+                  />
+                  {/* { this.renderCastButton() } */}
                 </Grid>
                 <Grid item xs={6}>
                   { this.renderLevelOptions() }
@@ -188,7 +201,7 @@ class CharacterSpellDetails extends Component<Props, State> {
                   />
                 </Grid>
               }
-              { !["Control","Utility","Summon","Transform"].includes(spell.effect_string) &&
+              { !["Control","Utility","Summon","Transform","Create Resource"].includes(spell.effect_string) &&
                 <Grid item style={{
                   display: "flex",
                   justifyContent: "center"
@@ -427,6 +440,11 @@ class CharacterSpellDetails extends Component<Props, State> {
               <Grid item>
                 { the_spell.description }
               </Grid>
+              { spell instanceof CharacterSpecialSpell && spell.special_spell_feature &&
+                <Grid item>
+                  { spell.description }
+                </Grid>
+              }
             </Grid>
             <Popover key="rolls"
               open={ this.state.popoverAnchorEl !== null && this.state.popoverMode !== "" }
@@ -451,264 +469,174 @@ class CharacterSpellDetails extends Component<Props, State> {
     }
   }
 
-  renderCastButton() {
+  renderLevelOptions() {
     const spell = this.props.spell;
-    const level = this.state.level;
-    const self_condition_ids = spell.self_condition();
-    if (spell.level === 0 || spell.at_will) {
-      if (spell.spell && spell.spell.concentration) {
-        if (this.props.obj.concentrating_on) {
-          return (
-            <div>
-              You're already concentrating on <ViewSpell spell={this.props.obj.concentrating_on} show_ritual />
-              <ButtonBox name={ spell.level < level ? "Upcast Anyway" : "Cast Anyway" }
-                onClick={() => {
-                  this.props.obj.concentrating_on = spell;
-                  if (self_condition_ids.length > 0) {
-                    // Apply the conditions
-                    const obj = this.props.obj;
-                    self_condition_ids.forEach(cond_id => {
-                      obj.conditions.push(cond_id);
-                    });
-                    if (obj instanceof Character) {
-                      this.char_util.recalcAll(obj);
-                    }
-                  }
-                  this.props.onChange();
-                }} 
-              />
-            </div>
-          );
-        } else {
-          return (
-            <ButtonBox name="At Will"
-              onClick={() => {
-                this.props.obj.concentrating_on = spell;
-                if (self_condition_ids.length > 0) {
-                  // Apply the conditions
-                  const obj = this.props.obj;
-                  self_condition_ids.forEach(cond_id => {
-                    obj.conditions.push(cond_id);
-                  });
-                  if (obj instanceof Character) {
-                    this.char_util.recalcAll(obj);
-                  }
-                }
+    const level = this.state.level === -1 ? this.props.spell.level : this.state.level;
+    if (spell instanceof CharacterSpecialSpell) {
+      if (spell.special_spell_feature) {
+        const ssf = spell.special_spell_feature;
+        // "Normal","At Will","Only Special Resource","Or Special Resource","And Special Resource"
+        const return_me: any[] = [];
+        if (ssf.slot_override.includes("Special")) {
+          // Need to show the Special Resources
+          return_me.push(
+            <CharacterResourceBoxes 
+              key="special"
+              resource={spell}
+              character={this.props.obj}
+              onChange={() => {
                 this.props.onChange();
-                this.setState({ });
-              }} 
+              }}
             />
           );
         }
-      } else {
-        return (
-          <ButtonBox 
-            disabled={self_condition_ids.length === 0}
-            name="At Will"
-            onClick={() => {
-              // Apply the conditions
-              const obj = this.props.obj;
-              self_condition_ids.forEach(cond_id => {
-                obj.conditions.push(cond_id);
-              });
-              if (obj instanceof Character) {
-                this.char_util.recalcAll(obj);
-              }
-            }}
-          />
-        );
-      }
-    } else if (spell.ritual_only) {
-      return (
-        <ButtonBox 
-          disabled={self_condition_ids.length === 0} 
-          name="Ritual Only" 
-          onClick={() => {
-            // Apply the conditions
-            const obj = this.props.obj;
-            self_condition_ids.forEach(cond_id => {
-              obj.conditions.push(cond_id);
-            });
-            if (obj instanceof Character) {
-              this.char_util.recalcAll(obj);
-            }
-          }}
-        />
-      );
-    } else {
-      // Get the slots for the level
-      const slots = this.props.obj.slots.filter(o => o.level === level);
-      if (slots.length === 1) {
-        const slot = slots[0];
-        if (spell.spell && spell.spell.concentration) { 
-          if (this.props.obj.concentrating_on) {
-            return (
-              <div>
-                You're already concentrating on <ViewSpell spell={this.props.obj.concentrating_on} show_ritual />
-                <ButtonBox name={ spell.level < level ? `Upcast with ${slot.slot_name} Anyway` : `Cast with ${slot.slot_name} Anyway` }
-                  disabled={slot.used === slot.total}
-                  onClick={() => {
-                    slot.used++;
-                    this.props.obj.concentrating_on = spell;
-                    if (self_condition_ids.length > 0) {
-                      // Apply the conditions
-                      const obj = this.props.obj;
-                      self_condition_ids.forEach(cond_id => {
-                        obj.conditions.push(cond_id);
-                      });
-                      if (obj instanceof Character) {
-                        this.char_util.recalcAll(obj);
-                      }
-                    }
-                    this.props.onChange();
-                  }} 
-                />
-              </div>
-            );
-          } else {
-            return (
-              <ButtonBox name={ spell.level < level ? `Upcast with ${slot.slot_name}` : `Cast with ${slot.slot_name}` }
-                disabled={slot.used === slot.total}
-                onClick={() => {
-                  slot.used++;
-                  this.props.obj.concentrating_on = spell;
-                  if (self_condition_ids.length > 0) {
-                    // Apply the conditions
-                    const obj = this.props.obj;
-                    self_condition_ids.forEach(cond_id => {
-                      obj.conditions.push(cond_id);
-                    });
-                    if (obj instanceof Character) {
-                      this.char_util.recalcAll(obj);
-                    }
-                  }
-                  this.props.onChange();
-                  this.setState({ });
-                }} 
-              />
-            );
-          }
-        } else {
-          return (
-            <ButtonBox name={ spell.level < level ? `Upcast with ${slot.slot_name}` : `Cast with ${slot.slot_name}` }
-              disabled={slot.used === slot.total}
-              onClick={() => {
-                slot.used++;
-                if (self_condition_ids.length > 0) {
-                  // Apply the conditions
-                  const obj = this.props.obj;
-                  self_condition_ids.forEach(cond_id => {
-                    obj.conditions.push(cond_id);
-                  });
-                  if (obj instanceof Character) {
-                    this.char_util.recalcAll(obj);
-                  }
-                }
-                this.props.onChange();
-                this.setState({ });
-              }} 
-            />
-          );
-        }
-      } else {
-        if (spell.spell) {
-          if (spell.spell.concentration && this.props.obj.concentrating_on) {
-            return (
-              <div>
-                You're already concentrating on <ViewSpell spell={this.props.obj.concentrating_on} show_ritual />
-                <div>
-                  { slots.map((slot, key) => {
-                    return (
-                      <ButtonBox key={key} name={slot.slot_name}
-                        disabled={slot.used === slot.total}
-                        onClick={() => {
-                          slot.used++;
-                          this.props.obj.concentrating_on = spell;
-                          if (self_condition_ids.length > 0) {
-                            // Apply the conditions
-                            const obj = this.props.obj;
-                            self_condition_ids.forEach(cond_id => {
-                              obj.conditions.push(cond_id);
-                            });
-                            if (obj instanceof Character) {
-                              this.char_util.recalcAll(obj);
-                            }
-                          }
-                          this.props.onChange();
-                        }} 
-                      />
-                    );
-                  })}
-                </div>
-              </div>
-            );
-          } else {
-            return (
-              <div>
-                { slots.map((slot, key) => {
-                  return (
-                    <ButtonBox key={key} name={slot.slot_name}
-                      disabled={slot.used === slot.total}
+        if (["At Will","Or Special Resource","And Special Resource"].includes(ssf.slot_override)) {
+          // Need to show the slots for the level
+          const slot_levels = Array.from(new Set(this.props.obj.slots.filter(o => o.level >= spell.level).map(o => o.level)));
+          const slots = this.props.obj.slots.filter(o => o.level === level);
+          if (slot_levels.length > 1) {
+            return_me.push(
+              <Grid key="slots" container spacing={0} direction="row">
+                <Grid item xs={4}>
+                  Level
+                </Grid>
+                <Grid item xs={8} container spacing={0} direction="row">
+                  <Grid item xs={4}>
+                    <ButtonBox
+                      name=" - "
+                      disabled={ level === Math.min(...slot_levels) }
                       onClick={() => {
-                        slot.used++;
-                        this.props.obj.concentrating_on = spell;
-                        if (self_condition_ids.length > 0) {
-                          // Apply the conditions
-                          const obj = this.props.obj;
-                          self_condition_ids.forEach(cond_id => {
-                            obj.conditions.push(cond_id);
-                          });
-                          if (obj instanceof Character) {
-                            this.char_util.recalcAll(obj);
-                          }
-                        }
-                        this.props.onChange();
+                        this.setState({ level: Math.max(...slot_levels.filter(o => o < level)) });
                       }} 
                     />
+                  </Grid>
+                  <Grid item xs={4} style={{
+                    display: "flex",
+                    justifyContent: "center"
+                  }}>
+                    { level }
+                  </Grid>
+                  <Grid item xs={4}>
+                    <ButtonBox
+                      name=" + "
+                      disabled={ level === Math.max(...slot_levels) }
+                      onClick={() => {
+                        this.setState({ level: Math.min(...slot_levels.filter(o => o > level)) });
+                      }} 
+                    />
+                  </Grid>
+                </Grid>
+                { slots.map((slot, key) => {
+                  return (
+                    <Grid item key={key} xs={12}>
+                      <CharacterResourceBoxes 
+                        resource={slot}
+                        character={this.props.obj}
+                        onChange={() => {
+                          this.props.onChange();
+                        }}
+                      />
+                      {/* { this.renderSlotsForLevel() } */}
+                    </Grid>
                   );
                 })}
-              </div>
+              </Grid>
+            );
+          } else {
+            return_me.push(
+              <Grid key="slots" container spacing={0} direction="row">
+                { slots.map((slot, key) => {
+                  return (
+                    <Grid item key={key} xs={12}>
+                      <CharacterResourceBoxes 
+                        resource={slot}
+                        character={this.props.obj}
+                        onChange={() => {
+                          this.props.onChange();
+                        }}
+                      />
+                      {/* { this.renderSlotsForLevel() } */}
+                    </Grid>
+                  );
+                })}
+              </Grid>
             );
           }
         }
+        return return_me;
       }
-    }
-  }
-
-  renderLevelOptions() {
-    if (this.state.level > 0) { // and not at will and not ritual only
-      const slots = Array.from(new Set(this.props.obj.slots.filter(o => o.level >= this.props.spell.level).map(o => o.level)));
-      if (slots.length > 1) {
-        return (
-          <Grid container spacing={0} direction="row">
-            <Grid item xs={4}>
-              Level
+    } else {
+      if (level > 0) { // and not at will and not ritual only
+        const slot_levels = Array.from(new Set(this.props.obj.slots.filter(o => o.level >= this.props.spell.level).map(o => o.level)));
+        const slots = this.props.obj.slots.filter(o => o.level === level);
+        if (slot_levels.length > 1) {
+          return (
+            <Grid container spacing={0} direction="row">
+              <Grid item xs={4}>
+                Level
+              </Grid>
+              <Grid item xs={8} container spacing={0} direction="row">
+                <Grid item xs={4}>
+                  <ButtonBox
+                    name=" - "
+                    disabled={ level === Math.min(...slot_levels) }
+                    onClick={() => {
+                      this.setState({ level: Math.max(...slot_levels.filter(o => o < level)) });
+                    }} 
+                  />
+                </Grid>
+                <Grid item xs={4} style={{
+                  display: "flex",
+                  justifyContent: "center"
+                }}>
+                  { level }
+                </Grid>
+                <Grid item xs={4}>
+                  <ButtonBox
+                    name=" + "
+                    disabled={ level === Math.max(...slot_levels) }
+                    onClick={() => {
+                      this.setState({ level: Math.min(...slot_levels.filter(o => o > level)) });
+                    }} 
+                  />
+                </Grid>
+              </Grid>
+              { slots.map((slot, key) => {
+                return (
+                  <Grid item key={key} xs={12}>
+                    <CharacterResourceBoxes 
+                      resource={slot}
+                      character={this.props.obj}
+                      onChange={() => {
+                        this.props.onChange();
+                      }}
+                    />
+                    {/* { this.renderSlotsForLevel() } */}
+                  </Grid>
+                );
+              })}
             </Grid>
-            <Grid item xs={8} container spacing={0} direction="row">
-              <Grid item xs={4}>
-                <ButtonBox
-                  name=" - "
-                  disabled={ this.state.level === Math.min(...slots) }
-                  onClick={() => {
-                    this.setState({ level: Math.max(...slots.filter(o => o < this.state.level)) });
-                  }} 
-                />
-              </Grid>
-              <Grid item xs={4}>
-                { this.get_level_string() }
-              </Grid>
-              <Grid item xs={4}>
-                <ButtonBox
-                  name=" + "
-                  disabled={ this.state.level === Math.max(...slots) }
-                  onClick={() => {
-                    this.setState({ level: Math.min(...slots.filter(o => o > this.state.level)) });
-                  }} 
-                />
-              </Grid>
+          );
+        } else {
+          return (
+            <Grid container spacing={0} direction="row">
+              { slots.map((slot, key) => {
+                return (
+                  <Grid item key={key} xs={12}>
+                    <CharacterResourceBoxes 
+                      resource={slot}
+                      character={this.props.obj}
+                      onChange={() => {
+                        this.props.onChange();
+                      }}
+                    />
+                    {/* { this.renderSlotsForLevel() } */}
+                  </Grid>
+                );
+              })}
             </Grid>
-          </Grid>
-        );
+          );
+        }
       }
     }
     return null;

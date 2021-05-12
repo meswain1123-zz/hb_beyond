@@ -89,7 +89,7 @@ class CreatureAction extends Component<Props, State> {
           }
         </Grid>
         <Grid item xs={4}>
-          { !["Control","Utility","Summon","Transform"].includes(action.effect.type) && action.effect.potences.length === 1 ?
+          { !["Control","Utility","Summon","Transform","Create Resource"].includes(action.effect.type) && action.effect.potences.length === 1 ?
             <ButtonBox
               fontSize={9}
               name={ action.effect.potences[0].rolls.as_string }

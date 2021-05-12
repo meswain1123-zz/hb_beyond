@@ -13,7 +13,7 @@ import { UpgradableNumber } from "./UpgradableNumber";
  * because I want to use this for things that aren't spells
  * (like Battlemaster Maneuvers, Weapon Attacks, Sneak Attack, etc).
  * 
- * potence_formula is a string, but it's complicated, so I'm going to 
+ * bonus is a string, but it's complicated, so I'm going to 
  * define how it works here.
  * To help me make sure I understand it myself, I'm going to start
  * with some examples:

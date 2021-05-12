@@ -6,10 +6,13 @@ import {
 } from "@material-ui/core";
 
 import { 
-  Resource, ResourceFeature
+  Resource, 
+  ResourceFeature,
+  UpgradableNumber
 } from "../../../models";
 
-import StringBox from "../../input/StringBox";
+import UpgradableNumberBox from "../../input/UpgradableNumberBox";
+
 import SelectBox from "../../input/SelectBox";
 
 import API from "../../../utilities/smart_api";
@@ -111,14 +114,14 @@ class ResourceFeatureInput extends Component<Props, State> {
             />
           </Grid>
           <Grid item>
-            <StringBox 
-              name="Total" 
-              value={`${this.props.obj.total}`} 
-              onBlur={(value: string) => {
+            <UpgradableNumberBox 
+              name="Total"
+              value={this.props.obj.total} 
+              onChange={(value: UpgradableNumber) => {
                 const obj = this.props.obj;
-                obj.total = +value;
+                obj.total = value;
                 this.props.onChange(obj);
-              }} 
+              }}
             />
           </Grid>
         </Grid>

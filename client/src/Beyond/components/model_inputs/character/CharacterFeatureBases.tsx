@@ -75,7 +75,13 @@ class CharacterFeatureBasesInput extends Component<Props, State> {
   render() {
     return (
       <Grid item xs={12} container spacing={1} direction="column">
-        { this.props.features.map((fb, i) => {
+        { this.props.features.sort((a, b) => { 
+          if (a.feature_base && b.feature_base) {
+            return +a.feature_base.level < +b.feature_base.level ? -1 : 1;
+          } else {
+            return 1;
+          }
+        }).map((fb, i) => {
           return (
             <Grid item key={i}>
               <div 

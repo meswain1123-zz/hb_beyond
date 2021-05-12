@@ -13,10 +13,16 @@ import {
 import { 
   Condition, Feature
 } from "../../models";
+
 import StringBox from "../../components/input/StringBox";
+import ToggleButtonBox from "../../components/input/ToggleButtonBox";
+
 import FeatureListInput from "../../components/model_inputs/feature/FeatureList";
 import FeatureInput from "../../components/model_inputs/feature/FeatureMain";
-import ToggleButtonBox from "../../components/input/ToggleButtonBox";
+
+import SelectGameClassBox from "../../components/model_inputs/select/SelectGameClassBox";
+import SelectSubclassBox from "../../components/model_inputs/select/SelectSubclassBox";
+
 import API from "../../utilities/smart_api";
 import { APIClass } from "../../utilities/smart_api_class";
 
@@ -229,6 +235,31 @@ class ConditionEdit extends Component<Props, State> {
                       obj.level = obj.level === -1 ? 0 : -1;
                       this.setState({ obj });
                     }}
+                  />
+                </Grid>
+                <Grid item>
+                  <SelectGameClassBox
+                    name="Only Show for these Classes" 
+                    values={ this.state.obj.class_ids } 
+                    multiple
+                    onChange={(ids: string[]) => {
+                      const obj = this.state.obj;
+                      obj.class_ids = ids;
+                      this.setState({ obj });
+                    }} 
+                  />
+                </Grid>
+                <Grid item>
+                  <SelectSubclassBox
+                    name="Only Show for these Subclasses" 
+                    game_class_id={ this.state.obj.class_ids.length === 1 ? this.state.obj.class_ids[0] : null }
+                    values={ this.state.obj.subclass_ids } 
+                    multiple
+                    onChange={(ids: string[]) => {
+                      const obj = this.state.obj;
+                      obj.subclass_ids = ids;
+                      this.setState({ obj });
+                    }} 
                   />
                 </Grid>
                 { this.state.obj.level > -1 &&

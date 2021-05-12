@@ -31,7 +31,8 @@ import {
   SpellcastingFeature,
   UpgradableNumber,
   IStringHash,
-  Reroll
+  Reroll,
+  SpecialSpellFeature
 } from "../../../models";
 import { 
   FEATURE_TYPES,
@@ -63,9 +64,11 @@ import SelectSpecialFeatureTypeBox from "../select/SelectSpecialFeatureTypeBox";
 import SelectSpecialFeatureBox from "../select/SelectSpecialFeatureBox";
 import SelectFightingStyleBox from "../select/SelectFightingStyleBox";
 import SelectSpellListBox from "../select/SelectSpellListBox";
+import SelectGameClassBox from "../select/SelectGameClassBox";
 import DamageMultiplierInput from "./DamageMultiplier";
 import SpellcastingFeatureInput from "./SpellcastingFeature";
 import SenseFeatureInput from "./SenseFeature";
+import SpecialSpellFeatureInput from "./SpecialSpellFeature";
 
 import API from "../../../utilities/smart_api";
 import { APIClass } from "../../../utilities/smart_api_class";
@@ -231,7 +234,7 @@ class FeatureInput extends Component<Props, State> {
           </Grid>
           <Grid item>
             <SelectStringBox 
-              options={FEATURE_TYPES}
+              options={FEATURE_TYPES.sort((a,b) => { return a.localeCompare(b); })}
               value={this.state.feature.feature_type} 
               name="Feature Type"
               onChange={(value: string) => {
@@ -302,9 +305,20 @@ class FeatureInput extends Component<Props, State> {
                     the_feature = new Proficiency();
                     the_feature.proficiency_type = feature.feature_type;
                     the_feature.the_proficiencies.push("");
-                    the_feature.the_proficiencies.push("");
+                    // the_feature.the_proficiencies.push("");
+                  break;
+                  case "Tool Proficiencies":
+                    the_feature = new Proficiency();
+                    the_feature.proficiency_type = feature.feature_type;
+                  break;
+                  case "Tool Proficiency Choices":
+                    the_feature = new Proficiency();
+                    the_feature.proficiency_type = feature.feature_type;
                   break;
                   case "Expertise":
+                    the_feature = 1;
+                  break;
+                  case "Jack of All Trades":
                     the_feature = 1;
                   break;
                   case "Feat":
@@ -369,9 +383,17 @@ class FeatureInput extends Component<Props, State> {
                   break;
                   case "Cantrips from List":
                     the_feature = {
-                      list_id: "",
+                      list_id: "Any",
                       count: "0",
                       spellcasting_ability: ""
+                    };
+                  break;
+                  case "Spells from List":
+                    the_feature = {
+                      list_id: "Any",
+                      count: "0",
+                      count_as_class_id: "",
+                      max_level: "0"
                     };
                   break;
                   case "Ritual Casting":
@@ -385,6 +407,12 @@ class FeatureInput extends Component<Props, State> {
                   break;
                   case "Mystic Arcanum":
                     the_feature = 1;
+                  break;
+                  case "Spell Mastery":
+                    the_feature = 1;
+                  break;
+                  case "Special Spell":
+                    the_feature = new SpecialSpellFeature();
                   break;
                 }
                 feature.the_feature = the_feature;
@@ -420,6 +448,12 @@ class FeatureInput extends Component<Props, State> {
           if (typeof this.state.feature.the_feature === "string") {
             feature_details = 
               <span>The player will be able to choose a Pact Boon</span>;
+          }
+        break;
+        case "Jack of All Trades":
+          if (typeof this.state.feature.the_feature === "string") {
+            feature_details = 
+              <span>The player will have half proficiency on all of their non-proficient ability checks.</span>;
           }
         break;
         case "Eldritch Invocation":
@@ -573,6 +607,34 @@ class FeatureInput extends Component<Props, State> {
           }
         break;
         case "Tool Proficiency":
+          if (this.state.feature.the_feature instanceof Proficiency) {
+            const proficiency: Proficiency = this.state.feature.the_feature;
+            feature_details = 
+              <ProficiencyFeatureInput
+                proficiency={proficiency}
+                onChange={(changed: Proficiency) => {
+                  const feature = this.state.feature;
+                  feature.the_feature = changed;
+                  this.setState({ feature });
+                }}
+              />;
+          }
+        break;
+        case "Tool Proficiencies":
+          if (this.state.feature.the_feature instanceof Proficiency) {
+            const proficiency: Proficiency = this.state.feature.the_feature;
+            feature_details = 
+              <ProficiencyFeatureInput
+                proficiency={proficiency}
+                onChange={(changed: Proficiency) => {
+                  const feature = this.state.feature;
+                  feature.the_feature = changed;
+                  this.setState({ feature });
+                }}
+              />;
+          }
+        break;
+        case "Tool Proficiency Choices":
           if (this.state.feature.the_feature instanceof Proficiency) {
             const proficiency: Proficiency = this.state.feature.the_feature;
             feature_details = 
@@ -934,6 +996,7 @@ class FeatureInput extends Component<Props, State> {
               <Grid item xs={4}>
                 <SelectSpellListBox
                   name="Spell List"
+                  allow_any
                   value={cantrips_hash.list_id} 
                   onChange={(value: string) => {
                     const feature = this.state.feature;
@@ -965,6 +1028,63 @@ class FeatureInput extends Component<Props, State> {
                     const feature = this.state.feature;
                     cantrips_hash.spellcasting_ability = value;
                     feature.the_feature = cantrips_hash;
+                    this.setState({ feature });
+                  }} 
+                />
+              </Grid>
+            </Grid>;
+        break;
+        case "Spells from List":
+          const spells_hash: IStringHash = this.state.feature.the_feature as IStringHash;
+          feature_details = 
+            <Grid container spacing={1} direction="row">
+              <Grid item xs={3}>
+                <SelectSpellListBox
+                  name="Spell List"
+                  allow_any
+                  value={spells_hash.list_id} 
+                  onChange={(value: string) => {
+                    const feature = this.state.feature;
+                    spells_hash.list_id = value;
+                    feature.the_feature = spells_hash;
+                    this.setState({ feature });
+                  }} 
+                />
+              </Grid>
+              <Grid item xs={3}>
+                <StringBox
+                  name="Count"
+                  value={spells_hash.count} 
+                  type="number"
+                  onBlur={(value: string) => {
+                    const feature = this.state.feature;
+                    spells_hash.count = value;
+                    feature.the_feature = spells_hash;
+                    this.setState({ feature });
+                  }} 
+                />
+              </Grid>
+              <Grid item xs={3}>
+                <StringBox
+                  name="Max Level"
+                  value={spells_hash.max_level} 
+                  type="number"
+                  onBlur={(value: string) => {
+                    const feature = this.state.feature;
+                    spells_hash.max_level = value;
+                    feature.the_feature = spells_hash;
+                    this.setState({ feature });
+                  }} 
+                />
+              </Grid>
+              <Grid item xs={3}>
+                <SelectGameClassBox
+                  name="From Class"
+                  value={spells_hash.count_as_class_id} 
+                  onChange={(value: string) => {
+                    const feature = this.state.feature;
+                    spells_hash.count_as_class_id = value;
+                    feature.the_feature = spells_hash;
                     this.setState({ feature });
                   }} 
                 />
@@ -1031,6 +1151,36 @@ class FeatureInput extends Component<Props, State> {
                   feature.the_feature = +value;
                   this.setState({ feature });
                 }} 
+              />;
+          }
+        break;
+        case "Spell Mastery":
+          if (typeof this.state.feature.the_feature === "number") {
+            const level: number = this.state.feature.the_feature;
+            feature_details = 
+              <StringBox 
+                name="Spell Mastery Level" 
+                value={`${level}`} 
+                type="number"
+                onBlur={(value: string) => {
+                  const feature = this.state.feature;
+                  feature.the_feature = +value;
+                  this.setState({ feature });
+                }} 
+              />;
+          }
+        break;
+        case "Special Spell":
+          if (this.state.feature.the_feature instanceof SpecialSpellFeature) {
+            const ssf: SpecialSpellFeature = this.state.feature.the_feature;
+            feature_details = 
+              <SpecialSpellFeatureInput
+                feature={ssf}
+                onChange={(changed: SpecialSpellFeature) => {
+                  const feature = this.state.feature;
+                  feature.the_feature = changed;
+                  this.setState({ feature });
+                }}
               />;
           }
         break;

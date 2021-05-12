@@ -20,7 +20,11 @@ export class PactBoon extends ModelBase {
       } else {
         this.features = [];
         obj.features.forEach((o: any) => {
-          this.features.push(new Feature(o));
+          const feature = new Feature(o);
+          if (feature.description.length === 0) {
+            feature.fake_description = this.description;
+          }
+          this.features.push(feature);
         });
       }
     } else {

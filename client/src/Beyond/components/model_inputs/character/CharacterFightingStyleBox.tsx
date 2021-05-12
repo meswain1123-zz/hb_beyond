@@ -94,7 +94,6 @@ class CharacterFightingStyleBox extends Component<Props, State> {
       return <span>Loading</span>;
     } else {
       const char_ei = this.props.obj.feature_options[0] as CharacterFightingStyle;
-      console.log(char_ei);
       const fighting_style_ids = this.props.obj.feature.the_feature as string[];
       const filtered = this.state.fighting_styles.filter(o => 
         (fighting_style_ids.includes(o._id)) &&

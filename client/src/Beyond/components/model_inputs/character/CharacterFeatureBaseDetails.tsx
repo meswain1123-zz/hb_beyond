@@ -408,7 +408,24 @@ class CharacterFeatureBaseDetails extends Component<Props, State> {
             Whenever you gain a level in this class, you can replace one of these cantrips with another cantrip from the <DisplayObjects type="spell_list" ids={[cfl.list_id]} /> spell list. 
           </Grid>
           <Grid item>
-          <DisplayObjects type="spell" ids={cantrip_ids} />
+            <DisplayObjects type="spell" ids={cantrip_ids} />
+          </Grid>
+        </Grid>
+      );
+    } else if (feature.feature_type === "Spells from List") {
+      const sfl = feature.feature.the_feature as IStringHash;
+      const spell_ids = feature.feature_options as string[];
+      return (
+        <Grid item key={key} container spacing={1} direction="column">
+          <Grid item>
+            You learn { sfl.count } spells of your choice from { sfl.list_id === "Any" ? <span>any</span> : <span>the <DisplayObjects type="spell_list" ids={[sfl.list_id]} /></span> } spell list. 
+            A spell you choose must be of a level you can cast, 
+            as shown on the <DisplayObjects type="game_class" ids={[sfl.count_as_class_id]} /> table, or a cantrip. 
+            The chosen spells count as <DisplayObjects type="game_class" ids={[sfl.count_as_class_id]} /> spells for you 
+            but don’t count against the number of <DisplayObjects type="game_class" ids={[sfl.count_as_class_id]} /> spells you know.
+          </Grid>
+          <Grid item>
+            <DisplayObjects type="spell" ids={spell_ids} />
           </Grid>
         </Grid>
       );

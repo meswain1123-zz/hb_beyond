@@ -119,7 +119,7 @@ class CharacterSenses extends Component<Props, State> {
           let modifier = this.props.obj.current_ability_scores.getModifier(skill.use_ability_score);
           const override = this.props.obj instanceof Character ? this.props.obj.skill_overrides[skill._id] : null;
           const prof_override = this.props.obj instanceof Character ? this.props.obj.proficiency_overrides[skill._id] : null;
-          const jack = false; // this.props.obj.jack_of_all_trades;
+          const jack = this.props.obj.jack_of_all_trades;
           const proficiency = this.props.obj.skill_proficiencies[skill._id];
             
           if (prof_override !== null && prof_override !== undefined) {
@@ -150,7 +150,7 @@ class CharacterSenses extends Component<Props, State> {
           let modifier = this.props.obj.current_ability_scores.getModifier(skill.use_ability_score);
           const override = this.props.obj instanceof Character ? this.props.obj.skill_overrides[skill._id] : null;
           const prof_override = this.props.obj instanceof Character ? this.props.obj.proficiency_overrides[skill._id] : null;
-          const jack = false; // this.props.obj.jack_of_all_trades;
+          const jack = this.props.obj.jack_of_all_trades;
           const proficiency = this.props.obj.skill_proficiencies[skill._id];
             
           if (prof_override !== null && prof_override !== undefined) {
@@ -181,7 +181,7 @@ class CharacterSenses extends Component<Props, State> {
           let modifier = this.props.obj.current_ability_scores.getModifier(skill.use_ability_score);
           const override = this.props.obj instanceof Character ? this.props.obj.skill_overrides[skill._id] : null;
           const prof_override = this.props.obj instanceof Character ? this.props.obj.proficiency_overrides[skill._id] : null;
-          const jack = false; // this.props.obj.jack_of_all_trades;
+          const jack = this.props.obj.jack_of_all_trades;
           const proficiency = this.props.obj.skill_proficiencies[skill._id];
             
           if (prof_override !== null && prof_override !== undefined) {

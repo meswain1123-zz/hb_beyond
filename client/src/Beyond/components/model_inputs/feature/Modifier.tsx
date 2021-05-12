@@ -10,7 +10,8 @@ import {
 } from "../../../models";
 import { 
   DAMAGE_TYPES, 
-  ABILITY_SCORES 
+  ABILITY_SCORES,
+  SCHOOLS
 } from "../../../models/Constants";
 
 import StringBox from "../../input/StringBox";
@@ -172,7 +173,7 @@ class ModifierInput extends Component<Props, State> {
           <Grid item>
             <SelectStringBox 
               name="Attack Type" 
-              options={["Strength","Dexterity","Melee","Ranged","Versatile","2nd Weapon","Cantrip Attacks","Spell Attacks","Cantrip Saves","Spell Saves"]}
+              options={["Strength","Dexterity","Melee","Ranged","Versatile","2nd Weapon","Cantrip Attacks","Spell Attacks","Cantrip Saves","Spell Saves",...SCHOOLS]}
               values={this.props.obj.modifies_details} 
               multiple
               onChange={(values: string[]) => {
@@ -241,7 +242,7 @@ class ModifierInput extends Component<Props, State> {
             />
           </Grid>
         }
-        { this.props.obj.modifies === "Damage" && 
+        { ["Attack","Damage"].includes(this.props.obj.modifies) && 
           <Grid item>
             <SelectWeaponKeywordBox 
               name="Required Weapon Keywords" 
@@ -260,7 +261,7 @@ class ModifierInput extends Component<Props, State> {
         <Grid item>
           <SelectStringBox 
             name="Modification Type" 
-            options={["Flat","Attack Ability Modifier","Character Level","Class Level",...ABILITY_SCORES]}
+            options={["Flat","Attack Ability Modifier","Attack Ability Option","Damage Dice Option","Character Level","Class Level",...ABILITY_SCORES]}
             value={this.props.obj.type} 
             onChange={(value: string) => {
               const obj = this.props.obj;
@@ -277,6 +278,34 @@ class ModifierInput extends Component<Props, State> {
               onBlur={(value: string) => {
                 const obj = this.props.obj;
                 obj.amount = value;
+                this.props.onChange(obj);
+              }} 
+            />
+          </Grid>
+        }
+        { ["Attack Ability Option"].includes(this.props.obj.type) && 
+          <Grid item>
+            <SelectStringBox 
+              name="Ability Score" 
+              options={ABILITY_SCORES}
+              value={this.props.obj.modifies_detail_3} 
+              onChange={(value: string) => {
+                const obj = this.props.obj;
+                obj.modifies_detail_3 = value;
+                this.props.onChange(obj);
+              }} 
+            />
+          </Grid>
+        }
+        { ["Damage Dice Option"].includes(this.props.obj.type) && 
+          <Grid item>
+            <StringBox 
+              name="Damage Dice Size" 
+              value={this.props.obj.modifies_detail_3} 
+              type="number"
+              onBlur={(value: string) => {
+                const obj = this.props.obj;
+                obj.modifies_detail_3 = value;
                 this.props.onChange(obj);
               }} 
             />

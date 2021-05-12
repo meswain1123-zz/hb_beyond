@@ -1,9 +1,11 @@
 
-import { GameClass } from "./GameClass";
-import { Subclass } from "./Subclass";
-import { CharacterFeatureBase } from "./CharacterFeatureBase";
-import { SpellBook } from "./SpellBook";
-import { BonusSpells } from "./BonusSpells";
+import { 
+  GameClass,
+  Subclass,
+  CharacterFeatureBase,
+  CharacterSpellBook,
+  BonusSpells
+} from ".";
 
 export class CharacterClass {
   position: number;
@@ -27,6 +29,7 @@ export class CharacterClass {
   knowledge_type: string; // Prepared, Known, Spell Book
   // These can be increased through other features.
   cantrips_max: number;
+  base_spell_count: number;
   spell_count_per_level: number;
   extra_prepared_from_ability: string; // This increases the number of spells Prepared/Known
   spells_prepared_max: number; // This is calculated from the two above
@@ -34,11 +37,8 @@ export class CharacterClass {
   ritual_casting: boolean;
   spellcasting_focus: string;
   // These are only from other features
-  spell_book: SpellBook | null;
+  spell_book: CharacterSpellBook | null;
   bonus_spells: BonusSpells[];
-  mystic_arcanum_levels: number[]; 
-  // Each entry represents a mystic arcanum the character gets.  
-  // The value is the level.
 
   constructor(obj?: any) {
     this.position = 0;
@@ -50,18 +50,23 @@ export class CharacterClass {
     this.class_features = [];
     if (obj && obj.class_features && obj.class_features.length > 0) {
       obj.class_features.forEach((o: any) => {
-        this.class_features.push(new CharacterFeatureBase(o));
+        const fb = new CharacterFeatureBase(o);
+        fb.source_id = this.game_class_id;
+        this.class_features.push(fb);
       });
     }
     this.subclass_features = [];
     if (obj && obj.subclass_features && obj.subclass_features.length > 0) {
       obj.subclass_features.forEach((o: any) => {
-        this.subclass_features.push(new CharacterFeatureBase(o));
+        const fb = new CharacterFeatureBase(o);
+        fb.source_id = this.game_class_id;
+        this.subclass_features.push(fb);
       });
     }
     this.level = obj ? obj.level : 0;
     this.game_class = obj && obj.game_class ? new GameClass(obj.game_class) : null;
     this.subclass = obj && obj.subclass ? new Subclass(obj.subclass) : null;
+    this.spell_book = obj && obj.spell_book ? new CharacterSpellBook(obj.spell_book) : null;
     
     this.spellcasting_ability = "";
     this.spell_dc = 0;
@@ -74,15 +79,13 @@ export class CharacterClass {
     this.spell_level_max = 0;
     this.spell_ids = [];
     this.cantrip_ids = [];
+    this.base_spell_count = 0;
     this.spell_count_per_level = 0;
     this.extra_prepared_from_ability = "";
     this.spells_prepared_max = 0;
     this.ritual_casting = false;
     this.spellcasting_focus = "";
-    this.spell_book = null;
     this.bonus_spells = [];
-
-    this.mystic_arcanum_levels = [];
   }
 
   get name(): string {
@@ -108,6 +111,7 @@ export class CharacterClass {
       class_features,
       subclass_features,
       level: this.level,
+      spell_book: this.spell_book ? this.spell_book.toDBObj() : null
     };
   }
 
@@ -120,7 +124,7 @@ export class CharacterClass {
       game_class.features.filter(fb => fb.level > this.level && fb.level <= level).forEach(fb => {
         if (fb.multiclassing === 0 || (fb.multiclassing === 2 && this.position > 0) || (fb.multiclassing === 1 && this.position === 0)) {
           const char_feature_base = new CharacterFeatureBase();
-          char_feature_base.copyFeatureBase(fb);
+          char_feature_base.copyFeatureBase(fb, this.game_class_id);
           this.class_features.push(char_feature_base);
         }
       });
@@ -140,14 +144,16 @@ export class CharacterClass {
     if (this.game_class) {
       this.game_class.features.filter(fb => fb.level <= this.level && fb.multiclassing === 1).forEach(fb => {
         const char_feature_base = new CharacterFeatureBase();
-        char_feature_base.copyFeatureBase(fb);
+        char_feature_base.copyFeatureBase(fb, this.game_class_id);
+        char_feature_base.source_id = this.game_class_id;
         this.class_features.push(char_feature_base);
       });
     }
     if (this.subclass) {
       this.subclass.features.filter(fb => fb.level <= this.level && fb.multiclassing === 1).forEach(fb => {
         const char_feature_base = new CharacterFeatureBase();
-        char_feature_base.copyFeatureBase(fb);
+        char_feature_base.copyFeatureBase(fb, this.game_class_id);
+        char_feature_base.source_id = this.game_class_id;
         this.subclass_features.push(char_feature_base);
       });
     }
@@ -164,7 +170,8 @@ export class CharacterClass {
     if (do_all) {
       subclass.features.filter(fb => fb.level <= level).forEach(fb => {
         const char_feature_base = new CharacterFeatureBase();
-        char_feature_base.copyFeatureBase(fb);
+        char_feature_base.copyFeatureBase(fb, this.game_class_id);
+        char_feature_base.source_id = this.game_class_id;
         this.subclass_features.push(char_feature_base);
       });
     } else {
@@ -173,7 +180,8 @@ export class CharacterClass {
       } else {
         subclass.features.filter(fb => fb.level > this.level && fb.level <= level).forEach(fb => {
           const char_feature_base = new CharacterFeatureBase();
-          char_feature_base.copyFeatureBase(fb);
+          char_feature_base.copyFeatureBase(fb, this.game_class_id);
+          char_feature_base.source_id = this.game_class_id;
           this.subclass_features.push(char_feature_base);
         });
       }
