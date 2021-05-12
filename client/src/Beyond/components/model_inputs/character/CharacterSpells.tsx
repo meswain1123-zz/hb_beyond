@@ -187,7 +187,9 @@ class CharacterSpells extends Component<Props, State> {
               }}
             />
           </Grid>
-          { this.renderSpells() }
+          <Grid item>
+            { this.renderSpells() }
+          </Grid>
           <Drawer anchor="right" 
             open={ this.state.drawer === "manage" } 
             onClose={() => {
@@ -322,7 +324,7 @@ class CharacterSpells extends Component<Props, State> {
 
   renderSpells() {
     return [
-      <Grid item key={0}>
+      <div key={0}>
         <div
           style={{
             display: "flex",
@@ -330,7 +332,7 @@ class CharacterSpells extends Component<Props, State> {
           }}>
           { this.renderSpellFilters() }
         </div>
-      </Grid>,
+      </div>,
       this.renderSpellGroups()
     ];
   }
@@ -428,15 +430,15 @@ class CharacterSpells extends Component<Props, State> {
     }
     // Render them by level
     return (
-      <Grid item key="spell_groups" container spacing={1} direction="column">
+      <div key="spell_groups">
         { Object.keys(this.state.levels).map((level, key) => {
           return (
-            <Grid item key={key} container spacing={1} direction="column">
+            <div key={key}>
               { this.renderSpellsForLevelHead(filtered, +level) }
-            </Grid>
+            </div>
           );
         })}
-      </Grid>
+      </div>
     );
   }
 
@@ -444,18 +446,20 @@ class CharacterSpells extends Component<Props, State> {
     const slots = this.props.obj.slots.filter(o => o.level === level);
     if (slots.length > 0 || (level === 0 && filtered.filter(o => o.level === level).length > 0)) {
       return [
-        <Grid item key={level} container spacing={0} direction="row"
+        <Grid key={level} container spacing={0} direction="row"
           style={{
             fontSize: "12px",
             fontWeight: "bold",
             color: "blue"
           }}>
           <Grid item xs={6}>
-            { level === 0 ? "Cantrip" : `${level}` }
+            <span style={{ margin: "4px" }}>
+              { level === 0 ? "Cantrip" : `${level}` }
+            </span>
           </Grid>
           { level > 0 && this.renderSlotsForLevel(level) }
         </Grid>,
-        <Grid item key={`${level}_header`} 
+        <Grid key={`${level}_header`} 
           style={{ fontWeight: "bold" }} 
           container spacing={0} 
           direction="row">
@@ -466,9 +470,9 @@ class CharacterSpells extends Component<Props, State> {
           <Grid item xs={3} style={{ display: "flex", justifyContent: "center" }}>Hit/DC</Grid>
           <Grid item xs={3} style={{ display: "flex", justifyContent: "center" }}>Effect</Grid>
         </Grid>,
-        <Grid item key={`${level}_body`}>
+        <div key={`${level}_body`}>
           { this.renderSpellsForLevelBody(filtered, level) }
-        </Grid>
+        </div>
       ];
     }
     return null;
