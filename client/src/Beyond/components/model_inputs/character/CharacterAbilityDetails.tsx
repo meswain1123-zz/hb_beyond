@@ -42,7 +42,7 @@ type PropsFromRedux = ConnectedProps<typeof connector>
 type Props = PropsFromRedux & {
   obj: Character;
   ability: CharacterAbility;
-  onChange: () => void;
+  onChange: (change_types: string[]) => void;
   onClose: () => void;
 }
 
@@ -112,8 +112,8 @@ class CharacterAbilityDetails extends Component<Props, State> {
                 obj={this.props.ability}
                 character={this.props.obj}
                 level={level}
-                onChange={() => {
-                  this.props.onChange();
+                onChange={(change_types: string[]) => {
+                  this.props.onChange(change_types);
                 }}
               />
             </Grid>
@@ -122,10 +122,9 @@ class CharacterAbilityDetails extends Component<Props, State> {
                 resource={this.props.ability}
                 character={this.props.obj}
                 onChange={() => {
-                  this.props.onChange();
+                  this.props.onChange(["Resources"]);
                 }}
               />
-              {/* { this.renderResourceCheckboxes() } */}
             </Grid>
           </Grid>
         );
@@ -138,8 +137,8 @@ class CharacterAbilityDetails extends Component<Props, State> {
                 obj={this.props.ability}
                 character={this.props.obj}
                 level={level}
-                onChange={() => {
-                  this.props.onChange();
+                onChange={(change_types: string[]) => {
+                  this.props.onChange(change_types);
                 }}
               />
             </Grid>
@@ -229,10 +228,9 @@ class CharacterAbilityDetails extends Component<Props, State> {
                     resource={slot}
                     character={this.props.obj}
                     onChange={() => {
-                      this.props.onChange();
+                      this.props.onChange(["Resources"]);
                     }}
                   />
-                  {/* { this.renderSlotsForLevel() } */}
                 </Grid>
               );
             })}
@@ -242,47 +240,6 @@ class CharacterAbilityDetails extends Component<Props, State> {
     }
     return null;
   }
-
-  // renderSlotsForLevel() {
-  //   const level = this.state.level === -1 ? this.props.ability.level : this.state.level;
-  //   const slots = this.props.obj.slots.filter(o => o.level === level);
-  //   const return_me: any[] = [];
-  //   slots.forEach(slot => {
-  //     let used = 0;
-  //     for (let i = 0; i < slot.total; ++i) {
-  //       let isUsed = false;
-  //       if (used < slot.used) {
-  //         isUsed = true;
-  //         used++;
-  //       }
-  //       return_me.push(
-  //         <CheckBox key={i}
-  //           name=""
-  //           value={isUsed}
-  //           onChange={(changed: boolean) => {
-  //             if (changed) {
-  //               slot.used++;
-  //             } else {
-  //               slot.used--;
-  //             }
-  //             this.setState({ }, () => {
-  //               this.api.updateObject(this.props.obj).then((res: any) => {
-  //                 if ((changed && slot.used === slot.total) || (!changed && slot.used === slot.total - 1)) {
-  //                   // Reload to make the cast buttons enabled/disabled appropriately
-  //                   this.setState({ reloading: true }, () => {
-  //                     this.setState({ reloading: false });
-  //                   });
-  //                 }
-  //               });
-  //             });
-  //           }}
-  //         />
-  //       );
-  //     }
-  //     return_me.push(<span key="slot_name">{ slot.slot_name }</span>);
-  //   });
-  //   return return_me;
-  // }
 
   renderAttacks() {
     const ability = this.props.ability;
@@ -334,55 +291,6 @@ class CharacterAbilityDetails extends Component<Props, State> {
       </Grid>
     );
   }
-
-  // renderResourceCheckboxes() {
-  //   const return_me: any[] = [];
-  //   const the_ability = this.props.ability.the_ability;
-  //   if (the_ability instanceof Ability && the_ability.resource_consumed) {
-  //     const obj = this.props.obj;
-  //     if (the_ability.resource_consumed === "Special") {
-  //       for (let i = 0; i < +this.props.ability.special_resource_amount; ++i) {
-  //         return_me.push(
-  //           <CheckBox key={i} name="" 
-  //             value={this.props.ability.special_resource_used > i} 
-  //             onChange={() => {
-  //               if (this.props.ability.special_resource_used > i) {
-  //                 this.props.ability.special_resource_used--;
-  //               } else {
-  //                 this.props.ability.special_resource_used++;
-  //               }
-  //               this.props.onChange();
-  //               this.setState({ });
-  //             }}
-  //           />
-  //         );
-  //       }
-  //     } else {
-  //       const resource_finder = obj.resources.filter(o => 
-  //         o.type_id === the_ability.resource_consumed);
-  //       if (resource_finder.length === 1) {
-  //         const resource = resource_finder[0];
-  //         for (let i = 0; i < resource.total; ++i) {
-  //           return_me.push(
-  //             <CheckBox key={i} name="" 
-  //               value={resource.used > i} 
-  //               onChange={() => {
-  //                 if (resource.used > i) {
-  //                   resource.used--;
-  //                 } else {
-  //                   resource.used++;
-  //                 }
-  //                 this.props.onChange();
-  //                 this.setState({ });
-  //               }}
-  //             />
-  //           );
-  //         }
-  //       }
-  //     }
-  //   }
-  //   return return_me;
-  // }
 }
 
 export default connector(CharacterAbilityDetails);

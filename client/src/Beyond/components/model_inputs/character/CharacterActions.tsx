@@ -42,7 +42,7 @@ type PropsFromRedux = ConnectedProps<typeof connector>
 
 type Props = PropsFromRedux & {
   obj: Character;
-  onChange: () => void;
+  onChange: (change_types: string[]) => void;
 }
 
 export interface State {
@@ -276,8 +276,8 @@ class CharacterActions extends Component<Props, State> {
                   obj={this.props.obj}
                   action={action}
                   group={group2}
-                  onChange={() => {
-                    this.props.onChange();
+                  onChange={(change_types: string[]) => {
+                    this.props.onChange(change_types);
                   }}
                 />
               );

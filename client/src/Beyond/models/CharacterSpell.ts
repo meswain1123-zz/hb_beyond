@@ -136,7 +136,7 @@ export class CharacterSpell {
         return "Action";
       } else if (casting_time === "BA") {
         return "Bonus Action";
-      } else if (casting_time === "BA") {
+      } else if (casting_time === "RA") {
         return "Reaction";
       } else {
         return casting_time;

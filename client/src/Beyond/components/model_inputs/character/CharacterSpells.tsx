@@ -9,7 +9,6 @@ import {
   Character,
   CharacterSpell,
   CharacterAbility,
-  CharacterSlot,
   Spell,
   INumHash,
 } from "../../../models";
@@ -18,8 +17,8 @@ import StringBox from "../../input/StringBox";
 import ToggleButtonBox from "../../input/ToggleButtonBox";
 import ButtonBox from "../../input/ButtonBox";
 import CharacterManageSpells from "./CharacterManageSpells";
-import CheckBox from '../../input/CheckBox';
 import CharacterAction from "./CharacterAction";
+import CharacterResourceBoxes from "./CharacterResourceBoxes";
 
 import API from "../../../utilities/smart_api";
 import { APIClass } from "../../../utilities/smart_api_class";
@@ -47,7 +46,7 @@ type PropsFromRedux = ConnectedProps<typeof connector>
 
 type Props = PropsFromRedux & {
   obj: Character;
-  onChange: () => void;
+  onChange: (change_types: string[]) => void;
 }
 
 export interface State {
@@ -215,107 +214,130 @@ class CharacterSpells extends Component<Props, State> {
     if (this.props.obj instanceof Character) {
       const classes = this.props.obj.classes.filter(o => o.spellcasting_ability !== "");
       return (
-        <Grid item xs={3} container spacing={0} direction="column">
-          <Grid item container spacing={1} direction="row">
-            <Grid item xs={3}>
-              &nbsp;
-            </Grid>
-            <Grid item xs={2}>
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "left"
-                }}>
-                <div className={"small_label gray"}>
-                  Modifier
-                </div>
-              </div>
-            </Grid>
-            <Grid item xs={4}>
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "left"
-                }}>
-                <div className={"small_label gray"}>
-                  Spell Attack
-                </div>
-              </div>
-            </Grid>
-            <Grid item xs={3}>
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "left"
-                }}>
-                <div className={"small_label gray"}>
-                  Save DC
-                </div>
-              </div>
-            </Grid>
-          </Grid>
-          { classes.map((char_class, key) => {
-            let modifier = this.props.obj.current_ability_scores.getModifier(char_class.spellcasting_ability);
-            if (!modifier) {
-              // Will never come here, but it makes the type happy.
-              modifier = 0;
-            }
-            return (
-              <Grid item key={key} container spacing={1} direction="row">
-                <Grid item xs={3}>
-                  { char_class.game_class && char_class.game_class.name }
+        <Grid item xs={3}>
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "center"
+            }}>
+            <span style={{ margin: "4px" }}>
+              <Grid container spacing={0} direction="column">
+                <Grid item>
+                  &nbsp;
                 </Grid>
-                <Grid item xs={2}>
+                { classes.map((char_class, key) => {
+                  return (
+                    <Grid item key={key}
+                      style={{
+                        display: "flex",
+                        justifyContent: "center"
+                      }}>
+                      { char_class.game_class && char_class.game_class.name }
+                    </Grid>
+                  );
+                })}
+              </Grid>
+            </span>
+            <span style={{ margin: "4px" }}>
+              <Grid container spacing={0} direction="column">
+                <Grid item>
                   <div
                     style={{
                       display: "flex",
                       justifyContent: "left"
                     }}>
-                    <div 
-                      style={{
-                        fontSize: "13px",
-                        fontWeight: "bold",
-                        textAlign: "center"
-                      }}>
-                      { this.data_util.add_plus_maybe(modifier) }
+                    <div className={"small_label gray"}>
+                      Modifier
                     </div>
                   </div>
                 </Grid>
-                <Grid item xs={4}>
+                { classes.map((char_class, key) => {
+                  let modifier = this.props.obj.current_ability_scores.getModifier(char_class.spellcasting_ability);
+                  if (!modifier) {
+                    // Will never come here, but it makes the type happy.
+                    modifier = 0;
+                  }
+                  return (
+                    <Grid item key={key}
+                      style={{
+                        display: "flex",
+                        justifyContent: "center",
+                        fontSize: "13px",
+                        fontWeight: "bold"
+                      }}>
+                        { this.data_util.add_plus_maybe(modifier) }
+                    </Grid>
+                  );
+                })}
+              </Grid>
+            </span>
+            <span style={{ margin: "4px" }}>
+              <Grid container spacing={0} direction="column">
+                <Grid item>
                   <div
                     style={{
                       display: "flex",
                       justifyContent: "left"
                     }}>
-                    <div
+                    <div className={"small_label gray"}>
+                      Spell Attack
+                    </div>
+                  </div>
+                </Grid>
+                { classes.map((char_class, key) => {
+                  let modifier = this.props.obj.current_ability_scores.getModifier(char_class.spellcasting_ability);
+                  if (!modifier) {
+                    // Will never come here, but it makes the type happy.
+                    modifier = 0;
+                  }
+                  return (
+                    <Grid item key={key}
                       style={{
+                        display: "flex",
+                        justifyContent: "center",
                         fontSize: "13px",
-                        fontWeight: "bold",
-                        textAlign: "center"
+                        fontWeight: "bold"
                       }}>
                       { this.data_util.add_plus_maybe(char_class.spell_attack) }
-                    </div>
-                  </div>
-                </Grid>
-                <Grid item xs={3}>
+                    </Grid>
+                  );
+                })}
+              </Grid>
+            </span>
+            <span style={{ margin: "4px" }}>
+              <Grid container spacing={0} direction="column">
+                <Grid item>
                   <div
                     style={{
                       display: "flex",
                       justifyContent: "left"
                     }}>
-                    <div
-                      style={{
-                        fontSize: "13px",
-                        fontWeight: "bold",
-                        textAlign: "center"
-                      }}>
-                      { char_class.spell_dc }
+                    <div className={"small_label gray"}>
+                      Save DC
                     </div>
                   </div>
                 </Grid>
+                { classes.map((char_class, key) => {
+                  let modifier = this.props.obj.current_ability_scores.getModifier(char_class.spellcasting_ability);
+                  if (!modifier) {
+                    // Will never come here, but it makes the type happy.
+                    modifier = 0;
+                  }
+                  return (
+                    <Grid item key={key}
+                      style={{
+                        display: "flex",
+                        justifyContent: "center",
+                        fontSize: "13px",
+                        fontWeight: "bold"
+                      }}>
+                      { char_class.spell_dc }
+                    </Grid>
+                  );
+                })}
               </Grid>
-            );
-          })}
+            </span>
+          </div>
         </Grid>
       );
     }
@@ -443,8 +465,7 @@ class CharacterSpells extends Component<Props, State> {
   }
 
   renderSpellsForLevelHead(filtered: (CharacterSpell | CharacterAbility)[], level: number) {
-    const slots = this.props.obj.slots.filter(o => o.level === level);
-    if (slots.length > 0 || (level === 0 && filtered.filter(o => o.level === level).length > 0)) {
+    if (this.state.view === `${level}` || filtered.filter(o => o.level === level).length > 0) {
       return [
         <Grid key={level} container spacing={0} direction="row"
           style={{
@@ -479,61 +500,26 @@ class CharacterSpells extends Component<Props, State> {
   }
 
   renderSlotsForLevel(level: number) {
-    const slots = this.props.obj.slots.filter(o => o.level === level);
-    const types = slots.map(o => o.slot_name).sort((a,b) => {return a.localeCompare(b)});
+    const slots = this.props.obj.slots.filter(o => o.level === level).sort((a,b) => {return a.slot_name.localeCompare(b.slot_name)});
     return (
       <Grid item xs={6}>
         <div style={{ float: "right" }}>
-          { types.map((slot_name, key) => {
+          { slots.map((slot, key) => {
             return (
               <span key={key}>
-                { this.renderSlotsForLevelForType(slots.filter(o => o.slot_name === slot_name)) }
-                <div style={{ display: "inline", fontSize: "15px", verticalAlign: "top" }}>{ slot_name }&nbsp;</div>
+                <CharacterResourceBoxes 
+                  resource={slot}
+                  character={this.props.obj}
+                  onChange={() => {
+                    this.props.onChange(["Resources"]);
+                  }}
+                />
               </span>
             );
           })}
         </div>
       </Grid>
     );
-  }
-
-  renderSlotsForLevelForType(slots: CharacterSlot[]) {
-    const return_me: any[] = [];
-    if (slots.length === 1) {
-      const slot = slots[0];
-      let used = 0;
-      for (let i = 0; i < slot.total; ++i) {
-        let isUsed = false;
-        if (used < slot.used) {
-          isUsed = true;
-          used++;
-        }
-        return_me.push(
-          <CheckBox key={i}
-            name=""
-            value={isUsed}
-            onChange={(changed: boolean) => {
-              if (changed) {
-                slot.used++;
-              } else {
-                slot.used--;
-              }
-              this.setState({ }, () => {
-                this.api.updateObject(this.props.obj).then((res: any) => {
-                  if ((changed && slot.used === slot.total) || (!changed && slot.used === slot.total - 1)) {
-                    // Reload to make the cast buttons enabled/disabled appropriately
-                    this.setState({ reloading: true }, () => {
-                      this.setState({ reloading: false });
-                    });
-                  }
-                });
-              });
-            }}
-          />
-        );
-      }
-    }
-    return return_me;
   }
 
   renderSpellsForLevelBody(filtered: (CharacterSpell | CharacterAbility)[], level: number) {
@@ -546,7 +532,8 @@ class CharacterSpells extends Component<Props, State> {
     } else {
       level_filtered = filtered.filter(o => 
         ((o.at_will || o.ritual_only) && o.level === level) ||
-        (!o.at_will && !o.ritual_only && o.level > 0 && o.level <= level)).sort((a,b) => { 
+        // (!o.at_will && !o.ritual_only && o.level > 0 && o.level <= level)).sort((a,b) => { 
+          (!o.at_will && !o.ritual_only && o.level > 0 && o.level === level)).sort((a,b) => { 
           return a.name < b.name ? -1 : 1;
         });
     }
@@ -562,11 +549,11 @@ class CharacterSpells extends Component<Props, State> {
             action={spell}
             group={""}
             show_casting_time
-            onChange={() => {
-              this.props.onChange();
-              this.setState({ reloading: true }, () => {
-                this.setState({ reloading: false });
-              });
+            onChange={(change_types: string[]) => {
+              this.props.onChange(change_types);
+              // this.setState({ reloading: true }, () => {
+              //   this.setState({ reloading: false });
+              // });
             }}
           />
         );

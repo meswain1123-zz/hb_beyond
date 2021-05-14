@@ -51,7 +51,7 @@ type Props = PropsFromRedux & {
   obj: CharacterAbility | CharacterSpecialSpell | CharacterSpell;
   simple: boolean; // When this is true then it just shows a single button, and when clicked does a popover for the rest
   level: number;
-  onChange: () => void;
+  onChange: (change_types: string[]) => void;
 }
 
 export interface State {
@@ -83,7 +83,7 @@ class CharacterCastButton extends Component<Props, State> {
     const level = this.props.level === -1 ? this.props.obj.level : this.props.level;
     if (obj instanceof CharacterAbility) {
       const the_ability = obj.the_ability;
-      const self_condition_ids = obj.self_condition();
+      // const self_condition_ids = obj.self_condition();
           
       if (the_ability && !(the_ability instanceof ItemAffectingAbility)) {
         if (the_ability.resource_consumed === "Slot") {
@@ -99,7 +99,7 @@ class CharacterCastButton extends Component<Props, State> {
                     <ButtonBox name={obj.use_string(this.props.character)}
                       disabled={obj.disabled(this.props.character, level)}
                       onClick={(event: React.MouseEvent<HTMLDivElement>) => {
-                        this.setState({ popoverAnchorEl: event.currentTarget });
+                        this.setPopoverAnchorEl(event.currentTarget);
                       }} 
                     />
                     { this.renderExtras() }
@@ -118,7 +118,7 @@ class CharacterCastButton extends Component<Props, State> {
                           <Clear style={{ cursor: "pointer" }} 
                             onClick={() => {
                               this.props.character.concentrating_on = null;
-                              this.props.onChange();
+                              this.updateCharacter(["Concentration"]);
                             }} 
                           />
                         </Grid>
@@ -150,7 +150,7 @@ class CharacterCastButton extends Component<Props, State> {
                   <ButtonBox name={obj.use_string(this.props.character)}
                     disabled={obj.disabled(this.props.character, level)}
                     onClick={(event: React.MouseEvent<HTMLDivElement>) => {
-                      this.setState({ popoverAnchorEl: event.currentTarget });
+                      this.setPopoverAnchorEl(event.currentTarget);
                     }} 
                   />
                   { this.renderExtras() }
@@ -169,7 +169,7 @@ class CharacterCastButton extends Component<Props, State> {
                         <Clear style={{ cursor: "pointer" }} 
                           onClick={() => {
                             this.props.character.concentrating_on = null;
-                            this.props.onChange();
+                            this.updateCharacter(["Concentration"]);
                           }} 
                         />
                       </Grid>
@@ -214,7 +214,7 @@ class CharacterCastButton extends Component<Props, State> {
                   <ButtonBox name={obj.use_string(this.props.character)}
                     disabled={obj.disabled(this.props.character, level)}
                     onClick={(event: React.MouseEvent<HTMLDivElement>) => {
-                      this.setState({ popoverAnchorEl: event.currentTarget });
+                      this.setPopoverAnchorEl(event.currentTarget);
                     }} 
                   />
                   { this.renderExtras() }
@@ -233,7 +233,7 @@ class CharacterCastButton extends Component<Props, State> {
                         <Clear style={{ cursor: "pointer" }} 
                           onClick={() => {
                             this.props.character.concentrating_on = null;
-                            this.props.onChange();
+                            this.updateCharacter(["Concentration"]);
                           }} 
                         />
                       </Grid>
@@ -270,7 +270,7 @@ class CharacterCastButton extends Component<Props, State> {
                   <ButtonBox name={obj.use_string(this.props.character)}
                     disabled={obj.disabled(this.props.character, level)}
                     onClick={(event: React.MouseEvent<HTMLDivElement>) => {
-                      this.setState({ popoverAnchorEl: event.currentTarget });
+                      this.setPopoverAnchorEl(event.currentTarget);
                     }} 
                   />
                   { this.renderExtras() }
@@ -289,7 +289,7 @@ class CharacterCastButton extends Component<Props, State> {
                         <Clear style={{ cursor: "pointer" }} 
                           onClick={() => {
                             this.props.character.concentrating_on = null;
-                            this.props.onChange();
+                            this.updateCharacter(["Concentration"]);
                           }} 
                         />
                       </Grid>
@@ -298,17 +298,7 @@ class CharacterCastButton extends Component<Props, State> {
                   <ButtonBox name="Use Anyway"
                     disabled={obj.disabled(this.props.character, level)}
                     onClick={() => {
-                      this.props.character.concentrating_on = obj;
-                      if (self_condition_ids.length > 0) {
-                        // Apply the conditions
-                        const character = this.props.character;
-                        self_condition_ids.forEach(cond_id => {
-                          character.conditions.push(cond_id);
-                        });
-                        if (character instanceof Character) {
-                          this.char_util.recalcAll(character);
-                        }
-                      }
+                      this.triggerAbilityEffect("Slots");
                     }} 
                   />
                 </div>
@@ -319,19 +309,7 @@ class CharacterCastButton extends Component<Props, State> {
               <ButtonBox name={obj.use_string(this.props.character)}
                 disabled={obj.disabled(this.props.character, level)}
                 onClick={() => {
-                  if (the_ability.concentration) {
-                    this.props.character.concentrating_on = obj;
-                  }
-                  if (self_condition_ids.length > 0) {
-                    // Apply the conditions
-                    const character = this.props.character;
-                    self_condition_ids.forEach(cond_id => {
-                      character.conditions.push(cond_id);
-                    });
-                    if (character instanceof Character) {
-                      this.char_util.recalcAll(character);
-                    }
-                  }
+                  this.triggerAbilityEffect("Slots");
                 }} 
               />
             );
@@ -341,7 +319,7 @@ class CharacterCastButton extends Component<Props, State> {
           const resources = this.props.character.resources.filter(o => the_ability.resource_consumed);
           
           if (resources.length === 1) {
-            const resource = resources[0];
+            // const resource = resources[0];
             if (the_ability.concentration && this.props.character.concentrating_on) {
               if (this.props.simple) {
                 return (
@@ -349,7 +327,7 @@ class CharacterCastButton extends Component<Props, State> {
                     <ButtonBox name={obj.use_string(this.props.character)}
                       disabled={obj.disabled(this.props.character, level)}
                       onClick={(event: React.MouseEvent<HTMLDivElement>) => {
-                        this.setState({ popoverAnchorEl: event.currentTarget });
+                        this.setPopoverAnchorEl(event.currentTarget);
                       }} 
                     />
                     { this.renderExtras() }
@@ -368,7 +346,7 @@ class CharacterCastButton extends Component<Props, State> {
                           <Clear style={{ cursor: "pointer" }} 
                             onClick={() => {
                               this.props.character.concentrating_on = null;
-                              this.props.onChange();
+                              this.updateCharacter(["Concentration"]);
                             }} 
                           />
                         </Grid>
@@ -388,10 +366,6 @@ class CharacterCastButton extends Component<Props, State> {
                 <ButtonBox name={obj.use_string(this.props.character)}
                   disabled={obj.disabled(this.props.character, level)}
                   onClick={() => {
-                    resource.used += +the_ability.amount_consumed;
-                    if (the_ability.concentration) {
-                      this.props.character.concentrating_on = obj;
-                    }
                     this.triggerAbilityEffect("Slots");
                   }} 
                 />
@@ -402,33 +376,25 @@ class CharacterCastButton extends Component<Props, State> {
       }
     } else {
       const spell = obj;
-      const self_condition_ids = spell.self_condition();
+      // const self_condition_ids = spell.self_condition();
       if (spell.level === 0 || (spell.at_will && level === spell.level)) {
         if (spell.spell && spell.spell.concentration) {
           if (this.props.character.concentrating_on) {
             return (
-              <ButtonBox name="At Will"
-                onClick={(event: React.MouseEvent<HTMLDivElement>) => {
-                  this.setState({ popoverAnchorEl: event.currentTarget });
-                }} 
-              />
+              <div>
+                <ButtonBox name="At Will"
+                  onClick={(event: React.MouseEvent<HTMLDivElement>) => {
+                    this.setPopoverAnchorEl(event.currentTarget);
+                  }} 
+                />
+                { this.renderExtras() }
+              </div>
             );
           } else {
             return (
               <ButtonBox name="At Will"
                 onClick={() => {
-                  this.props.character.concentrating_on = spell;
-                  if (self_condition_ids.length > 0) {
-                    // Apply the conditions
-                    const character = this.props.character;
-                    self_condition_ids.forEach(cond_id => {
-                      character.conditions.push(cond_id);
-                    });
-                    if (character instanceof Character) {
-                      this.char_util.recalcAll(character);
-                    }
-                  }
-                  this.updateCharacter();
+                  this.triggerAbilityEffect("Slots");
                 }} 
               />
             );
@@ -436,17 +402,10 @@ class CharacterCastButton extends Component<Props, State> {
         } else {
           return (
             <ButtonBox 
-              disabled={self_condition_ids.length === 0}
+              disabled={true}
               name="At Will"
               onClick={() => {
-                // Apply the conditions
-                const character = this.props.character;
-                self_condition_ids.forEach(cond_id => {
-                  character.conditions.push(cond_id);
-                });
-                if (character instanceof Character) {
-                  this.char_util.recalcAll(character);
-                }
+                this.triggerAbilityEffect("Slots");
               }}
             />
           );
@@ -454,17 +413,10 @@ class CharacterCastButton extends Component<Props, State> {
       } else if (spell.ritual_only) {
         return (
           <ButtonBox 
-            disabled={self_condition_ids.length === 0} 
+            disabled={true} 
             name="Ritual" 
             onClick={() => {
-              // Apply the conditions
-              const character = this.props.character;
-              self_condition_ids.forEach(cond_id => {
-                character.conditions.push(cond_id);
-              });
-              if (character instanceof Character) {
-                this.char_util.recalcAll(character);
-              }
+              this.triggerAbilityEffect("Slots");
             }}
           />
         );
@@ -487,31 +439,22 @@ class CharacterCastButton extends Component<Props, State> {
                 if (spell.spell && spell.spell.concentration) { 
                   if (this.props.character.concentrating_on) {
                     return (
-                      <ButtonBox name="Use"
-                        disabled={slot.used === slot.total}
-                        onClick={(event: React.MouseEvent<HTMLDivElement>) => {
-                          this.setState({ popoverAnchorEl: event.currentTarget });
-                        }} 
-                      />
+                      <div>
+                        <ButtonBox name="Use"
+                          disabled={slot.used === slot.total}
+                          onClick={(event: React.MouseEvent<HTMLDivElement>) => {
+                            this.setPopoverAnchorEl(event.currentTarget);
+                          }} 
+                        />
+                        { this.renderExtras() }
+                      </div>
                     );
                   } else {
                     return (
                       <ButtonBox name="Use"
                         disabled={slot.used === slot.total}
                         onClick={() => {
-                          slot.used++;
-                          this.props.character.concentrating_on = spell;
-                          if (self_condition_ids.length > 0) {
-                            // Apply the conditions
-                            const character = this.props.character;
-                            self_condition_ids.forEach(cond_id => {
-                              character.conditions.push(cond_id);
-                            });
-                            if (character instanceof Character) {
-                              this.char_util.recalcAll(character);
-                            }
-                          }
-                          this.updateCharacter();
+                          this.triggerAbilityEffect(slot.slot_name);
                         }} 
                       />
                     );
@@ -521,30 +464,22 @@ class CharacterCastButton extends Component<Props, State> {
                     <ButtonBox name="Use"
                       disabled={slot.used === slot.total}
                       onClick={() => {
-                        slot.used++;
-                        if (self_condition_ids.length > 0) {
-                          // Apply the conditions
-                          const character = this.props.character;
-                          self_condition_ids.forEach(cond_id => {
-                            character.conditions.push(cond_id);
-                          });
-                          if (character instanceof Character) {
-                            this.char_util.recalcAll(character);
-                          }
-                        }
-                        this.updateCharacter();
+                        this.triggerAbilityEffect(slot.slot_name);
                       }} 
                     />
                   );
                 }
               } else {
                 return (
-                  <ButtonBox name="Use"
-                    disabled={slots.filter(o => o.used < o.total).length === 0}
-                    onClick={(event: React.MouseEvent<HTMLDivElement>) => {
-                      this.setState({ popoverAnchorEl: event.currentTarget });
-                    }} 
-                  />
+                  <div>
+                    <ButtonBox name="Use"
+                      disabled={slots.filter(o => o.used < o.total).length === 0}
+                      onClick={(event: React.MouseEvent<HTMLDivElement>) => {
+                        this.setPopoverAnchorEl(event.currentTarget);
+                      }} 
+                    />
+                    { this.renderExtras() }
+                  </div>
                 );
               }
             } else {
@@ -555,7 +490,7 @@ class CharacterCastButton extends Component<Props, State> {
                       <ButtonBox name={obj.use_string(this.props.character)}
                         disabled={obj.disabled(this.props.character, level)}
                         onClick={(event: React.MouseEvent<HTMLDivElement>) => {
-                          this.setState({ popoverAnchorEl: event.currentTarget });
+                          this.setPopoverAnchorEl(event.currentTarget);
                         }} 
                       />
                       { this.renderExtras() }
@@ -574,7 +509,7 @@ class CharacterCastButton extends Component<Props, State> {
                             <Clear style={{ cursor: "pointer" }} 
                               onClick={() => {
                                 this.props.character.concentrating_on = null;
-                                this.props.onChange();
+                                this.updateCharacter(["Concentration"]);
                               }} 
                             />
                           </Grid>
@@ -607,31 +542,22 @@ class CharacterCastButton extends Component<Props, State> {
               if (spell.spell && spell.spell.concentration) { 
                 if (this.props.character.concentrating_on) {
                   return (
-                    <ButtonBox name={ spell.level < level ? "Upcast" : "Cast" }
-                      disabled={slot.used === slot.total}
-                      onClick={(event: React.MouseEvent<HTMLDivElement>) => {
-                        this.setState({ popoverAnchorEl: event.currentTarget });
-                      }} 
-                    />
+                    <div>
+                      <ButtonBox name={ spell.level < level ? "Upcast" : "Cast" }
+                        disabled={slot.used === slot.total}
+                        onClick={(event: React.MouseEvent<HTMLDivElement>) => {
+                          this.setPopoverAnchorEl(event.currentTarget);
+                        }} 
+                      />
+                      { this.renderExtras() }
+                    </div>
                   );
                 } else {
                   return (
                     <ButtonBox name={ spell.level < level ? "Upcast" : "Cast" }
                       disabled={slot.used === slot.total}
                       onClick={() => {
-                        slot.used++;
-                        this.props.character.concentrating_on = spell;
-                        if (self_condition_ids.length > 0) {
-                          // Apply the conditions
-                          const character = this.props.character;
-                          self_condition_ids.forEach(cond_id => {
-                            character.conditions.push(cond_id);
-                          });
-                          if (character instanceof Character) {
-                            this.char_util.recalcAll(character);
-                          }
-                        }
-                        this.updateCharacter();
+                        this.triggerAbilityEffect(slot.slot_name);
                       }} 
                     />
                   );
@@ -641,30 +567,22 @@ class CharacterCastButton extends Component<Props, State> {
                   <ButtonBox name={ spell.level < level ? "Upcast" : "Cast" }
                     disabled={slot.used === slot.total}
                     onClick={() => {
-                      slot.used++;
-                      if (self_condition_ids.length > 0) {
-                        // Apply the conditions
-                        const character = this.props.character;
-                        self_condition_ids.forEach(cond_id => {
-                          character.conditions.push(cond_id);
-                        });
-                        if (character instanceof Character) {
-                          this.char_util.recalcAll(character);
-                        }
-                      }
-                      this.updateCharacter();
+                      this.triggerAbilityEffect(slot.slot_name);
                     }} 
                   />
                 );
               }
             } else {
               return (
-                <ButtonBox name={ spell.level < level ? "Upcast" : "Cast" }
-                  disabled={slots.filter(o => o.used < o.total).length === 0}
-                  onClick={(event: React.MouseEvent<HTMLDivElement>) => {
-                    this.setState({ popoverAnchorEl: event.currentTarget });
-                  }} 
-                />
+                <div>
+                  <ButtonBox name={ spell.level < level ? "Upcast" : "Cast" }
+                    disabled={slots.filter(o => o.used < o.total).length === 0}
+                    onClick={(event: React.MouseEvent<HTMLDivElement>) => {
+                      this.setPopoverAnchorEl(event.currentTarget);
+                    }} 
+                  />
+                  { this.renderExtras() }
+                </div>
               );
             }
           }
@@ -677,31 +595,22 @@ class CharacterCastButton extends Component<Props, State> {
           if (spell.spell && spell.spell.concentration) { 
             if (this.props.character.concentrating_on) {
               return (
-                <ButtonBox name={ spell.level < level ? "Upcast" : "Cast" }
-                  disabled={slot.used === slot.total}
-                  onClick={(event: React.MouseEvent<HTMLDivElement>) => {
-                    this.setState({ popoverAnchorEl: event.currentTarget });
-                  }} 
-                />
+                <div>
+                  <ButtonBox name={ spell.level < level ? "Upcast" : "Cast" }
+                    disabled={slot.used === slot.total}
+                    onClick={(event: React.MouseEvent<HTMLDivElement>) => {
+                      this.setPopoverAnchorEl(event.currentTarget);
+                    }} 
+                  />
+                  { this.renderExtras() }
+                </div>
               );
             } else {
               return (
                 <ButtonBox name={ spell.level < level ? "Upcast" : "Cast" }
                   disabled={slot.used === slot.total}
                   onClick={() => {
-                    slot.used++;
-                    this.props.character.concentrating_on = spell;
-                    if (self_condition_ids.length > 0) {
-                      // Apply the conditions
-                      const character = this.props.character;
-                      self_condition_ids.forEach(cond_id => {
-                        character.conditions.push(cond_id);
-                      });
-                      if (character instanceof Character) {
-                        this.char_util.recalcAll(character);
-                      }
-                    }
-                    this.updateCharacter();
+                    this.triggerAbilityEffect(slot.slot_name);
                   }} 
                 />
               );
@@ -711,30 +620,22 @@ class CharacterCastButton extends Component<Props, State> {
               <ButtonBox name={ spell.level < level ? "Upcast" : "Cast" }
                 disabled={slot.used === slot.total}
                 onClick={() => {
-                  slot.used++;
-                  if (self_condition_ids.length > 0) {
-                    // Apply the conditions
-                    const character = this.props.character;
-                    self_condition_ids.forEach(cond_id => {
-                      character.conditions.push(cond_id);
-                    });
-                    if (character instanceof Character) {
-                      this.char_util.recalcAll(character);
-                    }
-                  }
-                  this.updateCharacter();
+                  this.triggerAbilityEffect(slot.slot_name);
                 }} 
               />
             );
           }
         } else {
           return (
-            <ButtonBox name={ spell.level < level ? "Upcast" : "Cast" }
-              disabled={slots.filter(o => o.used < o.total).length === 0}
-              onClick={(event: React.MouseEvent<HTMLDivElement>) => {
-                this.setState({ popoverAnchorEl: event.currentTarget });
-              }} 
-            />
+            <div>
+              <ButtonBox name={ spell.level < level ? "Upcast" : "Cast" }
+                disabled={slots.filter(o => o.used < o.total).length === 0}
+                onClick={(event: React.MouseEvent<HTMLDivElement>) => {
+                  this.setPopoverAnchorEl(event.currentTarget);
+                }} 
+              />
+              { this.renderExtras() }
+            </div>
           );
         }
       }
@@ -745,7 +646,6 @@ class CharacterCastButton extends Component<Props, State> {
   renderCastOptions() {
     const obj = this.props.obj;
     const level = this.props.level === -1 ? this.props.obj.level : this.props.level;
-    const self_condition_ids = obj.self_condition();
     if (obj instanceof CharacterSpecialSpell) {
       if (obj.spell) {
         if ((obj.level === 0 || obj.at_will) && obj.spell.concentration && this.props.character.concentrating_on) {
@@ -755,20 +655,9 @@ class CharacterCastButton extends Component<Props, State> {
               { (this.props.character.concentrating_on instanceof CharacterSpell || this.props.character.concentrating_on instanceof CharacterAbility) &&
                 <ViewSpell spell={this.props.character.concentrating_on} show_ritual />
               }
-              <ButtonBox name={ obj.level < level ? "Upcast Anyway" : "Cast Anyway" }
+              <ButtonBox name={ obj.level < level && obj.level !== 0 ? "Upcast Anyway" : "Cast Anyway" }
                 onClick={() => {
-                  this.props.character.concentrating_on = obj;
-                  if (self_condition_ids.length > 0) {
-                    // Apply the conditions
-                    const character = this.props.character;
-                    self_condition_ids.forEach(cond_id => {
-                      character.conditions.push(cond_id);
-                    });
-                    if (character instanceof Character) {
-                      this.char_util.recalcAll(character);
-                    }
-                  }
-                  this.updateCharacter();
+                  this.triggerAbilityEffect("Slots");
                 }} 
               />
             </div>
@@ -787,19 +676,7 @@ class CharacterCastButton extends Component<Props, State> {
                   <ButtonBox name={ obj.level < level ? "Upcast Anyway" : "Cast Anyway" }
                     disabled={slot.used === slot.total}
                     onClick={() => {
-                      slot.used++;
-                      this.props.character.concentrating_on = obj;
-                      if (self_condition_ids.length > 0) {
-                        // Apply the conditions
-                        const character = this.props.character;
-                        self_condition_ids.forEach(cond_id => {
-                          character.conditions.push(cond_id);
-                        });
-                        if (character instanceof Character) {
-                          this.char_util.recalcAll(character);
-                        }
-                      }
-                      this.updateCharacter();
+                      this.triggerAbilityEffect(slot.slot_name);
                     }} 
                   />
                 </div>
@@ -816,19 +693,7 @@ class CharacterCastButton extends Component<Props, State> {
                         <ButtonBox key={key} name={slot.slot_name}
                           disabled={slot.used === slot.total}
                           onClick={() => {
-                            slot.used++;
-                            this.props.character.concentrating_on = obj;
-                            if (self_condition_ids.length > 0) {
-                              // Apply the conditions
-                              const character = this.props.character;
-                              self_condition_ids.forEach(cond_id => {
-                                character.conditions.push(cond_id);
-                              });
-                              if (character instanceof Character) {
-                                this.char_util.recalcAll(character);
-                              }
-                            }
-                            this.updateCharacter();
+                            this.triggerAbilityEffect(slot.slot_name);
                           }} 
                         />
                       );
@@ -844,18 +709,7 @@ class CharacterCastButton extends Component<Props, State> {
                       <ButtonBox key={key} name={slot.slot_name}
                         disabled={slot.used === slot.total}
                         onClick={() => {
-                          slot.used++;
-                          if (self_condition_ids.length > 0) {
-                            // Apply the conditions
-                            const character = this.props.character;
-                            self_condition_ids.forEach(cond_id => {
-                              character.conditions.push(cond_id);
-                            });
-                            if (character instanceof Character) {
-                              this.char_util.recalcAll(character);
-                            }
-                          }
-                          this.updateCharacter();
+                          this.triggerAbilityEffect(slot.slot_name);
                         }} 
                       />
                     );
@@ -877,20 +731,9 @@ class CharacterCastButton extends Component<Props, State> {
               { (this.props.character.concentrating_on instanceof CharacterSpell || this.props.character.concentrating_on instanceof CharacterAbility) &&
                 <ViewSpell spell={this.props.character.concentrating_on} show_ritual />
               }
-              <ButtonBox name={ obj.level < level ? "Upcast Anyway" : "Cast Anyway" }
+              <ButtonBox name={ obj.level < level && obj.level !== 0 ? "Upcast Anyway" : "Cast Anyway" }
                 onClick={() => {
-                  this.props.character.concentrating_on = obj;
-                  if (self_condition_ids.length > 0) {
-                    // Apply the conditions
-                    const character = this.props.character;
-                    self_condition_ids.forEach(cond_id => {
-                      character.conditions.push(cond_id);
-                    });
-                    if (character instanceof Character) {
-                      this.char_util.recalcAll(character);
-                    }
-                  }
-                  this.updateCharacter();
+                  this.triggerAbilityEffect("Slots");
                 }} 
               />
             </div>
@@ -909,19 +752,7 @@ class CharacterCastButton extends Component<Props, State> {
                   <ButtonBox name={ obj.level < level ? "Upcast Anyway" : "Cast Anyway" }
                     disabled={slot.used === slot.total}
                     onClick={() => {
-                      slot.used++;
-                      this.props.character.concentrating_on = obj;
-                      if (self_condition_ids.length > 0) {
-                        // Apply the conditions
-                        const character = this.props.character;
-                        self_condition_ids.forEach(cond_id => {
-                          character.conditions.push(cond_id);
-                        });
-                        if (character instanceof Character) {
-                          this.char_util.recalcAll(character);
-                        }
-                      }
-                      this.updateCharacter();
+                      this.triggerAbilityEffect(slot.slot_name);
                     }} 
                   />
                 </div>
@@ -938,19 +769,7 @@ class CharacterCastButton extends Component<Props, State> {
                         <ButtonBox key={key} name={slot.slot_name}
                           disabled={slot.used === slot.total}
                           onClick={() => {
-                            slot.used++;
-                            this.props.character.concentrating_on = obj;
-                            if (self_condition_ids.length > 0) {
-                              // Apply the conditions
-                              const character = this.props.character;
-                              self_condition_ids.forEach(cond_id => {
-                                character.conditions.push(cond_id);
-                              });
-                              if (character instanceof Character) {
-                                this.char_util.recalcAll(character);
-                              }
-                            }
-                            this.updateCharacter();
+                            this.triggerAbilityEffect(slot.slot_name);
                           }} 
                         />
                       );
@@ -966,18 +785,7 @@ class CharacterCastButton extends Component<Props, State> {
                       <ButtonBox key={key} name={slot.slot_name}
                         disabled={slot.used === slot.total}
                         onClick={() => {
-                          slot.used++;
-                          if (self_condition_ids.length > 0) {
-                            // Apply the conditions
-                            const character = this.props.character;
-                            self_condition_ids.forEach(cond_id => {
-                              character.conditions.push(cond_id);
-                            });
-                            if (character instanceof Character) {
-                              this.char_util.recalcAll(character);
-                            }
-                          }
-                          this.updateCharacter();
+                          this.triggerAbilityEffect(slot.slot_name);
                         }} 
                       />
                     );
@@ -1008,19 +816,6 @@ class CharacterCastButton extends Component<Props, State> {
                     disabled={slot.used + +the_ability.amount_consumed > slot.total}
                     onClick={() => {
                       this.triggerAbilityEffect(slot.slot_name);
-                      // slot.used += +the_ability.amount_consumed;
-                      // this.props.character.concentrating_on = obj;
-                      // if (self_condition_ids.length > 0) {
-                      //   // Apply the conditions
-                      //   const character = this.props.character;
-                      //   self_condition_ids.forEach(cond_id => {
-                      //     character.conditions.push(cond_id);
-                      //   });
-                      //   if (character instanceof Character) {
-                      //     this.char_util.recalcAll(character);
-                      //   }
-                      // }
-                      // this.updateCharacter();
                     }} 
                   />
                 </div>
@@ -1041,19 +836,6 @@ class CharacterCastButton extends Component<Props, State> {
                           disabled={slot.used + +the_ability.amount_consumed > slot.total}
                           onClick={() => {
                             this.triggerAbilityEffect(slot.slot_name);
-                            // slot.used++;
-                            // this.props.character.concentrating_on = obj;
-                            // if (self_condition_ids.length > 0) {
-                            //   // Apply the conditions
-                            //   const character = this.props.character;
-                            //   self_condition_ids.forEach(cond_id => {
-                            //     character.conditions.push(cond_id);
-                            //   });
-                            //   if (character instanceof Character) {
-                            //     this.char_util.recalcAll(character);
-                            //   }
-                            // }
-                            // this.updateCharacter();
                           }} 
                         />
                       );
@@ -1070,18 +852,6 @@ class CharacterCastButton extends Component<Props, State> {
                         disabled={slot.used + +the_ability.amount_consumed > slot.total}
                         onClick={() => {
                           this.triggerAbilityEffect(slot.slot_name);
-                          // slot.used += +the_ability.amount_consumed;
-                          // if (self_condition_ids.length > 0) {
-                          //   // Apply the conditions
-                          //   const character = this.props.character;
-                          //   self_condition_ids.forEach(cond_id => {
-                          //     character.conditions.push(cond_id);
-                          //   });
-                          //   if (character instanceof Character) {
-                          //     this.char_util.recalcAll(character);
-                          //   }
-                          // }
-                          // this.updateCharacter();
                         }} 
                       />
                     );
@@ -1099,19 +869,6 @@ class CharacterCastButton extends Component<Props, State> {
                   disabled={obj.special_resource_used + +the_ability.amount_consumed > obj.special_resource_amount}
                   onClick={() => {
                     this.triggerAbilityEffect("Slots");
-                    // obj.special_resource_used += +the_ability.amount_consumed;
-                    // this.props.character.concentrating_on = obj;
-                    // if (self_condition_ids.length > 0) {
-                    //   // Apply the conditions
-                    //   const character = this.props.character;
-                    //   self_condition_ids.forEach(cond_id => {
-                    //     character.conditions.push(cond_id);
-                    //   });
-                    //   if (character instanceof Character) {
-                    //     this.char_util.recalcAll(character);
-                    //   }
-                    // }
-                    // this.updateCharacter();
                   }} 
                 />
               </div>
@@ -1129,17 +886,6 @@ class CharacterCastButton extends Component<Props, State> {
                   disabled={obj.special_resource_used + +the_ability.amount_consumed > obj.special_resource_amount}
                   onClick={() => {
                     this.triggerAbilityEffect("Slots");
-                    // this.props.character.concentrating_on = obj;
-                    // if (self_condition_ids.length > 0) {
-                    //   // Apply the conditions
-                    //   const character = this.props.character;
-                    //   self_condition_ids.forEach(cond_id => {
-                    //     character.conditions.push(cond_id);
-                    //   });
-                    //   if (character instanceof Character) {
-                    //     this.char_util.recalcAll(character);
-                    //   }
-                    // }
                   }} 
                 />
               </div>
@@ -1161,19 +907,6 @@ class CharacterCastButton extends Component<Props, State> {
                     disabled={resource.used + +the_ability.amount_consumed > resource.total}
                     onClick={() => {
                       this.triggerAbilityEffect("Slots");
-                      // resource.used += +the_ability.amount_consumed;
-                      // this.props.character.concentrating_on = obj;
-                      // if (self_condition_ids.length > 0) {
-                      //   // Apply the conditions
-                      //   const character = this.props.character;
-                      //   self_condition_ids.forEach(cond_id => {
-                      //     character.conditions.push(cond_id);
-                      //   });
-                      //   if (character instanceof Character) {
-                      //     this.char_util.recalcAll(character);
-                      //   }
-                      // }
-                      // this.updateCharacter();
                     }} 
                   />
                 </div>
@@ -1219,6 +952,7 @@ class CharacterCastButton extends Component<Props, State> {
       if (the_ability) {
         let go = false;
         const level = this.props.level === -1 ? this.props.obj.level : this.props.level;
+        const change_types: string[] = [];
         if (the_ability.resource_consumed === "Slot") {
           const slots = this.props.character.slots.filter(o => o.level === level && o.slot_name === slot_type);
               
@@ -1227,6 +961,7 @@ class CharacterCastButton extends Component<Props, State> {
             if (slot.used + +the_ability.amount_consumed <= slot.total) {
               slot.used += +the_ability.amount_consumed;
               go = true;
+              change_types.push("Resources");
             }
           }
         } else if (the_ability.resource_consumed === "Special") {
@@ -1244,6 +979,7 @@ class CharacterCastButton extends Component<Props, State> {
             if (resource.used + +the_ability.amount_consumed <= resource.total) {
               resource.used += +the_ability.amount_consumed;
               go = true;
+              change_types.push("Resources");
             }
           }
         }
@@ -1251,21 +987,24 @@ class CharacterCastButton extends Component<Props, State> {
           if (!(the_ability instanceof ItemAffectingAbility) && the_ability.concentration) {
             // Set the concentration
             this.props.character.concentrating_on = obj;
+            change_types.push("Concentration");
           }
           if (self_condition_ids.length > 0) {
             // Apply the conditions
             const character = this.props.character;
             self_condition_ids.forEach(cond_id => {
               character.conditions.push(cond_id);
+              change_types.push("Condition");
             });
-            this.char_util.recalcAll(character);
           }
           if (the_ability instanceof Ability && the_ability.effect.type === "Create Resource") {
             this.props.character.create_resource(the_ability.effect, obj.source_id, the_ability.slot_level, level);
+            change_types.push("Resources");
           } else if (the_ability instanceof SpellAsAbility && the_ability.spell && the_ability.spell.effect.type === "Create Resource") {
             this.props.character.create_resource(the_ability.spell.effect, obj.source_id, the_ability.slot_level, level);
+            change_types.push("Resources");
           }
-          this.updateCharacter();
+          this.updateCharacter(change_types);
         }
       }
     } else if (obj instanceof CharacterSpecialSpell) {
@@ -1273,8 +1012,7 @@ class CharacterCastButton extends Component<Props, State> {
       const ssf = spell.special_spell_feature;
       const level = this.props.level === -1 ? this.props.obj.level : this.props.level;
       let go = false;
-      console.log(spell);
-      console.log(ssf);
+      const change_types: string[] = [];
       if (ssf) {
         if (ssf.slot_override === "Only Special Resource") {
           if (spell.special_resource_used < spell.special_resource_max) {
@@ -1289,6 +1027,7 @@ class CharacterCastButton extends Component<Props, State> {
               slot.used++;
               spell.special_resource_used += 1;
               go = true;
+              change_types.push("Resources");
             }
           }
         } else if (ssf.slot_override === "Or Special Resource") { 
@@ -1303,6 +1042,7 @@ class CharacterCastButton extends Component<Props, State> {
               if (slot.used < slot.total) {
                 slot.used++;
                 go = true;
+                change_types.push("Resources");
               }
             }
           }
@@ -1314,6 +1054,7 @@ class CharacterCastButton extends Component<Props, State> {
             if (slot.used < slot.total) {
               slot.used++;
               go = true;
+              change_types.push("Resources");
             }
           }
         } else if (ssf.slot_override === "At Will") {
@@ -1329,6 +1070,7 @@ class CharacterCastButton extends Component<Props, State> {
               if (slot.used < slot.total) {
                 slot.used++;
                 go = true;
+                change_types.push("Resources");
               }
             }
           }
@@ -1343,49 +1085,57 @@ class CharacterCastButton extends Component<Props, State> {
           const character = this.props.character;
           self_condition_ids.forEach(cond_id => {
             character.conditions.push(cond_id);
+            change_types.push("Condition");
           });
-          if (character instanceof Character) {
-            this.char_util.recalcAll(character);
-          }
         }
         if (spell.spell && spell.spell.effect.type === "Create Resource") {
           this.props.character.create_resource(spell.spell.effect, obj.source_id, spell.level, level);
+          change_types.push("Resources");
         }
-        this.updateCharacter();
+        this.updateCharacter(change_types);
       }
     } else if (obj instanceof CharacterSpell) {
       const spell = obj;
       const level = this.props.level === -1 ? this.props.obj.level : this.props.level;
       const slots = this.props.character.slots.filter(o => o.level === level && o.slot_name === slot_type);
+      const change_types: string[] = [];
       if (slots.length === 1) {
         const slot = slots[0];
           
         slot.used++;
+        change_types.push("Resources");
       }
       if (spell.concentration) {
         this.props.character.concentrating_on = spell;
+        change_types.push("Concentration");
       }
       if (self_condition_ids.length > 0) {
         // Apply the conditions
         const character = this.props.character;
         self_condition_ids.forEach(cond_id => {
           character.conditions.push(cond_id);
+          change_types.push("Condition");
         });
-        if (character instanceof Character) {
-          this.char_util.recalcAll(character);
-        }
       }
       if (spell.spell && spell.spell.effect.type === "Create Resource") {
         this.props.character.create_resource(spell.spell.effect, obj.source_id, spell.level, level);
+        change_types.push("Resources");
       }
-      this.updateCharacter();
+      this.updateCharacter(change_types);
     }
+    this.setPopoverAnchorEl(null);
   }
 
-  updateCharacter() {
+  updateCharacter(change_types: string[]) {
     this.api.updateObject(this.props.character).then((res: any) => {
-      this.props.onChange();
+      if (change_types.length > 0) {
+        this.props.onChange(change_types);
+      }
     });
+  }
+
+  setPopoverAnchorEl(el: HTMLDivElement | null) {
+    this.setState({ popoverAnchorEl: el });
   }
 }
 

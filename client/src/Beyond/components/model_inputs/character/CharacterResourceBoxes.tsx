@@ -162,7 +162,7 @@ class CharacterResourceBoxes extends Component<Props, State> {
         }
       }
       if (this.props.show_type) {
-        return_me.push(<span key="slot_name">{ slot.slot_name }</span>);
+        return_me.push(<div key="slot_name" style={{ display: "inline", fontSize: "15px", verticalAlign: "top" }}>{ slot.slot_name }&nbsp;</div>);
       }
     } else if (this.props.resource instanceof CharacterAbility) {
       const ability = this.props.resource;

@@ -60,7 +60,7 @@ type Props = PropsFromRedux & {
   obj: Character;
   spell: CharacterSpell;
   level: number;
-  onChange: () => void;
+  onChange: (change_types: string[]) => void;
   onClose: () => void;
 }
 
@@ -175,11 +175,10 @@ class CharacterSpellDetails extends Component<Props, State> {
                     obj={this.props.spell}
                     character={this.props.obj}
                     level={level}
-                    onChange={() => {
-                      this.props.onChange();
+                    onChange={(change_types: string[]) => {
+                      this.props.onChange(change_types);
                     }}
                   />
-                  {/* { this.renderCastButton() } */}
                 </Grid>
                 <Grid item xs={6}>
                   { this.renderLevelOptions() }
@@ -256,7 +255,7 @@ class CharacterSpellDetails extends Component<Props, State> {
                           }
                           this.props.obj.minions.push(creature_instance);
                         }
-                        this.props.onChange();
+                        this.props.onChange(["Minions"]);
                       }}
                     />
                   </Grid>
@@ -297,7 +296,7 @@ class CharacterSpellDetails extends Component<Props, State> {
                                   this.props.spell.customizations.spell_attack = +value;
                                 } catch {}
                               }
-                              this.props.onChange();
+                              // this.props.onChange();
                             }}
                           />
                         </Grid>
@@ -314,7 +313,7 @@ class CharacterSpellDetails extends Component<Props, State> {
                                   this.props.spell.customizations.spell_attack_bonus = +value;
                                 } catch {}
                               }
-                              this.props.onChange();
+                              // this.props.onChange();
                             }}
                           />
                         </Grid>
@@ -331,7 +330,7 @@ class CharacterSpellDetails extends Component<Props, State> {
                                   this.props.spell.customizations.damage_bonus = +value;
                                 } catch {}
                               }
-                              this.props.onChange();
+                              // this.props.onChange();
                             }}
                           />
                         </Grid>
@@ -348,7 +347,7 @@ class CharacterSpellDetails extends Component<Props, State> {
                                   this.props.spell.customizations.spell_dc = +value;
                                 } catch {}
                               }
-                              this.props.onChange();
+                              // this.props.onChange();
                             }}
                           />
                         </Grid>
@@ -365,7 +364,7 @@ class CharacterSpellDetails extends Component<Props, State> {
                                   this.props.spell.customizations.spell_dc_bonus = +value;
                                 } catch {}
                               }
-                              this.props.onChange();
+                              // this.props.onChange();
                             }}
                           />
                         </Grid>
@@ -381,7 +380,7 @@ class CharacterSpellDetails extends Component<Props, State> {
                                   this.props.spell.customizations.display_as_attack = "true";
                                 } catch {}
                               }
-                              this.props.onChange();
+                              // this.props.onChange();
                             }}
                           />
                         </Grid>
@@ -391,7 +390,7 @@ class CharacterSpellDetails extends Component<Props, State> {
                             value={ this.props.spell._name }
                             onBlur={(value: string) => {
                               this.props.spell._name = value;
-                              this.props.onChange();
+                              // this.props.onChange();
                             }}
                           />
                         </Grid>
@@ -408,7 +407,7 @@ class CharacterSpellDetails extends Component<Props, State> {
                                   this.props.spell.customizations.notes = value;
                                 } catch {}
                               }
-                              this.props.onChange();
+                              // this.props.onChange();
                             }}
                           />
                         </Grid>
@@ -485,7 +484,7 @@ class CharacterSpellDetails extends Component<Props, State> {
               resource={spell}
               character={this.props.obj}
               onChange={() => {
-                this.props.onChange();
+                // this.props.onChange(["Resources"]);
               }}
             />
           );
@@ -533,10 +532,9 @@ class CharacterSpellDetails extends Component<Props, State> {
                         resource={slot}
                         character={this.props.obj}
                         onChange={() => {
-                          this.props.onChange();
+                          this.props.onChange(["Resources"]);
                         }}
                       />
-                      {/* { this.renderSlotsForLevel() } */}
                     </Grid>
                   );
                 })}
@@ -552,10 +550,9 @@ class CharacterSpellDetails extends Component<Props, State> {
                         resource={slot}
                         character={this.props.obj}
                         onChange={() => {
-                          this.props.onChange();
+                          this.props.onChange(["Resources"]);
                         }}
                       />
-                      {/* { this.renderSlotsForLevel() } */}
                     </Grid>
                   );
                 })}
@@ -608,10 +605,9 @@ class CharacterSpellDetails extends Component<Props, State> {
                       resource={slot}
                       character={this.props.obj}
                       onChange={() => {
-                        this.props.onChange();
+                        this.props.onChange(["Resources"]);
                       }}
                     />
-                    {/* { this.renderSlotsForLevel() } */}
                   </Grid>
                 );
               })}
@@ -627,10 +623,9 @@ class CharacterSpellDetails extends Component<Props, State> {
                       resource={slot}
                       character={this.props.obj}
                       onChange={() => {
-                        this.props.onChange();
+                        this.props.onChange(["Resources"]);
                       }}
                     />
-                    {/* { this.renderSlotsForLevel() } */}
                   </Grid>
                 );
               })}

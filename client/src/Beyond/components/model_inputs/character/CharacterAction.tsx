@@ -60,7 +60,7 @@ type Props = PropsFromRedux & {
   show_casting_time: boolean;
   action: any;
   group: string;
-  onChange: () => void; // For slots, resources, and concentration
+  onChange: (change_types: string[]) => void; // For slots, resources, and concentration
 }
 
 export interface State {
@@ -113,9 +113,9 @@ class CharacterAction extends Component<Props, State> {
   componentDidMount() {
   }
 
-  updateCharacter(reload: boolean) {
+  updateCharacter(change_types: string[]) {
     this.api.updateObject(this.props.obj).then((res: any) => {
-      if (reload) {
+      if (change_types.length > 0) {
         this.setState({ 
           popoverAnchorEl: null, 
           popoverAction: null, 
@@ -125,7 +125,7 @@ class CharacterAction extends Component<Props, State> {
           reloading: true 
         }, () => {
           this.setState({ reloading: false }, () => {
-            this.props.onChange();
+            this.props.onChange(change_types);
           });
         });
       } else {
@@ -135,8 +135,6 @@ class CharacterAction extends Component<Props, State> {
           popoverActionLevel: -1, 
           popoverWeapon: null,
           popoverMode: ""
-        }, () => {
-          this.props.onChange();
         });
       }
     });
@@ -152,12 +150,15 @@ class CharacterAction extends Component<Props, State> {
           <Grid item xs={1}>
             
           </Grid>
-          <Grid item xs={3} 
+          <Grid item xs={4} 
             container spacing={0} 
             direction="column">
             { weapon.name }
           </Grid>
-          <Grid item xs={2}>
+          <Grid item xs={1} style={{
+            display: "flex",
+            justifyContent: "center"
+          }}>
             { weapon.range === 0 ? "Melee" : `${weapon.range} feet` }
           </Grid>
           { this.renderWeaponAttacks(weapon, group2) }
@@ -184,12 +185,12 @@ class CharacterAction extends Component<Props, State> {
               obj={spell}
               character={this.props.obj}
               level={level2}
-              onChange={() => {
-                this.props.onChange();
+              onChange={(change_types: string[]) => {
+                this.props.onChange(change_types);
               }}
             />
           </Grid>
-          <Grid item xs={3} container spacing={0} direction="column" onClick={() => {
+          <Grid item xs={3} onClick={() => {
             this.setState({ 
               drawer: "details", 
               selected_spell: spell, 
@@ -198,20 +199,18 @@ class CharacterAction extends Component<Props, State> {
           }}>
             <ViewSpell spell={spell} show_ritual />
           </Grid>
-          { this.props.show_casting_time ? 
-            <Grid item xs={2} container spacing={0} direction="row">
-              <Grid item xs={6}>
-                { spell.casting_time_string }
-              </Grid>
-              <Grid item xs={6}>
-                { spell.range_string }
-              </Grid>
-            </Grid>
-          :
-            <Grid item xs={2}>
-              { spell.range_string }
-            </Grid>
-          }
+          <Grid item xs={1} style={{
+            display: "flex",
+            justifyContent: "center"
+          }}>
+            { this.props.show_casting_time && spell.casting_time_string }
+          </Grid>
+          <Grid item xs={1} style={{
+            display: "flex",
+            justifyContent: "center"
+          }}>
+            { spell.range_string }
+          </Grid>
           { this.renderSpellAttacks(spell, level2) }
           { this.renderExtras() }
         </Grid>
@@ -223,8 +222,8 @@ class CharacterAction extends Component<Props, State> {
             <CharacterCastButton
               obj={action}
               character={this.props.obj}
-              onChange={() => {
-                this.props.onChange();
+              onChange={(change_types: string[]) => {
+                this.props.onChange(change_types);
               }}
             />
           </Grid>
@@ -238,25 +237,26 @@ class CharacterAction extends Component<Props, State> {
               { action.source_name }
             </Grid>
           </Grid>
-          { this.props.show_casting_time && (action.the_ability instanceof Ability) ? 
-            <Grid item xs={2} container spacing={0} direction="row">
-              <Grid item xs={6}>
-                { action.the_ability.casting_time }
-              </Grid>
-              <Grid item xs={6}>
-                { action.the_ability.range }
-              </Grid>
-            </Grid>
-          : (action.the_ability instanceof Ability) ?
-            <Grid item xs={2}>
+          <Grid item xs={1} style={{
+            display: "flex",
+            justifyContent: "center"
+          }}>
+            { this.props.show_casting_time && action.casting_time_string }
+          </Grid>
+          { action.the_ability instanceof Ability ? 
+            <Grid item xs={1} style={{
+              display: "flex",
+              justifyContent: "center"
+            }}>
               { action.the_ability.range }
             </Grid>
-          : (action.the_ability instanceof SpellAsAbility) ?
-            <Grid item xs={2}>
+          : action.the_ability instanceof SpellAsAbility && 
+            <Grid item xs={1} style={{
+              display: "flex",
+              justifyContent: "center"
+            }}>
               { action.the_ability.spell && action.the_ability.spell.range }
             </Grid>
-          :
-            <Grid item xs={2}></Grid>
           }
           { this.renderSpellAttacks(action, action.level) }
           { this.renderExtras() }
@@ -277,8 +277,8 @@ class CharacterAction extends Component<Props, State> {
             obj={this.props.obj}
             spell={this.state.selected_spell}
             level={this.state.selected_level}
-            onChange={() => {
-              this.updateCharacter(true);
+            onChange={(change_types: string[]) => {
+              this.updateCharacter(change_types);
             }}
             onClose={() => {
               this.setState({ drawer: "", selected_spell: null, selected_level: null });
@@ -289,8 +289,8 @@ class CharacterAction extends Component<Props, State> {
           <CharacterAbilityDetails
             obj={this.props.obj}
             ability={this.state.selected_ability}
-            onChange={() => {
-              this.updateCharacter(true);
+            onChange={(change_types: string[]) => {
+              this.updateCharacter(change_types);
             }}
             onClose={() => {
               this.setState({ drawer: "", selected_ability: null });

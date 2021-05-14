@@ -431,6 +431,23 @@ export class CharacterAbility {
     return "Use";
   }
 
+  get casting_time_string(): string {
+    let the_spell = this.the_ability;
+    if (the_spell instanceof SpellAsAbility) {
+      const casting_time = the_spell.casting_time;
+      if (casting_time === "A") {
+        return "Action";
+      } else if (casting_time === "BA") {
+        return "Bonus Action";
+      } else if (casting_time === "RA") {
+        return "Reaction";
+      } else {
+        return casting_time;
+      }
+    }
+    return "";
+  }
+
   disabled(obj: Character, level: number = -1) {
     const the_ability = this.the_ability;
     if (the_ability instanceof Ability && the_ability.resource_consumed) {
