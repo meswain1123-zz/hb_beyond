@@ -89,12 +89,12 @@ export class StartEquipmentItem {
 }
 
 export class EquipmentPack extends ModelBase {
+  static data_type: string = "equipment_pack";
   cost: string;
   items: EquipmentPackItem[];
   
   constructor(obj?: any) {
     super(obj);
-    this.data_type = "equipment_pack";
     this.cost = obj ? obj.cost : "";
     this.items = [];
     if (obj && obj.items) {

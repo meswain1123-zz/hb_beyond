@@ -127,6 +127,7 @@ class MagicItemKeywordEdit extends Component<Props, State> {
         <FeatureBaseInput
           parent_name={this.state.obj.name}
           feature_base={this.state.expanded_feature_base} 
+          feature_bases={this.state.obj.features}
           onChange={(changed: FeatureBase) => {
             const obj = this.state.obj;
             const objFinder = obj.features.filter(o => o.id === changed.id);

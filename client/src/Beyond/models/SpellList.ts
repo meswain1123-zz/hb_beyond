@@ -5,11 +5,11 @@ import { ModelBase } from "./ModelBase";
  * 
  */
 export class SpellList extends ModelBase {
+  static data_type: string = "spell_list";
   spell_ids: string[];
 
   constructor(obj?: any) {
     super(obj);
-    this.data_type = "spell_list";
     this.spell_ids = obj ? [...obj.spell_ids] : [];
   }
 

@@ -28,11 +28,11 @@ import { ModelBase } from "./ModelBase";
  */
 
 export class Tool extends ModelBase {
+  static data_type: string = "tool";
   type: string;
 
   constructor(obj?: any) {
     super(obj);
-    this.data_type = "tool";
     this.type = obj ? `${obj.type}` : "";
   }
 

@@ -22,6 +22,7 @@ import { Feature } from "./Feature";
  */
 
 export class Condition extends ModelBase {
+  static data_type: string = "condition";
   immunity_exists: boolean;
   level: number;
   class_ids: string[];
@@ -30,7 +31,6 @@ export class Condition extends ModelBase {
   
   constructor(obj?: any) {
     super(obj);
-    this.data_type = "condition";
     this.immunity_exists = obj && obj.immunity_exists ? obj.immunity_exists : false;
     this.level = obj && obj.level ? obj.level : -1;
     this.class_ids = obj && obj.class_ids ? obj.class_ids : [];

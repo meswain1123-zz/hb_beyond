@@ -3,12 +3,12 @@ import { ModelBase } from "./ModelBase";
 import { FeatureBase } from "./FeatureBase";
 
 export class Subclass extends ModelBase {
+  static data_type: string = "subclass";
   game_class_id: string | null;
   features: FeatureBase[];
 
   constructor(obj?: any) {
     super(obj);
-    this.data_type = "subclass";
     this.game_class_id = obj ? `${obj.game_class_id}` : null;
     if (obj && obj.features && obj.features.length > 0) {
       if (obj.features[0] instanceof FeatureBase) {

@@ -30,12 +30,12 @@ import { FeatureBase } from "./FeatureBase";
  */
 
 export class SpecialFeature extends ModelBase {
+  static data_type: string = "special_feature";
   features: FeatureBase[];
   type: string;
 
   constructor(obj?: any) {
     super(obj);
-    this.data_type = "special_feature";
     this.features = [];
     if (obj && obj.features && obj.features.length > 0) {
       if (obj.features[0].feature_type) {

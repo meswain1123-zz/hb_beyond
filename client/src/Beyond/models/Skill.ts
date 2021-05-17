@@ -2,11 +2,11 @@
 import { ModelBase } from "./ModelBase";
 
 export class Skill extends ModelBase {
+  static data_type: string = "skill";
   use_ability_score: string;
 
   constructor(obj?: any) {
     super(obj);
-    this.data_type = "skill";
     this.use_ability_score = obj ? `${obj.use_ability_score}` : "";
   }
 

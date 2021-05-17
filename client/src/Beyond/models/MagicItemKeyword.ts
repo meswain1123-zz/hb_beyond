@@ -6,6 +6,7 @@ import { MagicItem } from "./MagicItem";
 
 
 export class MagicItemKeyword extends ModelBase {
+  static data_type: string = "magic_item_keyword";
   name_formula: string; // example: {base_item.name} of {feature_bases[0].feature_choices[0].selected_option.name} Resistance
   uses_specific: boolean;
   base_item_type: string;
@@ -21,7 +22,6 @@ export class MagicItemKeyword extends ModelBase {
 
   constructor(obj?: any) {
     super(obj);
-    this.data_type = "magic_item_keyword";
     this.name_formula = obj && obj.name_formula ? `${obj.name_formula}` : "";
     this.uses_specific = obj && obj.uses_specific ? obj.uses_specific : false;
     this.base_item_type = obj ? `${obj.base_item_type}` : "None";

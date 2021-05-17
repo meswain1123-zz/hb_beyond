@@ -4,6 +4,7 @@ import { FeatureBase } from "./FeatureBase";
 import { StartEquipmentChoice } from "./StartEquipment";
 
 export class GameClass extends ModelBase {
+  static data_type: string = "game_class";
   hit_die: number;
   subclass_level: number;
   subclasses_called: string;
@@ -15,7 +16,6 @@ export class GameClass extends ModelBase {
 
   constructor(obj?: any) {
     super(obj);
-    this.data_type = "game_class";
     this.hit_die = obj ? obj.hit_die : 6;
     this.subclass_level = obj ? obj.subclass_level : 1;
     this.subclasses_called = obj ? `${obj.subclasses_called}` : "Subclass";

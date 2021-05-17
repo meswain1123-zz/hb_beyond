@@ -2,6 +2,7 @@
 import { ModelBase } from "./ModelBase";
 
 export class User extends ModelBase {
+  static data_type: string = "user";
   email: string;
   username: string;
   password: string;
@@ -9,7 +10,6 @@ export class User extends ModelBase {
 
   constructor(obj?: any) {
     super(obj);
-    this.data_type = "user";
     this.email = obj ? `${obj.email}` : "";
     this.username = obj ? `${obj.username}` : "";
     this.password = obj ? `${obj.password}` : "";

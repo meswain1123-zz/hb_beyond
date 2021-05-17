@@ -133,6 +133,7 @@ class SpecialFeatureEdit extends Component<Props, State> {
         <FeatureBaseInput
           parent_name={this.state.obj.name}
           feature_base={this.state.expanded_feature_base} 
+          feature_bases={this.state.obj.features}
           onChange={(changed: FeatureBase) => {
             const obj = this.state.obj;
             const objFinder = obj.features.filter(o => o.id === changed.id);
@@ -184,44 +185,6 @@ class SpecialFeatureEdit extends Component<Props, State> {
             this.setState({ expanded_feature_base: null, child_names_valid });
           }}
         />
-        // <FeatureInput
-        //   label="Feature"
-        //   parent_name={this.state.obj.name}
-        //   base_name={null}
-        //   feature={this.state.expanded_feature} 
-        //   onChange={(changed: Feature) => {
-        //     const obj = this.state.obj;
-        //     const objFinder = obj.features.filter(o => o.id === changed.id);
-        //     if (objFinder.length === 1) {
-        //       const feature = objFinder[0];
-        //       feature.copy(changed);
-        //       this.setState({ obj });
-        //     }
-        //   }}
-        //   onDelete={() => {
-        //     if (this.state.expanded_feature) {
-        //       const id = this.state.expanded_feature.id;
-        //       const obj = this.state.obj;
-        //       const features = obj.features.filter(o => o.id !== id);
-        //       features.filter(o => o.id > id).forEach(o => {
-        //         o.id--;
-        //       });
-        //       obj.features = features;
-        //       this.setState({ expanded_feature: null, obj });
-        //     }
-        //   }}
-        //   onDone={() => {
-        //     let child_names_valid = true;
-        //     for (let i = 0; i < this.state.obj.features.length; i++) {
-        //       const fb = this.state.obj.features[i];
-        //       if (fb.name === "") {
-        //         child_names_valid = false;
-        //         break;
-        //       }
-        //     }
-        //     this.setState({ expanded_feature: null, child_names_valid });
-        //   }}
-        // />
       );
     } else { 
       let { id } = this.props.match.params;

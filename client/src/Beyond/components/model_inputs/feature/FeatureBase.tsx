@@ -13,11 +13,13 @@ import {
   Feature, 
   FeatureChoice,
   TemplateBase,
-  FeatureBaseTemplate 
+  FeatureBaseTemplate,
+  IStringHash
 } from "../../../models";
 
 import StringBox from "../../input/StringBox";
 import SelectStringBox from "../../input/SelectStringBox";
+import CheckBox from "../../input/CheckBox";
 
 import FeatureListInput from "./FeatureList";
 import FeatureInput from "./FeatureMain";
@@ -49,6 +51,7 @@ type PropsFromRedux = ConnectedProps<typeof connector>
 type Props = PropsFromRedux & {
   parent_name: string;
   feature_base: FeatureBase;
+  feature_bases: FeatureBase[];
   onChange: (feature_base: FeatureBase) => void; 
   onDelete: () => void; 
   onDone: () => void;
@@ -250,6 +253,33 @@ class FeatureBaseInput extends Component<Props, State> {
             />
           </Grid>
           <Grid item>
+            <CheckBox 
+              value={this.state.feature_base.display} 
+              name="Display"
+              onChange={(value: boolean) => {
+                const feature_base = this.state.feature_base;
+                feature_base.display = value;
+                this.setState({ feature_base });
+              }}
+            />
+          </Grid>
+          <Grid item>
+            <CheckBox 
+              value={this.state.feature_base.optional} 
+              name="Optional"
+              onChange={(value: boolean) => {
+                const feature_base = this.state.feature_base;
+                feature_base.optional = value;
+                this.setState({ feature_base });
+              }}
+            />
+          </Grid>
+          { this.state.feature_base.optional && 
+            <Grid item>
+              { this.render_other_feature_base_select() }
+            </Grid>
+          }
+          <Grid item>
             <StringBox 
               value={`${this.state.feature_base.level}`} 
               name={ (this.state.feature_base.parent_type === "Class" || this.state.feature_base.parent_type === "Subclass") ? "Class Level" : "Character Level" }
@@ -356,6 +386,27 @@ class FeatureBaseInput extends Component<Props, State> {
         </Grid>
       );
     }
+  }
+
+  render_other_feature_base_select() {
+    const option_map: IStringHash = {
+      "None": ""
+    };
+    this.props.feature_bases.filter(o => !o.optional).forEach(fb => {
+      option_map[fb.name] = fb.true_id;
+    });
+    return (
+      <SelectStringBox
+        name="Replace Other Feature"
+        option_map={option_map}
+        value={this.state.feature_base.replaces_feature_base_id}
+        onChange={(changed: string) => {
+          const feature_base = this.state.feature_base;
+          feature_base.replaces_feature_base_id = changed;
+          this.setState({ feature_base }); 
+        }}
+      />
+    );
   }
 }
 

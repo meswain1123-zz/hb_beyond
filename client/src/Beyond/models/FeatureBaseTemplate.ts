@@ -12,6 +12,9 @@ export class FeatureBaseTemplate extends TemplateBase {
   prevent_duplicate_choices: boolean;
   multiclassing: number;
   required_condition_ids: string[];
+  display: boolean;
+  optional: boolean;
+  replaces_feature_base_id: string;
 
   constructor(obj?: any) {
     super(obj);
@@ -36,6 +39,9 @@ export class FeatureBaseTemplate extends TemplateBase {
     this.prevent_duplicate_choices = obj ? obj.prevent_duplicate_choices : false;
     this.multiclassing = obj && obj.multiclassing ? obj.multiclassing : 0;
     this.required_condition_ids = obj && obj.required_condition_ids ? obj.required_condition_ids : ["All"];
+    this.display = obj && obj.display ? obj.display : false;
+    this.optional = obj && obj.optional ? obj.optional : false;
+    this.replaces_feature_base_id = obj && obj.replaces_feature_base_id ? obj.replaces_feature_base_id : "";
   }
 
   toDBObj = () => {
@@ -58,7 +64,10 @@ export class FeatureBaseTemplate extends TemplateBase {
       feature_choices,
       prevent_duplicate_choices: this.prevent_duplicate_choices,
       multiclassing: this.multiclassing,
-      required_condition_ids: this.required_condition_ids
+      required_condition_ids: this.required_condition_ids,
+      display: this.display,
+      optional: this.optional,
+      replaces_feature_base_id: this.replaces_feature_base_id
     };
   }
 
@@ -74,6 +83,9 @@ export class FeatureBaseTemplate extends TemplateBase {
     this.prevent_duplicate_choices = copyMe.prevent_duplicate_choices;
     this.multiclassing = copyMe.multiclassing;
     this.required_condition_ids = copyMe.required_condition_ids;
+    this.display = copyMe.display;
+    this.optional = copyMe.optional;
+    this.replaces_feature_base_id = copyMe.replaces_feature_base_id;
   }
 
   copyObj(copyMe: FeatureBase): void {
@@ -94,6 +106,9 @@ export class FeatureBaseTemplate extends TemplateBase {
     this.prevent_duplicate_choices = copyMe.prevent_duplicate_choices;
     this.multiclassing = copyMe.multiclassing;
     this.required_condition_ids = copyMe.required_condition_ids;
+    this.display = copyMe.display;
+    this.optional = copyMe.optional;
+    this.replaces_feature_base_id = copyMe.replaces_feature_base_id;
   }
 
   clone(): FeatureBaseTemplate {

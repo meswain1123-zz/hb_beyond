@@ -3,12 +3,12 @@ import { ModelBase } from "./ModelBase";
 
 
 export class ArmorType extends ModelBase {
+  static data_type: string = "armor_type";
   dex_bonus_max: number | null; // Light = null, Medium = 2, Heavy = 0
   stealth_disadvantage: boolean;
 
   constructor(obj?: any) {
     super(obj);
-    this.data_type = "armor_type";
     this.dex_bonus_max = obj?.dex_bonus_max;
     this.stealth_disadvantage = obj && obj.stealth_disadvantage ? obj.stealth_disadvantage : true;
   }

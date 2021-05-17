@@ -2,11 +2,7 @@
 import { ModelBase } from "./ModelBase";
 
 export class Sense extends ModelBase {
-
-  constructor(obj?: any) {
-    super(obj);
-    this.data_type = "sense";
-  }
+  static data_type: string = "sense";
 
   toDBObj = () => {
     return {

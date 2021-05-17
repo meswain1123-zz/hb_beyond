@@ -31,6 +31,8 @@ import {
 
 
 export class Character extends ModelBase {
+  static data_type: string = "character";
+  static always_store: boolean = false;
   connected: boolean;
   image_url: string;
   race: CharacterRace;
@@ -142,7 +144,6 @@ export class Character extends ModelBase {
 
   constructor(obj?: any) {
     super(obj);
-    this.data_type = "character";
     this.image_url = obj && obj.image_url ? obj.image_url : "";
     this.inspiration = obj && obj.inspiration ? obj.inspiration : 0;
     this.race = obj ? new CharacterRace(obj.race) : new CharacterRace();

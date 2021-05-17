@@ -9,12 +9,12 @@ import { LanguageFeature } from "./LanguageFeature";
 
 
 export class Subrace extends ModelBase {
+  static data_type: string = "subrace";
   features: FeatureBase[];
   race_id: string;
 
   constructor(obj?: any) {
     super(obj);
-    this.data_type = "subrace";
     this.features = [];
     if (obj && obj.features && obj.features.length > 0) {
       obj.features.forEach((o: any) => {

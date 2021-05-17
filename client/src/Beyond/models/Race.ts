@@ -10,6 +10,7 @@ import { LanguageFeature } from "./LanguageFeature";
 
 
 export class Race extends ModelBase {
+  static data_type: string = "race";
   features: FeatureBase[];
   age: string;
   alignment: string;
@@ -20,7 +21,6 @@ export class Race extends ModelBase {
 
   constructor(obj?: any) {
     super(obj);
-    this.data_type = "race";
     this.features = [];
     if (obj && obj.features && obj.features.length > 0) {
       for (let i = 0; i < obj.features.length; i++) {

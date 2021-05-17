@@ -290,7 +290,7 @@ class AbilityPotenceCreaturesInput extends Component<Props, State> {
               }
               { option.true_id === this.state.expanded_option && !option.custom && option.specific &&
                 <Grid item xs={4}>
-                  <SelectCreatureBox 
+                  {/* <SelectCreatureBox 
                     value={option.specific_id} 
                     name="Specific Creature"
                     creature_types={[option.creature_type]}
@@ -302,7 +302,7 @@ class AbilityPotenceCreaturesInput extends Component<Props, State> {
                       const obj = this.props.obj;
                       this.props.onChange(obj);
                     }}
-                  />
+                  /> */}
                 </Grid>
               }
               { option.true_id === this.state.expanded_option && option.custom && option.custom_stat_block && 

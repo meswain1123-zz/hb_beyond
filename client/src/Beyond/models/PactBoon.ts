@@ -9,11 +9,11 @@ import { Feature } from "./Feature";
  */
 
 export class PactBoon extends ModelBase {
+  static data_type: string = "pact_boon";
   features: Feature[];
 
   constructor(obj?: any) {
     super(obj);
-    this.data_type = "pact_boon";
     if (obj && obj.features && obj.features.length > 0) {
       if (obj.features[0] instanceof Feature) {
         this.features = obj ? [...obj.features] : [];

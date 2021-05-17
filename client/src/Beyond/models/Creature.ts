@@ -19,6 +19,8 @@ import { CreatureTemplate } from "./CreatureTemplate";
 import DataUtilities from "../utilities/data_utilities";
 
 export class Creature extends ModelBase {
+  static data_type: string = "creature";
+  static always_store: boolean = false;
   imported_object: any;
   connected: boolean;
   image_url: string;
@@ -68,7 +70,6 @@ export class Creature extends ModelBase {
     super(obj);
     this.imported_object = obj && obj.imported_object ? obj.imported_object : null;
     const data_util = DataUtilities.getInstance();
-    this.data_type = "creature";
     this.creature_type = obj ? (obj.creature_type ? data_util.capitalize_firsts(obj.creature_type) : data_util.capitalize_firsts(obj.type)) : "";
     this.subtype = obj ? data_util.capitalize_firsts(obj.subtype) : "";
     this.challenge_rating = obj ? obj.challenge_rating : 0;

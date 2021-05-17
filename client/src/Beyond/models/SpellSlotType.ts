@@ -8,6 +8,7 @@ import { ModelBase, SpellSlotTableEntry } from ".";
  */
 
 export class SpellSlotType extends ModelBase {
+  static data_type: string = "spell_slot_type";
   refresh_rule: string;
   slot_name: string;
   entries: SpellSlotTableEntry[];
@@ -15,7 +16,6 @@ export class SpellSlotType extends ModelBase {
   
   constructor(obj?: any) {
     super(obj);
-    this.data_type = "spell_slot_type";
     this.refresh_rule = obj ? obj.refresh_rule : "Long Rest";
     this.slot_name = obj && obj.slot_name ? obj.slot_name : "Slots";
     this.entries = [];

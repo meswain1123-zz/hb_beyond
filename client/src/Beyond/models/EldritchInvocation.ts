@@ -9,13 +9,13 @@ import { Feature } from "./Feature";
  */
 
 export class EldritchInvocation extends ModelBase {
+  static data_type: string = "eldritch_invocation";
   features: Feature[];
   level: number;
   pact: string;
 
   constructor(obj?: any) {
     super(obj);
-    this.data_type = "eldritch_invocation";
     this.features = [];
     if (obj && obj.features && obj.features.length > 0) {
       obj.features.forEach((o: any) => {

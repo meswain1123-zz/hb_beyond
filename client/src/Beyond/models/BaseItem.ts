@@ -5,6 +5,7 @@ import {
 } from ".";
 
 export class BaseItem extends ModelBase {
+  static data_type: string = "base_item";
   item_type: string;
   weight: number; // in lbs
   cost: number;
@@ -34,18 +35,17 @@ export class BaseItem extends ModelBase {
 
   constructor(obj?: any) {
     super(obj);
-    this.data_type = "base_item";
-    this.item_type = obj ? `${obj.item_type}` : "Other";
+    this.item_type = obj ? obj.item_type : "Other";
     this.weight = obj ? +obj.weight : 0;
     this.cost = obj && obj.cost ? +obj.cost : 0;
-    this.worn_type = obj ? `${obj.worn_type}` : "None";
+    this.worn_type = obj ? obj.worn_type : "None";
 
     this.armor_type_id = obj && obj.armor_type_id ? `${obj.armor_type_id}` : "";
     this.base_armor_class = obj ? obj.base_armor_class : 10;
     this.armor_type_name = "";
 
     this.weapon_keyword_ids = obj ? [...obj.weapon_keyword_ids] : [];
-    this.damage_type = obj && obj.damage_type ? `${obj.damage_type}` : "Bludgeoning";
+    this.damage_type = obj && obj.damage_type ? obj.damage_type : "Bludgeoning";
     this.attack_damages = []; 
     if (obj && obj.attack_damages) {
       obj.attack_damages.forEach((d: any) => {
@@ -85,7 +85,7 @@ export class BaseItem extends ModelBase {
     this.range2 = obj ? obj.range2 : 0;
     this.weapon_keyword_names = [];
 
-    this.tool_id = obj && obj.tool_id ? `${obj.tool_id}` : "";
+    this.tool_id = obj && obj.tool_id ? obj.tool_id : "";
     
     this.stackable = obj ? obj.stackable : false;
     this.bundle_size = obj ? obj.bundle_size : 0;

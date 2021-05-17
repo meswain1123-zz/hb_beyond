@@ -4,12 +4,12 @@ import { ModelBase } from "./ModelBase";
 import { StartEquipmentChoice } from "./StartEquipment";
 
 export class Background extends ModelBase {
+  static data_type: string = "background";
   features: FeatureBase[];
   start_equipment: StartEquipmentChoice[];
 
   constructor(obj?: any) {
     super(obj);
-    this.data_type = "background";
     this.features = [];
     if (obj && obj.features && obj.features.length > 0) {
       for (let i = 0; i < obj.features.length; i++) {

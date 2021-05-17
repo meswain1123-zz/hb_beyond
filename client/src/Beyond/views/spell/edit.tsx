@@ -15,7 +15,7 @@ import {
   Spell, 
   TemplateBase,
   SpellTemplate,
-  AbilityEffect
+  AbilityEffect,
 } from "../../models";
 import StringBox from "../../components/input/StringBox";
 

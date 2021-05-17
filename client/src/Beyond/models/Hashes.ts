@@ -1,4 +1,5 @@
 
+import { ModelBase } from ".";
 
 export interface IStringHash {
   [details: string] : string;
@@ -27,3 +28,7 @@ export interface IStringNumOrStringHash {
 export interface IStringStringNumHash {
   [details: string] : IStringNumHash;
 } 
+
+export interface SmartHash {
+  [details: string] : ModelBase[];
+}

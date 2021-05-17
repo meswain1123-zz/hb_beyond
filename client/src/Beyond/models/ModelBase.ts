@@ -3,14 +3,14 @@ export abstract class ModelBase {
   _id: string;
   name: string;
   description: string;
-  data_type: string;
+  static data_type: string = "";
+  static always_store: boolean = false;
 
   constructor(
     obj?: any) {
     this._id = obj ? obj._id : "";
     this.name = obj ? `${obj.name}` : "";
     this.description = obj ? `${obj.description}` : "";
-    this.data_type = "";
   }
 
   toDBObj = () => {

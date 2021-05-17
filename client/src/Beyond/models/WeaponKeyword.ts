@@ -9,6 +9,7 @@ import { ModelBase } from "./ModelBase";
  * Monk, Hex-weapon, Armorer-weapon.
  */
 export class WeaponKeyword extends ModelBase {
+  static data_type: string = "weapon_keyword";
   use_ability_score: string | null; 
   // Simple and Martial = STR, Range = DEX, Finesse = STR|DEX, 
   // Hex-weapon = CHA, Armorer-weapon = INT 
@@ -20,8 +21,7 @@ export class WeaponKeyword extends ModelBase {
 
   constructor(obj?: any) {
     super(obj);
-    this.data_type = "weapon_keyword";
-    this.use_ability_score = obj ? `${obj.use_ability_score}` : "";
+    this.use_ability_score = obj ? obj.use_ability_score : "";
     this.display_in_equipment = obj && obj.display_in_equipment ? obj.display_in_equipment : false;
     this.can_two_weapon_fight = obj && obj.can_two_weapon_fight ? obj.can_two_weapon_fight : false;
   }

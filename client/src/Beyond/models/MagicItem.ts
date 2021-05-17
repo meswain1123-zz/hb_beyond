@@ -8,6 +8,7 @@ import {
 
 
 export class MagicItem extends ModelBase {
+  static data_type: string = "magic_item";
   base_item_id: string | null;
   rarity: string; // Common, Uncommon, Rare, Very-Rare, Legendary
   attunement: boolean;
@@ -20,12 +21,11 @@ export class MagicItem extends ModelBase {
 
   constructor(obj?: any) {
     super(obj);
-    this.data_type = "magic_item";
     this.base_item_id = obj?.base_item_id;
-    this.rarity = obj ? `${obj.rarity}` : "Common";
+    this.rarity = obj ? obj.rarity : "Common";
     this.attunement = obj ? obj.attunement : false;
     this.charges = obj ? obj.charges : 0;
-    this.charge_refresh_rule = obj ? `${obj.charge_refresh_rule}` : "";
+    this.charge_refresh_rule = obj ? obj.charge_refresh_rule : "";
     if (obj && obj.features && obj.features.length > 0) {
       if (obj.features[0] instanceof FeatureBase) {
         this.features = obj ? [...obj.features] : [];

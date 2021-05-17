@@ -3,13 +3,13 @@ import { ModelBase } from "./ModelBase";
 
 
 export class Language extends ModelBase {
+  static data_type: string = "language";
   type: string; // Standard, Exotic, or Special
   script: string;
   typical_speakers: string[];
 
   constructor(obj?: any) {
     super(obj);
-    this.data_type = "language";
     this.type = obj && obj.type ? `${obj.type}` : "Standard";
     this.script = obj && obj.script ? `${obj.script}` : "";
     this.typical_speakers = obj && obj.typical_speakers ? obj.typical_speakers : [];

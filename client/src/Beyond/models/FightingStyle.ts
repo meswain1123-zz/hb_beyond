@@ -3,11 +3,11 @@ import { ModelBase } from "./ModelBase";
 import { Feature } from "./Feature";
 
 export class FightingStyle extends ModelBase {
+  static data_type: string = "fighting_style";
   features: Feature[];
 
   constructor(obj?: any) {
     super(obj);
-    this.data_type = "fighting_style";
     this.features = [];
     if (obj && obj.features && obj.features.length > 0) {
       obj.features.forEach((o: any) => {

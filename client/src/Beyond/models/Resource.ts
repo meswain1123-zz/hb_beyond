@@ -7,12 +7,12 @@ import { ModelBase } from "./ModelBase";
  * refresh_rule is when this refreshes (generally short or long).
  */
 export class Resource extends ModelBase {
+  static data_type: string = "resource";
   refresh_rule: string;
   default_dice_size: number;
 
   constructor(obj?: any) {
     super(obj);
-    this.data_type = "resource";
     this.refresh_rule = obj ? `${obj.refresh_rule}` : "";
     this.default_dice_size = obj ? obj.default_dice_size : 1;
   }

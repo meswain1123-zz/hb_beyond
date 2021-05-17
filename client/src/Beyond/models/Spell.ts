@@ -37,6 +37,8 @@ import {
  * 
  */
 export class Spell extends ModelBase {
+  static data_type: string = "spell";
+  static always_store: boolean = false;
   saving_throw_ability_score: string | null; // Ability Score saving throw the target(s) have to make
   effect: AbilityEffect; // Formula for how much damage/healing to do
   effect_2: AbilityEffect; // Some abilities have a second (like Ice Knife or Booming Blade or things that do different types of damage)
@@ -55,7 +57,6 @@ export class Spell extends ModelBase {
   
   constructor(obj?: any) {
     super(obj);
-    this.data_type = "spell";
     this.saving_throw_ability_score = obj ? obj.saving_throw_ability_score : null;
     this.effect = obj ? new AbilityEffect(obj.effect) : new AbilityEffect();
     this.effect_2 = obj ? new AbilityEffect(obj.effect_2) : new AbilityEffect();

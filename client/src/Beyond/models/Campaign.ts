@@ -2,11 +2,11 @@
 import { ModelBase } from "./ModelBase";
 
 export class Campaign extends ModelBase {
+  static data_type: string = "campaign";
   owner_id: string;
 
   constructor(obj?: any) {
     super(obj);
-    this.data_type = "campaign";
     this.owner_id = obj ? obj.owner_id : "";
   }
 
