@@ -111,11 +111,11 @@ class CharacterEdit extends Component<Props, State> {
       const obj = this.state.obj;
       obj.current_hit_points = obj.max_hit_points;
       if (obj._id && obj._id !== "") {
-        this.api.updateObject(obj).then((res: any) => {
+        this.api.updateObject("character", obj).then((res: any) => {
           this.setState({ processing: false, redirectTo: "/beyond/character" });
         });
       } else {
-        this.api.createObject(obj).then((res: any) => {
+        this.api.createObject("character", obj).then((res: any) => {
           this.setState({ processing: false, redirectTo: "/beyond/character" });
         });
       }
@@ -125,8 +125,8 @@ class CharacterEdit extends Component<Props, State> {
   // Loads the editing Character into state
   load_object(id: string) {
     this.api.getFullObject("character", id).then((res: any) => {
-      if (res && res.length === 1) {
-        const obj = res[0];
+      if (res) {
+        const obj = res;
         this.char_util.recalcAll(obj);
         this.setState({ obj });
       }

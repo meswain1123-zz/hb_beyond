@@ -100,11 +100,9 @@ class CreatureDetails extends Component<Props, State> {
   // Loads the editing Character into state
   load_object(id: string) {
     this.api.getFullObject("creature", id).then((res: any) => {
-      if (res && res.length === 1) {
-        const obj = res[0];
-        this.setState({ 
-          obj
-        });
+      if (res) {
+        const obj = res;
+        this.setState({ obj });
       }
     });
   }
@@ -129,7 +127,7 @@ class CreatureDetails extends Component<Props, State> {
   }
 
   updateCharacter(obj: Creature) {
-    this.api.updateObject(obj).then((res: any) => {
+    this.api.updateObject("creature", obj).then((res: any) => {
       this.setState({ obj });
     });
   }

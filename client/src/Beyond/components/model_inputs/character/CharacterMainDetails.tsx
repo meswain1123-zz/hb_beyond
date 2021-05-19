@@ -180,7 +180,7 @@ class CharacterMainDetails extends Component<Props, State> {
   }
 
   updateCharacter() {
-    this.api.updateObject(this.props.obj).then((res: any) => {
+    this.api.updateObject("character", this.props.obj).then((res: any) => {
       this.props.onChange();
     });
   }
@@ -356,7 +356,7 @@ class CharacterMainDetails extends Component<Props, State> {
                           const file_data = res[0];
                           const obj = this.props.obj;
                           obj.image_url = file_data.url;
-                          this.api.updateObject(obj).then((res: any) => {
+                          this.api.updateObject("character", obj).then((res: any) => {
                             this.props.onChange();
                           });
                         }
@@ -680,7 +680,7 @@ class CharacterMainDetails extends Component<Props, State> {
                 onClick={() => {
                   const obj = this.props.obj;
                   obj.concentrating_on = null;
-                  this.api.updateObject(obj).then((res: any) => {
+                  this.api.updateObject("character", obj).then((res: any) => {
                     this.props.onChange();
                   });
                 }} 
@@ -1057,7 +1057,7 @@ class CharacterMainDetails extends Component<Props, State> {
                 onClick={() => {
                   const obj = this.props.obj;
                   obj.minions = obj.minions.filter(o => o.true_id !== minion.true_id);
-                  this.api.updateObject(obj).then((res: any) => {
+                  this.api.updateObject("character", obj).then((res: any) => {
                     // this.props.onChange();
                     this.setState({ });
                   });

@@ -106,7 +106,7 @@ class BackgroundIndex extends Component<Props, State> {
           const background_obj = new Background();
           background_obj.copy5e(res);
           if (background_obj.name !== "") {
-            this.api.createObject(background_obj).then((res: any) => {
+            this.api.createObject("background", background_obj).then((res: any) => {
               this.runImport();
             });
           }

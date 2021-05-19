@@ -117,7 +117,7 @@ class SpellSlotTypeDetails extends Component<Props, State> {
               <Tooltip title={`Delete ${this.state.table.name}`}>
                 <Fab size="small" color="primary" style={{marginLeft: "8px"}}
                   onClick={ () => {
-                    this.api.deleteObject(this.state.table).then((res: any) => {
+                    this.api.deleteObject("spell_slot_type", this.state.table).then((res: any) => {
                       this.setState({ redirectTo:`/beyond/spell_slot_tables` });
                     });
                   }}>

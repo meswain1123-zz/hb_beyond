@@ -76,7 +76,7 @@ class ArmorTypeEdit extends Component<Props, State> {
 
   submit() {
     this.setState({ processing: true }, () => {
-      this.api.upsertObject(this.state.obj).then((res: any) => {
+      this.api.upsertObject("armor_type", this.state.obj).then((res: any) => {
         this.setState({ processing: false, redirectTo: "/beyond/armor_type" });
       });
     });

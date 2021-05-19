@@ -57,6 +57,7 @@ export interface State {
   level: string;
   school: string;
   loading: boolean;
+  count: number;
 }
 
 class SelectSpellBox extends Component<Props, State> {
@@ -76,7 +77,8 @@ class SelectSpellBox extends Component<Props, State> {
       search_string: "",
       level: "ALL",
       school: "ALL",
-      loading: false
+      loading: false,
+      count: 0
     };
     this.api = API.getInstance();
   }
@@ -86,44 +88,94 @@ class SelectSpellBox extends Component<Props, State> {
   componentDidMount() {
   }
 
-  load() {
+  start_up() {
     this.setState({ loading: true }, () => {
-      this.api.getSetOfObjects(["spell","spell_list"]).then((res: any) => {
+      this.api.getSetOfObjects(["spell_list"]).then((res: any) => {
         this.setState({ 
-          spells: res.spell,
-          spell_lists: res.spell_list, 
-          loading: false 
-        });
+          spell_lists: res.spell_list
+        }, this.load);
       });
     });
   }
 
-  render() {
-    if (this.state.loading) {
-      return <span>Loading</span>;
-    } else if (this.state.spells === null || this.state.spell_lists === null) {
-      this.load();
-      return <span>Loading</span>;
-    } else {
-      const level = this.props.level === -1 ? this.state.level : `${this.props.level}`;
-      const max_level = this.props.max_level;
-      const school = this.state.school;
-      let spell_list: SpellList | null = null;
+  load() {
+    this.setState({ loading: true, spells: [] }, () => {
+      const filter = this.get_filter();
+      console.log(filter)
+      this.api.getObjectCount("spell", filter).then((res: any) => {
+        console.log(res);
+        if (res && !res.error) {
+          if (res.count <= 100) {
+            this.setState({ count: res.count }, this.load_some);
+          } else {
+            this.setState({ count: res.count, loading: false });
+          }
+        } else if (res && res.error) {
+          // this.setState({ error: res.error, loading: false });
+        } else {
+          this.setState({ loading: false });
+        }
+      });
+    });
+  }
+
+  get_filter() {
+    const filter: any = {};
+    
+    if (this.state.level !== "ALL") {
+      filter.level = +this.state.level;
+    }
+    if (this.state.school !== "ALL") {
+      filter.school = this.state.school;
+    }
+    if (this.state.search_string !== "") {
+      filter.name = this.state.search_string;
+    }
+    let spell_list: SpellList | null = null;
+    if (this.state.spell_lists) {
       const spell_list_finder = this.props.spell_list_id === "" ? 
         this.state.spell_lists.filter(o => o.name === this.props.spell_list_name) :
         this.state.spell_lists.filter(o => o._id === this.props.spell_list_id);
       if (spell_list_finder.length === 1) {
         spell_list = spell_list_finder[0];
       }
-      const filtered = this.state.spells.filter(o => 
-        (!spell_list || spell_list.spell_ids.includes(o._id)) &&
-        (level === "ALL" || level === `${o.level}`) && 
-        (max_level === -1 || o.level <= max_level) && 
-        (school === "ALL" || school === `${o.school}`) && 
-        (this.state.search_string === "" || 
-          o.name.toLowerCase().includes(this.state.search_string.toLowerCase()) || 
-            o.description.toLowerCase().includes(this.state.search_string.toLowerCase())))
-        .sort((a,b) => {return a.name.localeCompare(b.name)});
+      if (spell_list) {
+        filter._id = { $in : spell_list.spell_ids };
+      }
+    }
+    if (this.props.max_level > -1) {
+      filter.level = { $lte : this.props.max_level };
+    }
+
+    return filter;
+  }
+
+  load_some() {
+    const filter = this.get_filter();
+    console.log(filter);
+    this.api.getObjects("spell", filter, 0, 100).then((res: any) => {
+      console.log(res);
+      if (res && !res.error) {
+        let spells: Spell[] = this.state.spells ? this.state.spells : [];
+        spells = [...spells, ...(res as Spell[])];
+        this.setState({ spells, loading: false });
+      }
+    });
+  }
+
+  filter_change() {
+    this.setState({ spells: [] }, this.load);
+  }
+
+  render() {
+    if ((this.state.spells === null || this.state.spell_lists === null) && this.state.loading) {
+      return <span>Loading</span>;
+    } else if (this.state.spells === null || this.state.spell_lists === null) {
+      this.start_up();
+      return <span>Loading</span>;
+    } else {
+      const max_level = this.props.max_level;
+      const filtered = this.state.spells;
       const levels = ["ALL"];
       for (let i = 0; i <= (max_level === -1 ? 9 : max_level); ++i) {
         levels.push(`${i}`);
@@ -137,7 +189,7 @@ class SelectSpellBox extends Component<Props, State> {
               name="Search"
               value={`${this.state.search_string}`}
               onBlur={(search_string: string) => {
-                this.setState({ search_string });
+                this.setState({ search_string }, this.filter_change);
               }}
             />
           </Grid>
@@ -148,7 +200,7 @@ class SelectSpellBox extends Component<Props, State> {
                 options={levels}
                 value={this.state.level}
                 onChange={(level: string) => {
-                  this.setState({ level });
+                  this.setState({ level }, this.filter_change);
                 }}
               />
             </Grid>
@@ -159,13 +211,15 @@ class SelectSpellBox extends Component<Props, State> {
               options={["ALL",...SCHOOLS]}
               value={this.state.school}
               onChange={(school: string) => {
-                this.setState({ school });
+                this.setState({ school }, this.filter_change);
               }}
             />
           </Grid>
           <Grid item xs={3}>
-            { filtered.length > 50 ?
-              <span>Too many spells { filtered.length }</span>
+            { this.state.count > 50 ?
+              <span>Too many spells { this.state.count }</span>
+            : this.state.loading ?
+              <span>Loading</span>
             :
               <SelectBox 
                 options={filtered}

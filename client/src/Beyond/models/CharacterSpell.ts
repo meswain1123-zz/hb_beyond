@@ -162,7 +162,6 @@ export class CharacterSpell {
   }
 
   use_string(character: Character) {
-    console.log(character);
     return "Cast";
   }
 

@@ -108,7 +108,7 @@ class CreatureStatBlock extends Component<Props, State> {
   }
 
   updateCharacter(obj: Creature) {
-    this.api.updateObject(obj).then((res: any) => {
+    this.api.updateObject("creature", obj).then((res: any) => {
       this.props.onChange();
     });
   }

@@ -40,7 +40,11 @@ import {
   TemplateBase,
   Language,
   ModelBase,
-  SmartHash
+  SmartHash,
+  CharacterFeat,
+  CharacterPactBoon,
+  CharacterEldritchInvocation,
+  CharacterFightingStyle,
 } from "../models";
 
 // This is our special type of Error that represents
@@ -193,8 +197,9 @@ export class APIClass {
       const response = await this.postData(
         `/api/beyond/getObjectCount/${data_type}`, { filter }
       );
-      const data = await this.processResponse(response, data_type, null, data_type);
-      return data;
+      return response.json();
+      // const data = await this.processResponse(response, data_type, null, data_type);
+      // return data;
     } else {
       return [{ _id: -1, vttID: -1, Name: "Alice" }];
     }
@@ -222,6 +227,57 @@ export class APIClass {
             }
           }
         }
+        for (let i = 0; i < char.race.features.length; ++i) {
+          const fb = char.race.features[i];
+          for (let j = 0; j < fb.features.length; ++j) {
+            const f = fb.features[j];
+            if (f.feature_type === "Feat") {
+              const opt = f.feature_options[0] as CharacterFeat;
+              if (opt.feat_id !== "") {
+                if (!this.smart_hash.feat) {
+                  await this.getObjects("feat");
+                }
+                const obj_finder2 = this.smart_hash.feat.filter(o => o._id === opt.feat_id);
+                if (obj_finder2.length === 1) {
+                  opt.connectFeat(obj_finder2[0] as Feat);
+                }
+              }
+            } else if (f.feature_type === "Pact Boon") {
+              const opt = f.feature_options[0] as CharacterPactBoon;
+              if (opt.pact_boon_id !== "") {
+                if (!this.smart_hash.pact_boon) {
+                  await this.getObjects("pact_boon");
+                }
+                const obj_finder2 = this.smart_hash.pact_boon.filter(o => o._id === opt.pact_boon_id);
+                if (obj_finder2.length === 1) {
+                  opt.connectPactBoon(obj_finder2[0] as PactBoon);
+                }
+              }
+            } else if (f.feature_type === "Eldritch Invocation") {
+              const opt = f.feature_options[0] as CharacterEldritchInvocation;
+              if (opt.eldritch_invocation_id !== "") {
+                if (!this.smart_hash.eldritch_invocation) {
+                  await this.getObjects("eldritch_invocation");
+                }
+                const obj_finder2 = this.smart_hash.eldritch_invocation.filter(o => o._id === opt.eldritch_invocation_id);
+                if (obj_finder2.length === 1) {
+                  opt.connectEldritchInvocation(obj_finder2[0] as EldritchInvocation);
+                }
+              }
+            } else if (f.feature_type === "Fighting Style") {
+              const opt = f.feature_options[0] as CharacterFightingStyle;
+              if (opt.fighting_style_id !== "") {
+                if (!this.smart_hash.fighting_style) {
+                  await this.getObjects("fighting_style");
+                }
+                const obj_finder2 = this.smart_hash.fighting_style.filter(o => o._id === opt.fighting_style_id);
+                if (obj_finder2.length === 1) {
+                  opt.connectFightingStyle(obj_finder2[0] as FightingStyle);
+                }
+              }
+            }
+          }
+        }
       }
       if (!char.background.background) {
         if (!this.smart_hash.background) {
@@ -232,13 +288,131 @@ export class APIClass {
           char.background.connectBackground(obj_finder[0] as Background);
         }
       }
+      if (!this.smart_hash.game_class) {
+        await this.getObjects("game_class");
+      }
+      if (!this.smart_hash.subclass) {
+        await this.getObjects("subclass");
+      }
+      for (let k = 0; k < char.classes.length; ++k) {
+        const c = char.classes[k];
+        const class_finder = this.smart_hash.game_class.filter(o => o._id === c.game_class_id);
+        const subclass_finder = this.smart_hash.subclass.filter(o => o._id === c.subclass_id);
+        if (class_finder.length === 1) {
+          c.connectGameClass(class_finder[0] as GameClass);
+        }
+        if (subclass_finder.length === 1) {
+          c.connectSubclass(subclass_finder[0] as Subclass);
+        }
+        for (let i = 0; i < c.class_features.length; ++i) {
+          const fb = c.class_features[i];
+          for (let j = 0; j < fb.features.length; ++j) {
+            const f = fb.features[j];
+            if (f.feature_type === "Feat") {
+              const opt = f.feature_options[0] as CharacterFeat;
+              if (opt.feat_id !== "") {
+                if (!this.smart_hash.feat) {
+                  await this.getObjects("feat");
+                }
+                const obj_finder2 = this.smart_hash.feat.filter(o => o._id === opt.feat_id);
+                if (obj_finder2.length === 1) {
+                  opt.connectFeat(obj_finder2[0] as Feat);
+                }
+              }
+            } else if (f.feature_type === "Pact Boon") {
+              const opt = f.feature_options[0] as CharacterPactBoon;
+              if (opt.pact_boon_id !== "") {
+                if (!this.smart_hash.pact_boon) {
+                  await this.getObjects("pact_boon");
+                }
+                const obj_finder2 = this.smart_hash.pact_boon.filter(o => o._id === opt.pact_boon_id);
+                if (obj_finder2.length === 1) {
+                  opt.connectPactBoon(obj_finder2[0] as PactBoon);
+                }
+              }
+            } else if (f.feature_type === "Eldritch Invocation") {
+              const opt = f.feature_options[0] as CharacterEldritchInvocation;
+              if (opt.eldritch_invocation_id !== "") {
+                if (!this.smart_hash.eldritch_invocation) {
+                  await this.getObjects("eldritch_invocation");
+                }
+                const obj_finder2 = this.smart_hash.eldritch_invocation.filter(o => o._id === opt.eldritch_invocation_id);
+                if (obj_finder2.length === 1) {
+                  opt.connectEldritchInvocation(obj_finder2[0] as EldritchInvocation);
+                }
+              }
+            } else if (f.feature_type === "Fighting Style") {
+              const opt = f.feature_options[0] as CharacterFightingStyle;
+              if (opt.fighting_style_id !== "") {
+                if (!this.smart_hash.fighting_style) {
+                  await this.getObjects("fighting_style");
+                }
+                const obj_finder2 = this.smart_hash.fighting_style.filter(o => o._id === opt.fighting_style_id);
+                if (obj_finder2.length === 1) {
+                  opt.connectFightingStyle(obj_finder2[0] as FightingStyle);
+                }
+              }
+            }
+          }
+        }
+        for (let i = 0; i < c.subclass_features.length; ++i) {
+          const fb = c.subclass_features[i];
+          for (let j = 0; j < fb.features.length; ++j) {
+            const f = fb.features[j];
+            if (f.feature_type === "Feat") {
+              const opt = f.feature_options[0] as CharacterFeat;
+              if (opt.feat_id !== "") {
+                if (!this.smart_hash.feat) {
+                  await this.getObjects("feat");
+                }
+                const obj_finder2 = this.smart_hash.feat.filter(o => o._id === opt.feat_id);
+                if (obj_finder2.length === 1) {
+                  opt.connectFeat(obj_finder2[0] as Feat);
+                }
+              }
+            } else if (f.feature_type === "Pact Boon") {
+              const opt = f.feature_options[0] as CharacterPactBoon;
+              if (opt.pact_boon_id !== "") {
+                if (!this.smart_hash.pact_boon) {
+                  await this.getObjects("pact_boon");
+                }
+                const obj_finder2 = this.smart_hash.pact_boon.filter(o => o._id === opt.pact_boon_id);
+                if (obj_finder2.length === 1) {
+                  opt.connectPactBoon(obj_finder2[0] as PactBoon);
+                }
+              }
+            } else if (f.feature_type === "Eldritch Invocation") {
+              const opt = f.feature_options[0] as CharacterEldritchInvocation;
+              if (opt.eldritch_invocation_id !== "") {
+                if (!this.smart_hash.eldritch_invocation) {
+                  await this.getObjects("eldritch_invocation");
+                }
+                const obj_finder2 = this.smart_hash.eldritch_invocation.filter(o => o._id === opt.eldritch_invocation_id);
+                if (obj_finder2.length === 1) {
+                  opt.connectEldritchInvocation(obj_finder2[0] as EldritchInvocation);
+                }
+              }
+            } else if (f.feature_type === "Fighting Style") {
+              const opt = f.feature_options[0] as CharacterFightingStyle;
+              if (opt.fighting_style_id !== "") {
+                if (!this.smart_hash.fighting_style) {
+                  await this.getObjects("fighting_style");
+                }
+                const obj_finder2 = this.smart_hash.fighting_style.filter(o => o._id === opt.fighting_style_id);
+                if (obj_finder2.length === 1) {
+                  opt.connectFightingStyle(obj_finder2[0] as FightingStyle);
+                }
+              }
+            }
+          }
+        }
+      }
     }
     return obj;
   };
 
-  createObject = async (obj: ModelBase) => {
+  createObject = async (data_type: string, obj: ModelBase) => {
     if (this.real) {
-      let data_type = this.get_data_type(typeof obj);
       const response = await this.postData("/api/beyond/createObject", { data_type, obj: obj.toDBObj() });
       const res = await this.processResponse(response, data_type, null);
       if (res.id) {
@@ -364,9 +538,8 @@ export class APIClass {
     }
   };
 
-  deleteObject = async (obj: ModelBase) => {
+  deleteObject = async (data_type: string, obj: ModelBase) => {
     if (this.real) {
-      const data_type = this.get_data_type(typeof obj);
       const object_id = obj._id;
       const response = await this.deleteData("/api/beyond/deleteObject", { data_type, object_id });
       const res = await this.processResponse(response, data_type, null);
@@ -379,12 +552,12 @@ export class APIClass {
     }
   };
 
-  deleteObjects = async (objects: ModelBase[]) => {
+  deleteObjects = async (data_type: string, objects: ModelBase[]) => {
     if (this.real) {
       const return_me: any[] = [];
       for (let i = 0; i < objects.length; i++) {
         const obj = objects[i];
-        return_me.push(await this.deleteObject(obj));
+        return_me.push(await this.deleteObject(data_type, obj));
       }
       return return_me;
     } else {
@@ -392,9 +565,8 @@ export class APIClass {
     }
   };
 
-  updateObject = async (obj: ModelBase) => {
+  updateObject = async (data_type: string, obj: ModelBase) => {
     if (this.real) {
-      const data_type = this.get_data_type(typeof obj);
       const response = await this.patchData("/api/beyond/updateObject", { data_type, obj: obj.toDBObj() });
       const res = await this.processResponse(response, data_type, null);
       if (res.message.includes("updated!") && this.smart_hash[data_type]) {
@@ -412,13 +584,13 @@ export class APIClass {
     }
   };
 
-  upsertObject = async (obj: ModelBase) => {
+  upsertObject = async (data_type: string, obj: ModelBase) => {
     if (this.real) {
       if (obj._id && obj._id !== "") {
-        const res = await this.updateObject(obj);
+        const res = await this.updateObject(data_type, obj);
         return res;
       } else {
-        const res = await this.createObject(obj);
+        const res = await this.createObject(data_type, obj);
         return res;
       }
     } else {
@@ -426,35 +598,18 @@ export class APIClass {
     }
   };
 
-  upsertObjects = async (objects: ModelBase[]) => {
+  upsertObjects = async (data_type: string, objects: ModelBase[]) => {
     if (this.real) {
       const return_me: any[] = [];
       for (let i = 0; i < objects.length; i++) {
         const obj = objects[i];
-        return_me.push(await this.upsertObject(obj));
+        return_me.push(await this.upsertObject(data_type, obj));
       }
       return return_me;
     } else {
       return -1;
     }
   };
-
-  get_data_type(class_name: string) {
-    const template_types = ["AbilityTemplate","SpellAsAbilityTemplate","ItemAffectingAbilityTemplate","SummonStatBlockTemplate","FeatureBaseTemplate","FeatureChoiceTemplate","FeatureTemplate","MagicItemTemplate","SpellTemplate","TemplateBase","template"];
-    if (template_types.includes(class_name)) {
-      return "template";
-    } else {
-      let data_type = "";
-      for (let i = 0; i < class_name.length; ++i) {
-        const char = class_name[i];
-        if (this.isUpper(char)) {
-          data_type += "_";
-        }
-        data_type += char.toLowerCase();
-      }
-      return data_type;
-    }
-  }
 
   always_store(data_type: string) {
     const dont_store = ["spell","creature","baseItem","magic_item"];

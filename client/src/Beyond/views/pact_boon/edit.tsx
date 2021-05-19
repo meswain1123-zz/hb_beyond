@@ -80,7 +80,7 @@ class PactBoonEdit extends Component<Props, State> {
 
   submit() {
     this.setState({ processing: true }, () => {
-      this.api.upsertObject(this.state.obj).then((res: any) => {
+      this.api.upsertObject("pact_boon", this.state.obj).then((res: any) => {
         this.setState({ processing: false, redirectTo: "/beyond/pact_boon" });
       });
     });

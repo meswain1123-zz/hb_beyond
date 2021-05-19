@@ -100,7 +100,7 @@ class PactBoonDetails extends Component<Props, State> {
               <Tooltip title={`Delete ${this.state.obj.name}`}>
                 <Fab size="small" color="primary" style={{marginLeft: "8px"}}
                   onClick={ () => {
-                    this.api.deleteObject(this.state.obj).then((res: any) => {
+                    this.api.deleteObject("pact_boon", this.state.obj).then((res: any) => {
                       if (this.props.objects) {
                         this.setState({ redirectTo:`/beyond/pact_boon` });
                       }

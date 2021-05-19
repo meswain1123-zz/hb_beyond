@@ -4,14 +4,14 @@ import { Redirect } from "react-router-dom";
 import {
   Add, 
   Edit,
-  GetApp,
-  ArrowBack
+  // GetApp,
+  // ArrowBack
 } from "@material-ui/icons";
 import {
   Grid, 
   Button, 
   Tooltip, Fab,
-  Checkbox,
+  // Checkbox,
   Link
 } from "@material-ui/core";
 
@@ -55,15 +55,17 @@ export interface State {
   search_string: string;
   level: string;
   school: string;
-  mode: string;
-  import_spells: any[] | null;
-  importing_pos: number;
-  import_checked: string[];
-  importing: string;
+  // mode: string;
+  // import_spells: any[] | null;
+  // importing_pos: number;
+  // import_checked: string[];
+  // importing: string;
   page_num: number;
   start_letter: string;
   spells: Spell[] | null;
   loading: boolean;
+  count: number;
+  offset: number;
 }
 
 class SpellIndex extends Component<Props, State> {
@@ -74,15 +76,17 @@ class SpellIndex extends Component<Props, State> {
       search_string: "",
       level: "ALL",
       school: "ALL",
-      mode: "index",
-      import_spells: null,
-      importing_pos: 0,
-      import_checked: [],
-      importing: "",
+      // mode: "index",
+      // import_spells: null,
+      // importing_pos: 0,
+      // import_checked: [],
+      // importing: "",
       page_num: 0,
       start_letter: "",
       spells: null,
-      loading: false
+      loading: false,
+      count: 0,
+      offset: 0
     };
     this.api = API.getInstance();
   }
@@ -105,57 +109,88 @@ class SpellIndex extends Component<Props, State> {
     return properties;
   }
 
-  runImport() {
-    if (this.state.import_checked.length > this.state.importing_pos) {
-      this.setState({ importing: this.state.import_checked[this.state.importing_pos], importing_pos: this.state.importing_pos + 1 }, () => {
-        // Get it from the API
-        this.api.get5eObjectFromAPI(this.state.importing).then((res: any) => {
-          // Translate it into a Spell object.
-          const spell_obj = new Spell();
-          spell_obj.copy5e(res);
-          this.api.createObject(spell_obj).then((res: any) => {
-            this.runImport();
-          });
-        });
-      });
-    } else {
-      this.setState({ 
-        importing: "", 
-        importing_pos: 0, 
-        import_checked: [] 
-      }, () => {
-        this.load();
-      });
-    }
-  }
+  // runImport() {
+  //   if (this.state.import_checked.length > this.state.importing_pos) {
+  //     this.setState({ importing: this.state.import_checked[this.state.importing_pos], importing_pos: this.state.importing_pos + 1 }, () => {
+  //       // Get it from the API
+  //       this.api.get5eObjectFromAPI(this.state.importing).then((res: any) => {
+  //         // Translate it into a Spell object.
+  //         const spell_obj = new Spell();
+  //         spell_obj.copy5e(res);
+  //         this.api.createObject(spell_obj).then((res: any) => {
+  //           this.runImport();
+  //         });
+  //       });
+  //     });
+  //   } else {
+  //     this.setState({ 
+  //       importing: "", 
+  //       importing_pos: 0, 
+  //       import_checked: [] 
+  //     }, () => {
+  //       this.load();
+  //     });
+  //   }
+  // }
 
   load() {
-    this.setState({ loading: true }, () => {
-      this.api.getObjects("spell").then((res: any) => {
+    this.setState({ loading: true, spells: [] }, () => {
+      const filter = this.get_filter();
+      this.api.getObjectCount("spell", filter).then((res: any) => {
         if (res && !res.error) {
-          this.setState({ spells: res, loading: false });
+          this.setState({ count: res.count }, this.load_some);
         }
       });
     });
   }
 
+  get_filter() {
+    const filter: any = {};
+    
+    if (this.state.level !== "ALL") {
+      filter.level = +this.state.level;
+    }
+    if (this.state.school !== "ALL") {
+      filter.school = this.state.school;
+    }
+    if (this.state.start_letter !== "") {
+      filter.start_letter = this.state.start_letter;
+    }
+    if (this.state.search_string !== "") {
+      filter.name = this.state.search_string;
+    }
+
+    return filter;
+  }
+
+  load_some() {
+    const filter = this.get_filter();
+    this.api.getObjects("spell", filter, this.state.spells ? (this.state.spells.length + this.state.offset) : this.state.offset, 350).then((res: any) => {
+      if (res && !res.error) {
+        let spells: Spell[] = this.state.spells ? this.state.spells : [];
+        spells = [...spells, ...(res as Spell[])];
+        this.setState({ spells, loading: false });
+      }
+    });
+  }
+
+  filter_change() {
+    this.setState({ spells: [], page_num: 0 }, this.load);
+  }
+
   render() {
-    if (this.state.loading) {
+    if (this.state.spells === null && this.state.loading) {
       return <span>Loading</span>;
     } else if (this.state.spells === null) {
       this.load();
       return <span>Loading</span>;
     } else if (this.state.redirectTo !== null) {
       return <Redirect to={this.state.redirectTo} />;
-    } else if (this.state.mode === "index") {
+    } else { // if (this.state.mode === "index") 
       const page_size = 7;
-      const filtered: any[] = this.state.spells ? this.state.spells.filter(o => 
-        (this.state.level === "ALL" || this.state.level === `${o.level}`) && 
-        (this.state.school === "ALL" || this.state.school === `${o.school}`) && 
-        (this.state.start_letter === "" || o.name.toUpperCase().startsWith(this.state.start_letter)) && 
-        (this.state.search_string === "" || o.name.toLowerCase().includes(this.state.search_string.toLowerCase()) || o.description.toLowerCase().includes(this.state.search_string.toLowerCase()))).sort((a,b) => {return a.name.localeCompare(b.name)}) : [];
-      const page_count = Math.ceil(filtered.length / page_size);
-      const filtered_and_paged: any[] = filtered.slice(page_size * this.state.page_num, page_size * (this.state.page_num + 1));
+      const filtered: any[] = this.state.spells ? this.state.spells : [];
+      const page_count = Math.ceil(this.state.count / page_size);
+      const filtered_and_paged: any[] = filtered.slice(page_size * this.state.page_num - this.state.offset, page_size * (this.state.page_num + 1) - this.state.offset);
       return (
         <Grid container spacing={1} direction="column">
           <Grid item container spacing={1} direction="row">
@@ -171,7 +206,7 @@ class SpellIndex extends Component<Props, State> {
                   <Add/>
                 </Fab>
               </Tooltip> 
-              { true && 
+              {/* { true && 
                 <Tooltip title={`Import Spells`}>
                   <Fab size="small" color="primary" style={{marginLeft: "8px"}}
                     onClick={ () => {
@@ -189,14 +224,14 @@ class SpellIndex extends Component<Props, State> {
                     <GetApp/>
                   </Fab>
                 </Tooltip> 
-              }
+              } */}
             </Grid>
             <Grid item xs={3}>
               <StringBox
                 name="Search"
                 value={`${this.state.search_string}`}
                 onBlur={(search_string: string) => {
-                  this.setState({ search_string });
+                  this.setState({ search_string }, this.filter_change);
                 }}
               />
             </Grid>
@@ -206,7 +241,7 @@ class SpellIndex extends Component<Props, State> {
                 options={["ALL","0","1","2","3","4","5","6","7","8","9"]}
                 value={this.state.level}
                 onChange={(level: string) => {
-                  this.setState({ level });
+                  this.setState({ level }, this.filter_change);
                 }}
               />
             </Grid>
@@ -216,7 +251,7 @@ class SpellIndex extends Component<Props, State> {
                 options={["ALL",...SCHOOLS]}
                 value={this.state.school}
                 onChange={(school: string) => {
-                  this.setState({ school });
+                  this.setState({ school }, this.filter_change);
                 }}
               />
             </Grid>
@@ -257,6 +292,11 @@ class SpellIndex extends Component<Props, State> {
                   </Grid>
                 );
               }) }
+              { this.state.loading && 
+                <Grid item>
+                  Loading
+                </Grid>
+              }
               <Grid item>
                 { this.renderPageLinks(page_count) }
               </Grid>
@@ -267,132 +307,133 @@ class SpellIndex extends Component<Props, State> {
           </Grid>
         </Grid>
       ); 
-    } else if (this.state.mode === "import") {
-      const formHeight = this.props.height - (this.props.width > 600 ? 198 : 198);
-      const page_size = 7;
-      const filtered: any[] = this.state.import_spells ? this.state.import_spells.filter(o => 
-        (this.state.start_letter === "" || o.name.toUpperCase().startsWith(this.state.start_letter)) && 
-        (this.state.search_string === "" || o.name.toLowerCase().includes(this.state.search_string.toLowerCase()))) : [];
-      const page_count = Math.ceil(filtered.length / page_size);
-      const filtered_and_paged: any[] = filtered.slice(page_size * this.state.page_num, page_size * (this.state.page_num + 1));
-      return (
-        <Grid container spacing={1} direction="column">
-          <Grid item container spacing={1} direction="row">
-            <Grid item xs={3}>
-              <span className={"MuiTypography-root MuiListItemText-primary header"}>
-                Importing Spells
-              </span>
-              <Tooltip title={`Back`}>
-                <Fab size="small" color="primary" style={{marginLeft: "8px"}}
-                  onClick={ () => {
-                    this.setState({ 
-                      mode: "index",
-                      page_num: 0 
-                    });
-                  }}>
-                  <ArrowBack/>
-                </Fab>
-              </Tooltip> 
-            </Grid>
-            <Grid item xs={9}>
-              <StringBox
-                name="Search"
-                value={`${this.state.search_string}`}
-                onBlur={(search_string: string) => {
-                  this.setState({ search_string });
-                }}
-              />
-            </Grid>
-          </Grid>
-          <Grid item
-            style={{ 
-              height: `${formHeight}px`, 
-              overflowY: "scroll", 
-              overflowX: "hidden" 
-            }}>
-            <Grid container spacing={1} direction="column">
-              <Grid item container spacing={1} direction="row">
-                <Grid item xs={2}>
-                  Found
-                </Grid>
-                <Grid item xs={2}>
-                  <Button 
-                    fullWidth variant="contained" color="primary" 
-                    onClick={ () => {
-                      if (this.state.import_spells) {
-                        const import_checked: string[] = [];
-                        if (this.state.import_spells.length !== this.state.import_checked.length) {
-                          this.state.import_spells.forEach(s => {
-                            if (this.state.spells && !this.state.spells.some(s2 => s2.name === s.name)) {
-                              import_checked.push(s.url);
-                            }
-                          });
-                        }
-                        this.setState({ import_checked });
-                      }
-                    }}>
-                      { (this.state.import_spells && this.state.import_spells.length === this.state.import_checked.length) ? "Deselect All" : "Select All" }
-                  </Button>
-                </Grid>
-                <Grid item xs={4}>
-                  Name
-                </Grid>
-                <Grid item xs={4}>
-                  Import Status
-                </Grid>
-              </Grid>
-              { filtered_and_paged.map((o, key) => {
-                return (
-                  <Grid key={key} item container spacing={1} direction="row">
-                    <Grid item xs={2}>
-                      <Checkbox 
-                        checked={ this.state.spells ? (this.state.spells.some(s => s.name === o.name) || (this.state.import_checked.some(s => s === o.url) && !this.state.import_checked.slice(this.state.importing_pos === 0 ? 0 : (this.state.importing_pos - 1)).some(s => s === o.url))) : false } 
-                        disabled={true}
-                        color="primary" 
-                      />
-                    </Grid>
-                    <Grid item xs={2}>
-                      <Checkbox 
-                        checked={ this.state.import_checked.some(s => s === o.url) } 
-                        onChange={e => {
-                          const import_checked = this.state.import_checked.filter(s => s !== o.url);
-                          if (e.target.checked) {
-                            import_checked.push(o.url);
-                          }
-                          this.setState({ import_checked });
-                        }}
-                        color="primary" 
-                      />
-                    </Grid>
-                    <Grid item xs={4}>
-                      { o.name }
-                    </Grid>
-                    <Grid item xs={4}>
-                      { o.url === this.state.importing ? "Importing" : "" }
-                    </Grid>
-                  </Grid>
-                );
-              }) }
-              <Grid item>
-                { this.renderPageLinks(page_count) }
-              </Grid>
-              <Grid item>
-                { this.renderLetterLinks() }
-              </Grid>
-            </Grid>
-          </Grid>
-          <Grid item>
-            <Button 
-              fullWidth variant="contained" color="primary" 
-              onClick={ () => {
-                this.runImport();
-              }}>
-                Import Selected
-            </Button>
-          </Grid>
-        </Grid>
-      );
-    }
+    } 
+    // else if (this.state.mode === "import") {
+    //   const formHeight = this.props.height - (this.props.width > 600 ? 198 : 198);
+    //   const page_size = 7;
+    //   const filtered: any[] = this.state.import_spells ? this.state.import_spells.filter(o => 
+    //     (this.state.start_letter === "" || o.name.toUpperCase().startsWith(this.state.start_letter)) && 
+    //     (this.state.search_string === "" || o.name.toLowerCase().includes(this.state.search_string.toLowerCase()))) : [];
+    //   const page_count = Math.ceil(filtered.length / page_size);
+    //   const filtered_and_paged: any[] = filtered.slice(page_size * this.state.page_num, page_size * (this.state.page_num + 1));
+    //   return (
+    //     <Grid container spacing={1} direction="column">
+    //       <Grid item container spacing={1} direction="row">
+    //         <Grid item xs={3}>
+    //           <span className={"MuiTypography-root MuiListItemText-primary header"}>
+    //             Importing Spells
+    //           </span>
+    //           <Tooltip title={`Back`}>
+    //             <Fab size="small" color="primary" style={{marginLeft: "8px"}}
+    //               onClick={ () => {
+    //                 this.setState({ 
+    //                   mode: "index",
+    //                   page_num: 0 
+    //                 });
+    //               }}>
+    //               <ArrowBack/>
+    //             </Fab>
+    //           </Tooltip> 
+    //         </Grid>
+    //         <Grid item xs={9}>
+    //           <StringBox
+    //             name="Search"
+    //             value={`${this.state.search_string}`}
+    //             onBlur={(search_string: string) => {
+    //               this.setState({ search_string });
+    //             }}
+    //           />
+    //         </Grid>
+    //       </Grid>
+    //       <Grid item
+    //         style={{ 
+    //           height: `${formHeight}px`, 
+    //           overflowY: "scroll", 
+    //           overflowX: "hidden" 
+    //         }}>
+    //         <Grid container spacing={1} direction="column">
+    //           <Grid item container spacing={1} direction="row">
+    //             <Grid item xs={2}>
+    //               Found
+    //             </Grid>
+    //             <Grid item xs={2}>
+    //               <Button 
+    //                 fullWidth variant="contained" color="primary" 
+    //                 onClick={ () => {
+    //                   if (this.state.import_spells) {
+    //                     const import_checked: string[] = [];
+    //                     if (this.state.import_spells.length !== this.state.import_checked.length) {
+    //                       this.state.import_spells.forEach(s => {
+    //                         if (this.state.spells && !this.state.spells.some(s2 => s2.name === s.name)) {
+    //                           import_checked.push(s.url);
+    //                         }
+    //                       });
+    //                     }
+    //                     this.setState({ import_checked });
+    //                   }
+    //                 }}>
+    //                   { (this.state.import_spells && this.state.import_spells.length === this.state.import_checked.length) ? "Deselect All" : "Select All" }
+    //               </Button>
+    //             </Grid>
+    //             <Grid item xs={4}>
+    //               Name
+    //             </Grid>
+    //             <Grid item xs={4}>
+    //               Import Status
+    //             </Grid>
+    //           </Grid>
+    //           { filtered_and_paged.map((o, key) => {
+    //             return (
+    //               <Grid key={key} item container spacing={1} direction="row">
+    //                 <Grid item xs={2}>
+    //                   <Checkbox 
+    //                     checked={ this.state.spells ? (this.state.spells.some(s => s.name === o.name) || (this.state.import_checked.some(s => s === o.url) && !this.state.import_checked.slice(this.state.importing_pos === 0 ? 0 : (this.state.importing_pos - 1)).some(s => s === o.url))) : false } 
+    //                     disabled={true}
+    //                     color="primary" 
+    //                   />
+    //                 </Grid>
+    //                 <Grid item xs={2}>
+    //                   <Checkbox 
+    //                     checked={ this.state.import_checked.some(s => s === o.url) } 
+    //                     onChange={e => {
+    //                       const import_checked = this.state.import_checked.filter(s => s !== o.url);
+    //                       if (e.target.checked) {
+    //                         import_checked.push(o.url);
+    //                       }
+    //                       this.setState({ import_checked });
+    //                     }}
+    //                     color="primary" 
+    //                   />
+    //                 </Grid>
+    //                 <Grid item xs={4}>
+    //                   { o.name }
+    //                 </Grid>
+    //                 <Grid item xs={4}>
+    //                   { o.url === this.state.importing ? "Importing" : "" }
+    //                 </Grid>
+    //               </Grid>
+    //             );
+    //           }) }
+    //           <Grid item>
+    //             { this.renderPageLinks(page_count) }
+    //           </Grid>
+    //           <Grid item>
+    //             { this.renderLetterLinks() }
+    //           </Grid>
+    //         </Grid>
+    //       </Grid>
+    //       <Grid item>
+    //         <Button 
+    //           fullWidth variant="contained" color="primary" 
+    //           onClick={ () => {
+    //             this.runImport();
+    //           }}>
+    //             Import Selected
+    //         </Button>
+    //       </Grid>
+    //     </Grid>
+    //   );
+    // }
   }
 
   renderPageLinks(page_count: number) {
@@ -404,7 +445,7 @@ class SpellIndex extends Component<Props, State> {
       return_us.push(
         <Link key={key} href="#" onClick={(event: React.SyntheticEvent) => {
           event.preventDefault();
-          this.setState({ page_num: 0 });
+          this.page_change(0);
           }}>
           1
         </Link>
@@ -424,7 +465,7 @@ class SpellIndex extends Component<Props, State> {
         return_us.push(
           <Link key={key} href="#" onClick={(event: React.SyntheticEvent) => {
             event.preventDefault();
-            this.setState({ page_num: i });
+            this.page_change(i);
             }}>
             { i + 1 }
           </Link>
@@ -442,7 +483,7 @@ class SpellIndex extends Component<Props, State> {
       return_us.push(
         <Link key={key} href="#" onClick={(event: React.SyntheticEvent) => {
           event.preventDefault();
-          this.setState({ page_num: page_count - 1 });
+          this.page_change(page_count - 1);
           }}>
           { page_count }
         </Link>
@@ -454,6 +495,20 @@ class SpellIndex extends Component<Props, State> {
     return return_us;
   }
 
+  page_change(page_num: number) {
+    if (this.state.spells) {
+      if ((page_num + 1) * 7 <= this.state.offset) {
+        const offset = Math.floor(page_num * 7 / 350) * 350;
+        this.setState({ page_num, loading: true, offset, spells: [] }, this.load_some); 
+      } else if ((page_num + 1) * 7 <= this.state.offset + this.state.spells.length) { 
+        this.setState({ page_num });
+      } else {
+        const offset = Math.floor((page_num + 1) * 7 / 350) * 350;
+        this.setState({ page_num, loading: true, offset, spells: [] }, this.load_some); 
+      }
+    }
+  }
+
   renderLetterLinks() {
     const return_us: any[] = [];
     const alphabet = ["A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T","U","V","W","X","Y","Z"];
@@ -462,7 +517,7 @@ class SpellIndex extends Component<Props, State> {
       return_us.push(
         <Link key={key} href="#" onClick={(event: React.SyntheticEvent) => {
           event.preventDefault();
-          this.setState({ start_letter: a });
+          this.setState({ start_letter: a }, this.filter_change);
           }}>
           {a}
         </Link>
@@ -474,7 +529,7 @@ class SpellIndex extends Component<Props, State> {
     return_us.push(
       <Link key={key} href="#" onClick={(event: React.SyntheticEvent) => {
         event.preventDefault();
-        this.setState({ start_letter: "" });
+        this.setState({ start_letter: "" }, this.filter_change);
         }}>
         Clear
       </Link>

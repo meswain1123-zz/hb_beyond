@@ -114,7 +114,7 @@ class CharacterAction extends Component<Props, State> {
   }
 
   updateCharacter(change_types: string[]) {
-    this.api.updateObject(this.props.obj).then((res: any) => {
+    this.api.updateObject("character", this.props.obj).then((res: any) => {
       if (change_types.length > 0) {
         this.setState({ 
           popoverAnchorEl: null, 

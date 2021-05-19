@@ -98,7 +98,7 @@ class ArmorTypeDetails extends Component<Props, State> {
               <Tooltip title={`Delete ${this.state.obj.name}`}>
                 <Fab size="small" color="primary" style={{marginLeft: "8px"}}
                   onClick={ () => {
-                    this.api.deleteObject(this.state.obj).then((res: any) => {
+                    this.api.deleteObject("armor_type", this.state.obj).then((res: any) => {
                       if (this.props.objects) {
                         this.setState({ redirectTo:`/beyond/armor_type` });
                       }

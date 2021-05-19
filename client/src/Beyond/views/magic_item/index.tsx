@@ -122,7 +122,7 @@ class MagicItemIndex extends Component<Props, State> {
           const magic_item_obj = new MagicItem();
           magic_item_obj.copy5e(res);
           if (magic_item_obj.name !== "") {
-            this.api.createObject(magic_item_obj).then((res: any) => {
+            this.api.createObject("magic_item", magic_item_obj).then((res: any) => {
               this.runImport();
             });
           }
@@ -266,9 +266,9 @@ class MagicItemIndex extends Component<Props, State> {
                           onClick={ () => {
                             const keyword = new MagicItemKeyword();
                             keyword.copyFromItem(o);
-                            this.api.createObject(keyword).then((res: any) => {
+                            this.api.createObject("magic_item_keyword", keyword).then((res: any) => {
                               if (res && res.id) {
-                                this.api.deleteObject(o).then((res2: any) => {
+                                this.api.deleteObject("magic_item_keyword", o).then((res2: any) => {
                                   if (this.state.magic_items) {
                                     const magic_items = this.state.magic_items.filter(i => i._id !== o._id);
                                     this.setState({ magic_items });

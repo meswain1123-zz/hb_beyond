@@ -105,7 +105,7 @@ class FightingStyleIndex extends Component<Props, State> {
           const fighting_style_obj = new FightingStyle();
           fighting_style_obj.copy5e(res);
           if (fighting_style_obj.name !== "") {
-            this.api.createObject(fighting_style_obj).then((res: any) => {
+            this.api.createObject("fighting_style", fighting_style_obj).then((res: any) => {
               this.runImport();
             });
           }

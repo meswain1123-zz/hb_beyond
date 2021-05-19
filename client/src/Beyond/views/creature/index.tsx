@@ -108,7 +108,7 @@ class CreatureIndex extends Component<Props, State> {
             const creature_obj = new Creature();
             creature_obj.copy5e(res, this.state.senses);
             if (creature_obj.name !== "") {
-              this.api.createObject(creature_obj).then((res: any) => {
+              this.api.createObject("creature", creature_obj).then((res: any) => {
                 this.runImport();
               });
             }

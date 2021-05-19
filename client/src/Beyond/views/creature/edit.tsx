@@ -112,7 +112,7 @@ class CreatureEdit extends Component<Props, State> {
   submit() {
     this.setState({ processing: true }, () => {
       const obj = this.state.obj;
-      this.api.upsertObject(obj).then((res: any) => {
+      this.api.upsertObject("creature", obj).then((res: any) => {
         this.setState({ processing: false, redirectTo: "/beyond/creature" });
       });
     });
@@ -121,8 +121,8 @@ class CreatureEdit extends Component<Props, State> {
   // Loads the editing Creature into state
   load_object(id: string) {
     this.api.getFullObject("creature", id).then((res: any) => {
-      if (res && res.length === 1) {
-        const obj = res[0];
+      if (res) {
+        const obj = res;
         this.setState({ obj });
       }
     });

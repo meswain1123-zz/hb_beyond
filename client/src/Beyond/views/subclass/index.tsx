@@ -112,7 +112,7 @@ class SubclassIndex extends Component<Props, State> {
     subclass_obj.game_class_id = game_class_id;
     subclass_obj.copy5e(res);
     if (subclass_obj.name !== "") {
-      this.api.createObject(subclass_obj).then((res: any) => {
+      this.api.createObject("subclass", subclass_obj).then((res: any) => {
         this.runImport();
       });
     }
@@ -128,7 +128,7 @@ class SubclassIndex extends Component<Props, State> {
             const game_class = classFinder[0];
             if (game_class.subclasses_called === "Subclass") {
               game_class.subclasses_called = res.subclass_flavor;
-              this.api.updateObject(game_class).then((res2: any) => {
+              this.api.updateObject("game_class", game_class).then((res2: any) => {
                 this.makeSubclass(res, game_class._id);
               });
             } else {

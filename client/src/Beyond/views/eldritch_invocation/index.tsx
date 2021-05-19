@@ -105,7 +105,7 @@ class EldritchInvocationIndex extends Component<Props, State> {
           const eldritch_invocation_obj = new EldritchInvocation();
           eldritch_invocation_obj.copy5e(res);
           if (eldritch_invocation_obj.name !== "") {
-            this.api.createObject(eldritch_invocation_obj).then((res: any) => {
+            this.api.createObject("eldritch_invocation", eldritch_invocation_obj).then((res: any) => {
               this.runImport();
             });
           }

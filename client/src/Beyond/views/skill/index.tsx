@@ -110,7 +110,7 @@ class SkillIndex extends Component<Props, State> {
           // Translate it into a Skill object.
           const skill_obj = new Skill();
           skill_obj.copy5e(res);
-          this.api.createObject(skill_obj).then((res: any) => {
+          this.api.createObject("skill", skill_obj).then((res: any) => {
             this.runImport();
           });
         });

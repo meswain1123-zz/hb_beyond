@@ -117,7 +117,7 @@ class CreatureInstanceInput extends Component<Props, State> {
   }
 
   updateCharacter() {
-    this.api.updateObject(this.props.obj).then((res: any) => {
+    this.api.updateObject("character", this.props.obj).then((res: any) => {
       this.props.onChange();
     });
   }

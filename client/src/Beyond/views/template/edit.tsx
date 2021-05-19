@@ -75,7 +75,7 @@ class BackgroundEdit extends Component<Props, State> {
 
   submit() {
     this.setState({ processing: true }, () => {
-      this.api.upsertObject(this.state.obj).then((res: any) => {
+      this.api.upsertObject("template", this.state.obj).then((res: any) => {
         this.setState({ processing: false, redirectTo: "/beyond/background" });
       });
     });

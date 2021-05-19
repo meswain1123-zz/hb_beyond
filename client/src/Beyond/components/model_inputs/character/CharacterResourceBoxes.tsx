@@ -69,7 +69,7 @@ class CharacterResourceBoxes extends Component<Props, State> {
   }
 
   updateCharacter() {
-    this.api.updateObject(this.props.character).then((res: any) => {
+    this.api.updateObject("character", this.props.character).then((res: any) => {
       this.props.onChange();
       this.setState({ });
     });
@@ -311,7 +311,7 @@ class CharacterResourceBoxes extends Component<Props, State> {
                         slot.used--;
                       }
                       this.setState({ }, () => {
-                        this.api.updateObject(this.props.character).then((res: any) => {
+                        this.api.updateObject("character", this.props.character).then((res: any) => {
                           if ((changed && slot.used === slot.total) || (!changed && slot.used === slot.total - 1)) {
                             // Reload to make the cast buttons enabled/disabled appropriately
                             this.setState({ reloading: true }, () => {

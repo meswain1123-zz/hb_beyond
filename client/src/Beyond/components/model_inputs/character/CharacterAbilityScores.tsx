@@ -341,7 +341,7 @@ class CharacterAbilityScores extends Component<Props, State> {
                       changed = "0";
                     }
                     obj.bonus_ability_score_modifiers.setAbilityScore(this.state.drawer, +changed);
-                    this.api.updateObject(obj).then((res: any) => {
+                    this.api.updateObject("character", obj).then((res: any) => {
                       this.props.onChange();
                       this.setState({ });
                     });
@@ -364,7 +364,7 @@ class CharacterAbilityScores extends Component<Props, State> {
                       changed = "-1";
                     }
                     obj.override_ability_scores.setAbilityScore(this.state.drawer, +changed);
-                    this.api.updateObject(obj).then((res: any) => {
+                    this.api.updateObject("character", obj).then((res: any) => {
                       this.props.onChange();
                       this.setState({ });
                     });

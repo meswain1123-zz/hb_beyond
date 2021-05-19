@@ -1127,7 +1127,7 @@ class CharacterCastButton extends Component<Props, State> {
   }
 
   updateCharacter(change_types: string[]) {
-    this.api.updateObject(this.props.character).then((res: any) => {
+    this.api.updateObject("character", this.props.character).then((res: any) => {
       if (change_types.length > 0) {
         this.props.onChange(change_types);
       }

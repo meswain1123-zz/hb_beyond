@@ -606,7 +606,7 @@ class CharacterManageSpells extends Component<Props, State> {
   }
 
   update(obj: Character) {
-    this.api.updateObject(obj).then((res: any) => {
+    this.api.updateObject("character", obj).then((res: any) => {
       this.setState({ });
     });
   }

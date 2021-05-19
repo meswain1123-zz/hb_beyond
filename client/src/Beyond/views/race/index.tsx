@@ -122,7 +122,7 @@ class RaceIndex extends Component<Props, State> {
           const race_obj = new Race();
           race_obj.copy5e(res, (this.state.languages ? this.state.languages : []));
           if (race_obj.name !== "") {
-            this.api.createObject(race_obj).then((res2: any) => {
+            this.api.createObject("race", race_obj).then((res2: any) => {
               if (res.subraces && res.subraces.length > 0) {
                 const importing_subraces: string[] = [];
                 res.subraces.forEach((s: any) => {
@@ -163,7 +163,7 @@ class RaceIndex extends Component<Props, State> {
           const race_obj = new Subrace();
           race_obj.copy5e(res, this.state.importing_subrace_race_id, (this.state.languages ? this.state.languages : []));
           if (race_obj.name !== "") {
-            this.api.createObject(race_obj).then((res: any) => {
+            this.api.createObject("race", race_obj).then((res: any) => {
               this.runImportSubrace();
             });
           }
@@ -465,7 +465,7 @@ class RaceIndex extends Component<Props, State> {
                   new_obj.copy(race);
                   new_obj.name = "Copy of " + new_obj.name;
                   new_obj._id = "";
-                  this.api.createObject(new_obj).then((res: any) => {
+                  this.api.createObject("race", new_obj).then((res: any) => {
                     this.setState({ processing: false, redirectTo: `/beyond/race/edit/${res.id}` });
                   });
                 });
@@ -527,7 +527,7 @@ class RaceIndex extends Component<Props, State> {
                   new_obj.copy(subrace);
                   new_obj.name = "Copy of " + new_obj.name;
                   new_obj._id = "";
-                  this.api.createObject(new_obj).then((res: any) => {
+                  this.api.createObject("race", new_obj).then((res: any) => {
                     this.setState({ processing: false, redirectTo: `/beyond/subrace/edit/${res.id}` });
                   });
                 });

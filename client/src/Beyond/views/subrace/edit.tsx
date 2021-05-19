@@ -85,7 +85,7 @@ class SubraceEdit extends Component<Props, State> {
 
   submit() {
     this.setState({ processing: true }, () => {
-      this.api.upsertObject(this.state.obj).then((res: any) => {
+      this.api.upsertObject("subrace", this.state.obj).then((res: any) => {
         this.setState({ processing: false, redirectTo: "/beyond/race" });
       });
     });

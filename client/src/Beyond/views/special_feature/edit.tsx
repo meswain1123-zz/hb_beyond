@@ -90,7 +90,7 @@ class SpecialFeatureEdit extends Component<Props, State> {
 
   submit() {
     this.setState({ processing: true }, () => {
-      this.api.upsertObject(this.state.obj).then((res: any) => {
+      this.api.upsertObject("special_feature", this.state.obj).then((res: any) => {
         this.setState({ processing: false, redirectTo: "/beyond/special_feature" });
       });
     });

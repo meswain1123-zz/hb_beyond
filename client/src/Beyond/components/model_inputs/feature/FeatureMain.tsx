@@ -222,12 +222,12 @@ class FeatureInput extends Component<Props, State> {
           </Grid>
           <Grid item>
             <StringBox 
-              value={this.state.feature.description} 
+              value={this.state.feature.true_description} 
               name="Description"
               multiline
               onBlur={(value: string) => {
                 const feature = this.state.feature;
-                feature.description = value;
+                feature.true_description = value;
                 this.setState({ feature });
               }}
             />

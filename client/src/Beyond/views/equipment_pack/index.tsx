@@ -175,7 +175,7 @@ class EquipmentPackIndex extends Component<Props, State> {
                               new_obj.copy(o);
                               new_obj.name = "Copy of " + new_obj.name;
                               new_obj._id = "";
-                              this.api.createObject(new_obj).then((res: any) => {
+                              this.api.createObject("equipment_pack", new_obj).then((res: any) => {
                                 this.setState({ processing: false, redirectTo: `/beyond/equipment_pack/edit/${res.id}` });
                               });
                             });

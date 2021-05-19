@@ -106,7 +106,7 @@ class PactBoonIndex extends Component<Props, State> {
           const pact_boon_obj = new PactBoon();
           pact_boon_obj.copy5e(res);
           if (pact_boon_obj.name !== "") {
-            this.api.createObject(pact_boon_obj).then((res: any) => {
+            this.api.createObject("pact_boon", pact_boon_obj).then((res: any) => {
               this.runImport();
             });
           }

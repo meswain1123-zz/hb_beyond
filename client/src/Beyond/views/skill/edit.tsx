@@ -77,7 +77,7 @@ class SkillEdit extends Component<Props, State> {
 
   submit() {
     this.setState({ processing: true }, () => {
-      this.api.upsertObject(this.state.obj).then((res: any) => {
+      this.api.upsertObject("skill", this.state.obj).then((res: any) => {
         this.setState({ processing: false, redirectTo: "/beyond/skill" });
       });
     });

@@ -78,7 +78,7 @@ class SpellSlotTypeEdit extends Component<Props, State> {
 
   submit() {
     this.setState({ processing: true }, () => {
-      this.api.upsertObject(this.state.table).then((res: any) => {
+      this.api.upsertObject("spell_slot_type", this.state.table).then((res: any) => {
         this.setState({ processing: false, redirectTo: "/beyond/spell_slot_tables" });
       });
     });

@@ -122,7 +122,7 @@ class DisplayResource extends Component<Props, State> {
               resource.used--;
             }
             this.setState({ }, () => {
-              this.api.updateObject(this.props.obj).then((res: any) => {
+              this.api.updateObject("character", this.props.obj).then((res: any) => {
               });
             });
           }}

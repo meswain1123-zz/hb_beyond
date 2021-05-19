@@ -102,7 +102,7 @@ class FeaturesModal extends Component<Props, State> {
               </Grid>
               <Grid item xs={10}>
                 <div style={this.descriptionStyle()}>
-                  {feature.description}
+                  {feature.true_description}
                 </div>
               </Grid>
             </Grid>

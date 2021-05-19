@@ -125,12 +125,10 @@ class CharacterDetails extends Component<Props, State> {
   // Loads the editing Character into state
   load_object(id: string) {
     this.api.getFullObject("character", id).then((res: any) => {
-      if (res && res.length === 1) {
-        const obj = res[0];
+      if (res) {
+        const obj = res;
         this.char_util.recalcAll(obj);
-        this.setState({ 
-          obj
-        });
+        this.setState({ obj });
       }
     });
   }
@@ -179,7 +177,7 @@ class CharacterDetails extends Component<Props, State> {
   }
 
   updateCharacter(obj: Character) {
-    this.api.updateObject(obj).then((res: any) => {
+    this.api.updateObject("character", obj).then((res: any) => {
       this.setState({ obj });
     });
   }
@@ -351,7 +349,7 @@ class CharacterDetails extends Component<Props, State> {
                           const file_data = res[0];
                           const obj = this.state.obj;
                           obj.image_url = file_data.url;
-                          this.api.updateObject(obj).then((res: any) => {
+                          this.api.updateObject("character", obj).then((res: any) => {
                             this.setState({ obj });
                           });
                         }
@@ -686,7 +684,7 @@ class CharacterDetails extends Component<Props, State> {
                         obj.current_hit_points = obj.override_max_hit_points + obj.max_hit_points_modifier;
                       }
                     }
-                    this.api.updateObject(obj).then((res: any) => {
+                    this.api.updateObject("character", obj).then((res: any) => {
                       this.setState({ obj });
                     });
                   }}
@@ -709,7 +707,7 @@ class CharacterDetails extends Component<Props, State> {
                 onBlur={(changed: string) => {
                   const obj = this.state.obj;
                   obj.temp_hit_points = +changed;
-                  this.api.updateObject(obj).then((res: any) => {
+                  this.api.updateObject("character", obj).then((res: any) => {
                     this.setState({ obj });
                   });
                 }}
@@ -756,7 +754,7 @@ class CharacterDetails extends Component<Props, State> {
                       obj.current_hit_points = obj.override_max_hit_points + obj.max_hit_points_modifier;
                     }
                   }
-                  this.api.updateObject(obj).then((res: any) => {
+                  this.api.updateObject("character", obj).then((res: any) => {
                     this.setState({ obj, reloading: true }, () => {
                       this.setState({ reloading: false });
                     });
@@ -785,7 +783,7 @@ class CharacterDetails extends Component<Props, State> {
                       obj.current_hit_points = obj.override_max_hit_points + obj.max_hit_points_modifier;
                     }
                   }
-                  this.api.updateObject(obj).then((res: any) => {
+                  this.api.updateObject("character", obj).then((res: any) => {
                     this.setState({ obj, reloading: true }, () => {
                       this.setState({ reloading: false });
                     });
@@ -819,7 +817,7 @@ class CharacterDetails extends Component<Props, State> {
             } else {
               obj.death_save_fails--;
             }
-            this.api.updateObject(obj).then((res: any) => {
+            this.api.updateObject("character", obj).then((res: any) => {
               this.setState({ obj });
             });
           }}
@@ -836,7 +834,7 @@ class CharacterDetails extends Component<Props, State> {
             } else {
               obj.death_save_successes--;
             }
-            this.api.updateObject(obj).then((res: any) => {
+            this.api.updateObject("character", obj).then((res: any) => {
               this.setState({ obj });
             });
           }}
@@ -922,7 +920,7 @@ class CharacterDetails extends Component<Props, State> {
             onToggle={() => {
               const obj = this.state.obj;
               obj.inspiration = obj.inspiration === 0 ? 1 : 0;
-              this.api.updateObject(obj).then((res: any) => {
+              this.api.updateObject("character", obj).then((res: any) => {
                 this.setState({ obj });
               });
             }}
@@ -1155,7 +1153,7 @@ class CharacterDetails extends Component<Props, State> {
 
                         } else {
                           obj.current_hit_points++;
-                          this.api.updateObject(obj).then((res: any) => {
+                          this.api.updateObject("character", obj).then((res: any) => {
                             this.setState({ obj });
                           });
                         }
@@ -1168,12 +1166,12 @@ class CharacterDetails extends Component<Props, State> {
                         const obj = this.state.obj;
                         if (obj.temp_hit_points > 0) {
                           obj.temp_hit_points--;
-                          this.api.updateObject(obj).then((res: any) => {
+                          this.api.updateObject("character", obj).then((res: any) => {
                             this.setState({ obj });
                           });
                         } else if (obj.current_hit_points > 0) {
                           obj.current_hit_points--;
-                          this.api.updateObject(obj).then((res: any) => {
+                          this.api.updateObject("character", obj).then((res: any) => {
                             this.setState({ obj });
                           });
                         }

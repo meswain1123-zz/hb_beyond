@@ -449,7 +449,7 @@ class CharacterSkills extends Component<Props, State> {
                     } else {
                       obj.extra_skill_bonuses[skill._id] = +changed;
                     }
-                    this.api.updateObject(obj).then((res: any) => {
+                    this.api.updateObject("character", obj).then((res: any) => {
                       this.props.onChange();
                       this.setState({ });
                     });
@@ -474,7 +474,7 @@ class CharacterSkills extends Component<Props, State> {
                       } else {
                         obj.proficiency_overrides[skill._id] = +changed;
                       }
-                      this.api.updateObject(obj).then((res: any) => {
+                      this.api.updateObject("character", obj).then((res: any) => {
                         this.props.onChange();
                         this.setState({ });
                       });
@@ -500,7 +500,7 @@ class CharacterSkills extends Component<Props, State> {
                       } else {
                         obj.skill_overrides[skill._id] = +changed;
                       }
-                      this.api.updateObject(obj).then((res: any) => {
+                      this.api.updateObject("character", obj).then((res: any) => {
                         this.props.onChange();
                         this.setState({ });
                       });

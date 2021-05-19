@@ -102,7 +102,7 @@ class SubclassDetails extends Component<Props, State> {
               <Tooltip title={`Delete ${this.state.obj.name}`}>
                 <Fab size="small" color="primary" style={{marginLeft: "8px"}}
                   onClick={ () => {
-                    this.api.deleteObject(this.state.obj).then((res: any) => {
+                    this.api.deleteObject("subclass", this.state.obj).then((res: any) => {
                       if (this.props.objects) {
                         this.props.setSubclasses(this.props.objects.filter(o => o._id !== this.state.obj._id));
                         this.setState({ redirectTo:`/beyond/subclass` });

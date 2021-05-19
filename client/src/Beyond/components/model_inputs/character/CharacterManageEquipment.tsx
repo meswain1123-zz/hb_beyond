@@ -330,7 +330,7 @@ class CharacterManageEquipment extends Component<Props, State> {
   addItem(item: BaseItem | MagicItem) {
     const obj = this.props.obj;
     obj.add_item(item);
-    this.api.updateObject(obj).then((res: any) => {
+    this.api.updateObject("character", obj).then((res: any) => {
       this.props.onChange();
     });
   }
@@ -338,7 +338,7 @@ class CharacterManageEquipment extends Component<Props, State> {
   removeItem(item: CharacterItem) {
     const obj = this.props.obj;
     obj.remove_item(item);
-    this.api.updateObject(obj).then((res: any) => {
+    this.api.updateObject("character", obj).then((res: any) => {
       this.props.onChange();
     });
   }
@@ -384,7 +384,7 @@ class CharacterManageEquipment extends Component<Props, State> {
                       } else {
                         obj.unequip_item(item);
                       }
-                      this.api.updateObject(obj).then((res: any) => {
+                      this.api.updateObject("character", obj).then((res: any) => {
                         this.props.onChange();
                       });
                     }} 

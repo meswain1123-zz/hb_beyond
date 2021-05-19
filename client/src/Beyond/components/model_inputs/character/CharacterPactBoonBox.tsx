@@ -14,6 +14,8 @@ import {
 
 import SelectPactBoonBox from "../select/SelectPactBoonBox";
 
+import CharacterFeatureInput from "./CharacterFeature";
+
 import API from "../../../utilities/smart_api";
 import { APIClass } from "../../../utilities/smart_api_class";
 
@@ -126,6 +128,19 @@ class CharacterPactBoonBox extends Component<Props, State> {
               </Grid>
             </Grid>
           }
+          { char_pb.features.map((feature, key) => {
+            return (
+              <Grid item key={key}>
+                <CharacterFeatureInput 
+                  obj={feature}
+                  character={this.props.character}
+                  onChange={(changed: CharacterFeature) => {
+                    this.props.onChange(this.props.obj);
+                  }}
+                />
+              </Grid>
+            );
+          })}
         </Grid>
       );
     }

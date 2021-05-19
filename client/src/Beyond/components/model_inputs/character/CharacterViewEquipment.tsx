@@ -306,7 +306,7 @@ class CharacterViewEquipment extends Component<Props, State> {
                 obj={this.props.obj}
                 item={this.state.selected_item}
                 onChange={() => {
-                  this.api.updateObject(this.props.obj).then((res: any) => {
+                  this.api.updateObject("character", this.props.obj).then((res: any) => {
                     this.props.onChange();
                     this.setState({ reloading: true }, () => {
                       this.setState({ reloading: false });
@@ -404,7 +404,7 @@ class CharacterViewEquipment extends Component<Props, State> {
                         } else {
                           obj.unequip_item(item);
                         }
-                        this.api.updateObject(obj).then((res: any) => {
+                        this.api.updateObject("character", obj).then((res: any) => {
                           this.props.onChange();
                         });
                       }} 
@@ -510,7 +510,7 @@ class CharacterViewEquipment extends Component<Props, State> {
                     } else {
                       obj.unattune_item(item);
                     }
-                    this.api.updateObject(obj).then((res: any) => {
+                    this.api.updateObject("character", obj).then((res: any) => {
                       this.props.onChange();
                     });
                   }} 
@@ -550,7 +550,7 @@ class CharacterViewEquipment extends Component<Props, State> {
               onBlur={(value: string) => {
                 const obj = this.props.obj;
                 obj.other_possessions = value;
-                this.api.updateObject(obj).then((res: any) => {
+                this.api.updateObject("character", obj).then((res: any) => {
                   this.setState({ edit_view: "" }, () => {
                     this.props.onChange();
                   });

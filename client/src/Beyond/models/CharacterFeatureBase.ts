@@ -1,15 +1,18 @@
 
-import { FeatureBase } from "./FeatureBase";
-import { Feature } from "./Feature";
-import { FeatureChoice } from "./FeatureChoice";
-import { CharacterASIBaseFeature } from "./CharacterASIBaseFeature";
-import { CharacterFeature } from "./CharacterFeature";
-import { CharacterFeat } from "./CharacterFeat";
-import { CharacterFeatureChoice } from "./CharacterFeatureChoice";
-import { CharacterLanguageFeature } from "./CharacterLanguageFeature";
-import { CharacterEldritchInvocation } from "./CharacterEldritchInvocation";
-import { CharacterFightingStyle } from "./CharacterFightingStyle";
-import { CharacterSpecialFeature } from "./CharacterSpecialFeature";
+import { 
+  FeatureBase,
+  Feature,
+  FeatureChoice,
+  CharacterASIBaseFeature,
+  CharacterFeature,
+  CharacterFeat,
+  CharacterFeatureChoice,
+  CharacterLanguageFeature,
+  CharacterEldritchInvocation,
+  CharacterFightingStyle,
+  CharacterSpecialFeature,
+  CharacterPactBoon
+} from ".";
 
 /**
  * This represents a feature 
@@ -458,6 +461,29 @@ export class CharacterFeatureBase {
           //     break;
           //   }
           // }
+        }
+        if (this.needs_attention) {
+          break;
+        }
+      } else if (feature.feature.feature_type === "Pact Boon") {
+        const pact_boon = feature.feature_options[0] as CharacterPactBoon;
+        if (pact_boon.pact_boon_id === "") {
+          this.needs_attention = true;
+          break;
+        } else {
+          for (let k = 0; k < pact_boon.features.length; k++) {
+            const pb_feature = pact_boon.features[k];
+            for (let j = 0; j < pb_feature.feature_options.length; j++) {
+              const ei_opt: any = pb_feature.feature_options[j];
+              if (ei_opt === "") {
+                this.needs_attention = true;
+                break;
+              }
+            }
+            if (this.needs_attention) {
+              break;
+            }
+          }
         }
         if (this.needs_attention) {
           break;

@@ -18,6 +18,8 @@ import { APIClass } from "../../../utilities/smart_api_class";
 
 import SelectEldritchInvocationBox from "../select/SelectEldritchInvocationBox";
 
+import CharacterFeatureInput from "./CharacterFeature";
+
 
 interface AppState {
 }
@@ -145,6 +147,19 @@ class CharacterEldritchInvocationBox extends Component<Props, State> {
               </Grid>
             </Grid>
           }
+          { char_ei.features.map((feature, key) => {
+            return (
+              <Grid item key={key}>
+                <CharacterFeatureInput 
+                  obj={feature}
+                  character={this.props.character}
+                  onChange={(changed: CharacterFeature) => {
+                    this.props.onChange(this.props.obj);
+                  }}
+                />
+              </Grid>
+            );
+          })}
         </Grid>
       );
     }

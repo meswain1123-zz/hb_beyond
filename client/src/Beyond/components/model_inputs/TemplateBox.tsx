@@ -261,7 +261,7 @@ class TemplateBox extends Component<Props, State> {
                       onClick={() => {
                         this.setState({ processing: true }, () => {
                           if (this.state.new_template) {
-                            this.api.createObject(this.state.new_template).then((res: any) => {
+                            this.api.createObject("template", this.state.new_template).then((res: any) => {
                               if (this.state.new_template) {
                                 this.setState({ processing: false, modal_open: false }, () => {
                                   const templates = this.state.all_templates ? this.state.all_templates.filter(t => t.type === this.props.type && (this.state.selected_category === "ALL" || t.category === this.state.selected_category)) : [];

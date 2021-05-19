@@ -108,7 +108,7 @@ class LanguageIndex extends Component<Props, State> {
           const language_obj = new Language();
           language_obj.copy5e(res);
           if (language_obj.name !== "") {
-            this.api.createObject(language_obj).then((res: any) => {
+            this.api.createObject("language", language_obj).then((res: any) => {
               this.runImport();
             });
           }
