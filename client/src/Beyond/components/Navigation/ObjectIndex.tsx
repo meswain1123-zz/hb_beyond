@@ -2,7 +2,6 @@ import React, { Component } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
 import { Redirect } from "react-router-dom";
 import {
-  Add, 
   Edit,
 } from "@material-ui/icons";
 import {
@@ -13,13 +12,9 @@ import {
   Link
 } from "@material-ui/core";
 
-import { Spell } from "../../models";
 import { 
-  SCHOOLS 
-} from "../../models/Constants";
-
-import StringBox from "../../components/input/StringBox";
-import SelectStringBox from "../../components/input/SelectStringBox";
+  ModelBase 
+} from "../../models";
 
 import API from "../../utilities/smart_api";
 import { APIClass } from "../../utilities/smart_api_class";
@@ -51,7 +46,9 @@ type Props = PropsFromRedux & {
   data_type: string;
 }
 
-export interface State { 
+export interface State {  
+  filter: any;
+  data_type: string;
   redirectTo: string | null;
   page_num: number;
   objects: ModelBase[] | null;
@@ -69,7 +66,9 @@ class ObjectIndex extends Component<Props, State> {
       objects: null,
       loading: false,
       count: 0,
-      offset: 0
+      offset: 0,
+      filter: {},
+      data_type: ""
     };
     this.api = API.getInstance();
   }
@@ -77,6 +76,15 @@ class ObjectIndex extends Component<Props, State> {
   api: APIClass;
 
   componentDidMount() {
+  }
+
+  componentDidUpdate(prevProps: Props, prevState: State) {
+    if (this.state.filter !== this.props.filter || this.state.data_type !== this.props.data_type) {
+      this.setState({ 
+        filter: this.props.filter, 
+        data_type: this.props.data_type 
+        }, this.load);
+    }
   }
 
   descriptionStyle = () => {
@@ -94,7 +102,7 @@ class ObjectIndex extends Component<Props, State> {
 
   load() {
     this.setState({ loading: true, objects: [] }, () => {
-      this.api.getObjectCount(this.props.data_type, this.props.filter).then((res: any) => {
+      this.api.getObjectCount(this.state.data_type, this.state.filter).then((res: any) => {
         if (res && !res.error) {
           this.setState({ count: res.count }, this.load_some);
         }
@@ -103,7 +111,7 @@ class ObjectIndex extends Component<Props, State> {
   }
 
   load_some() {
-    this.api.getObjects(this.props.data_type, this.props.filter, this.state.objects ? (this.state.objects.length + this.state.offset) : this.state.offset, 350).then((res: any) => {
+    this.api.getObjects(this.state.data_type, this.state.filter, this.state.objects ? (this.state.objects.length + this.state.offset) : this.state.offset, 350).then((res: any) => {
       if (res && !res.error) {
         let objects: ModelBase[] = this.state.objects ? this.state.objects : [];
         objects = [...objects, ...(res as ModelBase[])];
@@ -113,10 +121,7 @@ class ObjectIndex extends Component<Props, State> {
   }
 
   render() {
-    if (this.state.objects === null && this.state.loading) {
-      return <span>Loading</span>;
-    } else if (this.state.objects === null) {
-      this.load();
+    if (this.state.data_type === "" || this.state.objects === null || this.state.loading) {
       return <span>Loading</span>;
     } else if (this.state.redirectTo !== null) {
       return <Redirect to={this.state.redirectTo} />;
@@ -168,9 +173,6 @@ class ObjectIndex extends Component<Props, State> {
           }
           <Grid item>
             { this.renderPageLinks(page_count) }
-          </Grid>
-          <Grid item>
-            { this.renderLetterLinks() }
           </Grid>
         </Grid>
       ); 

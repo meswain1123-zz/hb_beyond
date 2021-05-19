@@ -40,11 +40,23 @@ router
   
     db.getUserByEmail(gotUser, req.body.email);
   })
-  .get("/getObjects/:data_type", function(req, res) {
+  .post("/getObjectCount/:data_type", function(req, res) {
+    function respond(response) {
+      res.send(response);
+    }
+    db.getObjectCount(respond, req.params.data_type, req.body.filter);
+  })
+  .post("/getObjects/:data_type", function(req, res) {
     function respond(objects) {
       res.send({objects});
     }
-    db.getObjects(respond, req.params.data_type);
+    db.getObjects(respond, req.params.data_type, req.body.filter, req.body.skip, req.body.take);
+  })
+  .get("/getObject/:data_type/:object_id", function(req, res) {
+    function respond(objects) {
+      res.send({objects});
+    }
+    db.getObject(respond, req.params.data_type, req.params.object_id);
   })
   .get("/getUserObjects/:data_type/:userID", function(req, res) {
     function respond(objects) {

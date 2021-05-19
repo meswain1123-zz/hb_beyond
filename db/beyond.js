@@ -322,11 +322,76 @@ function register(respond, user) {
   });
 }
 
-function getObjects(respond, data_type) {
+function getObjects(respond, data_type, filter, skip, take) {
+  try {
+    const db = client.db(dbName);
+    if (filter.name && filter.start_letter) {
+      filter.$and = [
+        { name: { $regex : new RegExp(filter.name, "i") }},
+        { name: { $regex : new RegExp("^" + filter.start_letter, "i") }}
+      ];
+      delete filter.start_letter;
+      delete filter.name;
+    } else if (filter.name) {
+      filter.name = { $regex : new RegExp(filter.name, "i") };
+    } else if (filter.start_letter) {
+      filter.name = { $regex : new RegExp("^" + filter.start_letter, "i") };
+      delete filter.start_letter;
+    }
+    if (take === -1) {
+      db.collection(data_type)
+        .find(filter).sort({ "name": 1 }).skip(skip)
+        .toArray(function(err, docs) {
+          if (err) respond({ error: `Error: ${err}.` });
+          else if (docs == null || docs.length == 0) respond([]);
+          else respond(docs);
+        });
+    } else {
+      db.collection(data_type)
+        .find(filter).sort({ "name": 1 }).skip(skip).limit(take)
+        .toArray(function(err, docs) {
+          if (err) respond({ error: `Error: ${err}.` });
+          else if (docs == null || docs.length == 0) respond([]);
+          else respond(docs);
+        });
+    }
+  } catch (err) {
+    console.log(err);
+    respond(err);
+  }
+}
+
+function getObjectCount(respond, data_type, filter) {
+  try {
+    const db = client.db(dbName);
+    if (filter.name && filter.start_letter) {
+      filter.$and = [
+        { name: { $regex : new RegExp(filter.name, "i") }},
+        { name: { $regex : new RegExp("^" + filter.start_letter, "i") }}
+      ];
+      delete filter.start_letter;
+      delete filter.name;
+    } else if (filter.name) {
+      filter.name = { $regex : new RegExp(filter.name, "i") };
+    } else if (filter.start_letter) {
+      filter.name = { $regex : new RegExp("^" + filter.start_letter, "i") };
+      delete filter.start_letter;
+    }
+    db.collection(data_type).find(filter).count(function(err, count) {
+      if (err) respond({ error: `Error: ${err}.` });
+      else respond({ count });
+    }); 
+  } catch (err) {
+    console.log(err);
+    respond(err);
+  }
+}
+
+function getObject(respond, data_type, object_id) {
   try {
     const db = client.db(dbName);
     db.collection(data_type)
-      .find({ })
+      .find({ _id: ObjectID(object_id) })
       .toArray(function(err, docs) {
         if (err) respond({ error: `Error: ${err}.` });
         else if (docs == null || docs.length == 0) respond([]);
@@ -385,28 +450,14 @@ function deleteObject(respond, data_type, object_id) {
   respond({ message: `${data_type} ${object_id} deleted!` });
 }
 
-// function getObject(respond, data_type, id) {
-//   try {
-//     const db = client.db(dbName);
-//     db.collection(data_type)
-//       .find({ _id: ObjectID(id) })
-//       .toArray(function(err, docs) {
-//         if (err) respond({ error: `Error: ${err}.` });
-//         else if (docs == null || docs.length == 0) respond([]);
-//         else respond(docs);
-//       });
-//   } catch (err) {
-//     console.log(err);
-//     respond(err);
-//   }
-// }
-
 module.exports = {
   open,
   close,
   getUserByLogin,
   getUserByEmail,
   register,
+  getObjectCount,
+  getObject,
   getObjects,
   getUserObjects,
   createObject,
