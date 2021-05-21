@@ -78,6 +78,9 @@ class CharacterFeatureInput extends Component<Props, State> {
   api: APIClass;
 
   componentDidMount() {
+    if (this.props.obj.feature.feature_type === "Subclass") {
+      this.load();
+    }
   }
 
   load() {
@@ -100,10 +103,7 @@ class CharacterFeatureInput extends Component<Props, State> {
       </Grid>;
     switch(feature.feature.feature_type) {
       case "Subclass":
-        if (this.state.loading) {
-          details = <Grid item>Loading</Grid>;
-        } else if (this.state.subclasses === null) {
-          this.load();
+        if (this.state.loading || this.state.subclasses === null) {
           details = <Grid item>Loading</Grid>;
         } else {
           details = 

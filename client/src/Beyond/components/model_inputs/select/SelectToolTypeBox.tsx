@@ -58,6 +58,7 @@ class SelectToolTypeBox extends Component<Props, State> {
   api: APIClass;
 
   componentDidMount() {
+    this.load();
   }
 
   load() {
@@ -75,10 +76,7 @@ class SelectToolTypeBox extends Component<Props, State> {
   }
 
   render() {
-    if (this.state.loading) {
-      return <span>Loading</span>;
-    } else if (this.state.tool_types === null) {
-      this.load();
+    if (this.state.loading || this.state.tool_types === null) {
       return <span>Loading</span>;
     } else {
       let features: string[] = [];

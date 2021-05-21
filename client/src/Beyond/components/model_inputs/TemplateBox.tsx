@@ -83,6 +83,7 @@ class TemplateBox extends Component<Props, State> {
   api: APIClass;
 
   componentDidMount() {
+    this.load();
   }
 
   getModalStyle = () => {
@@ -133,10 +134,7 @@ class TemplateBox extends Component<Props, State> {
   }
 
   render() {
-    if (this.state.loading) {
-      return <span>Loading</span>;
-    } else if (this.state.all_templates === null || this.state.type !== this.props.type) {
-      this.load();
+    if (this.state.loading || this.state.all_templates === null || this.state.type !== this.props.type) {
       return <span>Loading</span>;
     } else {
       return (

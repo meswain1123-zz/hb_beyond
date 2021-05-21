@@ -92,6 +92,7 @@ class CharacterSpellDetails extends Component<Props, State> {
   char_util: CharacterUtilitiesClass;
 
   componentDidMount() {
+    this.load();
   }
 
   get_level_string(): string {
@@ -121,7 +122,6 @@ class CharacterSpellDetails extends Component<Props, State> {
 
   render() {
     if (this.state.level === -1) {
-      this.load();
       return (<span>Loading...</span>);
     } else {
       let the_spell = this.props.spell.the_spell;

@@ -67,6 +67,7 @@ class SelectEquipmentPackBox extends Component<Props, State> {
   api: APIClass;
 
   componentDidMount() {
+    this.load();
   }
 
   load() {
@@ -80,10 +81,7 @@ class SelectEquipmentPackBox extends Component<Props, State> {
   }
 
   render() {
-    if (this.state.loading) {
-      return <span>Loading</span>;
-    } else if (this.state.equipment_packs === null) {
-      this.load();
+    if (this.state.loading || this.state.equipment_packs === null) {
       return <span>Loading</span>;
     } else if (this.props.multiple) {
       let equipment_packs = this.state.equipment_packs;

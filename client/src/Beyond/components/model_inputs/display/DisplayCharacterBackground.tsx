@@ -60,6 +60,7 @@ class DisplayCharacterBackground extends Component<Props, State> {
   api: APIClass;
 
   componentDidMount() {
+    this.load();
   }
 
   descriptionStyle = () => {
@@ -96,10 +97,7 @@ class DisplayCharacterBackground extends Component<Props, State> {
 
   render() {
     let obj_background = this.props.obj.background;
-    if (this.state.loading) {
-      return <span>Loading</span>;
-    } else if (this.state.backgrounds === null) {
-      this.load();
+    if (this.state.loading || this.state.backgrounds === null) {
       return <span>Loading</span>;
     } else {
       if (obj_background.background) {

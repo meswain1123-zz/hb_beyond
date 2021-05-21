@@ -61,6 +61,7 @@ class SelectRaceBox extends Component<Props, State> {
   api: APIClass;
 
   componentDidMount() {
+    this.load();
   }
 
   load() {
@@ -74,10 +75,7 @@ class SelectRaceBox extends Component<Props, State> {
   }
 
   render() {
-    if (this.state.loading) {
-      return <span>Loading</span>;
-    } else if (this.state.races === null) {
-      this.load();
+    if (this.state.loading || this.state.races === null) {
       return <span>Loading</span>;
     } else if (this.props.multiple) {
       return (

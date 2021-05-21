@@ -70,6 +70,7 @@ class CharacterSpecialFeatureBox extends Component<Props, State> {
   api: APIClass;
 
   componentDidMount() {
+    this.load();
   }
 
   load() {
@@ -89,10 +90,7 @@ class CharacterSpecialFeatureBox extends Component<Props, State> {
   }
 
   render() {
-    if (this.state.loading) {
-      return <span>Loading</span>;
-    } else if (this.state.special_features === null) {
-      this.load();
+    if (this.state.loading || this.state.special_features === null) {
       return <span>Loading</span>;
     } else {
       return this.render_main();

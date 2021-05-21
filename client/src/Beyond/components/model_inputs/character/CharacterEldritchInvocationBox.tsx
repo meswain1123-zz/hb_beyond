@@ -69,6 +69,7 @@ class CharacterEldritchInvocationBox extends Component<Props, State> {
   api: APIClass;
 
   componentDidMount() {
+    this.load();
   }
 
   load() {
@@ -88,10 +89,7 @@ class CharacterEldritchInvocationBox extends Component<Props, State> {
   }
 
   render() {
-    if (this.state.loading) {
-      return <span>Loading</span>;
-    } else if (this.state.eldritch_invocations === null) {
-      this.load();
+    if (this.state.loading || this.state.eldritch_invocations === null) {
       return <span>Loading</span>;
     } else {
       const char_ei = this.props.obj.feature_options[0] as CharacterEldritchInvocation;

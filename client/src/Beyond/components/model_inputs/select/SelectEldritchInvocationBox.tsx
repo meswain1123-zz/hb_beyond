@@ -60,6 +60,7 @@ class SelectEldritchInvocationBox extends Component<Props, State> {
   api: APIClass;
 
   componentDidMount() {
+    this.load();
   }
 
   load() {
@@ -73,10 +74,7 @@ class SelectEldritchInvocationBox extends Component<Props, State> {
   }
 
   render() {
-    if (this.state.loading) {
-      return <span>Loading</span>;
-    } else if (this.state.eldritch_invocations === null) {
-      this.load();
+    if (this.state.loading || this.state.eldritch_invocations === null) {
       return <span>Loading</span>;
     } else {
       const eldritch_invocations = this.props.eldritch_invocations ? this.props.eldritch_invocations : this.state.eldritch_invocations;

@@ -67,6 +67,7 @@ class SelectFeatBox extends Component<Props, State> {
   api: APIClass;
 
   componentDidMount() {
+    this.load();
   }
 
   load() {
@@ -80,10 +81,7 @@ class SelectFeatBox extends Component<Props, State> {
   }
 
   render() {
-    if (this.state.loading) {
-      return <span>Loading</span>;
-    } else if (this.state.feats === null) {
-      this.load();
+    if (this.state.loading || this.state.feats === null) {
       return <span>Loading</span>;
     } else if (this.props.multiple) {
       let feats = this.state.feats;

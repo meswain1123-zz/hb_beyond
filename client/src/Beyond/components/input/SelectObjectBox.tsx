@@ -87,6 +87,7 @@ class SelectBox extends Component<Props, State> {
   api: APIClass;
 
   componentDidMount() {
+    this.load();
   }
 
   getLabelWidth(name: string) {
@@ -141,10 +142,7 @@ class SelectBox extends Component<Props, State> {
   render() {
     if (this.props.type === "") {
       return <span></span>;
-    } else if (this.state.loading) {
-      return <span>Loading</span>;
-    } else if (this.state.objects === null) {
-      this.load();
+    } else if (this.state.loading || this.state.objects === null) {
       return <span>Loading</span>;
     } else {
       if (this.props.color !== "") {

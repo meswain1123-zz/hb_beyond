@@ -128,6 +128,7 @@ class FeatureInput extends Component<Props, State> {
   api: APIClass;
 
   componentDidMount() {
+    this.load();
   }
 
   load() {
@@ -136,10 +137,8 @@ class FeatureInput extends Component<Props, State> {
 
   render() {
     if (this.props.feature.parent_type !== this.state.feature.parent_type || 
-      this.props.feature.id !== this.state.feature.id) {
-      this.load();
-      return <span>Loading</span>;
-    } else if (this.state.reloading) {
+      this.props.feature.id !== this.state.feature.id || 
+      this.state.reloading) {
       return (
         <Grid item>Loading</Grid>
       );

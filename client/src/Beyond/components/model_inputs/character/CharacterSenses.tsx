@@ -88,6 +88,7 @@ class CharacterSenses extends Component<Props, State> {
   api: APIClass;
 
   componentDidMount() {
+    this.load();
   }
 
   load() {
@@ -102,10 +103,7 @@ class CharacterSenses extends Component<Props, State> {
   }
 
   render() {
-    if (this.state.loading) {
-      return <span>Loading</span>;
-    } else if (this.state.skills === null) {
-      this.load();
+    if (this.state.loading || this.state.skills === null) {
       return <span>Loading</span>;
     } else {
       let passive_perception = 10;

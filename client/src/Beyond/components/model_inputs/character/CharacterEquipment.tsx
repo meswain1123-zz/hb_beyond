@@ -89,6 +89,7 @@ class CharacterEquipmentInput extends Component<Props, State> {
   api: APIClass;
 
   componentDidMount() {
+    this.load();
   }
 
   load() {
@@ -303,10 +304,7 @@ class CharacterEquipmentInput extends Component<Props, State> {
   }
 
   render() {
-    if (this.state.loading) {
-      return <span>Loading</span>;
-    } else if (this.state.base_items === null) {
-      this.load();
+    if (this.state.loading || this.state.base_items === null) {
       return <span>Loading</span>;
     } else {
       return (

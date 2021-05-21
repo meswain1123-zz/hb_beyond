@@ -62,6 +62,7 @@ class ResourceFeatureInput extends Component<Props, State> {
   api: APIClass;
 
   componentDidMount() {
+    this.load();
   }
 
   load() {
@@ -75,10 +76,7 @@ class ResourceFeatureInput extends Component<Props, State> {
   }
 
   render() {
-    if (this.state.loading) {
-      return <span>Loading</span>;
-    } else if (this.state.resources === null) {
-      this.load();
+    if (this.state.loading || this.state.resources === null) {
       return <span>Loading</span>;
     } else if (this.props.obj.type_id && (this.state.type === null || this.state.type._id !== this.props.obj.type_id)) {
       const objFinder = this.state.resources ? this.state.resources.filter(o => o._id === this.props.obj.type_id) : [];

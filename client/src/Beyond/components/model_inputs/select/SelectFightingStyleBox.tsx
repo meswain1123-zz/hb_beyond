@@ -69,6 +69,7 @@ class SelectFightingStyleBox extends Component<Props, State> {
   api: APIClass;
 
   componentDidMount() {
+    this.load();
   }
 
   load() {
@@ -82,10 +83,7 @@ class SelectFightingStyleBox extends Component<Props, State> {
   }
 
   render() {
-    if (this.state.loading) {
-      return <span>Loading</span>;
-    } else if (this.props.fighting_styles === null && this.state.fighting_styles === null) {
-      this.load();
+    if (this.state.loading || this.props.fighting_styles === null || this.state.fighting_styles === null) {
       return <span>Loading</span>;
     } else {
       const fighting_styles = this.props.fighting_styles === null ? this.state.fighting_styles : this.props.fighting_styles;

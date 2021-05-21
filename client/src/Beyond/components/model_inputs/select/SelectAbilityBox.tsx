@@ -59,6 +59,7 @@ class SelectAbilityBox extends Component<Props, State> {
   api: APIClass;
 
   componentDidMount() {
+    this.load();
   }
 
   load() {
@@ -72,10 +73,7 @@ class SelectAbilityBox extends Component<Props, State> {
   }
 
   render() {
-    if (this.state.loading) {
-      return <span>Loading</span>;
-    } else if (this.state.abilities === null) {
-      this.load();
+    if (this.state.loading || this.state.abilities === null) {
       return <span>Loading</span>;
     } else if (this.props.multiple) {
       return (<span></span>);

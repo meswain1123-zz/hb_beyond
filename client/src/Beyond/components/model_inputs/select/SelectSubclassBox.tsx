@@ -65,6 +65,7 @@ class SelectSubclassBox extends Component<Props, State> {
   api: APIClass;
 
   componentDidMount() {
+    this.load();
   }
 
   load() {
@@ -78,10 +79,7 @@ class SelectSubclassBox extends Component<Props, State> {
   }
 
   render() {
-    if (this.state.loading) {
-      return <span>Loading</span>;
-    } else if (this.state.subclasses === null) {
-      this.load();
+    if (this.state.loading || this.state.subclasses === null) {
       return <span>Loading</span>;
     } else {
       const options = this.props.game_class_id ? this.state.subclasses.filter(o => o.game_class_id === this.props.game_class_id) : this.state.subclasses;

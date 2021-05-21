@@ -77,6 +77,7 @@ class CharacterRaceInput extends Component<Props, State> {
   api: APIClass;
 
   componentDidMount() {
+    this.load();
   }
 
   descriptionStyle = () => {
@@ -139,10 +140,7 @@ class CharacterRaceInput extends Component<Props, State> {
 
   render() {
     let obj_race = this.props.obj.race;
-    if (this.state.loading) {
-      return <span>Loading</span>;
-    } else if (this.state.races === null) {
-      this.load();
+    if (this.state.loading || this.state.races === null) {
       return <span>Loading</span>;
     } else if (!obj_race || obj_race.race_id === "" || this.state.change_race) {
       const page_size = 7;

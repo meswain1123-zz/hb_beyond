@@ -58,6 +58,7 @@ class DisplayAbility extends Component<Props, State> {
   api: APIClass;
 
   componentDidMount() {
+    this.load();
   }
 
   load() {
@@ -74,10 +75,7 @@ class DisplayAbility extends Component<Props, State> {
   }
 
   render() {
-    if (this.state.loading) {
-      return <span>Loading</span>;
-    } else if (this.state.resources === null) {
-      this.load();
+    if (this.state.loading || this.state.resources === null) {
       return <span>Loading</span>;
     } else {
       const ability = this.props.ability;

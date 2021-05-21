@@ -93,6 +93,7 @@ class CharacterManageSpells extends Component<Props, State> {
   api: APIClass;
 
   componentDidMount() {
+    this.load();
   }
 
   load() {
@@ -141,10 +142,7 @@ class CharacterManageSpells extends Component<Props, State> {
   }
 
   render() {
-    if (this.state.loading) {
-      return <span style={{ width: "324px" }}>Loading</span>;
-    } else if (this.state.spells === null) {
-      this.load();
+    if (this.state.loading || this.state.spells === null) {
       return <span style={{ width: "324px" }}>Loading</span>;
     } else { 
       return (

@@ -80,6 +80,7 @@ export * from "./ResourceFeature";
 export * from "./RollPlus";
 export * from "./RollPlusUpgradable";
 export * from "./Skill";
+export * from "./SourceBook";
 export * from "./SpecialFeature";
 export * from "./SpecialSpellFeature";
 export * from "./CharacterSpellBook";

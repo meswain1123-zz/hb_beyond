@@ -75,6 +75,7 @@ class SelectSpecialFeatureBox extends Component<Props, State> {
   api: APIClass;
 
   componentDidMount() {
+    this.load();
   }
 
   load() {
@@ -103,10 +104,7 @@ class SelectSpecialFeatureBox extends Component<Props, State> {
   }
 
   render() {
-    if (this.state.loading) {
-      return <span>Loading</span>;
-    } else if (this.state.special_features === null) {
-      this.load();
+    if (this.state.loading || this.state.special_features === null) {
       return <span>Loading</span>;
     } else if (this.props.type === "ALL") {
       let features = this.props.options.length === 0 ? this.state.special_features.filter(o => o.type === this.state.type) : this.props.options;

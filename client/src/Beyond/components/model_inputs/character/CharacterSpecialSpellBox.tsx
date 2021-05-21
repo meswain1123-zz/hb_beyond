@@ -70,6 +70,7 @@ class CharacterSpecialSpellBox extends Component<Props, State> {
   api: APIClass;
 
   componentDidMount() {
+    this.load();
   }
 
   load() {
@@ -94,10 +95,7 @@ class CharacterSpecialSpellBox extends Component<Props, State> {
   }
 
   render() {
-    if (this.state.loading) {
-      return <span>Loading</span>;
-    } else if (this.state.spells === null || this.state.game_classes === null) {
-      this.load();
+    if (this.state.loading || this.state.spells === null || this.state.game_classes === null) {
       return <span>Loading</span>;
     } else {
       const id = this.props.obj.feature_options[0] as string;

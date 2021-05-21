@@ -86,6 +86,7 @@ class CreatureStatBlock extends Component<Props, State> {
   image_api: ImageAPIClass;
 
   componentDidMount() {
+    this.load();
   }
 
   load() {
@@ -114,10 +115,7 @@ class CreatureStatBlock extends Component<Props, State> {
   }
 
   render() {
-    if (this.state.loading) {
-      return <span>Loading</span>;
-    } else if (this.state.armor_types === null) {
-      this.load();
+    if (this.state.loading || this.state.armor_types === null) {
       return <span>Loading</span>;
     } else if (this.state.redirectTo !== null) {
       return <Redirect to={this.state.redirectTo} />;

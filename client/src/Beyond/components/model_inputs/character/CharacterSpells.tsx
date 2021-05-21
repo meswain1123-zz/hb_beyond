@@ -89,6 +89,7 @@ class CharacterSpells extends Component<Props, State> {
   data_util: DataUtilitiesClass;
 
   componentDidMount() {
+    this.load();
   }
 
   resetSearch() {
@@ -134,10 +135,7 @@ class CharacterSpells extends Component<Props, State> {
   }
 
   render() {
-    if (this.state.loading) {
-      return <span>Loading</span>;
-    } else if (this.state.spells === null) {
-      this.load();
+    if (this.state.loading || this.state.spells === null) {
       return <span>Loading</span>;
     } else { 
       return (

@@ -85,6 +85,7 @@ class CharacterAbilityScoresInput extends Component<Props, State> {
   data_util: DataUtilitiesClass;
 
   componentDidMount() {
+    this.load();
   }
 
   descriptionStyle = () => {
@@ -127,10 +128,7 @@ class CharacterAbilityScoresInput extends Component<Props, State> {
   }
 
   render() {
-    if (this.state.loading) {
-      return <span>Loading</span>;
-    } else if (this.state.races === null) {
-      this.load();
+    if (this.state.loading || this.state.races === null) {
       return <span>Loading</span>;
     } else {
       return (

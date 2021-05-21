@@ -60,6 +60,7 @@ class SelectLanguageBox extends Component<Props, State> {
   api: APIClass;
 
   componentDidMount() {
+    this.load();
   }
 
   load() {
@@ -73,10 +74,7 @@ class SelectLanguageBox extends Component<Props, State> {
   }
 
   render() {
-    if (this.state.loading) {
-      return <span>Loading</span>;
-    } else if (this.state.languages === null) {
-      this.load();
+    if (this.state.loading || this.state.languages === null) {
       return <span>Loading</span>;
     } else {
       const filtered = this.state.languages.filter(o => 

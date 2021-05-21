@@ -56,6 +56,7 @@ class DisplaySpellcasting extends Component<Props, State> {
   api: APIClass;
 
   componentDidMount() {
+    this.load();
   }
 
   load() {
@@ -73,10 +74,7 @@ class DisplaySpellcasting extends Component<Props, State> {
   }
 
   render() {
-    if (this.state.loading) {
-      return <span>Loading</span>;
-    } else if (this.state.spell_lists === null || this.state.spell_slot_types === null) {
-      this.load();
+    if (this.state.loading || this.state.spell_lists === null || this.state.spell_slot_types === null) {
       return <span>Loading</span>;
     } else {
       const spellcasting = this.props.spellcasting;

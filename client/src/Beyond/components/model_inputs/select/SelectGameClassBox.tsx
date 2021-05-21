@@ -63,6 +63,7 @@ class SelectGameClassBox extends Component<Props, State> {
   api: APIClass;
 
   componentDidMount() {
+    this.load();
   }
 
   load() {
@@ -76,10 +77,7 @@ class SelectGameClassBox extends Component<Props, State> {
   }
 
   render() {
-    if (this.state.loading) {
-      return <span>Loading</span>;
-    } else if (this.state.game_classes === null) {
-      this.load();
+    if (this.state.loading || this.state.game_classes === null) {
       return <span>Loading</span>;
     } else if (this.props.multiple) {
       return (

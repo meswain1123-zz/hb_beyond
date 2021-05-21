@@ -75,10 +75,7 @@ class SelectResourceBox extends Component<Props, State> {
   }
 
   render() {
-    if (this.state.loading) {
-      return <span>Loading</span>;
-    } else if (this.state.resources === null) {
-      this.load();
+    if (this.state.loading || this.state.resources === null) {
       return <span>Loading</span>;
     } else {
       let resources: Resource[] = [];

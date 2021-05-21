@@ -60,6 +60,7 @@ class SelectPactBoonBox extends Component<Props, State> {
   api: APIClass;
 
   componentDidMount() {
+    this.load();
   }
 
   load() {
@@ -73,10 +74,7 @@ class SelectPactBoonBox extends Component<Props, State> {
   }
 
   render() {
-    if (this.state.loading) {
-      return <span>Loading</span>;
-    } else if (this.state.pact_boons === null) {
-      this.load();
+    if (this.state.loading || this.state.pact_boons === null) {
       return <span>Loading</span>;
     } else {
       return (

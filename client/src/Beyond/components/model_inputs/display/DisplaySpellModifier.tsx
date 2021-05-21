@@ -53,6 +53,7 @@ class DisplaySpellModifier extends Component<Props, State> {
   api: APIClass;
 
   componentDidMount() {
+    this.load();
   }
 
   load() {
@@ -69,10 +70,7 @@ class DisplaySpellModifier extends Component<Props, State> {
   }
 
   render() {
-    if (this.state.loading) {
-      return <span>Loading</span>;
-    } else if (this.state.spells === null) {
-      this.load();
+    if (this.state.loading || this.state.spells === null) {
       return <span>Loading</span>;
     } else {
       const modifier = this.props.modifier;

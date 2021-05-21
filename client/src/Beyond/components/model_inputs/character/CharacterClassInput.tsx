@@ -89,6 +89,7 @@ class CharacterClassInput extends Component<Props, State> {
   api: APIClass;
 
   componentDidMount() {
+    this.load();
   }
 
   descriptionStyle = () => {
@@ -136,10 +137,7 @@ class CharacterClassInput extends Component<Props, State> {
   }
 
   render() {
-    if (this.state.loading) {
-      return <span>Loading</span>;
-    } else if (this.state.game_classes === null) {
-      this.load();
+    if (this.state.loading || this.state.game_classes === null) {
       return <span>Loading</span>;
     } else if (this.props.obj.classes.length === 0 || this.state.new_class) {
       const page_size = 7;

@@ -97,6 +97,7 @@ class SummonStatBlockInput extends Component<Props, State> {
   api: APIClass;
 
   componentDidMount() {
+    this.load();
   }
 
   load() {
@@ -114,10 +115,7 @@ class SummonStatBlockInput extends Component<Props, State> {
   }
 
   render() {
-    if (this.state.loading) {
-      return <span>Loading</span>;
-    } else if (this.state.skills === null) {
-      this.load();
+    if (this.state.loading || this.state.skills === null) {
       return <span>Loading</span>;
     } else { 
       return (

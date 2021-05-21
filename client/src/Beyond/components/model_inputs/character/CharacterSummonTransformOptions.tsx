@@ -66,6 +66,7 @@ class CharacterSummonTransformOptions extends Component<Props, State> {
   api: APIClass;
 
   componentDidMount() {
+    this.load();
   }
 
   load() {
@@ -80,10 +81,7 @@ class CharacterSummonTransformOptions extends Component<Props, State> {
   }
 
   render() {
-    if (this.state.loading) {
-      return <span>Loading</span>;
-    } else if (this.state.creatures === null) {
-      this.load();
+    if (this.state.loading || this.state.creatures === null) {
       return <span>Loading</span>;
     } else {
       const summon_options = this.props.potence.summon_options;

@@ -62,6 +62,7 @@ class SelectSpellListBox extends Component<Props, State> {
   api: APIClass;
 
   componentDidMount() {
+    this.load();
   }
 
   load() {
@@ -75,10 +76,7 @@ class SelectSpellListBox extends Component<Props, State> {
   }
 
   render() {
-    if (this.state.loading) {
-      return <span>Loading</span>;
-    } else if (this.state.spell_lists === null) {
-      this.load();
+    if (this.state.loading || this.state.spell_lists === null) {
       return <span>Loading</span>;
     } else {
       const extra_options: string[] = [];
