@@ -55,7 +55,7 @@ class CharacterDescription extends Component<Props, State> {
       loading: false,
       reloading: false,
       drawer: "",
-      view: "All"
+      view: "ALL"
     };
     this.api = API.getInstance();
   }
@@ -95,15 +95,15 @@ class CharacterDescription extends Component<Props, State> {
             <Grid container spacing={0} direction="row" style={{ width: "300px" }}>
               <Grid item xs={1}>
                 <ToggleButtonBox 
-                  name="All"
+                  name="ALL"
                   height={15}
                   lineHeight={1.5}
                   border=""
                   color="gray"
                   bold
-                  value={this.state.view === "All"}
+                  value={this.state.view === "ALL"}
                   onToggle={() => {
-                    this.setState({ view: "All" });
+                    this.setState({ view: "ALL" });
                   }}
                 />
               </Grid>
@@ -152,7 +152,7 @@ class CharacterDescription extends Component<Props, State> {
             </Grid>
           </div>
         </Grid>
-        { (this.state.view === "All" || this.state.view === "Background") && 
+        { (this.state.view === "ALL" || this.state.view === "Background") && 
           <Grid item container spacing={0} direction="column">
             <Grid item style={{ fontWeight: "bold", fontSize: "12px" }}>
               Background
@@ -162,7 +162,7 @@ class CharacterDescription extends Component<Props, State> {
             </Grid>
           </Grid>
         }
-        { (this.state.view === "All" || this.state.view === "Characteristics") && 
+        { (this.state.view === "ALL" || this.state.view === "Characteristics") && 
           <Grid item container spacing={0} direction="column">
             <Grid item style={{ fontWeight: "bold", fontSize: "12px" }}>
               Characteristics
@@ -274,7 +274,7 @@ class CharacterDescription extends Component<Props, State> {
             </Grid>
           </Grid>
         }
-        { (this.state.view === "All" || this.state.view === "Appearance") && 
+        { (this.state.view === "ALL" || this.state.view === "Appearance") && 
           <Grid item>
             <StringBox 
               name="Appearance" 

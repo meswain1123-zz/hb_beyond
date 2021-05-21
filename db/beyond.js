@@ -325,15 +325,15 @@ function register(respond, user) {
 function getObjects(respond, data_type, filter, skip, take) {
   try {
     const db = client.db(dbName);
-    if (filter.name && filter.start_letter) {
+    if (filter.search_string && filter.start_letter) {
       filter.$and = [
-        { name: { $regex : new RegExp(filter.name, "i") }},
+        { name: { $regex : new RegExp(filter.search_string, "i") }},
         { name: { $regex : new RegExp("^" + filter.start_letter, "i") }}
       ];
       delete filter.start_letter;
-      delete filter.name;
-    } else if (filter.name) {
-      filter.name = { $regex : new RegExp(filter.name, "i") };
+      delete filter.search_string;
+    } else if (filter.search_string) {
+      filter.name = { $regex : new RegExp(filter.search_string, "i") };
     } else if (filter.start_letter) {
       filter.name = { $regex : new RegExp("^" + filter.start_letter, "i") };
       delete filter.start_letter;

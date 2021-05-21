@@ -83,7 +83,7 @@ class SelectSpellListBox extends Component<Props, State> {
     } else {
       const extra_options: string[] = [];
       if (this.props.allow_all) {
-        extra_options.push("All");
+        extra_options.push("ALL");
       }
       if (this.props.allow_any) {
         extra_options.push("Any");

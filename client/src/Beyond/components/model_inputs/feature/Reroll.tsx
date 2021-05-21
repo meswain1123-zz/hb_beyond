@@ -66,7 +66,7 @@ class RerollInput extends Component<Props, State> {
         <Grid item>
           <SelectStringBox 
             name="Allowed Damage Types" 
-            options={["All",...DAMAGE_TYPES]}
+            options={["ALL",...DAMAGE_TYPES]}
             values={this.props.obj.allowed_damage_types} 
             multiple
             onChange={(values: string[]) => {

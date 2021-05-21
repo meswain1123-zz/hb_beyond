@@ -69,7 +69,7 @@ class CharacterSenses extends Component<Props, State> {
       reloading: false,
       drawer: "",
       search_string: "",
-      view: "All",
+      view: "ALL",
       edit_view: "",
       selected_spell: null,
       selected_level: null,

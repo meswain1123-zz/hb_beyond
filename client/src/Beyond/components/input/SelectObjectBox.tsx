@@ -117,7 +117,7 @@ class SelectBox extends Component<Props, State> {
           }
           rendered += oFinder[0].name;
         } else {
-          // To get All and None to show up
+          // To get ALL and None to show up
           if (i > 0) {
             rendered += ",";
           }
@@ -181,9 +181,9 @@ class SelectBox extends Component<Props, State> {
             MenuProps={MenuProps}
           >
             { this.props.allow_all && 
-              <MenuItem value="All">
-                <Checkbox checked={ this.props.values.indexOf("All") > -1 } />
-                <ListItemText primary="All" />
+              <MenuItem value="ALL">
+                <Checkbox checked={ this.props.values.indexOf("ALL") > -1 } />
+                <ListItemText primary="ALL" />
               </MenuItem>
             }
             { this.props.allow_none && 
@@ -211,7 +211,7 @@ class SelectBox extends Component<Props, State> {
             labelWidth={ this.props.labelWidth ? this.props.labelWidth : this.state.labelWidth }
           >
             { this.props.allow_all && 
-              <MenuItem value="All">All</MenuItem>
+              <MenuItem value="ALL">ALL</MenuItem>
             }
             { this.props.allow_none && 
               <MenuItem value="None">None</MenuItem>

@@ -79,7 +79,7 @@ class SpellSlotTypeEdit extends Component<Props, State> {
   submit() {
     this.setState({ processing: true }, () => {
       this.api.upsertObject("spell_slot_type", this.state.table).then((res: any) => {
-        this.setState({ processing: false, redirectTo: "/beyond/spell_slot_tables" });
+        this.setState({ processing: false, redirectTo: "/beyond/spell_slot_type" });
       });
     });
   }
@@ -139,7 +139,7 @@ class SpellSlotTypeEdit extends Component<Props, State> {
               <Tooltip title={`Back to Spell Slot Tables`}>
                 <Fab size="small" color="primary" style={{marginLeft: "8px"}}
                   onClick={ () => {
-                    this.setState({ redirectTo:`/beyond/spell_slot_tables` });
+                    this.setState({ redirectTo:`/beyond/spell_slot_type` });
                   }}>
                   <ArrowBack/>
                 </Fab>
@@ -238,7 +238,7 @@ class SpellSlotTypeEdit extends Component<Props, State> {
                 disabled={this.state.processing}
                 style={{ marginLeft: "4px" }}
                 onClick={ () => { 
-                  this.setState({ redirectTo:`/beyond/spell_slot_tables` });
+                  this.setState({ redirectTo:`/beyond/spell_slot_type` });
                 }}>
                 Cancel
               </Button>

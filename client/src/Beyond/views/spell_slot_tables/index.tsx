@@ -3,20 +3,17 @@ import { connect, ConnectedProps } from 'react-redux';
 import { Redirect } from "react-router-dom";
 import {
   Add, 
-  Edit,
 } from "@material-ui/icons";
 import {
   Grid, 
-  Button, 
-  Tooltip, Fab
+  Tooltip, 
+  Fab
 } from "@material-ui/core";
-
-import { SpellSlotType } from "../../models";
 
 import StringBox from "../../components/input/StringBox";
 
-import API from "../../utilities/smart_api";
-import { APIClass } from "../../utilities/smart_api_class";
+import ObjectIndex from "../../components/Navigation/ObjectIndex";
+import LetterLinks from "../../components/Navigation/LetterLinks";
 
 
 interface AppState {
@@ -43,8 +40,7 @@ type Props = PropsFromRedux & { }
 export interface State { 
   redirectTo: string | null;
   search_string: string;
-  spell_slot_types: SpellSlotType[] | null;
-  loading: boolean;
+  start_letter: string;
 }
 
 class SpellSlotTypeIndex extends Component<Props, State> {
@@ -53,48 +49,25 @@ class SpellSlotTypeIndex extends Component<Props, State> {
     this.state = {
       redirectTo: null,
       search_string: "",
-      spell_slot_types: null,
-      loading: false
+      start_letter: ""
     };
-    this.api = API.getInstance();
   }
 
-  api: APIClass;
+  get_filter() {
+    const filter: any = {};
+    
+    if (this.state.start_letter !== "") {
+      filter.start_letter = this.state.start_letter;
+    }
+    if (this.state.search_string !== "") {
+      filter.search_string = this.state.search_string;
+    }
 
-  componentDidMount() {
-  }
-
-  descriptionStyle = () => {
-    const descWidth = Math.floor(this.props.width * 0.7);
-  
-    const properties: React.CSSProperties = {
-      width: `${descWidth}px`,
-      whiteSpace: "nowrap", 
-      overflow: "hidden", 
-      textOverflow: "ellipsis"
-    } as React.CSSProperties;
-
-    return properties;
-  }
-
-  load() {
-    this.setState({ loading: true }, () => {
-      this.api.getObjects("spell_slot_type").then((res: any) => {
-        if (res && !res.error) {
-          const spell_slot_types: SpellSlotType[] = res;
-          this.setState({ spell_slot_types, loading: false });
-        }
-      });
-    });
+    return filter;
   }
 
   render() {
-    if (this.state.loading) {
-      return <span>Loading</span>;
-    } else if (this.state.spell_slot_types === null) {
-      this.load();
-      return <span>Loading</span>;
-    } else if (this.state.redirectTo !== null) {
+    if (this.state.redirectTo !== null) {
       return <Redirect to={this.state.redirectTo} />;
     } else {
       return (
@@ -107,7 +80,7 @@ class SpellSlotTypeIndex extends Component<Props, State> {
               <Tooltip title={`Create New Table`}>
                 <Fab size="small" color="primary" style={{marginLeft: "8px"}}
                   onClick={ () => {
-                    this.setState({ redirectTo:`/beyond/spell_slot_tables/create` });
+                    this.setState({ redirectTo:`/beyond/spell_slot_type/create` });
                   }}>
                   <Add/>
                 </Fab>
@@ -124,43 +97,21 @@ class SpellSlotTypeIndex extends Component<Props, State> {
             </Grid>
           </Grid>
           <Grid item>
-            <Grid container spacing={1} direction="column">
-              { this.state.spell_slot_types.filter(o => 
-                (this.state.search_string === "" || o.name.toLowerCase().includes(this.state.search_string.toLowerCase()))).map((o, key) => {
-                return (
-                  <Grid key={key} item container spacing={1} direction="row">
-                    <Grid item xs={2}>
-                      <Tooltip title={`View details for ${o.name}`}>
-                        <Button 
-                          fullWidth variant="contained" color="primary" 
-                          onClick={ () => {
-                            this.setState({ redirectTo:`/beyond/spell_slot_tables/details/${o._id}` });
-                          }}>
-                            {o.name}
-                        </Button>
-                      </Tooltip>
-                    </Grid>
-                    <Grid item xs={1}>
-                      <Tooltip title={`Edit ${o.name}`}>
-                        <Fab size="small" color="primary" style={{marginLeft: "8px"}}
-                          onClick={ () => {
-                            this.setState({ redirectTo:`/beyond/spell_slot_tables/edit/${o._id}` });
-                          }}>
-                          <Edit/>
-                        </Fab>
-                      </Tooltip> 
-                    </Grid>
-                    <Grid item xs={9}>
-                      
-                    </Grid>
-                  </Grid>
-                );
-              }) }
-            </Grid>
+            <ObjectIndex 
+              filter={this.get_filter()}
+              data_type="spell_slot_type"
+            />
+          </Grid>
+          <Grid item>
+            <LetterLinks 
+              onChange={(start_letter: string) => {
+                this.setState({ start_letter });
+              }} 
+            />
           </Grid>
         </Grid>
       ); 
-    }
+    } 
   }
 }
 

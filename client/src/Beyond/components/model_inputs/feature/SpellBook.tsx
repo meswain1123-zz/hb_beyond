@@ -101,7 +101,7 @@ class SpellBookInput extends Component<Props, State> {
         <Grid item>
           <SelectStringBox 
             name="Limitations"
-            options={["All","No Cantrips","Rituals Only"]}
+            options={["ALL","No Cantrips","Rituals Only"]}
             value={this.props.obj.limitations}
             onChange={(value: string) => {
               const obj = this.props.obj;

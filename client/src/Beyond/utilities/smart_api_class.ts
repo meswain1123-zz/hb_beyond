@@ -130,7 +130,14 @@ export class APIClass {
       return this.getObjectsFromAPI(data_type, filter, skip, take);
     } else {
       if (this.smart_hash[data_type]) {
-        return this.smart_hash[data_type];
+        const filtered = this.filter(this.smart_hash[data_type], filter);
+        if (take > -1) {
+          return filtered.slice(skip, take);
+        } else if (skip > 0) {
+          return filtered.slice(skip);
+        } else {
+          return filtered;
+        }
       } else {
         return this.getObjectsFromAPI(data_type, filter, skip, take);
       }
@@ -192,7 +199,19 @@ export class APIClass {
       }
     }
   };
-  getObjectCount = async (data_type: string, filter: any = {}) => {
+  getObjectCount = async (data_type: string, filter: any = {}, refresh = false) => {
+    if (refresh) {
+      return this.getObjectCountFromAPI(data_type, filter);
+    } else {
+      if (this.smart_hash[data_type]) {
+        const filtered = this.filter(this.smart_hash[data_type], filter);
+        return filtered.length;
+      } else {
+        return this.getObjectCountFromAPI(data_type, filter);
+      }
+    }
+  };
+  getObjectCountFromAPI = async (data_type: string, filter: any = {}) => {
     if (this.real) {
       const response = await this.postData(
         `/api/beyond/getObjectCount/${data_type}`, { filter }
@@ -203,6 +222,29 @@ export class APIClass {
     } else {
       return [{ _id: -1, vttID: -1, Name: "Alice" }];
     }
+  };
+
+  filter = (objects: ModelBase[], filter: any) => {
+    let filtered = [...objects];
+    Object.keys(filter).forEach(key => {
+      if (key === "start_letter") {
+        filtered = filtered.filter(o => o.name.startsWith(filter[key]));
+      } else if (key === "search_string") {
+        filtered = filtered.filter(o => o.name.includes(filter[key]));
+      } else {
+        // // Keeping this here to make it easier to debug if something goes wrong with future filters
+        // const new_filtered: ModelBase[] = [];
+        // filtered.forEach(mb => {
+        //   const o = mb as any;
+        //   if (o[key] === filter[key]) {
+        //     new_filtered.push(mb);
+        //   }
+        // });
+        // filtered = new_filtered;
+        filtered = filtered.filter(o => (o as any)[key] === filter[key]);
+      }
+    });
+    return filtered;
   };
 
   connectObject = async (obj: ModelBase) => {
@@ -417,119 +459,121 @@ export class APIClass {
       const res = await this.processResponse(response, data_type, null);
       if (res.id) {
         obj._id = res.id;
-        if (!this.smart_hash[data_type]) {
-          this.smart_hash[data_type] = [];
-        }
-        switch(data_type) {
-          case "spell":
-            this.smart_hash[data_type].push(obj as Spell);
-          break;
-          case "skill":
-            this.smart_hash[data_type].push(obj as Skill);
-          break;
-          case "condition":
-            this.smart_hash[data_type].push(obj as Condition);
-          break;
-          case "spell_list": 
-            this.smart_hash[data_type].push(obj as SpellList);
-          break;
-          case "armor_type": 
-            this.smart_hash[data_type].push(obj as ArmorType);
-          break;
-          case "background": 
-            this.smart_hash[data_type].push(obj as Background);
-          break;
-          case "base_item": 
-            this.smart_hash[data_type].push(obj as BaseItem);
-          break;
-          case "campaign":
-            this.smart_hash[data_type].push(obj as Campaign);
-          break;
-          case "character": 
-            this.smart_hash[data_type].push(obj as Character);
-          break;
-          case "creature": 
-            this.smart_hash[data_type].push(obj as Creature);
-          break;
-          case "eldritch_invocation": 
-            this.smart_hash[data_type].push(obj as EldritchInvocation);
-          break;
-          case "fighting_style": 
-            this.smart_hash[data_type].push(obj as FightingStyle);
-          break;
-          case "equipment_pack": 
-            this.smart_hash[data_type].push(obj as EquipmentPack);
-          break;
-          case "pact_boon": 
-            this.smart_hash[data_type].push(obj as PactBoon);
-          break;
-          case "feat": 
-            this.smart_hash[data_type].push(obj as Feat);
-          break;
-          case "game_class": 
-            this.smart_hash[data_type].push(obj as GameClass);
-          break;
-          case "magic_item": 
-            this.smart_hash[data_type].push(obj as MagicItem);
-          break;
-          case "magic_item_keyword": 
-            this.smart_hash[data_type].push(obj as MagicItemKeyword);
-          break;
-          case "magic_item_template": 
-          break;
-          case "race": 
-            this.smart_hash[data_type].push(obj as Race);
-          break;
-          case "subrace": 
-            this.smart_hash[data_type].push(obj as Subrace);
-          break;
-          case "resource":
-            this.smart_hash[data_type].push(obj as Resource);
-          break;
-          case "spell_slot_type":
-            this.smart_hash[data_type].push(obj as SpellSlotType);
-          break;
-          case "subclass":
-            this.smart_hash[data_type].push(obj as Subclass);
-          break;
-          case "user":
-            this.smart_hash[data_type].push(obj as User);
-          break;
-          case "weapon_keyword":
-            this.smart_hash[data_type].push(obj as WeaponKeyword);
-          break;
-          case "template":
-            const template: TemplateBase = obj as TemplateBase;
-            if (template.type === "Ability") {
-              this.smart_hash[data_type].push(obj as AbilityTemplate);
-            } else if (template.type === "SpellAsAbility") {
-              this.smart_hash[data_type].push(obj as SpellAsAbilityTemplate);
-            } else if (template.type === "ItemAffectingAbility") {
-              this.smart_hash[data_type].push(obj as ItemAffectingAbilityTemplate);
-            } else if (template.type === "Spell") {
-              this.smart_hash[data_type].push(obj as SpellTemplate);
-            } else if (template.type === "FeatureBase") {
-              this.smart_hash[data_type].push(obj as FeatureBaseTemplate);
-            } else if (template.type === "FeatureChoice") {
-              this.smart_hash[data_type].push(obj as FeatureChoiceTemplate);
-            } else if (template.type === "Feature") {
-              this.smart_hash[data_type].push(obj as FeatureTemplate);
-            } else if (template.type === "SummonStatBlock") {
-              this.smart_hash[data_type].push(obj as SummonStatBlockTemplate);
-            }
-          break;
-          case "language":
-            this.smart_hash[data_type].push(obj as Language);
-          break;
-          case "special_feature":
-            this.smart_hash[data_type].push(obj as SpecialFeature);
-          break;
-          case "tool":
-            this.smart_hash[data_type].push(obj as Tool);
-          break;
-          case "sense":
-            this.smart_hash[data_type].push(obj as Sense);
-          break;
+        if (this.always_store(data_type)) {
+          if (!this.smart_hash[data_type]) {
+            this.smart_hash[data_type] = [];
+          }
+          switch(data_type) {
+            case "spell":
+              this.smart_hash[data_type].push(obj as Spell);
+            break;
+            case "skill":
+              this.smart_hash[data_type].push(obj as Skill);
+            break;
+            case "condition":
+              this.smart_hash[data_type].push(obj as Condition);
+            break;
+            case "spell_list": 
+              this.smart_hash[data_type].push(obj as SpellList);
+            break;
+            case "armor_type": 
+              this.smart_hash[data_type].push(obj as ArmorType);
+            break;
+            case "background": 
+              this.smart_hash[data_type].push(obj as Background);
+            break;
+            case "base_item": 
+              this.smart_hash[data_type].push(obj as BaseItem);
+            break;
+            case "campaign":
+              this.smart_hash[data_type].push(obj as Campaign);
+            break;
+            case "character": 
+              this.smart_hash[data_type].push(obj as Character);
+            break;
+            case "creature": 
+              this.smart_hash[data_type].push(obj as Creature);
+            break;
+            case "eldritch_invocation": 
+              this.smart_hash[data_type].push(obj as EldritchInvocation);
+            break;
+            case "fighting_style": 
+              this.smart_hash[data_type].push(obj as FightingStyle);
+            break;
+            case "equipment_pack": 
+              this.smart_hash[data_type].push(obj as EquipmentPack);
+            break;
+            case "pact_boon": 
+              this.smart_hash[data_type].push(obj as PactBoon);
+            break;
+            case "feat": 
+              this.smart_hash[data_type].push(obj as Feat);
+            break;
+            case "game_class": 
+              this.smart_hash[data_type].push(obj as GameClass);
+            break;
+            case "magic_item": 
+              this.smart_hash[data_type].push(obj as MagicItem);
+            break;
+            case "magic_item_keyword": 
+              this.smart_hash[data_type].push(obj as MagicItemKeyword);
+            break;
+            case "magic_item_template": 
+            break;
+            case "race": 
+              this.smart_hash[data_type].push(obj as Race);
+            break;
+            case "subrace": 
+              this.smart_hash[data_type].push(obj as Subrace);
+            break;
+            case "resource":
+              this.smart_hash[data_type].push(obj as Resource);
+            break;
+            case "spell_slot_type":
+              this.smart_hash[data_type].push(obj as SpellSlotType);
+            break;
+            case "subclass":
+              this.smart_hash[data_type].push(obj as Subclass);
+            break;
+            case "user":
+              this.smart_hash[data_type].push(obj as User);
+            break;
+            case "weapon_keyword":
+              this.smart_hash[data_type].push(obj as WeaponKeyword);
+            break;
+            case "template":
+              const template: TemplateBase = obj as TemplateBase;
+              if (template.type === "Ability") {
+                this.smart_hash[data_type].push(obj as AbilityTemplate);
+              } else if (template.type === "SpellAsAbility") {
+                this.smart_hash[data_type].push(obj as SpellAsAbilityTemplate);
+              } else if (template.type === "ItemAffectingAbility") {
+                this.smart_hash[data_type].push(obj as ItemAffectingAbilityTemplate);
+              } else if (template.type === "Spell") {
+                this.smart_hash[data_type].push(obj as SpellTemplate);
+              } else if (template.type === "FeatureBase") {
+                this.smart_hash[data_type].push(obj as FeatureBaseTemplate);
+              } else if (template.type === "FeatureChoice") {
+                this.smart_hash[data_type].push(obj as FeatureChoiceTemplate);
+              } else if (template.type === "Feature") {
+                this.smart_hash[data_type].push(obj as FeatureTemplate);
+              } else if (template.type === "SummonStatBlock") {
+                this.smart_hash[data_type].push(obj as SummonStatBlockTemplate);
+              }
+            break;
+            case "language":
+              this.smart_hash[data_type].push(obj as Language);
+            break;
+            case "special_feature":
+              this.smart_hash[data_type].push(obj as SpecialFeature);
+            break;
+            case "tool":
+              this.smart_hash[data_type].push(obj as Tool);
+            break;
+            case "sense":
+              this.smart_hash[data_type].push(obj as Sense);
+            break;
+          }
         }
       }
       return res;
@@ -1010,7 +1054,7 @@ export class APIClass {
           this.smart_hash[data_type] = response;
         }
       }
-      if (sessionName !== null) {
+      if (sessionName !== null && this.always_store(data_type)) {
         let expiresAt: string | Date = new Date();
         if (noExpiry) 
           expiresAt = "never";

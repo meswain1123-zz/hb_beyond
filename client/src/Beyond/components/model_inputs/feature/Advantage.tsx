@@ -71,7 +71,7 @@ class AdvantageInput extends Component<Props, State> {
             onChange={(value: string) => {
               const obj = this.props.obj;
               obj.type = value;
-              obj.type_detail = "All";
+              obj.type_detail = "ALL";
               this.props.onChange(obj);
             }} 
           />
@@ -91,7 +91,7 @@ class AdvantageInput extends Component<Props, State> {
           <Grid item>
             <SelectStringBox 
               name="Saving Throw" 
-              options={["All",...ABILITY_SCORES]}
+              options={["ALL",...ABILITY_SCORES]}
               value={this.props.obj.type_detail} 
               onChange={(value: string) => {
                 const obj = this.props.obj;

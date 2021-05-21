@@ -81,7 +81,7 @@ class SelectLanguageBox extends Component<Props, State> {
     } else {
       const filtered = this.state.languages.filter(o => 
         !this.props.ignore_us.includes(o._id) && 
-          (this.props.type === "All" ||
+          (this.props.type === "ALL" ||
           (this.props.type === "Standard" && (o.type === "Standard" || o.type === "Exotic")) ||
           (this.props.type === "Exotic" && o.type === "Exotic"))
       );

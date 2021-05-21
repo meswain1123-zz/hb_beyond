@@ -20,9 +20,6 @@ import SelectStringBox from "../../components/input/SelectStringBox";
 import ObjectIndex from "../../components/Navigation/ObjectIndex";
 import LetterLinks from "../../components/Navigation/LetterLinks";
 
-import API from "../../utilities/smart_api";
-import { APIClass } from "../../utilities/smart_api_class";
-
 
 interface AppState {
   height: number;
@@ -65,25 +62,6 @@ class SpellIndex extends Component<Props, State> {
       school: "ALL",
       start_letter: "",
     };
-    this.api = API.getInstance();
-  }
-
-  api: APIClass;
-
-  componentDidMount() {
-  }
-
-  descriptionStyle = () => {
-    const descWidth = Math.floor(this.props.width * 0.7);
-  
-    const properties: React.CSSProperties = {
-      width: `${descWidth}px`,
-      whiteSpace: "nowrap", 
-      overflow: "hidden", 
-      textOverflow: "ellipsis"
-    } as React.CSSProperties;
-
-    return properties;
   }
 
   get_filter() {
@@ -99,7 +77,7 @@ class SpellIndex extends Component<Props, State> {
       filter.start_letter = this.state.start_letter;
     }
     if (this.state.search_string !== "") {
-      filter.name = this.state.search_string;
+      filter.search_string = this.state.search_string;
     }
 
     return filter;

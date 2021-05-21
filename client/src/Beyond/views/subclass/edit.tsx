@@ -275,7 +275,7 @@ class SubclassEdit extends Component<Props, State> {
                 disabled={this.state.processing}
                 style={{ marginLeft: "4px" }}
                 onClick={ () => { 
-                  this.setState({ redirectTo:`/beyond/class` });
+                  this.setState({ redirectTo:`/beyond/subclass` });
                 }}>
                 Cancel
               </Button>

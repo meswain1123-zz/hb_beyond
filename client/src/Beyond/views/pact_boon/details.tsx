@@ -2,24 +2,22 @@ import React, { Component } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
 import { RouteComponentProps } from 'react-router';
 import { Redirect } from "react-router-dom";
+
 import {
-  Edit, ArrowBack, DeleteForever
-} from "@material-ui/icons";
-import {
-  Grid,  
-  Tooltip, Fab,
+  Grid, 
 } from "@material-ui/core";
 
 import { 
-  PactBoon
+  PactBoon, ModelBase
 } from "../../models";
+
+import ObjectDetails from "../../components/model_inputs/ObjectDetails";
 
 import API from "../../utilities/smart_api";
 import { APIClass } from "../../utilities/smart_api_class";
 
 
 interface AppState {
-  pact_boons: PactBoon[] | null;
   height: number;
   width: number;
 }
@@ -33,7 +31,6 @@ interface MatchParams {
 }
 
 const mapState = (state: RootState) => ({
-  objects: state.app.pact_boons,
   height: state.app.height,
   width: state.app.width
 })
@@ -50,6 +47,7 @@ type Props = PropsFromRedux & RouteComponentProps<MatchParams> & { }
 export interface State { 
   redirectTo: string | null;
   obj: PactBoon;
+  loading: boolean;
 }
 
 class PactBoonDetails extends Component<Props, State> {
@@ -57,7 +55,8 @@ class PactBoonDetails extends Component<Props, State> {
     super(props);
     this.state = {
       redirectTo: null,
-      obj: new PactBoon()
+      obj: new PactBoon(),
+      loading: false
     };
     this.api = API.getInstance();
   }
@@ -65,82 +64,40 @@ class PactBoonDetails extends Component<Props, State> {
   api: APIClass;
 
   componentDidMount() {
-  }
-
-  // Loads the editing PactBoon into state
-  load(id: string) {
-    const objectFinder = this.props.objects ? this.props.objects.filter(o => o._id === id) : [];
-    if (objectFinder.length === 1) {
-      this.setState({ obj: objectFinder[0].clone() });
+    let { id } = this.props.match.params;
+    if (id !== undefined && this.state.obj._id !== id) {
+      this.load_object(id);
     }
   }
 
+  // Loads the editing PactBoon into state
+  load_object(id: string) {
+    this.setState({ loading: true }, () => {
+      this.api.getFullObject("pact_boon", id).then((res: ModelBase | null) => {
+        if (res) {
+          this.setState({ obj: (res as PactBoon).clone(), loading: false });
+        }
+      });
+    });
+  }
+
   render() {
-    if (this.state.redirectTo !== null) {
+    if (this.state.loading || this.state.obj === null) {
+      return <span>Loading</span>;
+    } else if (this.state.redirectTo !== null) {
       return <Redirect to={this.state.redirectTo} />;
     } else { 
-      let { id } = this.props.match.params;
-      if (id !== undefined && this.state.obj._id !== id) {
-        this.load(id);
-        return (<span>Loading...</span>);
-      } else {
-        const formHeight = this.props.height - (this.props.width > 600 ? 150 : 150);
-        return (
-          <Grid container spacing={1} direction="column">
-            <Grid item>
-              <Tooltip title={`Back to Pact Boons`}>
-                <Fab size="small" color="primary" style={{marginLeft: "8px"}}
-                  onClick={ () => {
-                    this.setState({ redirectTo:`/beyond/pact_boon` });
-                  }}>
-                  <ArrowBack/>
-                </Fab>
-              </Tooltip> 
-              &nbsp;
-              <Tooltip title={`Delete ${this.state.obj.name}`}>
-                <Fab size="small" color="primary" style={{marginLeft: "8px"}}
-                  onClick={ () => {
-                    this.api.deleteObject("pact_boon", this.state.obj).then((res: any) => {
-                      if (this.props.objects) {
-                        this.setState({ redirectTo:`/beyond/pact_boon` });
-                      }
-                    });
-                  }}>
-                  <DeleteForever/>
-                </Fab>
-              </Tooltip> 
-            </Grid>
-            <Grid item>
-              <span className={"MuiTypography-root MuiListItemText-primary header"}>
-                { this.state.obj.name }
-              </span>
-              <Tooltip title={`Edit ${this.state.obj.name}`}>
-                <Fab size="small" color="primary" style={{marginLeft: "8px"}}
-                  onClick={ () => {
-                    this.setState({ redirectTo:`/beyond/pact_boon/edit/${this.state.obj._id}` });
-                  }}>
-                  <Edit/>
-                </Fab>
-              </Tooltip> 
-            </Grid>
-            <Grid item 
-              style={{ 
-                height: `${formHeight}px`, 
-                overflowY: "scroll", 
-                overflowX: "hidden" 
-              }}>
-              <Grid container spacing={1} direction="row">
-                <Grid item xs={3} className={"MuiTypography-root MuiListItemText-primary header"}>
-                  Description
-                </Grid>
-                <Grid item xs={9}>
-                  {this.state.obj.description} 
-                </Grid>
-              </Grid>
-            </Grid>
+      return (
+        <Grid container spacing={1} direction="column">
+          <Grid item>
+            <ObjectDetails 
+              obj={this.state.obj}
+              data_type="pact_boon"
+              type_label="Pact Boons"
+            />
           </Grid>
-        ); 
-      }
+        </Grid>
+      );
     }
   }
 }

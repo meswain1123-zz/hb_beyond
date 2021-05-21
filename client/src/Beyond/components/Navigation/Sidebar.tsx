@@ -68,7 +68,7 @@ class Sidebar extends Component<Props, State> {
 
   links() {
     return (
-      menuRoutes.admin.map((prop, key) => 
+      menuRoutes.admin.sort((a, b) => { return a.name.localeCompare(b.name) }).map((prop, key) => 
         <ListItem key={key} className="curvedButton">
           <NavLink to={prop.path} className="MyButton" activeClassName="active">
             <ListItem button>

@@ -98,6 +98,7 @@ class MagicItemIndex extends Component<Props, State> {
   api: APIClass;
 
   componentDidMount() {
+    this.load();
   }
 
   descriptionStyle = () => {
@@ -164,19 +165,16 @@ class MagicItemIndex extends Component<Props, State> {
   }
 
   render() {
-    if (this.state.loading) {
-      return <span>Loading</span>;
-    } else if (this.state.magic_items === null) {
-      this.load();
+    if (this.state.loading || this.state.magic_items === null) {
       return <span>Loading</span>;
     } else if (this.state.redirectTo !== null) {
       return <Redirect to={this.state.redirectTo} />;
     } else if (this.state.mode === "index") {
       const page_size = 7;
-      const filtered: any[] = this.state.magic_items ? this.state.magic_items.filter(o => 
+      const filtered: any[] = this.state.magic_items.filter(o => 
         (this.props.item_type === "ALL" || (o.base_item && o.base_item.item_type === this.props.item_type)) &&
         (this.state.start_letter === "" || o.name.toUpperCase().startsWith(this.state.start_letter)) && 
-        (this.state.search_string === "" || o.name.toLowerCase().includes(this.state.search_string.toLowerCase()) || o.description.toLowerCase().includes(this.state.search_string.toLowerCase()))).sort((a,b) => {return a.name.localeCompare(b.name)}) : [];
+        (this.state.search_string === "" || o.name.toLowerCase().includes(this.state.search_string.toLowerCase()) || o.description.toLowerCase().includes(this.state.search_string.toLowerCase()))).sort((a,b) => {return a.name.localeCompare(b.name)});
       const page_count = Math.ceil(filtered.length / page_size);
       const filtered_and_paged: any[] = filtered.slice(page_size * this.state.page_num, page_size * (this.state.page_num + 1));
       return (
@@ -496,7 +494,7 @@ class MagicItemIndex extends Component<Props, State> {
       return_us.push(
         <Link key={key} href="#" onClick={(event: React.SyntheticEvent) => {
           event.preventDefault();
-          this.setState({ start_letter: a });
+          this.setState({ start_letter: a, page_num: 0 });
           }}>
           {a}
         </Link>
@@ -508,7 +506,7 @@ class MagicItemIndex extends Component<Props, State> {
     return_us.push(
       <Link key={key} href="#" onClick={(event: React.SyntheticEvent) => {
         event.preventDefault();
-        this.setState({ start_letter: "" });
+        this.setState({ start_letter: "", page_num: 0 });
         }}>
         Clear
       </Link>

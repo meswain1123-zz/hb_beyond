@@ -14,8 +14,8 @@ export class Reroll {
 
   constructor(obj?: any) {
     this.threshold = obj ? obj.threshold : 1;
-    this.allowed_damage_types = obj && obj.allowed_damage_types ? [...obj.allowed_damage_types] : ["All"];
-    this.allowed_armor_types = obj && obj.allowed_armor_types ? [...obj.allowed_armor_types] : ["All"];
+    this.allowed_damage_types = obj && obj.allowed_damage_types ? [...obj.allowed_damage_types] : ["ALL"];
+    this.allowed_armor_types = obj && obj.allowed_armor_types ? [...obj.allowed_armor_types] : ["ALL"];
     this.required_armor_types = obj && obj.required_armor_types ? [...obj.required_armor_types] : ["None"];
     this.excluded_weapon_keywords = obj && obj.excluded_weapon_keywords ? [...obj.excluded_weapon_keywords] : ["None"];
     this.required_weapon_keywords = obj && obj.required_weapon_keywords ? [...obj.required_weapon_keywords] : ["None"];

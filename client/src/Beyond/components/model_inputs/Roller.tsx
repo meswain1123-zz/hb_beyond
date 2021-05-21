@@ -513,7 +513,7 @@ class Roller extends Component<Props, State> {
       }
       let reroll_threshold = 0;
       this.props.rerolls.forEach(r => {
-        if (r.allowed_damage_types.includes("All") || r.allowed_damage_types.includes(dr.type)) {
+        if (r.allowed_damage_types.includes("ALL") || r.allowed_damage_types.includes(dr.type)) {
           reroll_threshold = Math.max(reroll_threshold, r.threshold);
         }
       });

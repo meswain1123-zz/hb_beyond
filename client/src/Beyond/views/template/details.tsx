@@ -2,24 +2,22 @@ import React, { Component } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
 import { RouteComponentProps } from 'react-router';
 import { Redirect } from "react-router-dom";
-import {
-  Edit, ArrowBack, DeleteForever
-} from "@material-ui/icons";
+
 import {
   Grid, 
-  Tooltip, Fab,
 } from "@material-ui/core";
 
 import { 
-  Background
+  SpellSlotType, ModelBase
 } from "../../models";
+
+import ObjectDetails from "../../components/model_inputs/ObjectDetails";
 
 import API from "../../utilities/smart_api";
 import { APIClass } from "../../utilities/smart_api_class";
 
 
 interface AppState {
-  backgrounds: Background[] | null;
   height: number;
   width: number;
 }
@@ -33,7 +31,6 @@ interface MatchParams {
 }
 
 const mapState = (state: RootState) => ({
-  objects: state.app.backgrounds,
   height: state.app.height,
   width: state.app.width
 })
@@ -49,15 +46,17 @@ type Props = PropsFromRedux & RouteComponentProps<MatchParams> & { }
 
 export interface State { 
   redirectTo: string | null;
-  obj: Background;
+  obj: SpellSlotType;
+  loading: boolean;
 }
 
-class BackgroundDetails extends Component<Props, State> {
+class SpellSlotTypeDetails extends Component<Props, State> {
   constructor(props: Props) {
     super(props);
     this.state = {
       redirectTo: null,
-      obj: new Background()
+      obj: new SpellSlotType(),
+      loading: false
     };
     this.api = API.getInstance();
   }
@@ -65,82 +64,42 @@ class BackgroundDetails extends Component<Props, State> {
   api: APIClass;
 
   componentDidMount() {
-  }
-
-  // Loads the editing Background into state
-  load(id: string) {
-    const objectFinder = this.props.objects ? this.props.objects.filter(o => o._id === id) : [];
-    if (objectFinder.length === 1) {
-      this.setState({ obj: objectFinder[0].clone() });
+    let { id } = this.props.match.params;
+    if (id !== undefined && this.state.obj._id !== id) {
+      this.load_object(id);
     }
   }
 
+  // Loads the editing SpellSlotType into state
+  load_object(id: string) {
+    this.setState({ loading: true }, () => {
+      this.api.getFullObject("spell_slot_type", id).then((res: ModelBase | null) => {
+        if (res) {
+          this.setState({ obj: (res as SpellSlotType).clone(), loading: false });
+        }
+      });
+    });
+  }
+
   render() {
-    if (this.state.redirectTo !== null) {
+    if (this.state.loading || this.state.obj === null) {
+      return <span>Loading</span>;
+    } else if (this.state.redirectTo !== null) {
       return <Redirect to={this.state.redirectTo} />;
     } else { 
-      let { id } = this.props.match.params;
-      if (id !== undefined && this.state.obj._id !== id) {
-        this.load(id);
-        return (<span>Loading...</span>);
-      } else {
-        const formHeight = this.props.height - (this.props.width > 600 ? 150 : 150);
-        return (
-          <Grid container spacing={1} direction="column">
-            <Grid item>
-              <Tooltip title={`Back to Backgrounds`}>
-                <Fab size="small" color="primary" style={{marginLeft: "8px"}}
-                  onClick={ () => {
-                    this.setState({ redirectTo:`/beyond/background` });
-                  }}>
-                  <ArrowBack/>
-                </Fab>
-              </Tooltip> 
-              &nbsp;
-              <Tooltip title={`Delete ${this.state.obj.name}`}>
-                <Fab size="small" color="primary" style={{marginLeft: "8px"}}
-                  onClick={ () => {
-                    this.api.deleteObject("background", this.state.obj).then((res: any) => {
-                      this.setState({ redirectTo:`/beyond/background` });
-                    });
-                  }}>
-                  <DeleteForever/>
-                </Fab>
-              </Tooltip> 
-            </Grid>
-            <Grid item>
-              <span className={"MuiTypography-root MuiListItemText-primary header"}>
-                { this.state.obj.name }
-              </span>
-              <Tooltip title={`Edit ${this.state.obj.name}`}>
-                <Fab size="small" color="primary" style={{marginLeft: "8px"}}
-                  onClick={ () => {
-                    this.setState({ redirectTo:`/beyond/background/edit/${this.state.obj._id}` });
-                  }}>
-                  <Edit/>
-                </Fab>
-              </Tooltip> 
-            </Grid>
-            <Grid item 
-              style={{ 
-                height: `${formHeight}px`, 
-                overflowY: "scroll", 
-                overflowX: "hidden" 
-              }}>
-              <Grid container spacing={1} direction="row">
-                <Grid item xs={3} className={"MuiTypography-root MuiListItemText-primary header"}>
-                  Description
-                </Grid>
-                <Grid item xs={9}>
-                  {this.state.obj.description} 
-                </Grid>
-              </Grid>
-            </Grid>
+      return (
+        <Grid container spacing={1} direction="column">
+          <Grid item>
+            <ObjectDetails 
+              obj={this.state.obj}
+              data_type="spell_slot_type"
+              type_label="Spell Slot Types"
+            />
           </Grid>
-        ); 
-      }
+        </Grid>
+      );
     }
   }
 }
 
-export default connector(BackgroundDetails);
+export default connector(SpellSlotTypeDetails);

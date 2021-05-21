@@ -15,7 +15,7 @@ const menuRoutes = {
       
     },
     {
-      path: "/beyond/spell_slot_tables",
+      path: "/beyond/spell_slot_type",
       name: "Spell Slot Tables",
       
     },
@@ -65,7 +65,7 @@ const menuRoutes = {
       
     },
     {
-      path: "/beyond/class",
+      path: "/beyond/game_class",
       name: "Classes",
       
     },

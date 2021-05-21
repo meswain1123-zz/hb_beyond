@@ -53,7 +53,7 @@ class CharacterNotes extends Component<Props, State> {
       loading: false,
       reloading: false,
       drawer: "",
-      view: "All"
+      view: "ALL"
     };
     this.api = API.getInstance();
   }
@@ -93,15 +93,15 @@ class CharacterNotes extends Component<Props, State> {
             <Grid container spacing={0} direction="row" style={{ width: "300px" }}>
               <Grid item xs={1}>
                 <ToggleButtonBox 
-                  name="All"
+                  name="ALL"
                   height={15}
                   lineHeight={1.5}
                   border=""
                   color="gray"
                   bold
-                  value={this.state.view === "All"}
+                  value={this.state.view === "ALL"}
                   onToggle={() => {
-                    this.setState({ view: "All" });
+                    this.setState({ view: "ALL" });
                   }}
                 />
               </Grid>
@@ -178,7 +178,7 @@ class CharacterNotes extends Component<Props, State> {
             </Grid>
           </div>
         </Grid>
-        { (this.state.view === "All" || this.state.view === "Orgs") && 
+        { (this.state.view === "ALL" || this.state.view === "Orgs") && 
           <Grid item>
             <StringBox 
               name="Organizations" 
@@ -190,7 +190,7 @@ class CharacterNotes extends Component<Props, State> {
             />
           </Grid>
         }
-        { (this.state.view === "All" || this.state.view === "Allies") && 
+        { (this.state.view === "ALL" || this.state.view === "Allies") && 
           <Grid item>
             <StringBox 
               name="Allies" 
@@ -202,7 +202,7 @@ class CharacterNotes extends Component<Props, State> {
             />
           </Grid>
         }
-        { (this.state.view === "All" || this.state.view === "Enemies") && 
+        { (this.state.view === "ALL" || this.state.view === "Enemies") && 
           <Grid item>
             <StringBox 
               name="Enemies" 
@@ -214,7 +214,7 @@ class CharacterNotes extends Component<Props, State> {
             />
           </Grid>
         }
-        { (this.state.view === "All" || this.state.view === "Backstory") && 
+        { (this.state.view === "ALL" || this.state.view === "Backstory") && 
           <Grid item>
             <StringBox 
               name="Backstory" 
@@ -226,7 +226,7 @@ class CharacterNotes extends Component<Props, State> {
             />
           </Grid>
         }
-        { (this.state.view === "All" || this.state.view === "Other") && 
+        { (this.state.view === "ALL" || this.state.view === "Other") && 
           <Grid item>
             <StringBox 
               name="Other" 

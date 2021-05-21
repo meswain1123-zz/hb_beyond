@@ -54,7 +54,7 @@ export interface State {
 
 class SelectSpecialFeatureBox extends Component<Props, State> {
   public static defaultProps = {
-    type: "All",
+    type: "ALL",
     color: "",
     multiple: false,
     value: "",
@@ -82,7 +82,7 @@ class SelectSpecialFeatureBox extends Component<Props, State> {
       this.api.getObjects("special_feature").then((res: SpecialFeature[]) => {
         const special_features: SpecialFeature[] = res;
         let type = this.props.type;
-        if (type === "All") {
+        if (type === "ALL") {
           if (this.props.value !== "") {
             const objFinder = special_features.filter(o => o._id === this.props.value);
             if (objFinder.length === 1) {
@@ -108,7 +108,7 @@ class SelectSpecialFeatureBox extends Component<Props, State> {
     } else if (this.state.special_features === null) {
       this.load();
       return <span>Loading</span>;
-    } else if (this.props.type === "All") {
+    } else if (this.props.type === "ALL") {
       let features = this.props.options.length === 0 ? this.state.special_features.filter(o => o.type === this.state.type) : this.props.options;
       if (this.props.multiple) {
         return (

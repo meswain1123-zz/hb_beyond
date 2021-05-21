@@ -426,7 +426,7 @@ class CharacterAction extends Component<Props, State> {
           const rerolls: Reroll[] = [];
           this.props.obj.rerolls.forEach(r => {
             let good = false;
-            if (r.allowed_armor_types.includes("All")) {
+            if (r.allowed_armor_types.includes("ALL")) {
               // Check for required
               if (r.required_armor_types.includes("None")) {
                 good = true;
@@ -460,7 +460,7 @@ class CharacterAction extends Component<Props, State> {
             }
             if (good) {
               if (!r.required_weapon_keywords.includes("None")) {
-              } else if (!r.allowed_damage_types.includes("All")) {
+              } else if (!r.allowed_damage_types.includes("ALL")) {
                 good = false;
                 for (let i = 0; i < damage_rolls.length; ++i) {
                   if (r.allowed_damage_types.includes(damage_rolls[i].type)) {
@@ -512,7 +512,7 @@ class CharacterAction extends Component<Props, State> {
         if (weapon) {
           this.props.obj.rerolls.forEach(r => {
             let good = false;
-            if (r.allowed_armor_types.includes("All")) {
+            if (r.allowed_armor_types.includes("ALL")) {
               // Check for required
               if (r.required_armor_types.includes("None")) {
                 good = true;
@@ -564,7 +564,7 @@ class CharacterAction extends Component<Props, State> {
                 }
               }
               if (good) {
-                if (!r.allowed_damage_types.includes("All")) {
+                if (!r.allowed_damage_types.includes("ALL")) {
                   good = false;
                   for (let i = 0; i < attack.damage_rolls.length; ++i) {
                     if (r.allowed_damage_types.includes(attack.damage_rolls[i].type)) {
@@ -616,7 +616,7 @@ class CharacterAction extends Component<Props, State> {
             const rerolls: Reroll[] = [];
             this.props.obj.rerolls.forEach(r => {
               let good = false;
-              if (r.allowed_armor_types.includes("All")) {
+              if (r.allowed_armor_types.includes("ALL")) {
                 // Check for required
                 if (r.required_armor_types.includes("None")) {
                   good = true;
@@ -650,7 +650,7 @@ class CharacterAction extends Component<Props, State> {
               }
               if (good) {
                 if (!r.required_weapon_keywords.includes("None")) {
-                } else if (!r.allowed_damage_types.includes("All")) {
+                } else if (!r.allowed_damage_types.includes("ALL")) {
                   good = false;
                   for (let i = 0; i < damage_rolls.length; ++i) {
                     if (r.allowed_damage_types.includes(damage_rolls[i].type)) {
@@ -707,7 +707,7 @@ class CharacterAction extends Component<Props, State> {
             const rerolls: Reroll[] = [];
             this.props.obj.rerolls.forEach(r => {
               let good = false;
-              if (r.allowed_armor_types.includes("All")) {
+              if (r.allowed_armor_types.includes("ALL")) {
                 // Check for required
                 if (r.required_armor_types.includes("None")) {
                   good = true;
@@ -741,7 +741,7 @@ class CharacterAction extends Component<Props, State> {
               }
               if (good) {
                 if (!r.required_weapon_keywords.includes("None")) {
-                } else if (!r.allowed_damage_types.includes("All")) {
+                } else if (!r.allowed_damage_types.includes("ALL")) {
                   good = false;
                   for (let i = 0; i < damage_rolls.length; ++i) {
                     if (r.allowed_damage_types.includes(damage_rolls[i].type)) {

@@ -72,7 +72,7 @@ class CharacterSpells extends Component<Props, State> {
       reloading: false,
       drawer: "",
       search_string: "",
-      view: "All",
+      view: "ALL",
       edit_view: "",
       selected_spell: null,
       selected_level: null,
@@ -361,18 +361,18 @@ class CharacterSpells extends Component<Props, State> {
 
   renderSpellFilters() {
     const return_me: any[] = [
-      <span key="All">
+      <span key="ALL">
         <ToggleButtonBox 
-          name="All"
+          name="ALL"
           height={15}
           lineHeight={1.5}
           border=""
           color="gray"
           width={30}
           bold
-          value={this.state.view === "All"}
+          value={this.state.view === "ALL"}
           onToggle={() => {
-            this.setState({ view: "All" });
+            this.setState({ view: "ALL" });
           }}
         />
       </span>,
@@ -441,7 +441,7 @@ class CharacterSpells extends Component<Props, State> {
       filtered = filtered.filter(o => 
         o.name.toLowerCase().includes(this.state.search_string.toLowerCase()));
     }
-    if (this.state.view !== "All") {
+    if (this.state.view !== "ALL") {
       if (this.state.view === "C") {
         filtered = filtered.filter(o => o.spell && o.spell.concentration);
       } else if (this.state.view === "R") {

@@ -3,6 +3,7 @@ import { connect, ConnectedProps } from 'react-redux';
 import { Redirect } from "react-router-dom";
 import {
   Edit,
+  FileCopy
 } from "@material-ui/icons";
 import {
   Grid, 
@@ -46,8 +47,7 @@ type Props = PropsFromRedux & {
   data_type: string;
 }
 
-export interface State {  
-  filter: any;
+export interface State {
   data_type: string;
   redirectTo: string | null;
   page_num: number;
@@ -55,6 +55,7 @@ export interface State {
   loading: boolean;
   count: number;
   offset: number;
+  processing: boolean;
 }
 
 class ObjectIndex extends Component<Props, State> {
@@ -67,8 +68,8 @@ class ObjectIndex extends Component<Props, State> {
       loading: false,
       count: 0,
       offset: 0,
-      filter: {},
-      data_type: ""
+      data_type: "",
+      processing: false
     };
     this.api = API.getInstance();
   }
@@ -76,14 +77,12 @@ class ObjectIndex extends Component<Props, State> {
   api: APIClass;
 
   componentDidMount() {
+    this.load();
   }
 
   componentDidUpdate(prevProps: Props, prevState: State) {
-    if (this.state.filter !== this.props.filter || this.state.data_type !== this.props.data_type) {
-      this.setState({ 
-        filter: this.props.filter, 
-        data_type: this.props.data_type 
-        }, this.load);
+    if (!this.state.loading && (prevProps.filter !== this.props.filter || prevProps.data_type !== this.props.data_type)) {
+      this.load();
     }
   }
 
@@ -101,17 +100,17 @@ class ObjectIndex extends Component<Props, State> {
   }
 
   load() {
-    this.setState({ loading: true, objects: [] }, () => {
-      this.api.getObjectCount(this.state.data_type, this.state.filter).then((res: any) => {
-        if (res && !res.error) {
-          this.setState({ count: res.count }, this.load_some);
+    this.setState({ loading: true, objects: [], data_type: this.props.data_type }, () => {
+      this.api.getObjectCount(this.props.data_type, this.props.filter).then((res: any) => {
+        if (!res.error) {
+          this.setState({ count: res.count, page_num: 0 }, this.load_some);
         }
       });
     });
   }
 
   load_some() {
-    this.api.getObjects(this.state.data_type, this.state.filter, this.state.objects ? (this.state.objects.length + this.state.offset) : this.state.offset, 350).then((res: any) => {
+    this.api.getObjects(this.props.data_type, this.props.filter, this.state.objects ? (this.state.objects.length + this.state.offset) : this.state.offset, 350).then((res: any) => {
       if (res && !res.error) {
         let objects: ModelBase[] = this.state.objects ? this.state.objects : [];
         objects = [...objects, ...(res as ModelBase[])];
@@ -121,7 +120,7 @@ class ObjectIndex extends Component<Props, State> {
   }
 
   render() {
-    if (this.state.data_type === "" || this.state.objects === null || this.state.loading) {
+    if (this.props.data_type === "" || this.state.objects === null || this.state.loading) {
       return <span>Loading</span>;
     } else if (this.state.redirectTo !== null) {
       return <Redirect to={this.state.redirectTo} />;
@@ -140,7 +139,7 @@ class ObjectIndex extends Component<Props, State> {
                     <Button 
                       fullWidth variant="contained" color="primary" 
                       onClick={ () => {
-                        this.setState({ redirectTo:`/beyond/spell/details/${o._id}` });
+                        this.setState({ redirectTo:`/beyond/${this.props.data_type}/details/${o._id}` });
                       }}>
                         { o.name }
                     </Button>
@@ -150,13 +149,31 @@ class ObjectIndex extends Component<Props, State> {
                   <Tooltip title={`Edit ${o.name}`}>
                     <Fab size="small" color="primary" style={{marginLeft: "8px"}}
                       onClick={ () => {
-                        this.setState({ redirectTo:`/beyond/spell/edit/${o._id}` });
+                        this.setState({ redirectTo:`/beyond/${this.props.data_type}/edit/${o._id}` });
                       }}>
                       <Edit/>
                     </Fab>
                   </Tooltip> 
                 </Grid>
-                <Grid item xs={9}>
+                <Grid item xs={1}>
+                  <Tooltip title={`Copy ${o.name}`}>
+                    <Fab size="small" color="primary"
+                      disabled={this.state.processing} style={{marginLeft: "8px"}}
+                      onClick={ () => {
+                        this.setState({ processing: true }, () => {
+                          const new_obj = o.clone();
+                          new_obj.name = "Copy of " + new_obj.name;
+                          new_obj._id = "";
+                          this.api.createObject(this.props.data_type, new_obj).then((res: any) => {
+                            this.setState({ processing: false, redirectTo: `/beyond/${this.props.data_type}/edit/${res.id}` });
+                          });
+                        });
+                      }}>
+                      <FileCopy/>
+                    </Fab>
+                  </Tooltip> 
+                </Grid>
+                <Grid item xs={8}>
                   <Tooltip title={o.description}>
                     <div style={this.descriptionStyle()}>
                       { o.description }

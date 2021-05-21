@@ -72,7 +72,7 @@ class CharacterActions extends Component<Props, State> {
       reloading: false,
       drawer: "",
       search_string: "",
-      view: "All",
+      view: "ALL",
       edit_view: "",
       selected_spell: null,
       selected_level: null,
@@ -124,16 +124,16 @@ class CharacterActions extends Component<Props, State> {
               }}>
               <span>
                 <ToggleButtonBox 
-                  name="All"
+                  name="ALL"
                   height={15}
                   lineHeight={1.5}
                   border=""
                   color="gray"
                   width={30}
                   bold
-                  value={this.state.view === "All"}
+                  value={this.state.view === "ALL"}
                   onToggle={() => {
-                    this.setState({ view: "All" });
+                    this.setState({ view: "ALL" });
                   }}
                 />
               </span>
@@ -203,16 +203,16 @@ class CharacterActions extends Component<Props, State> {
             
           </Grid>
         </Grid>
-        { (this.state.view === "All" || this.state.view === "Action") && 
+        { (this.state.view === "ALL" || this.state.view === "Action") && 
           this.renderActionGroup("Actions") 
         }
-        { (this.state.view === "All" || this.state.view === "Bonus Action") && 
+        { (this.state.view === "ALL" || this.state.view === "Bonus Action") && 
           this.renderActionGroup("Bonus Actions") 
         }
-        { (this.state.view === "All" || this.state.view === "Reaction") && 
+        { (this.state.view === "ALL" || this.state.view === "Reaction") && 
           this.renderActionGroup("Reactions") 
         }
-        { (this.state.view === "All" || this.state.view === "Other") && 
+        { (this.state.view === "ALL" || this.state.view === "Other") && 
           this.renderActionGroup("Other Actions") 
         }
       </Grid>

@@ -31,6 +31,7 @@ type PropsFromRedux = ConnectedProps<typeof connector>
 type Props = PropsFromRedux & {
   name: string;
   value: string | null;
+  allow_all: boolean;
   multiple: boolean;
   values: string[];
   game_classes: GameClass[] | null;
@@ -47,7 +48,8 @@ class SelectGameClassBox extends Component<Props, State> {
     game_classes: null,
     value: null,
     values: [],
-    multiple: false
+    multiple: false,
+    allow_all: false
   };
   constructor(props: Props) {
     super(props);
@@ -84,6 +86,7 @@ class SelectGameClassBox extends Component<Props, State> {
         <SelectBox 
           options={this.state.game_classes}
           multiple
+          allow_all
           values={this.props.values} 
           name={this.props.name}
           onChange={(ids: string[]) => {
@@ -97,6 +100,7 @@ class SelectGameClassBox extends Component<Props, State> {
           options={this.state.game_classes}
           value={this.props.value} 
           name={this.props.name}
+          allow_all
           onChange={(id: string) => {
             const objFinder = this.state.game_classes ? this.state.game_classes.filter(o => o._id === id) : [];
             if (objFinder.length === 1) {

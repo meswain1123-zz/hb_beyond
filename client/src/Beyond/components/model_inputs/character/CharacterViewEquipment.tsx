@@ -80,7 +80,7 @@ class CharacterViewEquipment extends Component<Props, State> {
       reloading: false,
       drawer: "",
       search_string: "",
-      view: "All",
+      view: "ALL",
       edit_view: "",
       selected_item: null
     };
@@ -217,15 +217,15 @@ class CharacterViewEquipment extends Component<Props, State> {
                 <Grid item xs={7} container spacing={1} direction="row">
                   <Grid item xs={3}>
                     <ToggleButtonBox 
-                      name="All"
+                      name="ALL"
                       height={15}
                       lineHeight={1.5}
                       border=""
                       color="gray"
                       bold
-                      value={this.state.view === "All"}
+                      value={this.state.view === "ALL"}
                       onToggle={() => {
-                        this.setState({ view: "All" });
+                        this.setState({ view: "ALL" });
                       }}
                     />
                   </Grid>
@@ -275,13 +275,13 @@ class CharacterViewEquipment extends Component<Props, State> {
               </Grid>
             </div>
           </Grid>
-          { (this.state.view === "All" || this.state.view === "Inventory") &&
+          { (this.state.view === "ALL" || this.state.view === "Inventory") &&
             this.renderInventory()
           }
-          { (this.state.view === "All" || this.state.view === "Attunement") &&
+          { (this.state.view === "ALL" || this.state.view === "Attunement") &&
             this.renderAttunement()
           }
-          { (this.state.view === "All" || this.state.view === "Other") &&
+          { (this.state.view === "ALL" || this.state.view === "Other") &&
             this.renderOtherPossessions()
           }
           <Drawer anchor="right" 

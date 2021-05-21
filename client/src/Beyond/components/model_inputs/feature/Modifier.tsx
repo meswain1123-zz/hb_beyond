@@ -188,7 +188,7 @@ class ModifierInput extends Component<Props, State> {
           <Grid item>
             <SelectStringBox 
               name="Damage Type" 
-              options={["All",...DAMAGE_TYPES]}
+              options={["ALL",...DAMAGE_TYPES]}
               value={this.props.obj.modifies_detail_2} 
               onChange={(value: string) => {
                 const obj = this.props.obj;

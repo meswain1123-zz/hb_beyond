@@ -96,7 +96,7 @@ class GameClassEdit extends Component<Props, State> {
   submit() {
     this.setState({ processing: true }, () => {
       this.api.upsertObject("game_class", this.state.obj).then((res: any) => {
-        this.setState({ processing: false, redirectTo: "/beyond/class" });
+        this.setState({ processing: false, redirectTo: "/beyond/game_class" });
       });
     });
   }
@@ -190,7 +190,7 @@ class GameClassEdit extends Component<Props, State> {
               <Tooltip title={`Back to Classes`}>
                 <Fab size="small" color="primary" style={{marginLeft: "8px"}}
                   onClick={ () => {
-                    this.setState({ redirectTo:`/beyond/class` });
+                    this.setState({ redirectTo:`/beyond/game_class` });
                   }}>
                   <ArrowBack/>
                 </Fab>
@@ -288,7 +288,7 @@ class GameClassEdit extends Component<Props, State> {
                 disabled={this.state.processing}
                 style={{ marginLeft: "4px" }}
                 onClick={ () => { 
-                  this.setState({ redirectTo:`/beyond/class` });
+                  this.setState({ redirectTo:`/beyond/game_class` });
                 }}>
                 Cancel
               </Button>

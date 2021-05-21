@@ -196,10 +196,10 @@ class MainPage extends Component<Props, State> {
           <Route exact path="/beyond/spell/create" component={SpellEdit} />
           <Route exact path="/beyond/spell/edit/:id" component={SpellEdit} />
 
-          <Route exact path="/beyond/spell_slot_tables" component={SpellSlotTableIndex} />
-          <Route exact path="/beyond/spell_slot_tables/details/:id" component={SpellSlotTableDetails} />
-          <Route exact path="/beyond/spell_slot_tables/create" component={SpellSlotTableEdit} />
-          <Route exact path="/beyond/spell_slot_tables/edit/:id" component={SpellSlotTableEdit} />
+          <Route exact path="/beyond/spell_slot_type" component={SpellSlotTableIndex} />
+          <Route exact path="/beyond/spell_slot_type/details/:id" component={SpellSlotTableDetails} />
+          <Route exact path="/beyond/spell_slot_type/create" component={SpellSlotTableEdit} />
+          <Route exact path="/beyond/spell_slot_type/edit/:id" component={SpellSlotTableEdit} />
 
           <Route exact path="/beyond/armor_type" component={ArmorTypeIndex} />
           <Route exact path="/beyond/armor_type/details/:id" component={ArmorTypeDetails} />
@@ -266,10 +266,10 @@ class MainPage extends Component<Props, State> {
           <Route exact path="/beyond/pact_boon/create" component={PactBoonEdit} />
           <Route exact path="/beyond/pact_boon/edit/:id" component={PactBoonEdit} />
 
-          <Route exact path="/beyond/class" component={GameClassIndex} />
-          <Route exact path="/beyond/class/details/:id" component={GameClassDetails} />
-          <Route exact path="/beyond/class/create" component={GameClassEdit} />
-          <Route exact path="/beyond/class/edit/:id" component={GameClassEdit} />
+          <Route exact path="/beyond/game_class" component={GameClassIndex} />
+          <Route exact path="/beyond/game_class/details/:id" component={GameClassDetails} />
+          <Route exact path="/beyond/game_class/create" component={GameClassEdit} />
+          <Route exact path="/beyond/game_class/edit/:id" component={GameClassEdit} />
 
           <Route exact path="/beyond/subclass" component={SubclassIndex} />
           <Route exact path="/beyond/subclass/details/:id" component={SubclassDetails} />

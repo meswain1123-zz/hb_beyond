@@ -79,7 +79,7 @@ class CharacterFeatures extends Component<Props, State> {
       reloading: false,
       drawer: "",
       search_string: "",
-      view: "All",
+      view: "ALL",
       edit_view: "",
       selected_item: null,
       selected_source: null
@@ -147,15 +147,15 @@ class CharacterFeatures extends Component<Props, State> {
                 <Grid item xs={9} container spacing={1} direction="row">
                   <Grid item xs={2}>
                     <ToggleButtonBox 
-                      name="All"
+                      name="ALL"
                       height={15}
                       lineHeight={1.5}
                       border=""
                       color="gray"
                       bold
-                      value={this.state.view === "All"}
+                      value={this.state.view === "ALL"}
                       onToggle={() => {
-                        this.setState({ view: "All" });
+                        this.setState({ view: "ALL" });
                       }}
                     />
                   </Grid>
@@ -205,13 +205,13 @@ class CharacterFeatures extends Component<Props, State> {
               </Grid>
             </div>
           </Grid>
-          { (this.state.view === "All" || this.state.view === "Class") &&
+          { (this.state.view === "ALL" || this.state.view === "Class") &&
             this.renderClassFeatures()
           }
-          { (this.state.view === "All" || this.state.view === "Racial") &&
+          { (this.state.view === "ALL" || this.state.view === "Racial") &&
             this.renderRacialFeatures()
           }
-          { (this.state.view === "All" || this.state.view === "Feats") &&
+          { (this.state.view === "ALL" || this.state.view === "Feats") &&
             this.renderFeats()
           }
           

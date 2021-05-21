@@ -83,6 +83,7 @@ class CreatureIndex extends Component<Props, State> {
   api: APIClass;
 
   componentDidMount() {
+    this.load();
   }
 
   descriptionStyle = () => {
@@ -142,9 +143,6 @@ class CreatureIndex extends Component<Props, State> {
 
   render() {
     if (this.state.loading) {
-      return <span>Loading</span>;
-    } else if (this.state.creatures === null) {
-      this.load();
       return <span>Loading</span>;
     } else if (this.state.redirectTo !== null) {
       return <Redirect to={this.state.redirectTo} />;

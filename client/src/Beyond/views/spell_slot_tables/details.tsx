@@ -2,16 +2,16 @@ import React, { Component } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
 import { RouteComponentProps } from 'react-router';
 import { Redirect } from "react-router-dom";
-import {
-  Edit, ArrowBack, DeleteForever
-} from "@material-ui/icons";
+
 import {
   Grid, 
-  Tooltip, Fab,
 } from "@material-ui/core";
+
 import { 
-  SpellSlotType
+  SpellSlotType, ModelBase
 } from "../../models";
+
+import ObjectDetails from "../../components/model_inputs/ObjectDetails";
 
 import API from "../../utilities/smart_api";
 import { APIClass } from "../../utilities/smart_api_class";
@@ -46,8 +46,7 @@ type Props = PropsFromRedux & RouteComponentProps<MatchParams> & { }
 
 export interface State { 
   redirectTo: string | null;
-  table: SpellSlotType;
-  spell_slot_types: SpellSlotType[] | null;
+  obj: SpellSlotType;
   loading: boolean;
 }
 
@@ -56,9 +55,8 @@ class SpellSlotTypeDetails extends Component<Props, State> {
     super(props);
     this.state = {
       redirectTo: null,
-      spell_slot_types: null,
-      table: new SpellSlotType(),
-      loading: false,
+      obj: new SpellSlotType(),
+      loading: false
     };
     this.api = API.getInstance();
   }
@@ -66,81 +64,40 @@ class SpellSlotTypeDetails extends Component<Props, State> {
   api: APIClass;
 
   componentDidMount() {
-  }
-
-  // Loads the editing SpellSlotType into state
-  load_table(id: string) {
-    if (this.state.spell_slot_types) {
-      const obj_finder = this.state.spell_slot_types.filter(a => a._id === id);
-      if (obj_finder.length === 1) {
-        this.setState({ table: obj_finder[0] });
-      }
+    let { id } = this.props.match.params;
+    if (id !== undefined && this.state.obj._id !== id) {
+      this.load_object(id);
     }
   }
 
-  load() {
+  // Loads the editing SpellSlotType into state
+  load_object(id: string) {
     this.setState({ loading: true }, () => {
-      this.api.getObjects("spell_slot_type").then((res: any) => {
-        if (res && !res.error) {
-          this.setState({ spell_slot_types: res, loading: false });
+      this.api.getFullObject("spell_slot_type", id).then((res: ModelBase | null) => {
+        if (res) {
+          this.setState({ obj: (res as SpellSlotType).clone(), loading: false });
         }
       });
     });
   }
 
   render() {
-    if (this.state.loading) {
-      return <span>Loading</span>;
-    } else if (this.state.spell_slot_types === null) {
-      this.load();
+    if (this.state.loading || this.state.obj === null) {
       return <span>Loading</span>;
     } else if (this.state.redirectTo !== null) {
       return <Redirect to={this.state.redirectTo} />;
     } else { 
-      let { id } = this.props.match.params;
-      if (id !== undefined && this.state.table._id !== id) {
-        this.load_table(id);
-        return (<span>Loading...</span>);
-      } else {
-        return (
-          <Grid container spacing={1} direction="column">
-            <Grid item>
-              <Tooltip title={`Back to Spell Slot Tables`}>
-                <Fab size="small" color="primary" style={{marginLeft: "8px"}}
-                  onClick={ () => {
-                    this.setState({ redirectTo:`/beyond/spell_slot_tables` });
-                  }}>
-                  <ArrowBack/>
-                </Fab>
-              </Tooltip> 
-              &nbsp;
-              <Tooltip title={`Delete ${this.state.table.name}`}>
-                <Fab size="small" color="primary" style={{marginLeft: "8px"}}
-                  onClick={ () => {
-                    this.api.deleteObject("spell_slot_type", this.state.table).then((res: any) => {
-                      this.setState({ redirectTo:`/beyond/spell_slot_tables` });
-                    });
-                  }}>
-                  <DeleteForever/>
-                </Fab>
-              </Tooltip> 
-            </Grid>
-            <Grid item>
-              <span className={"MuiTypography-root MuiListItemText-primary header"}>
-                { this.state.table.name }
-              </span>
-              <Tooltip title={`Edit ${this.state.table.name}`}>
-                <Fab size="small" color="primary" style={{marginLeft: "8px"}}
-                  onClick={ () => {
-                    this.setState({ redirectTo:`/beyond/spell_slot_tables/edit/${this.state.table._id}` });
-                  }}>
-                  <Edit/>
-                </Fab>
-              </Tooltip> 
-            </Grid>
+      return (
+        <Grid container spacing={1} direction="column">
+          <Grid item>
+            <ObjectDetails 
+              obj={this.state.obj}
+              data_type="spell_slot_type"
+              type_label="Spell Slot Types"
+            />
           </Grid>
-        ); 
-      }
+        </Grid>
+      );
     }
   }
 }

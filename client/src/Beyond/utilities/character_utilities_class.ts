@@ -653,7 +653,7 @@ export class CharacterUtilitiesClass {
         me.race.features.forEach(fb => {
           let good = true;
           if (fb.feature_base) {
-            if (fb.feature_base.required_condition_ids.length > 0 && fb.feature_base.required_condition_ids.filter(o => o !== "All").length > 0) {
+            if (fb.feature_base.required_condition_ids.length > 0 && fb.feature_base.required_condition_ids.filter(o => o !== "ALL").length > 0) {
               good = false;
               for (let i = 0; i < fb.feature_base.required_condition_ids.length; ++i) {
                 if (me.conditions.includes(fb.feature_base.required_condition_ids[i])) {
@@ -671,7 +671,7 @@ export class CharacterUtilitiesClass {
           me.race.subrace.features.forEach(fb => {
             let good = true;
             if (fb.feature_base) {
-              if (fb.feature_base.required_condition_ids.length > 0 && fb.feature_base.required_condition_ids.filter(o => o !== "All").length > 0) {
+              if (fb.feature_base.required_condition_ids.length > 0 && fb.feature_base.required_condition_ids.filter(o => o !== "ALL").length > 0) {
                 good = false;
                 for (let i = 0; i < fb.feature_base.required_condition_ids.length; ++i) {
                   if (me.conditions.includes(fb.feature_base.required_condition_ids[i])) {
@@ -689,7 +689,7 @@ export class CharacterUtilitiesClass {
         me.background.features.forEach(fb => {
           let good = true;
           if (fb.feature_base) {
-            if (fb.feature_base.required_condition_ids.length > 0 && fb.feature_base.required_condition_ids.filter(o => o !== "All").length > 0) {
+            if (fb.feature_base.required_condition_ids.length > 0 && fb.feature_base.required_condition_ids.filter(o => o !== "ALL").length > 0) {
               good = false;
               for (let i = 0; i < fb.feature_base.required_condition_ids.length; ++i) {
                 if (me.conditions.includes(fb.feature_base.required_condition_ids[i])) {
@@ -707,7 +707,7 @@ export class CharacterUtilitiesClass {
           char_class.class_features.forEach(fb => {
             let good = true;
             if (fb.feature_base) {
-              if (fb.feature_base.required_condition_ids.length > 0 && fb.feature_base.required_condition_ids.filter(o => o !== "All").length > 0) {
+              if (fb.feature_base.required_condition_ids.length > 0 && fb.feature_base.required_condition_ids.filter(o => o !== "ALL").length > 0) {
                 good = false;
                 for (let i = 0; i < fb.feature_base.required_condition_ids.length; ++i) {
                   if (me.conditions.includes(fb.feature_base.required_condition_ids[i])) {
@@ -724,7 +724,7 @@ export class CharacterUtilitiesClass {
           char_class.subclass_features.forEach(fb => {
             let good = true;
             if (fb.feature_base) {
-              if (fb.feature_base.required_condition_ids.length > 0 && fb.feature_base.required_condition_ids.filter(o => o !== "All").length > 0) {
+              if (fb.feature_base.required_condition_ids.length > 0 && fb.feature_base.required_condition_ids.filter(o => o !== "ALL").length > 0) {
                 good = false;
                 for (let i = 0; i < fb.feature_base.required_condition_ids.length; ++i) {
                   if (me.conditions.includes(fb.feature_base.required_condition_ids[i])) {
@@ -743,7 +743,7 @@ export class CharacterUtilitiesClass {
           item.features.forEach(fb => {
             let good = true;
             if (fb.feature_base) {
-              if (fb.feature_base.required_condition_ids.length > 0 && fb.feature_base.required_condition_ids.filter(o => o !== "All").length > 0) {
+              if (fb.feature_base.required_condition_ids.length > 0 && fb.feature_base.required_condition_ids.filter(o => o !== "ALL").length > 0) {
                 good = false;
                 for (let i = 0; i < fb.feature_base.required_condition_ids.length; ++i) {
                   if (me.conditions.includes(fb.feature_base.required_condition_ids[i])) {
@@ -773,7 +773,7 @@ export class CharacterUtilitiesClass {
           feat.features.forEach(fb => {
             let good = true;
             if (fb.feature_base) {
-              if (fb.feature_base.required_condition_ids.length > 0 && fb.feature_base.required_condition_ids.filter(o => o !== "All").length > 0) {
+              if (fb.feature_base.required_condition_ids.length > 0 && fb.feature_base.required_condition_ids.filter(o => o !== "ALL").length > 0) {
                 good = false;
                 for (let i = 0; i < fb.feature_base.required_condition_ids.length; ++i) {
                   if (me.conditions.includes(fb.feature_base.required_condition_ids[i])) {
@@ -805,7 +805,7 @@ export class CharacterUtilitiesClass {
             sf.features.forEach(fb => {
               let good = true;
               if (fb.feature_base) {
-                if (fb.feature_base.required_condition_ids.length > 0 && fb.feature_base.required_condition_ids.filter(o => o !== "All").length > 0) {
+                if (fb.feature_base.required_condition_ids.length > 0 && fb.feature_base.required_condition_ids.filter(o => o !== "ALL").length > 0) {
                   good = false;
                   for (let i = 0; i < fb.feature_base.required_condition_ids.length; ++i) {
                     if (me.conditions.includes(fb.feature_base.required_condition_ids[i])) {
@@ -983,7 +983,7 @@ export class CharacterUtilitiesClass {
       }
       const checkArmorRequirements = (me: Character, mod: Modifier) => {
         // Check if it matches the armor_requirement field
-        if (mod.allowed_armor_types.includes("All")) {
+        if (mod.allowed_armor_types.includes("ALL")) {
           // Check for required
           if (mod.required_armor_types.includes("None")) {
             return true;
@@ -1188,7 +1188,7 @@ export class CharacterUtilitiesClass {
               const bonus = new Bonus();
               bonus.source = mod_obj.source_name;
               bonus.types = mod.modifies_details;
-              if (mod.modifies_detail_2 === "All") {
+              if (mod.modifies_detail_2 === "ALL") {
                 bonus.subtypes.push(mod.modifies_detail_2);
               }
               bonus.excluded = mod.excluded_weapon_keywords;
