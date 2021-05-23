@@ -104,6 +104,7 @@ class CharacterEdit extends Component<Props, State> {
   char_util: CharacterUtilitiesClass;
 
   componentDidMount() {
+    this.load();
   }
 
   submit() {
@@ -151,144 +152,135 @@ class CharacterEdit extends Component<Props, State> {
   }
 
   render() {
-    if (this.state.loading) {
-      return <span>Loading</span>;
-    } else if (this.state.armor_types === null) {
-      this.load();
+    if (this.state.loading || this.state.armor_types === null) {
       return <span>Loading</span>;
     } else if (this.state.redirectTo !== null) {
       return <Redirect to={this.state.redirectTo} />;
     } else { 
-      let { id } = this.props.match.params;
-      if (id !== undefined && this.state.obj._id !== id) {
-        this.load_object(id);
-        return (<span>Loading...</span>);
-      } else {
-        const formHeight = this.props.height - (this.props.width > 600 ? 228 : 228);
-        return (
-          <Grid container spacing={1} direction="column">
-            <Grid item container spacing={1} direction="row">
-              <Grid item xs={3}>
-                <Tooltip title={`Back to Characters`}>
-                  <Fab size="small" color="primary" style={{marginLeft: "8px"}}
-                    onClick={ () => {
-                      this.setState({ redirectTo:`/beyond/character` });
-                    }}>
-                    <ArrowBack/>
-                  </Fab>
-                </Tooltip> 
-              </Grid>
-            </Grid>
-            <Grid item>
-              <span className={"MuiTypography-root MuiListItemText-primary header"}>
-                { this.state.obj._id === "" ? "Create Character" : `Edit ${this.state.obj.name}` }
-              </span>
-            </Grid>
-            <Grid item container spacing={1} direction="row">
-              <Grid item xs={2}>
-                <Link href="#" 
-                  style={{
-                    borderBottom: `${this.state.mode === "main" ? "2px solid blue" : "none"}`
-                  }}
-                  onClick={(event: React.SyntheticEvent) => {
-                    event.preventDefault();
-                    this.setState({ mode: "main" });
+      const formHeight = this.props.height - (this.props.width > 600 ? 228 : 228);
+      return (
+        <Grid container spacing={1} direction="column">
+          <Grid item container spacing={1} direction="row">
+            <Grid item xs={3}>
+              <Tooltip title={`Back to Characters`}>
+                <Fab size="small" color="primary" style={{marginLeft: "8px"}}
+                  onClick={ () => {
+                    this.setState({ redirectTo:`/beyond/character` });
                   }}>
-                  Home
-                </Link>
-              </Grid>
-              <Grid item xs={2}>
-                <Link href="#"  
-                  style={{
-                    borderBottom: `${this.state.mode === "race" ? "2px solid blue" : "none"}`
-                  }}
-                  onClick={(event: React.SyntheticEvent) => {
-                    event.preventDefault();
-                    this.setState({ mode: "race" });
-                  }}>
-                  Race
-                </Link>
-              </Grid>
-              <Grid item xs={2}>
-                <Link href="#" 
-                  style={{
-                    borderBottom: `${this.state.mode === "background" ? "2px solid blue" : "none"}`
-                  }}
-                  onClick={(event: React.SyntheticEvent) => {
-                    event.preventDefault();
-                    this.setState({ mode: "background" });
-                  }}>
-                  Background
-                </Link>
-              </Grid>
-              <Grid item xs={2}>
-                <Link href="#" 
-                  style={{
-                    borderBottom: `${this.state.mode === "abilities" ? "2px solid blue" : "none"}`
-                  }}
-                  onClick={(event: React.SyntheticEvent) => {
-                    event.preventDefault();
-                    this.setState({ mode: "abilities" });
-                  }}>
-                  Abilities
-                </Link>
-              </Grid>
-              <Grid item xs={2}>
-                <Link href="#" 
-                  style={{
-                    borderBottom: `${this.state.mode === "class" ? "2px solid blue" : "none"}`
-                  }}
-                  onClick={(event: React.SyntheticEvent) => {
-                    event.preventDefault();
-                    this.setState({ mode: "class" });
-                  }}>
-                  Class
-                </Link>
-              </Grid>
-              <Grid item xs={2}>
-                <Link href="#" 
-                  style={{
-                    borderBottom: `${this.state.mode === "equipment" ? "2px solid blue" : "none"}`
-                  }}
-                  onClick={(event: React.SyntheticEvent) => {
-                    event.preventDefault();
-                    this.setState({ mode: "equipment" });
-                  }}>
-                  Equipment
-                </Link>
-              </Grid>
-            </Grid>
-            <Grid item 
-              style={{ 
-                height: `${formHeight}px`, 
-                overflowY: "scroll", 
-                overflowX: "hidden" 
-              }}>
-                { this.render_tab() }
-            </Grid>
-            <Grid item>
-              <Button
-                variant="contained"
-                color="primary"
-                disabled={ this.state.processing || !this.state.child_names_valid || this.state.obj.name === "" || this.state.obj.race.race_id === "" || this.state.obj.background.background_id === "" || this.state.obj.classes.length === 0 }
-                onClick={ () => { 
-                  this.submit();
-                }}>
-                Submit
-              </Button>
-              <Button
-                variant="contained"
-                disabled={this.state.processing}
-                style={{ marginLeft: "4px" }}
-                onClick={ () => { 
-                  this.setState({ redirectTo:`/beyond/character` });
-                }}>
-                Cancel
-              </Button>
+                  <ArrowBack/>
+                </Fab>
+              </Tooltip> 
             </Grid>
           </Grid>
-        ); 
-      }
+          <Grid item>
+            <span className={"MuiTypography-root MuiListItemText-primary header"}>
+              { this.state.obj._id === "" ? "Create Character" : `Edit ${this.state.obj.name}` }
+            </span>
+          </Grid>
+          <Grid item container spacing={1} direction="row">
+            <Grid item xs={2}>
+              <Link href="#" 
+                style={{
+                  borderBottom: `${this.state.mode === "main" ? "2px solid blue" : "none"}`
+                }}
+                onClick={(event: React.SyntheticEvent) => {
+                  event.preventDefault();
+                  this.setState({ mode: "main" });
+                }}>
+                Home
+              </Link>
+            </Grid>
+            <Grid item xs={2}>
+              <Link href="#"  
+                style={{
+                  borderBottom: `${this.state.mode === "race" ? "2px solid blue" : "none"}`
+                }}
+                onClick={(event: React.SyntheticEvent) => {
+                  event.preventDefault();
+                  this.setState({ mode: "race" });
+                }}>
+                Race
+              </Link>
+            </Grid>
+            <Grid item xs={2}>
+              <Link href="#" 
+                style={{
+                  borderBottom: `${this.state.mode === "background" ? "2px solid blue" : "none"}`
+                }}
+                onClick={(event: React.SyntheticEvent) => {
+                  event.preventDefault();
+                  this.setState({ mode: "background" });
+                }}>
+                Background
+              </Link>
+            </Grid>
+            <Grid item xs={2}>
+              <Link href="#" 
+                style={{
+                  borderBottom: `${this.state.mode === "abilities" ? "2px solid blue" : "none"}`
+                }}
+                onClick={(event: React.SyntheticEvent) => {
+                  event.preventDefault();
+                  this.setState({ mode: "abilities" });
+                }}>
+                Abilities
+              </Link>
+            </Grid>
+            <Grid item xs={2}>
+              <Link href="#" 
+                style={{
+                  borderBottom: `${this.state.mode === "class" ? "2px solid blue" : "none"}`
+                }}
+                onClick={(event: React.SyntheticEvent) => {
+                  event.preventDefault();
+                  this.setState({ mode: "class" });
+                }}>
+                Class
+              </Link>
+            </Grid>
+            <Grid item xs={2}>
+              <Link href="#" 
+                style={{
+                  borderBottom: `${this.state.mode === "equipment" ? "2px solid blue" : "none"}`
+                }}
+                onClick={(event: React.SyntheticEvent) => {
+                  event.preventDefault();
+                  this.setState({ mode: "equipment" });
+                }}>
+                Equipment
+              </Link>
+            </Grid>
+          </Grid>
+          <Grid item 
+            style={{ 
+              height: `${formHeight}px`, 
+              overflowY: "scroll", 
+              overflowX: "hidden" 
+            }}>
+              { this.render_tab() }
+          </Grid>
+          <Grid item>
+            <Button
+              variant="contained"
+              color="primary"
+              disabled={ this.state.processing || !this.state.child_names_valid || this.state.obj.name === "" || this.state.obj.race.race_id === "" || this.state.obj.background.background_id === "" || this.state.obj.classes.length === 0 }
+              onClick={ () => { 
+                this.submit();
+              }}>
+              Submit
+            </Button>
+            <Button
+              variant="contained"
+              disabled={this.state.processing}
+              style={{ marginLeft: "4px" }}
+              onClick={ () => { 
+                this.setState({ redirectTo:`/beyond/character` });
+              }}>
+              Cancel
+            </Button>
+          </Grid>
+        </Grid>
+      ); 
     }
   }
 

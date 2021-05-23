@@ -83,7 +83,7 @@ class ArmorTypeEdit extends Component<Props, State> {
     });
   }
 
-  // Loads the editing ArmorType into state
+  // Loads the editing obj into state
   load_object(id: string) {
     const objFinder = this.state.armor_types ? this.state.armor_types.filter(a => a._id === id) : [];
     if (objFinder.length === 1) {

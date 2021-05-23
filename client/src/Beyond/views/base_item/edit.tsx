@@ -50,7 +50,6 @@ interface MatchParams {
 }
 
 const mapState = (state: RootState) => ({
-  item_type: state.app.item_type,
   height: state.app.height,
   width: state.app.width
 })
@@ -98,6 +97,7 @@ class BaseItemEdit extends Component<Props, State> {
   api: APIClass;
 
   componentDidMount() {
+    this.load();
   }
 
   submit() {
@@ -112,340 +112,311 @@ class BaseItemEdit extends Component<Props, State> {
   load_object(id: string) {
     const objFinder = this.state.base_items ? this.state.base_items.filter(a => a._id === id) : [];
     if (objFinder.length === 1) {
-      this.setState({ obj: objFinder[0].clone() });
+      this.setState({ obj: objFinder[0].clone(), loading: false });
     }
   }
 
   load() {
     this.setState({ loading: true }, () => {
-      this.api.getSetOfObjects(["base_item","weapon_keyword"]).then((res: any) => {
-        const obj = this.state.obj;
-        if (obj._id === "" && this.props.item_type !== "ALL") {
-          obj.item_type = this.props.item_type;
-        }
-        const range_ids: string[] = [];
-        let reach_id = "";
-        let versatile_id = "";
-        if (res.weapon_keyword) {
-          let objFinder = res.weapon_keyword.filter((o: WeaponKeyword) => o.name.toLowerCase().includes("range") || o.name.toLowerCase().includes("thrown"));
-          objFinder.forEach((o: WeaponKeyword) => {
-            range_ids.push(o._id);
-          });
-          objFinder = res.weapon_keyword.filter((o: WeaponKeyword) => o.name === "Reach");
-          if (objFinder.length === 1) {
-            reach_id = objFinder[0]._id;
-          }
-          objFinder = res.weapon_keyword.filter((o: WeaponKeyword) => o.name === "Versatile");
-          if (objFinder.length === 1) {
-            versatile_id = objFinder[0]._id;
+      this.api.getObjects("base_item").then((res: any) => {
+        if (res && !res.error) {
+          let { id } = this.props.match.params;
+          if (id !== undefined && this.state.obj._id !== id) {
+            this.setState({ base_items: res }, () => {
+              this.load_object(id);
+            });
+          } else {
+            this.setState({ base_items: res, loading: false });
           }
         }
-        this.setState({ 
-          obj,
-          base_items: res.base_item, 
-          weapon_keywords: res.weapon_keyword,
-          range_ids,
-          reach_id,
-          versatile_id,
-          loading: false
-        });
       });
     });
   }
 
   render() {
-    if (this.state.loading) {
-      return <span>Loading</span>;
-    } else if (this.state.base_items === null) {
-      this.load();
+    if (this.state.loading || this.state.base_items === null) {
       return <span>Loading</span>;
     } else if (this.state.redirectTo !== null) {
       return <Redirect to={this.state.redirectTo} />;
     } else { 
-      let { id } = this.props.match.params;
-      if (id !== undefined && this.state.obj._id !== id) {
-        this.load_object(id);
-        return (<span>Loading...</span>);
+      let range = false;
+      let reach = false;
+      let versatile = false;
+      if (this.state.obj.weapon_keyword_ids.indexOf(this.state.versatile_id) !== -1) {
+        versatile = true;
+      }
+      if (this.state.obj.weapon_keyword_ids.indexOf(this.state.reach_id) !== -1) {
+        reach = true;
       } else {
-        let range = false;
-        let reach = false;
-        let versatile = false;
-        if (this.state.obj.weapon_keyword_ids.indexOf(this.state.versatile_id) !== -1) {
-          versatile = true;
-        }
-        if (this.state.obj.weapon_keyword_ids.indexOf(this.state.reach_id) !== -1) {
-          reach = true;
-        } else {
-          for (let i = 0; i < this.state.obj.weapon_keyword_ids.length; i++) {
-            if (this.state.range_ids.indexOf(this.state.obj.weapon_keyword_ids[i]) !== -1) {
-              range = true;
-              break;
-            }
+        for (let i = 0; i < this.state.obj.weapon_keyword_ids.length; i++) {
+          if (this.state.range_ids.indexOf(this.state.obj.weapon_keyword_ids[i]) !== -1) {
+            range = true;
+            break;
           }
         }
-        const formHeight = this.props.height - (this.props.width > 600 ? 198 : 198);
-        const tool_types = ["Artisan's Tools","Game Set","Instrument","Vehicles"];
-        return (
-          <Grid container spacing={1} direction="column">
-            <Grid item>
-              <Tooltip title={`Back to Base Items`}>
-                <Fab size="small" color="primary" style={{marginLeft: "8px"}}
-                  onClick={ () => {
-                    this.setState({ redirectTo:`/beyond/base_item` });
-                  }}>
-                  <ArrowBack/>
-                </Fab>
-              </Tooltip> 
-            </Grid>
-            <Grid item>
-              <span className={"MuiTypography-root MuiListItemText-primary header"}>
-                { this.state.obj._id === "" ? "Create Base Item" : `Edit ${this.state.obj.name}` }
-              </span>
-            </Grid>
-            <Grid item 
-              style={{ 
-                height: `${formHeight}px`, 
-                overflowY: "scroll", 
-                overflowX: "hidden" 
-              }}>
-              <Grid container spacing={1} direction="column">
+      }
+      const formHeight = this.props.height - (this.props.width > 600 ? 198 : 198);
+      const tool_types = ["Artisan's Tools","Game Set","Instrument","Vehicles"];
+      return (
+        <Grid container spacing={1} direction="column">
+          <Grid item>
+            <Tooltip title={`Back to Base Items`}>
+              <Fab size="small" color="primary" style={{marginLeft: "8px"}}
+                onClick={ () => {
+                  this.setState({ redirectTo:`/beyond/base_item` });
+                }}>
+                <ArrowBack/>
+              </Fab>
+            </Tooltip> 
+          </Grid>
+          <Grid item>
+            <span className={"MuiTypography-root MuiListItemText-primary header"}>
+              { this.state.obj._id === "" ? "Create Base Item" : `Edit ${this.state.obj.name}` }
+            </span>
+          </Grid>
+          <Grid item 
+            style={{ 
+              height: `${formHeight}px`, 
+              overflowY: "scroll", 
+              overflowX: "hidden" 
+            }}>
+            <Grid container spacing={1} direction="column">
+              <Grid item>
+                <StringBox 
+                  value={this.state.obj.name} 
+                  message={this.state.obj.name.length > 0 ? "" : "Name Invalid"} 
+                  name="Name"
+                  onBlur={(value: string) => {
+                    const obj = this.state.obj;
+                    obj.name = value;
+                    this.setState({ obj });
+                  }}
+                />
+              </Grid>
+              <Grid item>
+                <StringBox 
+                  value={this.state.obj.description} 
+                  name="Description"
+                  multiline
+                  onBlur={(value: string) => {
+                    const obj = this.state.obj;
+                    obj.description = value;
+                    this.setState({ obj });
+                  }}
+                />
+              </Grid>
+              <Grid item>
+                <StringBox 
+                  value={`${this.state.obj.weight}`} 
+                  name="Weight (in lbs)"
+                  type="number"
+                  onBlur={(value: number) => {
+                    const obj = this.state.obj;
+                    obj.weight = value;
+                    this.setState({ obj });
+                  }}
+                />
+              </Grid>
+              <Grid item>
+                <StringBox 
+                  value={`${this.state.obj.cost}`} 
+                  name="Cost (GP)"
+                  onBlur={(value: string) => {
+                    const obj = this.state.obj;
+                    obj.cost = +value;
+                    this.setState({ obj });
+                  }}
+                />
+              </Grid>
+              <Grid item>
+                <SelectStringBox
+                  name="Item Type"
+                  options={ITEM_TYPES}
+                  value={this.state.obj.item_type}
+                  onChange={(value: string) => {
+                    const obj = this.state.obj;
+                    obj.item_type = value;
+                    this.setState({ obj });
+                  }}
+                />
+              </Grid>
+              { this.state.obj.item_type === "Armor" ? 
+                <Grid item container spacing={1} direction="column">
+                  <Grid item>
+                    <SelectArmorTypeBox
+                      name="Armor Type" 
+                      value={ this.state.obj.armor_type_id ? this.state.obj.armor_type_id : "" } 
+                      onChange={(id: string) => {
+                        const obj = this.state.obj;
+                        obj.armor_type_id = id;
+                        this.setState({ obj });
+                      }} 
+                    />
+                  </Grid>
+                  <Grid item>
+                    <StringBox
+                      name="Base Armor Class (or Bonus)"
+                      type="number"
+                      value={ `${this.state.obj.base_armor_class}` }
+                      onBlur={(value: string) => {
+                        const obj = this.state.obj;
+                        obj.base_armor_class = +value;
+                        this.setState({ obj });
+                      }}
+                    />
+                  </Grid>
+                </Grid>
+              : this.state.obj.item_type === "Weapon" ?
+                <Grid item container spacing={1} direction="column">
+                  <Grid item>
+                    <SelectWeaponKeywordBox
+                      name="Weapon Keywords" 
+                      values={ this.state.obj.weapon_keyword_ids } 
+                      multiple
+                      onChange={(ids: string[]) => {
+                        const obj = this.state.obj;
+                        obj.weapon_keyword_ids = ids;
+                        this.setState({ obj });
+                      }} 
+                    />
+                  </Grid>
+                  { this.renderDamageInputs(false) }
+                  <Grid item>
+                    <SelectStringBox
+                      name="Damage Type"
+                      options={DAMAGE_TYPES}
+                      value={this.state.obj.damage_type}
+                      onChange={(value: string) => {
+                        const obj = this.state.obj;
+                        obj.damage_type = value;
+                        this.setState({ obj });
+                      }}
+                    />
+                  </Grid>
+                  { versatile && this.renderDamageInputs(true) }
+                  { range ? 
+                    <Grid item>
+                      <StringBox
+                        name="Range"
+                        type="number"
+                        value={ `${this.state.obj.range}` }
+                        onBlur={(value: number) => {
+                          const obj = this.state.obj;
+                          obj.range = value;
+                          this.setState({ obj });
+                        }}
+                      />
+                    </Grid>
+                  : reach &&
+                    <Grid item>
+                      <StringBox
+                        name="Reach"
+                        type="number"
+                        value={ `${this.state.obj.range}` }
+                        onBlur={(value: number) => {
+                          const obj = this.state.obj;
+                          obj.range = value;
+                          this.setState({ obj });
+                        }}
+                      />
+                    </Grid>
+                  }
+                  { range && 
+                    <Grid item>
+                      <StringBox
+                        name="Far Range"
+                        type="number"
+                        value={ `${this.state.obj.range2}` }
+                        onBlur={(value: number) => {
+                          const obj = this.state.obj;
+                          obj.range2 = value;
+                          this.setState({ obj });
+                        }}
+                      />
+                    </Grid>
+                  }
+                </Grid>
+              : tool_types.includes(this.state.obj.item_type) &&
+                <Grid item container spacing={1} direction="column">
+                  <Grid item>
+                    <SelectToolBox
+                      name="Specific Tool" 
+                      type={ this.state.obj.item_type }
+                      value={ this.state.obj.tool_id } 
+                      onChange={(id: string) => {
+                        const obj = this.state.obj;
+                        obj.tool_id = id;
+                        this.setState({ obj });
+                      }} 
+                    />
+                  </Grid>
+                </Grid>
+              }
+              { this.state.obj.item_type !== "Weapon" && this.state.obj.item_type !== "Armor" && 
                 <Grid item>
-                  <StringBox 
-                    value={this.state.obj.name} 
-                    message={this.state.obj.name.length > 0 ? "" : "Name Invalid"} 
-                    name="Name"
-                    onBlur={(value: string) => {
+                  <SelectStringBox
+                    name="Worn Type"
+                    options={["None","Head","Chest","Hands","Feet","Cape","Ring","Belt"]}
+                    value={this.state.obj.worn_type}
+                    onChange={(value: string) => {
                       const obj = this.state.obj;
-                      obj.name = value;
+                      obj.worn_type = value;
                       this.setState({ obj });
                     }}
                   />
                 </Grid>
+              }
+              { this.state.obj.item_type !== "Weapon" && this.state.obj.item_type !== "Armor" && 
                 <Grid item>
-                  <StringBox 
-                    value={this.state.obj.description} 
-                    name="Description"
-                    multiline
-                    onBlur={(value: string) => {
+                  <CheckBox 
+                    name="Stackable"
+                    value={this.state.obj.stackable}
+                    onChange={(value: boolean) => {
                       const obj = this.state.obj;
-                      obj.description = value;
+                      obj.stackable = value;
                       this.setState({ obj });
                     }}
                   />
                 </Grid>
+              }
+              { this.state.obj.stackable &&
                 <Grid item>
                   <StringBox 
-                    value={`${this.state.obj.weight}`} 
-                    name="Weight (in lbs)"
+                    value={`${this.state.obj.bundle_size}`} 
+                    name="Bundle Size"
                     type="number"
                     onBlur={(value: number) => {
                       const obj = this.state.obj;
-                      obj.weight = value;
+                      obj.bundle_size = value;
                       this.setState({ obj });
                     }}
                   />
                 </Grid>
-                <Grid item>
-                  <StringBox 
-                    value={`${this.state.obj.cost}`} 
-                    name="Cost (GP)"
-                    onBlur={(value: string) => {
-                      const obj = this.state.obj;
-                      obj.cost = +value;
-                      this.setState({ obj });
-                    }}
-                  />
-                </Grid>
-                <Grid item>
-                  <SelectStringBox
-                    name="Item Type"
-                    options={ITEM_TYPES}
-                    value={this.state.obj.item_type}
-                    onChange={(value: string) => {
-                      const obj = this.state.obj;
-                      obj.item_type = value;
-                      this.setState({ obj });
-                    }}
-                  />
-                </Grid>
-                { this.state.obj.item_type === "Armor" ? 
-                  <Grid item container spacing={1} direction="column">
-                    <Grid item>
-                      <SelectArmorTypeBox
-                        name="Armor Type" 
-                        value={ this.state.obj.armor_type_id ? this.state.obj.armor_type_id : "" } 
-                        onChange={(id: string) => {
-                          const obj = this.state.obj;
-                          obj.armor_type_id = id;
-                          this.setState({ obj });
-                        }} 
-                      />
-                    </Grid>
-                    <Grid item>
-                      <StringBox
-                        name="Base Armor Class (or Bonus)"
-                        type="number"
-                        value={ `${this.state.obj.base_armor_class}` }
-                        onBlur={(value: string) => {
-                          const obj = this.state.obj;
-                          obj.base_armor_class = +value;
-                          this.setState({ obj });
-                        }}
-                      />
-                    </Grid>
-                  </Grid>
-                : this.state.obj.item_type === "Weapon" ?
-                  <Grid item container spacing={1} direction="column">
-                    <Grid item>
-                      <SelectWeaponKeywordBox
-                        name="Weapon Keywords" 
-                        values={ this.state.obj.weapon_keyword_ids } 
-                        multiple
-                        onChange={(ids: string[]) => {
-                          const obj = this.state.obj;
-                          obj.weapon_keyword_ids = ids;
-                          this.setState({ obj });
-                        }} 
-                      />
-                    </Grid>
-                    { this.renderDamageInputs(false) }
-                    <Grid item>
-                      <SelectStringBox
-                        name="Damage Type"
-                        options={DAMAGE_TYPES}
-                        value={this.state.obj.damage_type}
-                        onChange={(value: string) => {
-                          const obj = this.state.obj;
-                          obj.damage_type = value;
-                          this.setState({ obj });
-                        }}
-                      />
-                    </Grid>
-                    { versatile && this.renderDamageInputs(true) }
-                    { range ? 
-                      <Grid item>
-                        <StringBox
-                          name="Range"
-                          type="number"
-                          value={ `${this.state.obj.range}` }
-                          onBlur={(value: number) => {
-                            const obj = this.state.obj;
-                            obj.range = value;
-                            this.setState({ obj });
-                          }}
-                        />
-                      </Grid>
-                    : reach &&
-                      <Grid item>
-                        <StringBox
-                          name="Reach"
-                          type="number"
-                          value={ `${this.state.obj.range}` }
-                          onBlur={(value: number) => {
-                            const obj = this.state.obj;
-                            obj.range = value;
-                            this.setState({ obj });
-                          }}
-                        />
-                      </Grid>
-                    }
-                    { range && 
-                      <Grid item>
-                        <StringBox
-                          name="Far Range"
-                          type="number"
-                          value={ `${this.state.obj.range2}` }
-                          onBlur={(value: number) => {
-                            const obj = this.state.obj;
-                            obj.range2 = value;
-                            this.setState({ obj });
-                          }}
-                        />
-                      </Grid>
-                    }
-                  </Grid>
-                : tool_types.includes(this.state.obj.item_type) &&
-                  <Grid item container spacing={1} direction="column">
-                    <Grid item>
-                      <SelectToolBox
-                        name="Specific Tool" 
-                        type={ this.state.obj.item_type }
-                        value={ this.state.obj.tool_id } 
-                        onChange={(id: string) => {
-                          const obj = this.state.obj;
-                          obj.tool_id = id;
-                          this.setState({ obj });
-                        }} 
-                      />
-                    </Grid>
-                  </Grid>
-                }
-                { this.state.obj.item_type !== "Weapon" && this.state.obj.item_type !== "Armor" && 
-                  <Grid item>
-                    <SelectStringBox
-                      name="Worn Type"
-                      options={["None","Head","Chest","Hands","Feet","Cape","Ring","Belt"]}
-                      value={this.state.obj.worn_type}
-                      onChange={(value: string) => {
-                        const obj = this.state.obj;
-                        obj.worn_type = value;
-                        this.setState({ obj });
-                      }}
-                    />
-                  </Grid>
-                }
-                { this.state.obj.item_type !== "Weapon" && this.state.obj.item_type !== "Armor" && 
-                  <Grid item>
-                    <CheckBox 
-                      name="Stackable"
-                      value={this.state.obj.stackable}
-                      onChange={(value: boolean) => {
-                        const obj = this.state.obj;
-                        obj.stackable = value;
-                        this.setState({ obj });
-                      }}
-                    />
-                  </Grid>
-                }
-                { this.state.obj.stackable &&
-                  <Grid item>
-                    <StringBox 
-                      value={`${this.state.obj.bundle_size}`} 
-                      name="Bundle Size"
-                      type="number"
-                      onBlur={(value: number) => {
-                        const obj = this.state.obj;
-                        obj.bundle_size = value;
-                        this.setState({ obj });
-                      }}
-                    />
-                  </Grid>
-                }
-              </Grid>
-            </Grid>
-            <Grid item>
-              <Button
-                variant="contained"
-                color="primary"
-                disabled={this.state.processing}
-                onClick={ () => { 
-                  this.submit();
-                }}>
-                Submit
-              </Button>
-              <Button
-                variant="contained"
-                disabled={this.state.processing}
-                style={{ marginLeft: "4px" }}
-                onClick={ () => { 
-                  this.setState({ redirectTo:`/beyond/base_item` });
-                }}>
-                Cancel
-              </Button>
+              }
             </Grid>
           </Grid>
-        ); 
-      }
+          <Grid item>
+            <Button
+              variant="contained"
+              color="primary"
+              disabled={this.state.processing}
+              onClick={ () => { 
+                this.submit();
+              }}>
+              Submit
+            </Button>
+            <Button
+              variant="contained"
+              disabled={this.state.processing}
+              style={{ marginLeft: "4px" }}
+              onClick={ () => { 
+                this.setState({ redirectTo:`/beyond/base_item` });
+              }}>
+              Cancel
+            </Button>
+          </Grid>
+        </Grid>
+      ); 
     }
   }
 

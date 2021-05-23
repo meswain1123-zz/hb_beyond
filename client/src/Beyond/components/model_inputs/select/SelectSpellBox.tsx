@@ -86,6 +86,7 @@ class SelectSpellBox extends Component<Props, State> {
   api: APIClass;
 
   componentDidMount() {
+    this.start_up();
   }
 
   start_up() {
@@ -101,9 +102,7 @@ class SelectSpellBox extends Component<Props, State> {
   load() {
     this.setState({ loading: true, spells: [] }, () => {
       const filter = this.get_filter();
-      console.log(filter)
       this.api.getObjectCount("spell", filter).then((res: any) => {
-        console.log(res);
         if (res && !res.error) {
           if (res.count <= 100) {
             this.setState({ count: res.count }, this.load_some);
@@ -129,7 +128,7 @@ class SelectSpellBox extends Component<Props, State> {
       filter.school = this.state.school;
     }
     if (this.state.search_string !== "") {
-      filter.name = this.state.search_string;
+      filter.search_string = this.state.search_string;
     }
     let spell_list: SpellList | null = null;
     if (this.state.spell_lists) {
@@ -152,9 +151,7 @@ class SelectSpellBox extends Component<Props, State> {
 
   load_some() {
     const filter = this.get_filter();
-    console.log(filter);
     this.api.getObjects("spell", filter, 0, 100).then((res: any) => {
-      console.log(res);
       if (res && !res.error) {
         let spells: Spell[] = this.state.spells ? this.state.spells : [];
         spells = [...spells, ...(res as Spell[])];
@@ -168,10 +165,7 @@ class SelectSpellBox extends Component<Props, State> {
   }
 
   render() {
-    if ((this.state.spells === null || this.state.spell_lists === null) && this.state.loading) {
-      return <span>Loading</span>;
-    } else if (this.state.spells === null || this.state.spell_lists === null) {
-      this.start_up();
+    if (this.state.spells === null || this.state.spell_lists === null || this.state.loading) {
       return <span>Loading</span>;
     } else {
       const max_level = this.props.max_level;
@@ -187,7 +181,7 @@ class SelectSpellBox extends Component<Props, State> {
           <Grid item xs={ this.props.level === -1 ? 3 : 6 }>
             <StringBox
               name="Search"
-              value={`${this.state.search_string}`}
+              value={this.state.search_string}
               onBlur={(search_string: string) => {
                 this.setState({ search_string }, this.filter_change);
               }}

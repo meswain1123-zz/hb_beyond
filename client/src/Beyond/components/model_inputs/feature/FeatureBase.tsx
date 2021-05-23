@@ -69,13 +69,10 @@ class FeatureBaseInput extends Component<Props, State> {
     super(props);
     this.state = {
       feature_base: new FeatureBase(),
-      loading: true,
+      loading: false,
       reloading: false,
       expanded: null
     };
-  }
-
-  componentDidMount() {
   }
 
   getLabelWidth(name: string) {
@@ -95,18 +92,7 @@ class FeatureBaseInput extends Component<Props, State> {
   }
 
   render() {
-    if (this.state.loading || 
-      this.props.feature_base.parent_type !== this.state.feature_base.parent_type || 
-      this.props.feature_base.id !== this.state.feature_base.id) {
-      this.setState({ loading: false, feature_base: this.props.feature_base });
-      return (
-        <Grid item>Loading</Grid>
-      );
-    } else if (this.state.reloading) {
-      return (
-        <Grid item>Loading</Grid>
-      );
-    } else if (this.state.expanded) {
+    if (this.state.expanded) {
       if (this.state.expanded instanceof Feature) {
         const feature: Feature = this.state.expanded;
         return (
@@ -114,10 +100,10 @@ class FeatureBaseInput extends Component<Props, State> {
             <FeatureInput 
               label="Feature"
               parent_name={this.props.parent_name}
-              base_name={this.state.feature_base.name}
+              base_name={this.props.feature_base.name}
               feature={feature} 
               onChange={(changed: Feature) => {
-                const feature_base = this.state.feature_base;
+                const feature_base = this.props.feature_base;
                 const objFinder = feature_base.features.filter(o => o.id === changed.id);
                 if (objFinder.length === 1) {
                   const feature = objFinder[0];
@@ -127,7 +113,7 @@ class FeatureBaseInput extends Component<Props, State> {
               }}
               onDelete={() => {
                 const id = feature.id;
-                const feature_base = this.state.feature_base;
+                const feature_base = this.props.feature_base;
                 const features = feature_base.features.filter(o => o.id !== id);
                 features.filter(o => o.id > id).forEach(o => {
                   o.id--;
@@ -153,10 +139,10 @@ class FeatureBaseInput extends Component<Props, State> {
           <Grid item>
             <FeatureChoiceInput 
               parent_name={this.props.parent_name}
-              base_name={this.state.feature_base.name}
+              base_name={this.props.feature_base.name}
               obj={feature_choice} 
               onChange={(changed: FeatureChoice) => {
-                const feature_base = this.state.feature_base;
+                const feature_base = this.props.feature_base;
                 const objFinder = feature_base.feature_choices.filter(o => o.id === changed.id);
                 if (objFinder.length === 1) {
                   const feature = objFinder[0];
@@ -166,7 +152,7 @@ class FeatureBaseInput extends Component<Props, State> {
               }}
               onDelete={() => {
                 const id = feature_choice.id;
-                const feature_base = this.state.feature_base;
+                const feature_base = this.props.feature_base;
                 const feature_choices = feature_base.feature_choices.filter(o => o.id !== id);
                 feature_choices.filter(o => o.id > id).forEach(o => {
                   o.id--;
@@ -215,11 +201,11 @@ class FeatureBaseInput extends Component<Props, State> {
             </Grid>
             <Grid item xs={10}>
               <TemplateBox
-                obj={this.state.feature_base}
+                obj={this.props.feature_base}
                 type="FeatureBase"
                 useTemplate={(template: TemplateBase) => {
                   const feature_base_template: FeatureBaseTemplate = template as FeatureBaseTemplate;
-                  const feature_base = this.state.feature_base;
+                  const feature_base = this.props.feature_base;
                   feature_base.copyTemplate(feature_base_template);
                   this.props.onChange(feature_base);
                   this.setState({ feature_base, reloading: true }, () => {
@@ -231,10 +217,10 @@ class FeatureBaseInput extends Component<Props, State> {
           </Grid>
           <Grid item>
             <StringBox 
-              value={this.state.feature_base.name} 
+              value={this.props.feature_base.name} 
               name="Name"
               onBlur={(value: string) => {
-                const feature_base = this.state.feature_base;
+                const feature_base = this.props.feature_base;
                 feature_base.name = value;
                 this.setState({ feature_base });
               }}
@@ -242,11 +228,11 @@ class FeatureBaseInput extends Component<Props, State> {
           </Grid>
           <Grid item>
             <StringBox 
-              value={this.state.feature_base.description} 
+              value={this.props.feature_base.description} 
               name="Description"
               multiline
               onBlur={(value: string) => {
-                const feature_base = this.state.feature_base;
+                const feature_base = this.props.feature_base;
                 feature_base.description = value;
                 this.setState({ feature_base });
               }}
@@ -254,10 +240,10 @@ class FeatureBaseInput extends Component<Props, State> {
           </Grid>
           <Grid item>
             <CheckBox 
-              value={this.state.feature_base.display} 
+              value={this.props.feature_base.display} 
               name="Display"
               onChange={(value: boolean) => {
-                const feature_base = this.state.feature_base;
+                const feature_base = this.props.feature_base;
                 feature_base.display = value;
                 this.setState({ feature_base });
               }}
@@ -265,27 +251,27 @@ class FeatureBaseInput extends Component<Props, State> {
           </Grid>
           <Grid item>
             <CheckBox 
-              value={this.state.feature_base.optional} 
+              value={this.props.feature_base.optional} 
               name="Optional"
               onChange={(value: boolean) => {
-                const feature_base = this.state.feature_base;
+                const feature_base = this.props.feature_base;
                 feature_base.optional = value;
                 this.setState({ feature_base });
               }}
             />
           </Grid>
-          { this.state.feature_base.optional && 
+          { this.props.feature_base.optional && 
             <Grid item>
               { this.render_other_feature_base_select() }
             </Grid>
           }
           <Grid item>
             <StringBox 
-              value={`${this.state.feature_base.level}`} 
-              name={ (this.state.feature_base.parent_type === "Class" || this.state.feature_base.parent_type === "Subclass") ? "Class Level" : "Character Level" }
+              value={`${this.props.feature_base.level}`} 
+              name={ (this.props.feature_base.parent_type === "Class" || this.props.feature_base.parent_type === "Subclass") ? "Class Level" : "Character Level" }
               type="number"
               onBlur={(value: number) => {
-                const feature_base = this.state.feature_base;
+                const feature_base = this.props.feature_base;
                 feature_base.level = value;
                 this.setState({ feature_base });
               }}
@@ -299,9 +285,9 @@ class FeatureBaseInput extends Component<Props, State> {
                 "First Class Only": "1",
                 "Later Classes Only": "2"
               }}
-              value={`${this.state.feature_base.multiclassing}`}
+              value={`${this.props.feature_base.multiclassing}`}
               onChange={(changed: string) => {
-                const feature_base = this.state.feature_base;
+                const feature_base = this.props.feature_base;
                 feature_base.multiclassing = +changed;
                 this.setState({ feature_base }); 
               }}
@@ -312,9 +298,9 @@ class FeatureBaseInput extends Component<Props, State> {
               name="Required Conditions"
               multiple
               allow_all
-              values={this.state.feature_base.required_condition_ids}
+              values={this.props.feature_base.required_condition_ids}
               onChange={(ids: string[]) => {
-                const feature_base = this.state.feature_base;
+                const feature_base = this.props.feature_base;
                 feature_base.required_condition_ids = ids;
                 this.setState({ feature_base }); 
               }}
@@ -323,11 +309,11 @@ class FeatureBaseInput extends Component<Props, State> {
           <Grid item>
             <FeatureListInput 
               label="Feature"
-              features={this.state.feature_base.features} 
-              parent_id={this.state.feature_base.parent_id} 
-              parent_type={this.state.feature_base.parent_type}
+              features={this.props.feature_base.features} 
+              parent_id={this.props.feature_base.parent_id} 
+              parent_type={this.props.feature_base.parent_type}
               onChange={(changed: Feature[]) => {
-                const feature_base = this.state.feature_base;
+                const feature_base = this.props.feature_base;
                 feature_base.features = [];
                 this.setState({ feature_base }, () => {
                   feature_base.features = changed;
@@ -338,7 +324,7 @@ class FeatureBaseInput extends Component<Props, State> {
                 this.setState({ expanded });
               }}
               onAdd={() => {
-                const feature_base = this.state.feature_base;
+                const feature_base = this.props.feature_base;
                 const feature = new Feature();
                 feature.parent_type = feature_base.parent_type;
                 feature.parent_id = feature_base.parent_id;
@@ -354,11 +340,11 @@ class FeatureBaseInput extends Component<Props, State> {
           </Grid>
           <Grid item>
             <FeatureChoicesInput 
-              feature_choices={this.state.feature_base.feature_choices} 
-              parent_id={this.state.feature_base.parent_id} 
-              parent_type={this.state.feature_base.parent_type}
+              feature_choices={this.props.feature_base.feature_choices} 
+              parent_id={this.props.feature_base.parent_id} 
+              parent_type={this.props.feature_base.parent_type}
               onChange={(changed: FeatureChoice[]) => {
-                const feature_base = this.state.feature_base;
+                const feature_base = this.props.feature_base;
                 feature_base.feature_choices = [];
                 this.setState({ feature_base }, () => {
                   feature_base.feature_choices = changed;
@@ -369,7 +355,7 @@ class FeatureBaseInput extends Component<Props, State> {
                 this.setState({ expanded });
               }}
               onAdd={() => {
-                const feature_base = this.state.feature_base;
+                const feature_base = this.props.feature_base;
                 const feature_choice = new FeatureChoice();
                 feature_choice.parent_type = feature_base.parent_type;
                 feature_choice.parent_id = feature_base.parent_id;
@@ -399,9 +385,9 @@ class FeatureBaseInput extends Component<Props, State> {
       <SelectStringBox
         name="Replace Other Feature"
         option_map={option_map}
-        value={this.state.feature_base.replaces_feature_base_id}
+        value={this.props.feature_base.replaces_feature_base_id}
         onChange={(changed: string) => {
-          const feature_base = this.state.feature_base;
+          const feature_base = this.props.feature_base;
           feature_base.replaces_feature_base_id = changed;
           this.setState({ feature_base }); 
         }}

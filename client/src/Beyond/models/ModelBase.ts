@@ -9,8 +9,8 @@ export abstract class ModelBase {
   constructor(
     obj?: any) {
     this._id = obj ? obj._id : "";
-    this.name = obj ? `${obj.name}` : "";
-    this.description = obj ? `${obj.description}` : "";
+    this.name = obj ? obj.name : "";
+    this.description = obj && obj.description && obj.description !== "undefined" ? obj.description : "";
   }
 
   toDBObj = () => {

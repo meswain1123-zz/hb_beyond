@@ -82,6 +82,7 @@ class ConditionEdit extends Component<Props, State> {
   api: APIClass;
 
   componentDidMount() {
+    this.load();
   }
 
   submit() {
@@ -94,28 +95,31 @@ class ConditionEdit extends Component<Props, State> {
 
   // Loads the editing Condition into state
   load_object(id: string) {
-    const objectFinder = this.state.conditions ? this.state.conditions.filter(o => o._id === id) : [];
-    if (objectFinder.length === 1) {
-      this.setState({ obj: objectFinder[0].clone() });
+    const objFinder = this.state.conditions ? this.state.conditions.filter(a => a._id === id) : [];
+    if (objFinder.length === 1) {
+      this.setState({ obj: objFinder[0].clone(), loading: false });
     }
   }
 
   load() {
     this.setState({ loading: true }, () => {
       this.api.getObjects("condition").then((res: any) => {
-        this.setState({ 
-          conditions: res, 
-          loading: false 
-        });
+        if (res && !res.error) {
+          let { id } = this.props.match.params;
+          if (id !== undefined && this.state.obj._id !== id) {
+            this.setState({ conditions: res }, () => {
+              this.load_object(id);
+            });
+          } else {
+            this.setState({ conditions: res, loading: false });
+          }
+        }
       });
     });
   }
 
   render() {
-    if (this.state.loading) {
-      return <span>Loading</span>;
-    } else if (this.state.conditions === null) {
-      this.load();
+    if (this.state.loading || this.state.conditions === null) {
       return <span>Loading</span>;
     } else if (this.state.redirectTo !== null) {
       return <Redirect to={this.state.redirectTo} />;
@@ -161,182 +165,176 @@ class ConditionEdit extends Component<Props, State> {
         />
       );
     } else { 
-      let { id } = this.props.match.params;
-      if (id !== undefined && this.state.obj._id !== id) {
-        this.load_object(id);
-        return (<span>Loading...</span>);
-      } else {
-        const formHeight = this.props.height - (this.props.width > 600 ? 198 : 198);
-        return (
-          <Grid container spacing={1} direction="column">
-            <Grid item>
-              <Tooltip title={`Back to Conditions`}>
-                <Fab size="small" color="primary" style={{marginLeft: "8px"}}
-                  onClick={ () => {
-                    this.setState({ redirectTo:`/beyond/condition` });
-                  }}>
-                  <ArrowBack/>
-                </Fab>
-              </Tooltip> 
-            </Grid>
-            <Grid item>
-              <span className={"MuiTypography-root MuiListItemText-primary header"}>
-                { this.state.obj._id === "" ? "Create Condition" : `Edit ${this.state.obj.name}` }
-              </span>
-            </Grid>
-            <Grid item 
-              style={{ 
-                height: `${formHeight}px`, 
-                overflowY: "scroll", 
-                overflowX: "hidden" 
-              }}>
-              <Grid container spacing={1} direction="column">
-                <Grid item>
-                  <StringBox 
-                    value={this.state.obj.name} 
-                    message={this.state.obj.name.length > 0 ? "" : "Name Invalid"} 
-                    name="Name"
-                    onBlur={(value: string) => {
-                      const obj = this.state.obj;
-                      obj.name = value;
-                      this.setState({ obj });
-                    }}
-                  />
-                </Grid>
-                <Grid item>
-                  <StringBox 
-                    value={this.state.obj.description} 
-                    name="Description"
-                    multiline
-                    onBlur={(value: string) => {
-                      const obj = this.state.obj;
-                      obj.description = value;
-                      this.setState({ obj });
-                    }}
-                  />
-                </Grid>
-                <Grid item>
-                  <ToggleButtonBox 
-                    name="Immunity Exists"
-                    value={this.state.obj.immunity_exists} 
-                    onToggle={() => {
-                      const obj = this.state.obj;
-                      obj.immunity_exists = !obj.immunity_exists;
-                      this.setState({ obj });
-                    }}
-                  />
-                </Grid>
-                <Grid item>
-                  <ToggleButtonBox 
-                    name="Uses Levels"
-                    value={this.state.obj.level > -1} 
-                    onToggle={() => {
-                      const obj = this.state.obj;
-                      obj.level = obj.level === -1 ? 0 : -1;
-                      this.setState({ obj });
-                    }}
-                  />
-                </Grid>
-                <Grid item>
-                  <SelectGameClassBox
-                    name="Only Show for these Classes" 
-                    values={ this.state.obj.class_ids } 
-                    multiple
-                    onChange={(ids: string[]) => {
-                      const obj = this.state.obj;
-                      obj.class_ids = ids;
-                      this.setState({ obj });
-                    }} 
-                  />
-                </Grid>
-                <Grid item>
-                  <SelectSubclassBox
-                    name="Only Show for these Subclasses" 
-                    game_class_id={ this.state.obj.class_ids.length === 1 ? this.state.obj.class_ids[0] : null }
-                    values={ this.state.obj.subclass_ids } 
-                    multiple
-                    onChange={(ids: string[]) => {
-                      const obj = this.state.obj;
-                      obj.subclass_ids = ids;
-                      this.setState({ obj });
-                    }} 
-                  />
-                </Grid>
-                { this.state.obj.level > -1 &&
-                  <Grid item>
-                    <StringBox 
-                      name="Level"
-                      value={`${this.state.obj.level}`} 
-                      type="number"
-                      onBlur={(value: string) => {
-                        const obj = this.state.obj;
-                        obj.level = +value;
-                        this.setState({ obj });
-                      }}
-                    />
-                  </Grid>
-                }
-                <Grid item>
-                  <FeatureListInput 
-                    label="Feature"
-                    features={this.state.obj.features} 
-                    parent_id={this.state.obj._id} 
-                    parent_type="Condition"
-                    onChange={(changed: Feature[]) => {
-                      const obj = this.state.obj;
-                      obj.features = [];
-                      this.setState({ obj }, () => {
-                        obj.features = changed;
-                        this.setState({ obj });
-                      });
-                    }}
-                    onExpand={(expanded_feature: Feature) => {
-                      this.setState({ expanded_feature });
-                    }}
-                    onAdd={() => {
-                      const obj = this.state.obj;
-                      const feature = new Feature();
-                      feature.parent_type = "Condition";
-                      feature.parent_id = obj._id;
-                      feature.id = obj.features.length;
-                      obj.features.push(feature);
-                      this.setState({
-                        obj,
-                        expanded_feature: feature
-                      });
-                    }}
-                  />
-                </Grid>
-              </Grid>
-            </Grid>
-            <Grid item>
-              <Button
-                variant="contained"
-                color="primary"
-                disabled={ this.state.processing || !this.state.child_names_valid || this.state.obj.name === "" }
-                onClick={ () => { 
-                  this.submit();
-                }}>
-                Submit
-              </Button>
-              <Button
-                variant="contained"
-                disabled={this.state.processing}
-                style={{ marginLeft: "4px" }}
-                onClick={ () => { 
+      const formHeight = this.props.height - (this.props.width > 600 ? 198 : 198);
+      return (
+        <Grid container spacing={1} direction="column">
+          <Grid item>
+            <Tooltip title={`Back to Conditions`}>
+              <Fab size="small" color="primary" style={{marginLeft: "8px"}}
+                onClick={ () => {
                   this.setState({ redirectTo:`/beyond/condition` });
                 }}>
-                Cancel
-              </Button>
-              { (this.state.obj.name === "" || !this.state.child_names_valid) && 
-                <span style={{ color: "red", marginLeft: "4px" }}>
-                  The Condition, all Feature Bases, Features, Feature Choices, and Options must have names.
-                </span>
+                <ArrowBack/>
+              </Fab>
+            </Tooltip> 
+          </Grid>
+          <Grid item>
+            <span className={"MuiTypography-root MuiListItemText-primary header"}>
+              { this.state.obj._id === "" ? "Create Condition" : `Edit ${this.state.obj.name}` }
+            </span>
+          </Grid>
+          <Grid item 
+            style={{ 
+              height: `${formHeight}px`, 
+              overflowY: "scroll", 
+              overflowX: "hidden" 
+            }}>
+            <Grid container spacing={1} direction="column">
+              <Grid item>
+                <StringBox 
+                  value={this.state.obj.name} 
+                  message={this.state.obj.name.length > 0 ? "" : "Name Invalid"} 
+                  name="Name"
+                  onBlur={(value: string) => {
+                    const obj = this.state.obj;
+                    obj.name = value;
+                    this.setState({ obj });
+                  }}
+                />
+              </Grid>
+              <Grid item>
+                <StringBox 
+                  value={this.state.obj.description} 
+                  name="Description"
+                  multiline
+                  onBlur={(value: string) => {
+                    const obj = this.state.obj;
+                    obj.description = value;
+                    this.setState({ obj });
+                  }}
+                />
+              </Grid>
+              <Grid item>
+                <ToggleButtonBox 
+                  name="Immunity Exists"
+                  value={this.state.obj.immunity_exists} 
+                  onToggle={() => {
+                    const obj = this.state.obj;
+                    obj.immunity_exists = !obj.immunity_exists;
+                    this.setState({ obj });
+                  }}
+                />
+              </Grid>
+              <Grid item>
+                <ToggleButtonBox 
+                  name="Uses Levels"
+                  value={this.state.obj.level > -1} 
+                  onToggle={() => {
+                    const obj = this.state.obj;
+                    obj.level = obj.level === -1 ? 0 : -1;
+                    this.setState({ obj });
+                  }}
+                />
+              </Grid>
+              <Grid item>
+                <SelectGameClassBox
+                  name="Only Show for these Classes" 
+                  values={ this.state.obj.class_ids } 
+                  multiple
+                  onChange={(ids: string[]) => {
+                    const obj = this.state.obj;
+                    obj.class_ids = ids;
+                    this.setState({ obj });
+                  }} 
+                />
+              </Grid>
+              <Grid item>
+                <SelectSubclassBox
+                  name="Only Show for these Subclasses" 
+                  game_class_id={ this.state.obj.class_ids.length === 1 ? this.state.obj.class_ids[0] : null }
+                  values={ this.state.obj.subclass_ids } 
+                  multiple
+                  onChange={(ids: string[]) => {
+                    const obj = this.state.obj;
+                    obj.subclass_ids = ids;
+                    this.setState({ obj });
+                  }} 
+                />
+              </Grid>
+              { this.state.obj.level > -1 &&
+                <Grid item>
+                  <StringBox 
+                    name="Level"
+                    value={`${this.state.obj.level}`} 
+                    type="number"
+                    onBlur={(value: string) => {
+                      const obj = this.state.obj;
+                      obj.level = +value;
+                      this.setState({ obj });
+                    }}
+                  />
+                </Grid>
               }
+              <Grid item>
+                <FeatureListInput 
+                  label="Feature"
+                  features={this.state.obj.features} 
+                  parent_id={this.state.obj._id} 
+                  parent_type="Condition"
+                  onChange={(changed: Feature[]) => {
+                    const obj = this.state.obj;
+                    obj.features = [];
+                    this.setState({ obj }, () => {
+                      obj.features = changed;
+                      this.setState({ obj });
+                    });
+                  }}
+                  onExpand={(expanded_feature: Feature) => {
+                    this.setState({ expanded_feature });
+                  }}
+                  onAdd={() => {
+                    const obj = this.state.obj;
+                    const feature = new Feature();
+                    feature.parent_type = "Condition";
+                    feature.parent_id = obj._id;
+                    feature.id = obj.features.length;
+                    obj.features.push(feature);
+                    this.setState({
+                      obj,
+                      expanded_feature: feature
+                    });
+                  }}
+                />
+              </Grid>
             </Grid>
           </Grid>
-        ); 
-      }
+          <Grid item>
+            <Button
+              variant="contained"
+              color="primary"
+              disabled={ this.state.processing || !this.state.child_names_valid || this.state.obj.name === "" }
+              onClick={ () => { 
+                this.submit();
+              }}>
+              Submit
+            </Button>
+            <Button
+              variant="contained"
+              disabled={this.state.processing}
+              style={{ marginLeft: "4px" }}
+              onClick={ () => { 
+                this.setState({ redirectTo:`/beyond/condition` });
+              }}>
+              Cancel
+            </Button>
+            { (this.state.obj.name === "" || !this.state.child_names_valid) && 
+              <span style={{ color: "red", marginLeft: "4px" }}>
+                The Condition, all Feature Bases, Features, Feature Choices, and Options must have names.
+              </span>
+            }
+          </Grid>
+        </Grid>
+      ); 
     }
   }
 }
