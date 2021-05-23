@@ -17,11 +17,16 @@ import {
 import { 
   ABILITY_SCORES 
 } from "../../models/Constants";
+
 import StringBox from "../../components/input/StringBox";
+import SelectStringBox from "../../components/input/SelectStringBox";
+
 import FeatureBasesInput from "../../components/model_inputs/feature/FeatureBases";
 import FeatureBaseInput from "../../components/model_inputs/feature/FeatureBase";
 import StartEquipmentChoices from "../../components/model_inputs/equipment/StartEquipmentChoices";
-import SelectStringBox from "../../components/input/SelectStringBox";
+
+import ModelBaseDetails from "../../components/model_inputs/ModelBaseDetails";
+
 import API from "../../utilities/smart_api";
 import { APIClass } from "../../utilities/smart_api_class";
 
@@ -306,18 +311,13 @@ class GameClassEdit extends Component<Props, State> {
   renderTab() {
     if (this.state.mode === "description") {
       return (
-        <Grid item>
-          <StringBox 
-            value={this.state.obj.description} 
-            name="Description"
-            multiline
-            onBlur={(value: string) => {
-              const obj = this.state.obj;
-              obj.description = value;
-              this.setState({ obj });
-            }}
-          />
-        </Grid>
+        <ModelBaseDetails key="description"
+          obj={this.state.obj}
+          onChange={() => {
+            const obj = this.state.obj;
+            this.setState({ obj });
+          }}
+        />
       );
     } else if (this.state.mode === "attributes") {
       return (

@@ -104,6 +104,8 @@ export class BaseItem extends ModelBase {
       _id: this._id,
       name: this.name,
       description: this.description,
+      source_type: this.source_type,
+      source_id: this.source_id,
       item_type: this.item_type,
       weight: this.weight,
       armor_type_id: this.armor_type_id,
@@ -130,6 +132,8 @@ export class BaseItem extends ModelBase {
     this._id = copyMe._id;
     this.name = copyMe.name;
     this.description = copyMe.description;
+    this.source_type = copyMe.source_type;
+    this.source_id = copyMe.source_id;
     this.item_type = copyMe.item_type;
     this.weight = copyMe.weight;
     this.armor_type_id = copyMe.armor_type_id;

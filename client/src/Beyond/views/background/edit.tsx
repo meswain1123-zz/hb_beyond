@@ -23,6 +23,8 @@ import StartEquipmentChoices from "../../components/model_inputs/equipment/Start
 
 import StringBox from "../../components/input/StringBox";
 
+import ModelBaseDetails from "../../components/model_inputs/ModelBaseDetails";
+
 import API from "../../utilities/smart_api";
 import { APIClass } from "../../utilities/smart_api_class";
 
@@ -290,18 +292,13 @@ class BackgroundEdit extends Component<Props, State> {
   renderTab() {
     if (this.state.mode === "description") {
       return (
-        <Grid item>
-          <StringBox 
-            value={this.state.obj.description} 
-            name="Description"
-            multiline
-            onBlur={(value: string) => {
-              const obj = this.state.obj;
-              obj.description = value;
-              this.setState({ obj });
-            }}
-          />
-        </Grid>
+        <ModelBaseDetails key="description"
+          obj={this.state.obj}
+          onChange={() => {
+            const obj = this.state.obj;
+            this.setState({ obj });
+          }}
+        />
       );
     } else if (this.state.mode === "features") {
       return (

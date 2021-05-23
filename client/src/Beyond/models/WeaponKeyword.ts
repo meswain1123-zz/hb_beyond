@@ -31,6 +31,8 @@ export class WeaponKeyword extends ModelBase {
       _id: this._id,
       name: this.name,
       description: this.description,
+      source_type: this.source_type,
+      source_id: this.source_id,
       use_ability_score: this.use_ability_score,
       display_in_equipment: this.display_in_equipment,
       can_two_weapon_fight: this.can_two_weapon_fight
@@ -45,6 +47,8 @@ export class WeaponKeyword extends ModelBase {
     this._id = copyMe._id;
     this.name = copyMe.name;
     this.description = copyMe.description;
+    this.source_type = copyMe.source_type;
+    this.source_id = copyMe.source_id;
     this.use_ability_score = copyMe.use_ability_score;
     this.display_in_equipment = copyMe.display_in_equipment;
     this.can_two_weapon_fight = copyMe.can_two_weapon_fight;

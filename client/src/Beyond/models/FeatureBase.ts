@@ -18,6 +18,8 @@ export class FeatureBase {
   true_id: string;
   name: string;
   description: string;
+  source_type: string;
+  source_id: string;
   level: number; // Level of when it is available.  0 for ones that don't have a requirement. 
   features: Feature[];
   feature_choices: FeatureChoice[];
@@ -39,6 +41,8 @@ export class FeatureBase {
     this.true_id = obj && obj.true_id ? obj.true_id : uuidv4().toString();
     this.name = obj ? `${obj.name}` : "";
     this.description = obj ? `${obj.description}` : "";
+    this.source_type = obj && obj.source_type ? obj.source_type : "";
+    this.source_id = obj && obj.source_id ? obj.source_id : "";
     this.level = obj ? obj.level : 1;
     this.features = [];
     if (obj && obj.features) {
@@ -86,6 +90,8 @@ export class FeatureBase {
       true_id: this.true_id,
       name: this.name,
       description: this.description,
+      source_type: this.source_type,
+      source_id: this.source_id,
       level: this.level,
       features,
       feature_choices,
@@ -102,6 +108,8 @@ export class FeatureBase {
     this.id = copyMe.id;
     this.name = copyMe.name;
     this.description = copyMe.description;
+    this.source_type = copyMe.source_type;
+    this.source_id = copyMe.source_id;
     this.level = copyMe.level;
     this.features = copyMe.features;
     this.features.forEach(feature => {
@@ -127,6 +135,8 @@ export class FeatureBase {
   copyTemplate(copyMe: FeatureBaseTemplate): void {
     this.name = copyMe.name;
     this.description = copyMe.description;
+    this.source_type = copyMe.source_type;
+    this.source_id = copyMe.source_id;
     this.level = copyMe.level;
     this.features = [];
     copyMe.features.forEach(f => {

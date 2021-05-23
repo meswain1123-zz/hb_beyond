@@ -54,6 +54,8 @@ export class SpellAsAbilityTemplate extends TemplateBase {
       _id: this._id,
       name: this.name,
       description: this.description,
+      source_type: this.source_type,
+      source_id: this.source_id,
       type: "SpellAsAbility",
       category: this.category,
       spell_id: this.spell_id,

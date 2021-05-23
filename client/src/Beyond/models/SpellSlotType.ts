@@ -35,6 +35,8 @@ export class SpellSlotType extends ModelBase {
       _id: this._id,
       name: this.name,
       description: this.description,
+      source_type: this.source_type,
+      source_id: this.source_id,
       refresh_rule: this.refresh_rule,
       slot_name: this.slot_name,
       entries
@@ -49,6 +51,8 @@ export class SpellSlotType extends ModelBase {
     this._id = copyMe._id;
     this.name = copyMe.name;
     this.description = copyMe.description;
+    this.source_type = copyMe.source_type;
+    this.source_id = copyMe.source_id;
     this.refresh_rule = copyMe.refresh_rule;
     this.slot_name = copyMe.slot_name;
     this.entries = [...copyMe.entries];

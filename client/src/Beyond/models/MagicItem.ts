@@ -71,6 +71,8 @@ export class MagicItem extends ModelBase {
       _id: this._id,
       name: this.name,
       description: this.description,
+      source_type: this.source_type,
+      source_id: this.source_id,
       base_item_id: this.base_item_id,
       rarity: this.rarity,
       attunement: this.attunement,
@@ -90,6 +92,8 @@ export class MagicItem extends ModelBase {
     this._id = copyMe._id;
     this.name = copyMe.name;
     this.description = copyMe.description;
+    this.source_type = copyMe.source_type;
+    this.source_id = copyMe.source_id;
     this.base_item_id = copyMe.base_item_id;
     this.rarity = copyMe.rarity;
     this.attunement = copyMe.attunement;

@@ -15,6 +15,8 @@ export class SourceBook extends ModelBase {
       _id: this._id,
       name: this.name,
       description: this.description,
+      source_type: this.source_type,
+      source_id: this.source_id,
       owner_id: this.owner_id,
     };
   }

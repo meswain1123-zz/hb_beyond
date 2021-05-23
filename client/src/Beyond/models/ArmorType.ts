@@ -18,6 +18,8 @@ export class ArmorType extends ModelBase {
       _id: this._id,
       name: this.name,
       description: this.description,
+      source_type: this.source_type,
+      source_id: this.source_id,
       dex_bonus_max: this.dex_bonus_max,
       stealth_disadvantage: this.stealth_disadvantage
     };
@@ -31,6 +33,8 @@ export class ArmorType extends ModelBase {
     this._id = copyMe._id;
     this.name = copyMe.name;
     this.description = copyMe.description;
+    this.source_type = copyMe.source_type;
+    this.source_id = copyMe.source_id;
     this.dex_bonus_max = copyMe.dex_bonus_max;
     this.stealth_disadvantage = copyMe.stealth_disadvantage;
   }

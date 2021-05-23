@@ -44,6 +44,8 @@ export class SpellTemplate extends TemplateBase {
       _id: this._id,
       name: this.name,
       description: this.description,
+      source_type: this.source_type,
+      source_id: this.source_id,
       type: "Spell",
       category: this.category,
       saving_throw_ability_score: this.saving_throw_ability_score,
@@ -71,6 +73,8 @@ export class SpellTemplate extends TemplateBase {
     this._id = copyMe._id;
     this.name = copyMe.name;
     this.description = copyMe.description;
+    this.source_type = copyMe.source_type;
+    this.source_id = copyMe.source_id;
     this.type = "Spell";
     this.category = copyMe.category;
     this.saving_throw_ability_score = copyMe.saving_throw_ability_score;
@@ -92,6 +96,8 @@ export class SpellTemplate extends TemplateBase {
   copyObj(copyMe: Spell): void {
     this.name = copyMe.name;
     this.description = copyMe.description;
+    this.source_type = copyMe.source_type;
+    this.source_id = copyMe.source_id;
     this.type = "Spell";
     this.saving_throw_ability_score = copyMe.saving_throw_ability_score;
     this.effect = copyMe.effect;

@@ -114,8 +114,10 @@ export class EquipmentPack extends ModelBase {
     return {
       _id: this._id,
       name: this.name,
-      cost: this.cost,
       description: this.description,
+      source_type: this.source_type,
+      source_id: this.source_id,
+      cost: this.cost,
       items
     };
   }
@@ -127,6 +129,8 @@ export class EquipmentPack extends ModelBase {
   copy(copyMe: EquipmentPack) {
     this.name = copyMe.name;
     this.description = copyMe.description;
+    this.source_type = copyMe.source_type;
+    this.source_id = copyMe.source_id;
     this.cost = copyMe.cost;
     this.items = [...copyMe.items];
   }

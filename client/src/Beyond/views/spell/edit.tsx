@@ -17,12 +17,6 @@ import {
   SpellTemplate,
   AbilityEffect,
 } from "../../models";
-import StringBox from "../../components/input/StringBox";
-
-import SelectStringBox from "../../components/input/SelectStringBox";
-import CheckBox from "../../components/input/CheckBox";
-import TemplateBox from "../../components/model_inputs/TemplateBox";
-import AbilityEffectInput from "../../components/model_inputs/feature/AbilityEffect";
 import { 
   ABILITY_SCORES, 
   DURATIONS,
@@ -30,6 +24,16 @@ import {
   CASTING_TIMES,
   SCHOOLS
 } from "../../models/Constants";
+
+import StringBox from "../../components/input/StringBox";
+import SelectStringBox from "../../components/input/SelectStringBox";
+import CheckBox from "../../components/input/CheckBox";
+
+import TemplateBox from "../../components/model_inputs/TemplateBox";
+import AbilityEffectInput from "../../components/model_inputs/feature/AbilityEffect";
+
+import ModelBaseDetails from "../../components/model_inputs/ModelBaseDetails";
+
 import API from "../../utilities/smart_api";
 import { APIClass } from "../../utilities/smart_api_class";
 
@@ -374,18 +378,13 @@ class SpellEdit extends Component<Props, State> {
                   />
                 </Grid>
               }
-              <Grid item>
-                <StringBox 
-                  value={this.state.obj.description} 
-                  name="Description"
-                  multiline
-                  onBlur={(value: string) => {
-                    const obj = this.state.obj;
-                    obj.description = value;
-                    this.setState({ obj });
-                  }}
-                />
-              </Grid>
+              <ModelBaseDetails key="description"
+                obj={this.state.obj}
+                onChange={() => {
+                  const obj = this.state.obj;
+                  this.setState({ obj });
+                }}
+              />
             </Grid>
           </Grid>
           <Grid item>

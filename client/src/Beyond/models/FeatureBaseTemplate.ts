@@ -57,6 +57,8 @@ export class FeatureBaseTemplate extends TemplateBase {
       _id: this._id,
       name: this.name,
       description: this.description,
+      source_type: this.source_type,
+      source_id: this.source_id,
       type: "FeatureBase",
       category: this.category,
       level: this.level,
@@ -75,6 +77,8 @@ export class FeatureBaseTemplate extends TemplateBase {
     this._id = copyMe._id;
     this.name = copyMe.name;
     this.description = copyMe.description;
+    this.source_type = copyMe.source_type;
+    this.source_id = copyMe.source_id;
     this.type = "FeatureBase";
     this.category = copyMe.category;
     this.level = copyMe.level;
@@ -91,6 +95,8 @@ export class FeatureBaseTemplate extends TemplateBase {
   copyObj(copyMe: FeatureBase): void {
     this.name = copyMe.name;
     this.description = copyMe.description;
+    this.source_type = copyMe.source_type;
+    this.source_id = copyMe.source_id;
     this.type = "FeatureBase";
     this.level = copyMe.level;
     this.features = [];

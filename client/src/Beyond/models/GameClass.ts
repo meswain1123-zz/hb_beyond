@@ -53,6 +53,8 @@ export class GameClass extends ModelBase {
       _id: this._id,
       name: this.name,
       description: this.description,
+      source_type: this.source_type,
+      source_id: this.source_id,
       hit_die: this.hit_die,
       subclass_level: this.subclass_level,
       subclasses_called: this.subclasses_called,
@@ -72,6 +74,8 @@ export class GameClass extends ModelBase {
     this._id = copyMe._id;
     this.name = copyMe.name;
     this.description = copyMe.description;
+    this.source_type = copyMe.source_type;
+    this.source_id = copyMe.source_id;
     this.hit_die = copyMe.hit_die;
     this.subclass_level = copyMe.subclass_level;
     this.subclasses_called = copyMe.subclasses_called;

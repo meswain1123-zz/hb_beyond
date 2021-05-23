@@ -129,6 +129,8 @@ export class CreatureTemplate extends TemplateBase {
       _id: this._id,
       name: this.name,
       description: this.description,
+      source_type: this.source_type,
+      source_id: this.source_id,
       type: "Creature",
       creature_type: this.creature_type,
       subtype: this.subtype,
@@ -164,6 +166,8 @@ export class CreatureTemplate extends TemplateBase {
     this._id = copyMe._id;
     this.name = copyMe.name;
     this.description = copyMe.description;
+    this.source_type = copyMe.source_type;
+    this.source_id = copyMe.source_id;
     this.type = "Creature";
     this.creature_type = copyMe.creature_type;
     this.connected = copyMe.connected;
@@ -214,6 +218,8 @@ export class CreatureTemplate extends TemplateBase {
   copyObj(copyMe: Creature): void {
     this.name = copyMe.name;
     this.description = copyMe.description;
+    this.source_type = copyMe.source_type;
+    this.source_id = copyMe.source_id;
     this.type = "Creature";
     this.creature_type = copyMe.creature_type;
     this.connected = copyMe.connected;

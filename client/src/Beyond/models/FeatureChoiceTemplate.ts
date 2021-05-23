@@ -46,6 +46,8 @@ export class FeatureChoiceTemplate extends TemplateBase {
       _id: this._id,
       name: this.name,
       description: this.description,
+      source_type: this.source_type,
+      source_id: this.source_id,
       type: "FeatureChoice",
       options,
       choice_count: this.choice_count

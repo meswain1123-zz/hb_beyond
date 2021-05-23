@@ -10,9 +10,9 @@ export class User extends ModelBase {
 
   constructor(obj?: any) {
     super(obj);
-    this.email = obj ? `${obj.email}` : "";
-    this.username = obj ? `${obj.username}` : "";
-    this.password = obj ? `${obj.password}` : "";
+    this.email = obj ? obj.email : "";
+    this.username = obj ? obj.username : "";
+    this.password = obj ? obj.password : "";
     this.dm = obj ? obj.dm : false;
   }
 
@@ -21,6 +21,8 @@ export class User extends ModelBase {
       _id: this._id,
       name: this.name,
       description: this.description,
+      source_type: this.source_type,
+      source_id: this.source_id,
       email: this.email,
       username: this.username,
       password: this.password,

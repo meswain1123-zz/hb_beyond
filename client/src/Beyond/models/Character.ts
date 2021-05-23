@@ -428,6 +428,8 @@ export class Character extends ModelBase {
       _id: this._id,
       name: this.name,
       description: this.description,
+      source_type: this.source_type,
+      source_id: this.source_id,
       image_url: this.image_url,
       race: this.race.toDBObj(),
       classes,

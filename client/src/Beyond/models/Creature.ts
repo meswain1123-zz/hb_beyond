@@ -154,6 +154,8 @@ export class Creature extends ModelBase {
       imported_object: this.imported_object,
       name: this.name,
       description: this.description,
+      source_type: this.source_type,
+      source_id: this.source_id,
       creature_type: this.creature_type,
       subtype: this.subtype,
       image_url: this.image_url,
@@ -330,6 +332,8 @@ export class Creature extends ModelBase {
     this._id = copyMe._id;
     this.name = copyMe.name;
     this.description = copyMe.description;
+    this.source_type = copyMe.source_type;
+    this.source_id = copyMe.source_id;
     this.creature_type = copyMe.creature_type;
     this.connected = copyMe.connected;
     this.ability_scores = new AbilityScores(copyMe.ability_scores);
@@ -379,6 +383,8 @@ export class Creature extends ModelBase {
   copyTemplate(copyMe: CreatureTemplate): void {
     this.name = copyMe.name;
     this.description = copyMe.description;
+    this.source_type = copyMe.source_type;
+    this.source_id = copyMe.source_id;
     this.creature_type = copyMe.creature_type;
     this.connected = copyMe.connected;
     this.ability_scores = new AbilityScores(copyMe.ability_scores);

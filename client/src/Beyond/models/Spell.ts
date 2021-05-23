@@ -78,6 +78,8 @@ export class Spell extends ModelBase {
       _id: this._id,
       name: this.name,
       description: this.description,
+      source_type: this.source_type,
+      source_id: this.source_id,
       saving_throw_ability_score: this.saving_throw_ability_score,
       effect: this.effect.toDBObj(),
       effect_2: this.effect_2.toDBObj(),
@@ -103,6 +105,8 @@ export class Spell extends ModelBase {
     this._id = copyMe._id;
     this.name = copyMe.name;
     this.description = copyMe.description;
+    this.source_type = copyMe.source_type;
+    this.source_id = copyMe.source_id;
     this.saving_throw_ability_score = copyMe.saving_throw_ability_score;
     this.effect = copyMe.effect;
     this.effect_2 = copyMe.effect_2;
@@ -122,6 +126,8 @@ export class Spell extends ModelBase {
   copyTemplate(copyMe: SpellTemplate): void {
     this.name = copyMe.name;
     this.description = copyMe.description;
+    this.source_type = copyMe.source_type;
+    this.source_id = copyMe.source_id;
     this.saving_throw_ability_score = copyMe.saving_throw_ability_score;
     this.effect = copyMe.effect;
     this.effect_2 = copyMe.effect_2;

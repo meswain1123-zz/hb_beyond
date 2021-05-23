@@ -62,6 +62,8 @@ export class Condition extends ModelBase {
       _id: this._id,
       name: this.name,
       description: this.description,
+      source_type: this.source_type,
+      source_id: this.source_id,
       immunity_exists: this.immunity_exists,
       level: this.level,
       class_ids: this.class_ids,
@@ -78,6 +80,8 @@ export class Condition extends ModelBase {
     this._id = copyMe._id;
     this.name = copyMe.name;
     this.description = copyMe.description;
+    this.source_type = copyMe.source_type;
+    this.source_id = copyMe.source_id;
     this.immunity_exists = copyMe.immunity_exists;
     this.level = copyMe.level;
     this.class_ids = copyMe.class_ids;

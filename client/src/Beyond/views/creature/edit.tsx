@@ -38,6 +38,8 @@ import FeatureInput from "../../components/model_inputs/feature/FeatureMain";
 
 import TemplateBox from "../../components/model_inputs/TemplateBox";
 
+import ModelBaseDetails from "../../components/model_inputs/ModelBaseDetails";
+
 import API from "../../utilities/smart_api";
 import { APIClass } from "../../utilities/smart_api_class";
 
@@ -593,13 +595,11 @@ class CreatureEdit extends Component<Props, State> {
             </Grid>
           </Grid>
           <Grid item xs={4}>
-            <StringBox 
-              value={this.state.obj.description} 
-              name="Description"
-              multiline
-              onBlur={(value: string) => {
+            <ModelBaseDetails key="description"
+              obj={this.state.obj}
+              no_grid
+              onChange={() => {
                 const obj = this.state.obj;
-                obj.description = value;
                 this.setState({ obj });
               }}
             />

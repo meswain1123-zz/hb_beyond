@@ -13,7 +13,7 @@ import {
 import { 
   Campaign
 } from "../../models";
-import StringBox from "../../components/input/StringBox";
+import ModelBaseInput from "../../components/model_inputs/ModelBaseInput";
 
 import API from "../../utilities/smart_api";
 import { APIClass } from "../../utilities/smart_api_class";
@@ -137,30 +137,13 @@ class CampaignEdit extends Component<Props, State> {
               overflowX: "hidden" 
             }}>
             <Grid container spacing={1} direction="column">
-              <Grid item>
-                <StringBox 
-                  value={this.state.obj.name} 
-                  message={this.state.obj.name.length > 0 ? "" : "Name Invalid"} 
-                  name="Name"
-                  onBlur={(value: string) => {
-                    const obj = this.state.obj;
-                    obj.name = value;
-                    this.setState({ obj });
-                  }}
-                />
-              </Grid>
-              <Grid item>
-                <StringBox 
-                  value={this.state.obj.description} 
-                  name="Description"
-                  multiline
-                  onBlur={(value: string) => {
-                    const obj = this.state.obj;
-                    obj.description = value;
-                    this.setState({ obj });
-                  }}
-                />
-              </Grid>
+              <ModelBaseInput 
+                obj={this.state.obj}
+                onChange={() => {
+                  const obj = this.state.obj;
+                  this.setState({ obj });
+                }}
+              />
             </Grid>
           </Grid>
           <Grid item>

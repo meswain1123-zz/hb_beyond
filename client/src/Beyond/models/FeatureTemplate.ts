@@ -314,6 +314,8 @@ export class FeatureTemplate extends TemplateBase {
       _id: this._id,
       name: this.name,
       description: this.description,
+      source_type: this.source_type,
+      source_id: this.source_id,
       type: "Feature",
       category: this.category,
       feature_type: this.feature_type,

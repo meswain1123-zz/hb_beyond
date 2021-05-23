@@ -42,6 +42,8 @@ export class Background extends ModelBase {
       _id: this._id,
       name: this.name,
       description: this.description,
+      source_type: this.source_type,
+      source_id: this.source_id,
       features,
       start_equipment
     };
@@ -57,6 +59,8 @@ export class Background extends ModelBase {
     this.description = copyMe.description;
     this.features = [...copyMe.features];
     this.start_equipment = [...copyMe.start_equipment];
+    this.source_type = copyMe.source_type;
+    this.source_id = copyMe.source_id;
   }
 
   copy5e(copyMe: any) {

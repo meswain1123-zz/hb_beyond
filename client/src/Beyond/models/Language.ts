@@ -20,6 +20,8 @@ export class Language extends ModelBase {
       _id: this._id,
       name: this.name,
       description: this.description,
+      source_type: this.source_type,
+      source_id: this.source_id,
       type: this.type,
       script: this.script,
       typical_speakers: this.typical_speakers
@@ -34,6 +36,8 @@ export class Language extends ModelBase {
     this._id = copyMe._id;
     this.name = copyMe.name;
     this.description = copyMe.description;
+    this.source_type = copyMe.source_type;
+    this.source_id = copyMe.source_id;
     this.type = copyMe.type;
     this.script = copyMe.script;
     this.typical_speakers = copyMe.typical_speakers;

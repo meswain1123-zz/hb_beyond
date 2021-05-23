@@ -129,6 +129,8 @@ export class SummonStatBlockTemplate extends TemplateBase {
       _id: this._id,
       name: this.name,
       description: this.description,
+      source_type: this.source_type,
+      source_id: this.source_id,
       type: "SummonStatBlock",
       creature_type: this.creature_type,
       subtype: this.subtype,
