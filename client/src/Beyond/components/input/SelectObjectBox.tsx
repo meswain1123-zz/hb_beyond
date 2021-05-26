@@ -38,6 +38,7 @@ type Props = PropsFromRedux & {
   type: string;
   value: string | null;
   values: string[];
+  extra_options: string[];
   multiple: boolean;
   allow_all: boolean;
   allow_none: boolean;
@@ -72,7 +73,8 @@ class SelectBox extends Component<Props, State> {
     values: [],
     allow_all: false,
     allow_none: false,
-    color: ""
+    color: "",
+    extra_options: []
   };
   constructor(props: Props) {
     super(props);
@@ -190,6 +192,14 @@ class SelectBox extends Component<Props, State> {
                 <ListItemText primary="None" />
               </MenuItem>
             }
+            { this.props.extra_options.map((extra_option, key) => {
+              return (
+                <MenuItem key={key} value={extra_option}>
+                  <Checkbox checked={ this.props.values.indexOf(extra_option) > -1 } />
+                  <ListItemText primary={extra_option} />
+                </MenuItem>
+              );
+            })}
             { this.state.objects && this.state.objects.map((opt: ModelBase, i: any) => (
               <MenuItem key={i} value={opt._id}>
                 <Checkbox checked={ this.props.values.indexOf(opt._id) > -1 } />
@@ -214,6 +224,11 @@ class SelectBox extends Component<Props, State> {
             { this.props.allow_none && 
               <MenuItem value="None">None</MenuItem>
             }
+            { this.props.extra_options.map((extra_option, key) => {
+              return (
+                <MenuItem key={key} value={extra_option}>{extra_option}</MenuItem>
+              );
+            })}
             { this.state.objects && this.state.objects.map((opt: ModelBase, i: any) => {
               return (<MenuItem key={i} value={opt._id}>{opt.name}</MenuItem>);
             })}

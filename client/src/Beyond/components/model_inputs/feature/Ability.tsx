@@ -216,14 +216,14 @@ class AbilityInput extends Component<Props, State> {
                 </Button>
               </Grid>
               <Grid item xs={6}>
-                <Button
+                {/* <Button
                   variant="contained"
                   color={ this.state.show_effect === 2 ? "primary" : "default" }
                   onClick={ () => { 
                     this.setState({ show_effect: (this.state.show_effect === 2 ? 0 : 2) });
                   }}>
                   { this.props.obj.effect_2.type } { ["None","Self Condition"].includes(this.props.obj.effect_2.type) || this.props.obj.effect_2.attack_type === "None" ? "" : this.props.obj.effect_2.attack_type }
-                </Button>
+                </Button> */}
               </Grid>
             </Grid>
           </Grid>
@@ -247,13 +247,17 @@ class AbilityInput extends Component<Props, State> {
                 name="Effect 1"
                 onChange={(changed: AbilityEffect) => {
                   const obj = this.props.obj;
-                  obj.effect = changed;
+                  if (obj.effects.length > 0) {
+                    obj.effects[0] = changed;
+                  } else {
+                    obj.effects.push(changed);
+                  }
                   this.props.onChange(obj);
                 }}
               />
             </Grid>
           }
-          { this.state.show_effect === 2 &&
+          {/* { this.state.show_effect === 2 &&
             <Grid item>
               <AbilityEffectInput 
                 obj={this.props.obj.effect_2}
@@ -265,7 +269,7 @@ class AbilityInput extends Component<Props, State> {
                 }}
               />
             </Grid>
-          }
+          } */}
           <Grid item>
             <SelectResourceBox 
               name="Resource Consumed"

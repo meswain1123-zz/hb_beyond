@@ -322,18 +322,18 @@ class SpellEdit extends Component<Props, State> {
                       onClick={ () => { 
                         this.setState({ show_effect: (this.state.show_effect === 1 ? 0 : 1) });
                       }}>
-                      { this.state.obj.effect.type } { ["None","Self Condition"].includes(this.state.obj.effect_2.type) || this.state.obj.effect.attack_type === "None" ? "" : this.state.obj.effect.attack_type }
+                      { this.state.obj.effect.type } { this.state.obj.effect.attack_type === "None" ? "" : this.state.obj.effect.attack_type }
                     </Button>
                   </Grid>
                   <Grid item xs={6}>
-                    <Button
+                    {/* <Button
                       variant="contained"
                       color={ this.state.show_effect === 2 ? "primary" : "default" }
                       onClick={ () => { 
                         this.setState({ show_effect: (this.state.show_effect === 2 ? 0 : 2) });
                       }}>
                       { this.state.obj.effect_2.type } { ["None","Self Condition"].includes(this.state.obj.effect_2.type) || this.state.obj.effect_2.attack_type === "None" ? "" : this.state.obj.effect_2.attack_type }
-                    </Button>
+                    </Button> */}
                   </Grid>
                 </Grid>
               </Grid>
@@ -358,13 +358,17 @@ class SpellEdit extends Component<Props, State> {
                     slot_level={this.state.obj.level}
                     onChange={(changed: AbilityEffect) => {
                       const obj = this.state.obj;
-                      obj.effect = changed;
+                      if (obj.effects.length > 0) {
+                        obj.effects[0] = changed;
+                      } else {
+                        obj.effects.push(changed);
+                      }
                       this.setState({ obj });
                     }}
                   />
                 </Grid>
               }
-              { this.state.show_effect === 2 &&
+              {/* { this.state.show_effect === 2 &&
                 <Grid item>
                   <AbilityEffectInput 
                     obj={this.state.obj.effect_2}
@@ -377,7 +381,7 @@ class SpellEdit extends Component<Props, State> {
                     }}
                   />
                 </Grid>
-              }
+              } */}
               <ModelBaseDetails key="description"
                 obj={this.state.obj}
                 onChange={() => {

@@ -15,6 +15,11 @@ const menuRoutes = {
       
     },
     {
+      path: "/beyond/source_book",
+      name: "Source Books",
+      
+    },
+    {
       path: "/beyond/spell_slot_type",
       name: "Spell Slot Tables",
       

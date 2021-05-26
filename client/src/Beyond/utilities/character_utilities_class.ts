@@ -457,7 +457,6 @@ export class CharacterUtilitiesClass {
           spell_modifiers.push({ source_type, source_id, source_name, modifier: f.feature.the_feature as SpellModifier });
         } else if (f.feature_type === "Damage Multiplier") {
           const dm = f.feature.the_feature as DamageMultiplier;
-          dm.id = damage_multipliers.length;
           damage_multipliers.push(dm);
         } else if (f.feature_type === "Ability Score Improvement") {
           const asi_base_feature = f.feature_options[0] as CharacterASIBaseFeature;
@@ -1530,13 +1529,11 @@ export class CharacterUtilitiesClass {
           const dms = new DamageMultiplierSimple();
           dms.damage_type = dt;
           dms.multiplier = dm.multiplier;
-          dms.id = damage_multiplier_simples.length;
           dms.from_feature = true;
           damage_multiplier_simples.push(dms);
         });
       });
       char.extra_damage_multipliers.forEach(dm => {
-        dm.id = damage_multiplier_simples.length;
         damage_multiplier_simples.push(dm);
       });
       char.damage_multipliers = damage_multiplier_simples;

@@ -119,9 +119,13 @@ import SpecialFeatureIndex from "./special_feature";
 import SpecialFeatureEdit from "./special_feature/edit";
 import SpecialFeatureDetails from "./special_feature/details";
 
-import toolIndex from "./tool";
-import toolEdit from "./tool/edit";
-import toolDetails from "./tool/details";
+import SourceBookIndex from "./source_book";
+import SourceBookEdit from "./source_book/edit";
+import SourceBookDetails from "./source_book/details";
+
+import ToolIndex from "./tool";
+import ToolEdit from "./tool/edit";
+import ToolDetails from "./tool/details";
 
 import Attributions from "./attributions";
 
@@ -320,10 +324,15 @@ class MainPage extends Component<Props, State> {
           <Route exact path="/beyond/special_feature/create" component={SpecialFeatureEdit} />
           <Route exact path="/beyond/special_feature/edit/:id" component={SpecialFeatureEdit} />
 
-          <Route exact path="/beyond/tool" component={toolIndex} />
-          <Route exact path="/beyond/tool/details/:id" component={toolDetails} />
-          <Route exact path="/beyond/tool/create" component={toolEdit} />
-          <Route exact path="/beyond/tool/edit/:id" component={toolEdit} />
+          <Route exact path="/beyond/tool" component={ToolIndex} />
+          <Route exact path="/beyond/tool/details/:id" component={ToolDetails} />
+          <Route exact path="/beyond/tool/create" component={ToolEdit} />
+          <Route exact path="/beyond/tool/edit/:id" component={ToolEdit} />
+
+          <Route exact path="/beyond/source_book" component={SourceBookIndex} />
+          <Route exact path="/beyond/source_book/details/:id" component={SourceBookDetails} />
+          <Route exact path="/beyond/source_book/create" component={SourceBookEdit} />
+          <Route exact path="/beyond/source_book/edit/:id" component={SourceBookEdit} />
 
           <Route exact path="/beyond/dm" component={DMPage} />
         </Switch>

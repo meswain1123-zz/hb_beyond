@@ -5,6 +5,10 @@ export interface IStringHash {
   [details: string] : string;
 } 
 
+export interface IString2Hash {
+  [details: string] : IStringHash;
+} 
+
 export interface IStringAnyHash {
   [details: string] : any;
 } 

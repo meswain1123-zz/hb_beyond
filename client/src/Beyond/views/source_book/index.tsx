@@ -45,7 +45,7 @@ export interface State {
   start_letter: string;
 }
 
-class SpellListIndex extends Component<Props, State> {
+class SourceBookIndex extends Component<Props, State> {
   constructor(props: Props) {
     super(props);
     this.state = {
@@ -77,12 +77,12 @@ class SpellListIndex extends Component<Props, State> {
           <Grid item container spacing={1} direction="row">
             <Grid item xs={3}>
               <span className={"MuiTypography-root MuiListItemText-primary header"}>
-                Spell Lists
+                Source Books
               </span>
-              <Tooltip title={`Create New Spell List`}>
+              <Tooltip title={`Create New Source Book`}>
                 <Fab size="small" color="primary" style={{marginLeft: "8px"}}
                   onClick={ () => {
-                    this.setState({ redirectTo:`/beyond/spell_list/create` });
+                    this.setState({ redirectTo:`/beyond/source_book/create` });
                   }}>
                   <Add/>
                 </Fab>
@@ -101,7 +101,7 @@ class SpellListIndex extends Component<Props, State> {
           <Grid item>
             <ObjectIndex 
               filter={this.get_filter()}
-              data_type="spell_list"
+              data_type="source_book"
             />
           </Grid>
           <Grid item>
@@ -117,4 +117,4 @@ class SpellListIndex extends Component<Props, State> {
   }
 }
 
-export default connector(SpellListIndex);
+export default connector(SourceBookIndex);

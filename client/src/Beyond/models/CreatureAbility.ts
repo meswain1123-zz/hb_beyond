@@ -45,8 +45,8 @@ export class CreatureAbility {
   name: string;
   description: string;
   saving_throw_ability_score: string | null; // Ability Score saving throw the target(s) have to make
-  effect: AbilityEffect; // Formula for how much damage/healing to do
-  effect_2: AbilityEffect; // Some abilities have a second (like Ice Knife or Booming Blade or things that do different types of damage)
+  effects: AbilityEffect[]; // Formula for how much damage/healing to do
+  // effect_2: AbilityEffect; // Some abilities have a second (like Ice Knife or Booming Blade or things that do different types of damage)
   range: string | null; // Self, Touch, or a number
   range_2: string | null; // For some there are multiple ranges.  It can be an AoE size, or sometimes something else.
   concentration: boolean;
@@ -73,8 +73,16 @@ export class CreatureAbility {
     this.name = obj ? obj.name : "";
     this.description = obj ? obj.description : "";
     this.saving_throw_ability_score = obj ? obj.saving_throw_ability_score : "";
-    this.effect = obj ? new AbilityEffect(obj.effect) : new AbilityEffect();
-    this.effect_2 = obj ? new AbilityEffect(obj.effect_2) : new AbilityEffect();
+    this.effects = []; 
+    if (obj && obj.effects && obj.effects.length) {
+      obj.effects.forEach((effect: any) => {
+        this.effects.push(new AbilityEffect(effect));
+      });
+    } else if (obj && obj.effect) {
+      this.effects.push(new AbilityEffect(obj.effect));
+    }
+    // this.effect = obj ? new AbilityEffect(obj.effect) : new AbilityEffect();
+    // this.effect_2 = obj ? new AbilityEffect(obj.effect_2) : new AbilityEffect();
     this.range = obj ? obj.range : null;
     this.range_2 = obj ? obj.range_2 : null;
     this.concentration = obj ? obj.concentration : false;
@@ -92,13 +100,16 @@ export class CreatureAbility {
   }
 
   toDBObj = () => {
+    const effects: any[] = [];
+    for (let i = 0; i < this.effects.length; i++) {
+      effects.push(this.effects[i].toDBObj());
+    }
     return {
       true_id: this.true_id,
       name: this.name,
       description: this.description,
       saving_throw_ability_score: this.saving_throw_ability_score,
-      effect: this.effect.toDBObj(),
-      effect_2: this.effect_2.toDBObj(),
+      effects,
       range: this.range,
       range_2: this.range_2,
       concentration: this.concentration,
@@ -116,6 +127,14 @@ export class CreatureAbility {
     };
   }
 
+  get effect(): AbilityEffect {
+    if (this.effects.length > 0) {
+      return this.effects[0];
+    } else {
+      return new AbilityEffect();
+    }
+  }
+
   clone(): CreatureAbility {
     return new CreatureAbility(this);
   }
@@ -126,8 +145,7 @@ export class CreatureAbility {
     this.name = copyMe.name;
     this.description = copyMe.description;
     this.saving_throw_ability_score = copyMe.saving_throw_ability_score;
-    this.effect = copyMe.effect;
-    this.effect_2 = copyMe.effect_2;
+    this.effects = [...copyMe.effects];
     this.range = copyMe.range;
     this.range_2 = copyMe.range_2;
     this.concentration = copyMe.concentration;

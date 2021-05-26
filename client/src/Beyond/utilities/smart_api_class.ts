@@ -45,6 +45,7 @@ import {
   CharacterPactBoon,
   CharacterEldritchInvocation,
   CharacterFightingStyle,
+  SourceBook
 } from "../models";
 
 // This is our special type of Error that represents
@@ -205,7 +206,7 @@ export class APIClass {
     } else {
       if (this.smart_hash[data_type]) {
         const filtered = this.filter(this.smart_hash[data_type], filter);
-        return filtered.length;
+        return { count: filtered.length};
       } else {
         return this.getObjectCountFromAPI(data_type, filter);
       }
@@ -563,6 +564,9 @@ export class APIClass {
             break;
             case "language":
               this.smart_hash[data_type].push(obj as Language);
+            break;
+            case "source_book":
+              this.smart_hash[data_type].push(obj as SourceBook);
             break;
             case "special_feature":
               this.smart_hash[data_type].push(obj as SpecialFeature);
@@ -1027,6 +1031,13 @@ export class APIClass {
               languages.push(new Language(o));
             });
             response = languages;
+          break;
+          case "source_book": 
+            const source_books: SourceBook[] = [];
+            body.objects.forEach((o: any) => {
+              source_books.push(new SourceBook(o));
+            });
+            response = source_books;
           break;
           case "special_feature": 
             const special_features: SpecialFeature[] = [];

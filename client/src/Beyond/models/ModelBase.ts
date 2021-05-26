@@ -13,8 +13,8 @@ export abstract class ModelBase {
     this._id = obj ? obj._id : "";
     this.name = obj ? obj.name : "";
     this.description = obj && obj.description && obj.description !== "undefined" ? obj.description : "";
-    this.source_type = obj && obj.source_type ? obj.source_type : "";
-    this.source_id = obj && obj.source_id ? obj.source_id : "";
+    this.source_type = obj && obj.source_type ? obj.source_type : "Source Book";
+    this.source_id = obj && obj.source_id ? obj.source_id : "Basic Rules";
   }
 
   toDBObj = () => {

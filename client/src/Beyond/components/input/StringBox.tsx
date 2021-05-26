@@ -33,6 +33,7 @@ type Props = PropsFromRedux & {
   labelWidth: number | null;
   type: string;
   color: string;
+  disabled: boolean;
 }
 
 export interface State { 
@@ -50,7 +51,8 @@ class StringBox extends Component<Props, State> {
     type: "text",
     color: "",
     onChange: null,
-    onBlur: null
+    onBlur: null,
+    disabled: false
   };
   constructor(props: Props) {
     super(props);
@@ -105,6 +107,7 @@ class StringBox extends Component<Props, State> {
           type={this.props.type}
           autoComplete="Off"
           value={this.state.value}
+          disabled={this.props.disabled}
           onChange={(event: any) => {
             this.setState({ value: event.target.value }, () => {
               if (this.props.type === "number") {

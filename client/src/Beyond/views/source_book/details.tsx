@@ -8,7 +8,7 @@ import {
 } from "@material-ui/core";
 
 import { 
-  SpellList, ModelBase
+  SourceBook, ModelBase
 } from "../../models";
 
 import ObjectDetails from "../../components/model_inputs/ObjectDetails";
@@ -46,16 +46,16 @@ type Props = PropsFromRedux & RouteComponentProps<MatchParams> & { }
 
 export interface State { 
   redirectTo: string | null;
-  obj: SpellList;
+  obj: SourceBook;
   loading: boolean;
 }
 
-class SpellListDetails extends Component<Props, State> {
+class SourceBookDetails extends Component<Props, State> {
   constructor(props: Props) {
     super(props);
     this.state = {
       redirectTo: null,
-      obj: new SpellList(),
+      obj: new SourceBook(),
       loading: false
     };
     this.api = API.getInstance();
@@ -70,12 +70,12 @@ class SpellListDetails extends Component<Props, State> {
     }
   }
 
-  // Loads the editing SpellList into state
+  // Loads the editing SourceBook into state
   load_object(id: string) {
     this.setState({ loading: true }, () => {
-      this.api.getFullObject("spell_list", id).then((res: ModelBase | null) => {
+      this.api.getFullObject("source_book", id).then((res: ModelBase | null) => {
         if (res) {
-          this.setState({ obj: (res as SpellList).clone(), loading: false });
+          this.setState({ obj: (res as SourceBook).clone(), loading: false });
         }
       });
     });
@@ -92,8 +92,8 @@ class SpellListDetails extends Component<Props, State> {
           <Grid item>
             <ObjectDetails 
               obj={this.state.obj}
-              data_type="spell_list"
-              type_label="Spell Lists"
+              data_type="source_book"
+              type_label="Source Books"
             />
           </Grid>
         </Grid>
@@ -102,4 +102,4 @@ class SpellListDetails extends Component<Props, State> {
   }
 }
 
-export default connector(SpellListDetails);
+export default connector(SourceBookDetails);

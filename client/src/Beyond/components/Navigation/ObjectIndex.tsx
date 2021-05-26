@@ -114,7 +114,7 @@ class ObjectIndex extends Component<Props, State> {
       if (res && !res.error) {
         let objects: ModelBase[] = this.state.objects ? this.state.objects : [];
         objects = [...objects, ...(res as ModelBase[])];
-        this.setState({ objects, loading: false });
+        this.setState({ objects: objects.sort((a, b) => { return a.name.localeCompare(b.name); }), loading: false });
       }
     });
   }

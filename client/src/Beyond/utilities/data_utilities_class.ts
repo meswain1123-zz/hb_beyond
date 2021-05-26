@@ -2,16 +2,16 @@
 
 export class DataUtilitiesClass {
 
-  capitalize_first(fix_me: string) {
+  capitalize_first(fix_me: string, only: boolean = false) {
     let return_me = "";
     if (fix_me.length > 0) {
       return_me = fix_me[0].toUpperCase();
-      return_me += fix_me.substring(1);
+      return_me += only ? fix_me.substring(1).toLowerCase() : fix_me.substring(1);
     }
     return return_me;
   }
   
-  capitalize_firsts(fix_me: string) {
+  capitalize_firsts(fix_me: string, only: boolean = false) {
     let return_me = "";
     if (fix_me) {
       const fix_us = fix_me.split(" ");
@@ -19,10 +19,31 @@ export class DataUtilitiesClass {
         if (return_me.length > 0) {
           return_me += " ";
         }
-        return_me += this.capitalize_first(fm);
+        return_me += this.capitalize_first(fm, only);
       });
     }
     return return_me;
+  }
+
+  // Takes a string of what should be a number, and fixes it.
+  // The reason for this is sometimes we are given O instead of 0 or S instead of 5.
+  // It also removes unnecessary + signs.
+  // It then returns it as a number
+  fix_number_string(fix_me: string) {
+    let return_me = "";
+    for (let i = 0; i < fix_me.length; ++i) {
+      const c = fix_me[i];
+      if (c === "S") {
+        return_me += "5";
+      } else if (c === "O") {
+        return_me += "0";
+      } else if (["L","l","I"].includes(c)) {
+        return_me += "1";
+      } else if (!["+",","," "].includes(c)) {
+        return_me += c;
+      }
+    }
+    return +return_me;
   }
 
   add_plus_maybe(add_to_me: string | number, blank_on_0: (boolean | null) = null): string {
@@ -177,5 +198,16 @@ export class DataUtilitiesClass {
       break;
     }
     return score;
+  }
+
+  replaceAll(cleanMe: string, replaceMe: string, withMe: string) {
+    let dirtyString = cleanMe;
+    let newString = "";
+    while (dirtyString.indexOf(replaceMe) > -1) {
+      newString += dirtyString.substring(0, dirtyString.indexOf(replaceMe)) + withMe;
+      dirtyString = dirtyString.substring(dirtyString.indexOf(replaceMe) + 1);
+    }
+    newString += dirtyString;
+    return newString;
   }
 }

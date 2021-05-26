@@ -20,6 +20,9 @@ import CharacterAction from "./CharacterAction";
 import API from "../../../utilities/smart_api";
 import { APIClass } from "../../../utilities/smart_api_class";
 
+import DataUtilities from "../../../utilities/data_utilities";
+import { DataUtilitiesClass } from "../../../utilities/data_utilities_class";
+
 
 interface AppState {
   width: number;
@@ -86,9 +89,11 @@ class CharacterActions extends Component<Props, State> {
       popoverMode: ""
     };
     this.api = API.getInstance();
+    this.data_util = DataUtilities.getInstance();
   }
 
   api: APIClass;
+  data_util: DataUtilitiesClass;
 
   componentDidMount() {
   }
@@ -220,7 +225,7 @@ class CharacterActions extends Component<Props, State> {
   }
 
   renderActionGroup(group: string) {
-    const group2 = this.replaceAll(group.toLowerCase()," ","_");
+    const group2 = this.data_util.replaceAll(group.toLowerCase()," ","_");
     let found = false;
     if (["actions","bonus_actions","reactions"].includes(group2)) {
       found = this.props.obj.actions.item_actions.length > 0;
@@ -247,7 +252,7 @@ class CharacterActions extends Component<Props, State> {
   }
 
   renderActionsOfType(group2: string, type: string) {
-    const type2 = this.replaceAll(type.toLowerCase()," ","_");
+    const type2 = this.data_util.replaceAll(type.toLowerCase()," ","_");
     let dingen: any = type === "Weapon Attacks" ? (["actions","bonus_actions","reactions"].includes(group2) ? this.props.obj.actions.item_actions : []) : this.props.obj.actions[`${type2}_${group2}`];
     if (type === "Weapon Attacks") {
       dingen = dingen.filter((o: any) => o instanceof CharacterItem && o.attacks.filter(a => group2 !== "bonus_actions" || a.bonus_action).length > 0);
@@ -286,17 +291,6 @@ class CharacterActions extends Component<Props, State> {
         </Grid>
       );
     } else return null;
-  }
-
-  replaceAll(cleanMe: string, replaceMe: string, withMe: string) {
-    let dirtyString = cleanMe;
-    let newString = "";
-    while (dirtyString.indexOf(replaceMe) > -1) {
-      newString += dirtyString.substring(0, dirtyString.indexOf(replaceMe)) + withMe;
-      dirtyString = dirtyString.substring(dirtyString.indexOf(replaceMe) + 1);
-    }
-    newString += dirtyString;
-    return newString;
   }
 }
 

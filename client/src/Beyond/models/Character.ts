@@ -215,7 +215,6 @@ export class Character extends ModelBase {
     if (obj && obj.extra_damage_multipliers) {
       for (let i = 0; i < obj.extra_damage_multipliers.length; i++) {
         const dm = new DamageMultiplierSimple(obj.extra_damage_multipliers[i]);
-        dm.id = this.extra_damage_multipliers.length;
         this.extra_damage_multipliers.push(dm);
       }
     }

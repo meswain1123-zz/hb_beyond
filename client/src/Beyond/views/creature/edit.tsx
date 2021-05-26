@@ -3,7 +3,9 @@ import { connect, ConnectedProps } from 'react-redux';
 import { RouteComponentProps } from 'react-router';
 import { Redirect } from "react-router-dom";
 import {
-  ArrowBack
+  ArrowBack,
+  Add,
+  DeleteForever
 } from "@material-ui/icons";
 import {
   Grid, 
@@ -15,6 +17,7 @@ import {
   AbilityScores,
   Creature, 
   CreatureTemplate,
+  CreatureAbility,
   TemplateBase,
   DamageMultiplier,
   CharacterSense,
@@ -23,6 +26,8 @@ import {
   Tool,
   Condition,
   Sense,
+  IStringHash,
+  HitDice
 } from "../../models";
 import {
   DAMAGE_TYPES
@@ -31,6 +36,7 @@ import {
 import StringBox from "../../components/input/StringBox";
 import ToggleButtonBox from "../../components/input/ToggleButtonBox";
 import SelectStringBox from "../../components/input/SelectStringBox";
+import StringToJSONBox from "../../components/input/StringToJSONBox";
 
 import CreatureAbilityScoresInput from "../../components/model_inputs/creature/CreatureAbilityScoresInput";
 import FeatureListInput from "../../components/model_inputs/feature/FeatureList";
@@ -42,6 +48,9 @@ import ModelBaseDetails from "../../components/model_inputs/ModelBaseDetails";
 
 import API from "../../utilities/smart_api";
 import { APIClass } from "../../utilities/smart_api_class";
+
+import DataUtilities from "../../utilities/data_utilities";
+import { DataUtilitiesClass } from "../../utilities/data_utilities_class";
 
 
 interface AppState {
@@ -84,6 +93,8 @@ export interface State {
   mode: string;
   edit_attribute: string;
   loading: boolean;
+  reloading: boolean;
+  expanded_dm: DamageMultiplier | null;
 }
 
 class CreatureEdit extends Component<Props, State> {
@@ -101,12 +112,16 @@ class CreatureEdit extends Component<Props, State> {
       senses: null,
       mode: "main",
       edit_attribute: "",
-      loading: false
+      loading: false,
+      reloading: false,
+      expanded_dm: null
     };
     this.api = API.getInstance();
+    this.data_util = DataUtilities.getInstance();
   }
 
   api: APIClass;
+  data_util: DataUtilitiesClass;
 
   componentDidMount() {
     this.load();
@@ -196,7 +211,7 @@ class CreatureEdit extends Component<Props, State> {
             />
           </Grid>
           <Grid item container spacing={1} direction="row">
-            <Grid item xs={2}>
+            <Grid item xs={1}>
               <Link href="#" 
                 style={{
                   borderBottom: `${this.state.mode === "main" ? "2px solid blue" : "none"}`
@@ -206,6 +221,18 @@ class CreatureEdit extends Component<Props, State> {
                   this.setState({ mode: "main" });
                 }}>
                 Home
+              </Link>
+            </Grid>
+            <Grid item xs={1}>
+              <Link href="#" 
+                style={{
+                  borderBottom: `${this.state.mode === "parse" ? "2px solid blue" : "none"}`
+                }}
+                onClick={(event: React.SyntheticEvent) => {
+                  event.preventDefault();
+                  this.setState({ mode: "parse" });
+                }}>
+                Parse
               </Link>
             </Grid>
             <Grid item xs={2}>
@@ -542,6 +569,274 @@ class CreatureEdit extends Component<Props, State> {
           />
         );
       }
+    } else if (this.state.mode === "parse") {
+      return (
+        <StringToJSONBox 
+          onParse={(pieces: IStringHash[]) => {
+            console.log(pieces); 
+            const obj = this.state.obj;
+            pieces.forEach(piece => {
+              if (piece.type === "Name") {
+                obj.name = this.data_util.capitalize_firsts(piece.str, true);
+              } else if (piece.type === "Description") {
+                obj.description = piece.str;
+              } else if (piece.type === "Type") {
+                obj.creature_type = this.data_util.capitalize_firsts(piece.str);
+              } else if (piece.type === "Subtype") {
+                obj.subtype = this.data_util.capitalize_firsts(piece.str);
+              } else if (piece.type === "Hit Dice") {
+                const bonus_pieces = piece.str.split("+");
+                obj.hit_dice_bonus = 0;
+                bonus_pieces.forEach(bp => {
+                  if (bp.includes("d")) {
+                    const hd_pieces = bp.split("d");
+                    const hd = new HitDice();
+                    hd.count = this.data_util.fix_number_string(hd_pieces[0]);
+                    hd.size = this.data_util.fix_number_string(hd_pieces[1]);
+                    obj.hit_dice.push(hd);
+                  } else {
+                    obj.hit_dice_bonus += this.data_util.fix_number_string(bp);
+                  }
+                });
+              } else if (piece.type === "Max HP") {
+                obj.max_hit_points = this.data_util.fix_number_string(piece.str);
+              } else if (piece.type === "Size") {
+                obj.size = this.data_util.capitalize_firsts(piece.str);
+              } else if (piece.type === "CR") {
+                obj.challenge_rating = this.data_util.fix_number_string(piece.str);
+              } else if (piece.type === "Exp Points") {
+                obj.xp = this.data_util.fix_number_string(piece.str);
+              } else if (piece.type === "Init Mod") {
+                obj.initiative_modifier = this.data_util.fix_number_string(piece.str);
+              } else if (piece.type === "AC") {
+                obj.armor_class = this.data_util.fix_number_string(piece.str);
+              } else if (piece.type === "Alignment") {
+                obj.alignment = this.data_util.capitalize_firsts(piece.str);
+              } else if (piece.type === "Speed") {
+                const speed_pieces = piece.str.split(" ");
+                let speed_type = "";
+                speed_pieces.forEach(sp => {
+                  if (["speed","walk","run"].includes(sp.toLowerCase())) {
+                    speed_type = "walk";
+                  } else if (sp.toLowerCase() === "swim") {
+                    speed_type = "swim";
+                  } else if (sp.toLowerCase() === "climb") {
+                    speed_type = "climb";
+                  } else if (sp.toLowerCase() === "fly") {
+                    speed_type = "fly";
+                  } else if (sp.toLowerCase() === "burrow") {
+                    speed_type = "burrow";
+                  } else if (sp.includes("hover")) {
+                    obj.speed.hover = 1;
+                  } else if (speed_type !== "") {
+                    obj.speed[speed_type] = this.data_util.fix_number_string(sp);
+                    speed_type = "";
+                  }
+                });
+              } else if (piece.type === "Ability Scores") {
+                const as_pieces = piece.str.split(" ");
+                let as_type = "";
+                as_pieces.forEach(asp => {
+                  if (["STR","DEX","CON","INT","WIS","CHA"].includes(asp.toUpperCase())) {
+                    as_type = asp.toUpperCase();
+                  } else if (as_type !== "") {
+                    obj.ability_scores.setAbilityScore(as_type, this.data_util.fix_number_string(asp));
+                    as_type = "";
+                  }
+                });
+              } else if (piece.type === "Saving Throws") {
+                const st_pieces = piece.str.split(" ");
+                let st_type = "";
+                st_pieces.forEach(stp => {
+                  if (["STR","DEX","CON","INT","WIS","CHA"].includes(stp.toUpperCase())) {
+                    st_type = stp.toUpperCase();
+                  } else if (st_type !== "") {
+                    obj.saving_throws[st_type] = this.data_util.fix_number_string(stp);
+                    st_type = "";
+                  }
+                });
+              } else if (piece.type === "Skill") {
+                const skill_pieces = piece.str.split(" ");
+                let skill = "";
+                skill_pieces.forEach(sp => {
+                  if (skill !== "") {
+                    obj.skill_proficiencies[skill] = this.data_util.fix_number_string(sp);
+                    skill = "";
+                  } else {
+                    skill = this.data_util.capitalize_firsts(sp);
+                  }
+                });
+              } else if (piece.type === "Tool") {
+                const tool_pieces = this.data_util.capitalize_firsts(piece.str).split(",");
+                tool_pieces.forEach(p => {
+                  obj.tool_proficiencies[p.trim()] = 1;
+                });
+              } else if (piece.type === "Language") {
+                obj.languages = this.data_util.capitalize_firsts(piece.str);
+              } else if (piece.type === "Damage Immunity") {
+                const more_pieces = this.data_util.capitalize_firsts(piece.str).split(";");
+                more_pieces.forEach(mp => {
+                  const dm = new DamageMultiplier();
+                  if (mp.includes("From ")) {
+                    const from_pieces = mp.split("From ");
+                    dm.details = `From ${from_pieces[1]}`;
+                    mp = from_pieces[0];
+                  }
+                  const mult_pieces = mp.split(",");
+                  dm.multiplier = 0;
+                  mult_pieces.forEach(p => {
+                    if (p.includes("And ")) {
+                      const p2 = p.split("And ");
+                      p2.forEach(p3 => {
+                        if (p3.trim() !== "") {
+                          dm.damage_types.push(p3.trim());
+                        }
+                      });
+                    } else {
+                      if (p.trim() !== "") {
+                        dm.damage_types.push(p.trim());
+                      }
+                    }
+                  });
+                  obj.damage_multipliers.push(dm);
+                });
+              } else if (piece.type === "Damage Resistance") {
+                const more_pieces = this.data_util.capitalize_firsts(piece.str).split(";");
+                more_pieces.forEach(mp => {
+                  const dm = new DamageMultiplier();
+                  if (mp.includes("From ")) {
+                    const from_pieces = mp.split("From ");
+                    dm.details = `From ${from_pieces[1]}`;
+                    mp = from_pieces[0];
+                  }
+                  const mult_pieces = mp.split(",");
+                  dm.multiplier = 0.5;
+                  mult_pieces.forEach(p => {
+                    if (p.includes("And ")) {
+                      const p2 = p.split("And ");
+                      p2.forEach(p3 => {
+                        if (p3.trim() !== "") {
+                          dm.damage_types.push(p3.trim());
+                        }
+                      });
+                    } else {
+                      if (p.trim() !== "") {
+                        dm.damage_types.push(p.trim());
+                      }
+                    }
+                  });
+                  obj.damage_multipliers.push(dm);
+                });
+              } else if (piece.type === "Damage Vulnerability") {
+                const more_pieces = this.data_util.capitalize_firsts(piece.str).split(";");
+                more_pieces.forEach(mp => {
+                  const dm = new DamageMultiplier();
+                  if (mp.includes("From ")) {
+                    const from_pieces = mp.split("From ");
+                    dm.details = `From ${from_pieces[1]}`;
+                    mp = from_pieces[0];
+                  }
+                  const mult_pieces = mp.split(",");
+                  dm.multiplier = 2;
+                  mult_pieces.forEach(p => {
+                    if (p.includes("And ")) {
+                      const p2 = p.split("And ");
+                      p2.forEach(p3 => {
+                        if (p3.trim() !== "") {
+                          dm.damage_types.push(p3.trim());
+                        }
+                      });
+                    } else {
+                      if (p.trim() !== "") {
+                        dm.damage_types.push(p.trim());
+                      }
+                    }
+                  });
+                  obj.damage_multipliers.push(dm);
+                });
+              } else if (piece.type === "Condition Immunity") {
+                const immunity_pieces = this.data_util.capitalize_firsts(piece.str).split(",");
+                immunity_pieces.forEach(p => {
+                  obj.condition_immunities.push(p.trim());
+                });
+              } else if (piece.type === "Sense") {
+                if (this.state.senses) {
+                  const sense_pieces = this.data_util.capitalize_firsts(piece.str).split(",");
+                  for (let i = 0; i < sense_pieces.length; ++i) {
+                    const sp = sense_pieces[i];
+                    const more_pieces = sp.trim().split(" ");
+                    if (more_pieces[0] === "Passive") {
+                      if (more_pieces[1] === "Perception") {
+                        obj.passives.passive_perception = this.data_util.fix_number_string(more_pieces[2]);
+                      } else if (more_pieces[1] === "Investigation") {
+                        obj.passives.passive_investigation = this.data_util.fix_number_string(more_pieces[2]);
+                      } else if (more_pieces[1] === "Insight") {
+                        obj.passives.passive_insight = this.data_util.fix_number_string(more_pieces[2]);
+                      }
+                    } else {
+                      const sense_name = more_pieces[0];
+                      const sense_finder = this.state.senses.filter(o => this.data_util.replaceAll(o.name, " ","").toLowerCase() === this.data_util.replaceAll(sense_name, " ","").toLowerCase());
+                      if (sense_finder.length === 1) {
+                        const sf = sense_finder[0];
+                        const char_sense = new CharacterSense();
+                        char_sense.name = sf.name;
+                        char_sense.sense_id = sf._id;
+                        char_sense.range = this.data_util.fix_number_string(more_pieces[1]);
+                        obj.senses.push(char_sense);
+                      }
+                    }
+                  }
+                }
+              } else if (piece.type === "Special") {
+                const abilities: Feature[] = [];
+                // obj.special_abilities.push()
+                // Needs to identify the beginning for each ability
+                // We can identify them by periods and spaces.  
+                // If there's a period and the 'sentence' before it 
+                // has < 4 words then it's probably the name of the next one.
+                const sentences = piece.str.split(".");
+                let sentence_num = 0;
+                let ability = new Feature();
+                while (sentence_num < sentences.length) {
+                  const sentence = sentences[sentence_num];
+                  const words = sentence.split(" ");
+                  if (words.length < 4) {
+                    // new ability
+                    if (ability.name !== "") {
+                      abilities.push(ability);
+                    }
+                    ability = new Feature();
+                    ability.name = sentence;
+                    ability.feature_type = "Creature Ability";
+                    ability.the_feature = new CreatureAbility();
+                  } else {
+                    ability.description += `${sentence}. `;
+                    const creature_ability = ability.the_feature as CreatureAbility;
+                    // Look for certain keywords: 
+                    // ft (for range), 
+                    // to hit (for attack bonus)
+                    // DC (for save and dc), 
+                    // damage (for damage type and amount)
+                  }
+                  sentence_num++;
+                }
+              } else {
+                console.log(piece);
+              } 
+              // } else if (piece.type === "Action") {
+
+              // } else if (piece.type === "Legendary Action") {
+
+              // } else if (piece.type === "Lair Action") {
+
+              // } else if (piece.type === "Special") {
+
+              // }
+              this.setState({ obj, mode: "home" });
+            });
+          }}
+        />
+      );
     } else {
       return (
         <Grid container spacing={1} direction="row">
@@ -568,38 +863,43 @@ class CreatureEdit extends Component<Props, State> {
               }}
             />
           </Grid>
-          <Grid item xs={4} container spacing={1} direction="row">
-            <Grid item xs={6}>
-              <StringBox
-                name="Hit Dice Count"
-                type="number"
-                value={`${this.state.obj.hit_dice.count}`} 
-                onBlur={(value: string) => {
-                  const obj = this.state.obj;
-                  obj.hit_dice.count = +value;
-                  this.setState({ obj });
-                }}
-              />
-            </Grid>
-            <Grid item xs={6}>
-              <SelectStringBox 
-                options={["d6","d8","d10","d12"]}
-                value={`d${this.state.obj.hit_dice.size}`} 
-                name="Hit Dice Size"
-                onChange={(value: string) => {
-                  const obj = this.state.obj;
-                  obj.hit_dice.size = +value;
-                  this.setState({ obj });
-                }}
-              />
-            </Grid>
+          <Grid item xs={4}>
+            <SelectStringBox 
+              options={[
+                "Lawful Good",
+                "Lawful Neutral",
+                "Lawful Evil",
+                "Neutral Good",
+                "Neutral",
+                "Neutral Evil",
+                "Chaotic Good",
+                "Chaotic Neutral",
+                "Chaotic Evil",
+                "Any Alignment",
+                "Any Chaotic Alignment",
+                "Any Evil Alignment",
+                "Any Non-good Alignment",
+                "Any Non-lawful Alignment",
+                "Unaligned",
+                "Neutral Good (50%) Or Neutral Evil (50%)"
+              ]}
+              value={this.state.obj.alignment} 
+              name="Alignment"
+              onChange={(value: string) => {
+                const obj = this.state.obj;
+                obj.alignment = value;
+                this.setState({ obj });
+              }}
+            />
           </Grid>
           <Grid item xs={4}>
-            <ModelBaseDetails key="description"
-              obj={this.state.obj}
-              no_grid
-              onChange={() => {
+            <SelectStringBox 
+              options={["Tiny","Small","Medium","Large","Huge","Gargantuan"]}
+              value={this.state.obj.size} 
+              name="Size"
+              onChange={(value: string) => {
                 const obj = this.state.obj;
+                obj.size = value;
                 this.setState({ obj });
               }}
             />
@@ -611,30 +911,6 @@ class CreatureEdit extends Component<Props, State> {
               onBlur={(value: string) => {
                 const obj = this.state.obj;
                 obj.subtype = value;
-                this.setState({ obj });
-              }}
-            />
-          </Grid>
-          <Grid item xs={4}>
-            <StringBox 
-              value={`${this.state.obj.max_hit_points}`} 
-              name="Max Hit Points"
-              type="number"
-              onBlur={(value: string) => {
-                const obj = this.state.obj;
-                obj.max_hit_points = +value;
-                this.setState({ obj });
-              }}
-            />
-          </Grid>
-          <Grid item xs={4}>
-            <StringBox 
-              value={`${this.state.obj.challenge_rating}`} 
-              name="Challenge Rating"
-              type="number"
-              onBlur={(value: string) => {
-                const obj = this.state.obj;
-                obj.challenge_rating = +value;
                 this.setState({ obj });
               }}
             />
@@ -665,6 +941,18 @@ class CreatureEdit extends Component<Props, State> {
           </Grid>
           <Grid item xs={4}>
             <StringBox 
+              value={`${this.state.obj.challenge_rating}`} 
+              name="Challenge Rating"
+              type="number"
+              onBlur={(value: string) => {
+                const obj = this.state.obj;
+                obj.challenge_rating = +value;
+                this.setState({ obj });
+              }}
+            />
+          </Grid>
+          <Grid item xs={4}>
+            <StringBox 
               value={`${this.state.obj.xp}`} 
               name="Exp. Points"
               type="number"
@@ -675,43 +963,88 @@ class CreatureEdit extends Component<Props, State> {
               }}
             />
           </Grid>
-          <Grid item xs={4}>
-            <SelectStringBox 
-              options={["Tiny","Small","Medium","Large","Huge","Gargantuan"]}
-              value={this.state.obj.size} 
-              name="Size"
-              onChange={(value: string) => {
+          <Grid item xs={12}>
+            <StringBox 
+              value={`${this.state.obj.max_hit_points}`} 
+              name="Max Hit Points"
+              type="number"
+              onBlur={(value: string) => {
                 const obj = this.state.obj;
-                obj.size = value;
+                obj.max_hit_points = +value;
                 this.setState({ obj });
               }}
             />
           </Grid>
-          <Grid item xs={4}>
-            <SelectStringBox 
-              options={[
-                "Lawful Good",
-                "Lawful Neutral",
-                "Lawful Evil",
-                "Neutral Good",
-                "Neutral",
-                "Neutral Evil",
-                "Chaotic Good",
-                "Chaotic Neutral",
-                "Chaotic Evil",
-                "Any Alignment",
-                "Any Chaotic Alignment",
-                "Any Evil Alignment",
-                "Any Non-good Alignment",
-                "Any Non-lawful Alignment",
-                "Unaligned",
-                "Neutral Good (50%) Or Neutral Evil (50%)"
-              ]}
-              value={this.state.obj.alignment} 
-              name="Alignment"
-              onChange={(value: string) => {
+          <Grid item xs={12} container spacing={1} direction="column">
+            <Grid item>
+              <Fab size="small" color="primary" style={{marginLeft: "8px"}}
+                onClick={ () => {
+                  const obj = this.state.obj;
+                  obj.hit_dice.push(new HitDice());
+                  this.setState({ obj });
+                }}>
+                <Add/>
+              </Fab>
+              <StringBox 
+                name="Hit Dice Bonus"
+                value={`${this.state.obj.hit_dice_bonus}`}
+                type="number"
+                onBlur={(value: string) => {
+                  const obj = this.state.obj;
+                  obj.hit_dice_bonus = +value;
+                  this.setState({ obj });
+                }}
+              />
+            </Grid>
+            <Grid item>
+              { !this.state.reloading && this.state.obj.hit_dice.map((hd, key) => {
+                return (
+                  <Grid key={key} container spacing={1} direction="row">
+                    <Grid item xs={5}>
+                      <StringBox
+                        name="Hit Dice Count"
+                        type="number"
+                        value={`${hd.count}`} 
+                        onBlur={(value: string) => {
+                          const obj = this.state.obj;
+                          hd.count = +value;
+                          this.setState({ obj });
+                        }}
+                      />
+                    </Grid>
+                    <Grid item xs={5}>
+                      <SelectStringBox 
+                        options={["d6","d8","d10","d12"]}
+                        value={`d${hd.size}`} 
+                        name="Hit Dice Size"
+                        onChange={(value: string) => {
+                          const obj = this.state.obj;
+                          hd.size = +value;
+                          this.setState({ obj });
+                        }}
+                      />
+                    </Grid>
+                    <Grid item xs={2}>
+                      <Fab size="small" color="primary" style={{marginLeft: "8px"}}
+                        onClick={ () => {
+                          const obj = this.state.obj;
+                          obj.hit_dice = obj.hit_dice.filter(o => o.true_id !== hd.true_id);
+                          this.setState({ obj, reloading: true }, () => { this.setState({ reloading: false }); });
+                        }}>
+                        <DeleteForever/>
+                      </Fab>
+                    </Grid>
+                  </Grid>  
+                );
+              })}
+            </Grid>
+          </Grid>
+          <Grid item xs={12}>
+            <ModelBaseDetails key="description"
+              obj={this.state.obj}
+              no_grid
+              onChange={() => {
                 const obj = this.state.obj;
-                obj.alignment = value;
                 this.setState({ obj });
               }}
             />
@@ -781,8 +1114,55 @@ class CreatureEdit extends Component<Props, State> {
           <Grid item xs={10}>
             Damage Immunities
           </Grid>
-          { DAMAGE_TYPES.map((damage_type, key) => {
-            return this.renderDamageType(damage_type, key, 0);
+          <Grid item xs={12}>
+            <Fab size="small" color="primary" style={{marginLeft: "8px"}}
+              onClick={ () => {
+                const obj = this.state.obj;
+                const dm = new DamageMultiplier();
+                dm.multiplier = 0;
+                obj.damage_multipliers.push(dm);
+                this.setState({ obj });
+              }}>
+              <Add/>
+            </Fab>
+          </Grid>
+          { this.state.obj.damage_multipliers.filter(o => o.multiplier === 0).map((dm, key) => {
+            return (
+              <Grid item xs={12} key={key} container spacing={1} direction="row">
+                <Grid item xs={2}>
+                  <ToggleButtonBox 
+                    name="Expand"
+                    value={ this.state.expanded_dm === null ? false : this.state.expanded_dm.true_id === dm.true_id }
+                    onToggle={() => {
+                      const expanded_dm = this.state.expanded_dm && this.state.expanded_dm.true_id === dm.true_id ? null : dm;
+                      this.setState({ expanded_dm });
+                    }}
+                  />
+                </Grid>
+                <Grid item xs={10}>
+                  { dm.toString() }
+                </Grid>
+                { this.state.expanded_dm && this.state.expanded_dm.true_id === dm.true_id && DAMAGE_TYPES.map((damage_type, key) => {
+                  return this.renderDamageType(damage_type, key, 2);
+                })}
+                { this.state.expanded_dm && this.state.expanded_dm.true_id === dm.true_id && 
+                  <Grid item xs={12}>
+                    <StringBox 
+                      name="Details"
+                      value={this.state.expanded_dm.details}
+                      onBlur={(changed: string) => {
+                        const obj = this.state.obj;
+                        const dm = this.state.expanded_dm;
+                        if (dm) {
+                          dm.details = changed;
+                        }
+                        this.setState({ obj });
+                      }}
+                    />
+                  </Grid>
+                }
+              </Grid>
+            );
           })}
         </Grid>
       );
@@ -798,8 +1178,55 @@ class CreatureEdit extends Component<Props, State> {
           <Grid item xs={10}>
             Damage Resistances
           </Grid>
-          { DAMAGE_TYPES.map((damage_type, key) => {
-            return this.renderDamageType(damage_type, key, 0.5);
+          <Grid item xs={12}>
+            <Fab size="small" color="primary" style={{marginLeft: "8px"}}
+              onClick={ () => {
+                const obj = this.state.obj;
+                const dm = new DamageMultiplier();
+                dm.multiplier = 0.5;
+                obj.damage_multipliers.push(dm);
+                this.setState({ obj });
+              }}>
+              <Add/>
+            </Fab>
+          </Grid>
+          { this.state.obj.damage_multipliers.filter(o => o.multiplier === 0.5).map((dm, key) => {
+            return (
+              <Grid item xs={12} key={key} container spacing={1} direction="row">
+                <Grid item xs={2}>
+                  <ToggleButtonBox 
+                    name="Expand"
+                    value={ this.state.expanded_dm === null ? false : this.state.expanded_dm.true_id === dm.true_id }
+                    onToggle={() => {
+                      const expanded_dm = this.state.expanded_dm && this.state.expanded_dm.true_id === dm.true_id ? null : dm;
+                      this.setState({ expanded_dm });
+                    }}
+                  />
+                </Grid>
+                <Grid item xs={10}>
+                  { dm.toString() }
+                </Grid>
+                { this.state.expanded_dm && this.state.expanded_dm.true_id === dm.true_id && DAMAGE_TYPES.map((damage_type, key) => {
+                  return this.renderDamageType(damage_type, key, 2);
+                })}
+                { this.state.expanded_dm && this.state.expanded_dm.true_id === dm.true_id && 
+                  <Grid item xs={12}>
+                    <StringBox 
+                      name="Details"
+                      value={this.state.expanded_dm.details}
+                      onBlur={(changed: string) => {
+                        const obj = this.state.obj;
+                        const dm = this.state.expanded_dm;
+                        if (dm) {
+                          dm.details = changed;
+                        }
+                        this.setState({ obj });
+                      }}
+                    />
+                  </Grid>
+                }
+              </Grid>
+            );
           })}
         </Grid>
       );
@@ -815,8 +1242,55 @@ class CreatureEdit extends Component<Props, State> {
           <Grid item xs={10}>
             Damage Vulnerabilities
           </Grid>
-          { DAMAGE_TYPES.map((damage_type, key) => {
-            return this.renderDamageType(damage_type, key, 2);
+          <Grid item xs={12}>
+            <Fab size="small" color="primary" style={{marginLeft: "8px"}}
+              onClick={ () => {
+                const obj = this.state.obj;
+                const dm = new DamageMultiplier();
+                dm.multiplier = 2;
+                obj.damage_multipliers.push(dm);
+                this.setState({ obj });
+              }}>
+              <Add/>
+            </Fab>
+          </Grid>
+          { this.state.obj.damage_multipliers.filter(o => o.multiplier === 2).map((dm, key) => {
+            return (
+              <Grid item xs={12} key={key} container spacing={1} direction="row">
+                <Grid item xs={2}>
+                  <ToggleButtonBox 
+                    name="Expand"
+                    value={ this.state.expanded_dm === null ? false : this.state.expanded_dm.true_id === dm.true_id }
+                    onToggle={() => {
+                      const expanded_dm = this.state.expanded_dm && this.state.expanded_dm.true_id === dm.true_id ? null : dm;
+                      this.setState({ expanded_dm });
+                    }}
+                  />
+                </Grid>
+                <Grid item xs={10}>
+                  { dm.toString() }
+                </Grid>
+                { this.state.expanded_dm && this.state.expanded_dm.true_id === dm.true_id && DAMAGE_TYPES.map((damage_type, key) => {
+                  return this.renderDamageType(damage_type, key, 2);
+                })}
+                { this.state.expanded_dm && this.state.expanded_dm.true_id === dm.true_id && 
+                  <Grid item xs={12}>
+                    <StringBox 
+                      name="Details"
+                      value={this.state.expanded_dm.details}
+                      onBlur={(changed: string) => {
+                        const obj = this.state.obj;
+                        const dm = this.state.expanded_dm;
+                        if (dm) {
+                          dm.details = changed;
+                        }
+                        this.setState({ obj });
+                      }}
+                    />
+                  </Grid>
+                }
+              </Grid>
+            );
           })}
         </Grid>
       );
@@ -1208,16 +1682,15 @@ class CreatureEdit extends Component<Props, State> {
   renderTool(tool: Tool, key: number) {
     return (
       <Grid item xs={4} key={key} container spacing={0} direction="row">
-        <StringBox
+        <ToggleButtonBox
           name={ tool.name }
-          value={ this.state.obj.tool_proficiencies[tool.name] ? `${this.state.obj.tool_proficiencies[tool.name]}` : "" }
-          type="number"
-          onBlur={(value: string) => {
+          value={ this.state.obj.tool_proficiencies[tool.name] !== undefined }
+          onToggle={() => {
             const obj = this.state.obj;
-            if (value === "") {
+            if (this.state.obj.tool_proficiencies[tool.name]) {
               delete obj.tool_proficiencies[tool.name];
             } else {
-              obj.tool_proficiencies[tool.name] = +value;
+              obj.tool_proficiencies[tool.name] = 1;
             }
             this.setState({ obj });
           }}
@@ -1247,26 +1720,29 @@ class CreatureEdit extends Component<Props, State> {
   }
   
   renderDamageType(damage_type: string, key: number, multiplier: number) {
-    return (
-      <Grid item xs={4} key={key} container spacing={0} direction="row">
-        <ToggleButtonBox
-          name={ damage_type }
-          value={ this.state.obj.damage_multipliers.filter(o => o.multiplier === multiplier && o.damage_types.includes(damage_type)).length > 0 }
-          onToggle={() => {
-            const obj = this.state.obj;
-            if (obj.damage_multipliers.filter(o => o.multiplier === multiplier && o.damage_types.includes(damage_type)).length > 0) {
-              obj.damage_multipliers = obj.damage_multipliers.filter(o => o.multiplier !== multiplier || !o.damage_types.includes(damage_type));
-            } else {
-              const damage_multiplier = new DamageMultiplier();
-              damage_multiplier.multiplier = multiplier;
-              damage_multiplier.damage_types.push(damage_type);
-              obj.damage_multipliers.push(damage_multiplier);
-            }
-            this.setState({ obj });
-          }}
-        />
-      </Grid>
-    );
+    if (this.state.expanded_dm) {
+      return (
+        <Grid item xs={4} key={key} container spacing={0} direction="row">
+          <ToggleButtonBox
+            name={ damage_type }
+            value={ this.state.expanded_dm.damage_types.includes(damage_type) }
+            onToggle={() => {
+              const obj = this.state.obj;
+              const dm = this.state.expanded_dm;
+              if (dm) {
+                if (dm.damage_types.includes(damage_type)) {
+                  dm.damage_types = dm.damage_types.filter(o => o !== damage_type);
+                } else {
+                  dm.damage_types.push(damage_type);
+                }
+                this.setState({ obj });
+              }
+            }}
+          />
+        </Grid>
+      );
+    }
+    return null;
   }
 }
 

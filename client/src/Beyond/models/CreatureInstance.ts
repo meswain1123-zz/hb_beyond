@@ -26,7 +26,8 @@ export class CreatureInstance {
   xp: number;
   creature_type: string; // Beast, Dragon, Humanoid, etc.
   subtype: string; // Drow, Bronze, etc.
-  hit_dice: HitDice;
+  hit_dice: HitDice[];
+  hit_dice_bonus: number;
   current_hit_points: number;
   max_hit_points: number;
   override_max_hit_points: number;
@@ -100,7 +101,18 @@ export class CreatureInstance {
         this.special_abilities.push(new CharacterFeature(o));
       });
     }
-    this.hit_dice = obj ? new HitDice(obj.hit_dice) : new HitDice();
+    this.hit_dice = []; 
+    if (obj && obj.hit_dice) {
+      if (obj.hit_dice.length) {
+        obj.hit_dice.forEach((hd: any) => {
+          this.hit_dice.push(new HitDice(hd));
+        });
+      } else {
+        this.hit_dice.push(new HitDice(obj.hit_dice));
+      }
+    }
+    //  ? new HitDice(obj.hit_dice) : new HitDice();
+    this.hit_dice_bonus = obj && obj.hit_dice_bonus ? obj.hit_dice_bonus : 0;
     this.current_hit_points = obj ? obj.current_hit_points : 0;
     this.max_hit_points = obj ? obj.max_hit_points : 0;
     this.override_max_hit_points = obj && obj.override_max_hit_points ? obj.override_max_hit_points : -1;
@@ -174,6 +186,10 @@ export class CreatureInstance {
     for (let i = 0; i < this.special_abilities.length; i++) {
       special_abilities.push(this.special_abilities[i].toDBObj(true));
     }
+    const hit_dice: any[] = [];
+    for (let i = 0; i < this.hit_dice.length; i++) {
+      hit_dice.push(this.hit_dice[i].toDBObj());
+    }
     return {
       true_id: this.true_id,
       instance_type: this.instance_type,
@@ -184,7 +200,8 @@ export class CreatureInstance {
       image_url: this.image_url,
       current_ability_scores: this.current_ability_scores.toDBObj(),
       ability_scores: this.ability_scores.toDBObj(),
-      hit_dice: this.hit_dice.toDBObj(),
+      hit_dice,
+      hit_dice_bonus: this.hit_dice_bonus,
       actions,
       legendary_actions,
       special_abilities,
@@ -213,7 +230,18 @@ export class CreatureInstance {
   }
 
   get hit_dice_string(): string {
-    let response = `${this.hit_dice.count}d${this.hit_dice.size}`;
+    let response = "";
+    this.hit_dice.forEach(hd => {
+      if (response.length > 0) {
+        response += ", ";
+      }
+      response += `${hd.count}d${hd.size}`;
+    });
+    if (this.hit_dice_bonus < 0) {
+      response += ` ${this.hit_dice_bonus}`;
+    } else if (this.hit_dice_bonus > 0) {
+      response += ` + ${this.hit_dice_bonus}`;
+    }
     return response;
   }
 
@@ -391,7 +419,8 @@ export class CreatureInstance {
     this.ability_scores = new AbilityScores(copyMe.ability_scores);
     this.image_url = copyMe.image_url;
     this.subtype = copyMe.subtype;
-    this.hit_dice = new HitDice(copyMe.hit_dice);
+    this.hit_dice = [...copyMe.hit_dice];
+    this.hit_dice_bonus = copyMe.hit_dice_bonus;
     this.challenge_rating = copyMe.challenge_rating;
     this.current_hit_points = copyMe.current_hit_points;
     this.max_hit_points = copyMe.max_hit_points;
@@ -458,7 +487,8 @@ export class CreatureInstance {
     this.ability_scores = new AbilityScores(copyMe.ability_scores);
     this.image_url = copyMe.image_url;
     this.subtype = copyMe.subtype;
-    this.hit_dice = new HitDice(copyMe.hit_dice);
+    this.hit_dice = [...copyMe.hit_dice];
+    this.hit_dice_bonus = copyMe.hit_dice_bonus;
     this.challenge_rating = copyMe.challenge_rating;
     this.current_hit_points = copyMe.max_hit_points;
     this.max_hit_points = copyMe.max_hit_points;
@@ -528,9 +558,11 @@ export class CreatureInstance {
     this.ability_scores = new AbilityScores(copyMe.ability_scores);
     this.image_url = copyMe.image_url;
     this.subtype = copyMe.subtype;
-    this.hit_dice = new HitDice();
-    this.hit_dice.size = copyMe.hit_dice_size.value(char, class_id, base_slot_level, slot_level);
-    this.hit_dice.count = copyMe.hit_dice_count.value(char, class_id, base_slot_level, slot_level);
+    this.hit_dice = [];
+    const hd = new HitDice();
+    hd.size = copyMe.hit_dice_size.value(char, class_id, base_slot_level, slot_level);
+    hd.count = copyMe.hit_dice_count.value(char, class_id, base_slot_level, slot_level);
+    this.hit_dice.push(hd);
     this.challenge_rating = copyMe.challenge_rating.value(char, class_id, base_slot_level, slot_level);
     this.current_hit_points = copyMe.max_hit_points.value(char, class_id, base_slot_level, slot_level);
     this.max_hit_points = copyMe.max_hit_points.value(char, class_id, base_slot_level, slot_level);

@@ -8,6 +8,8 @@ import {
 } from "../../models";
 
 import StringBox from "../input/StringBox";
+import SelectStringBox from "../input/SelectStringBox";
+import SelectObjectBox from "../input/SelectObjectBox";
 
 interface AppState {
 }
@@ -46,33 +48,79 @@ class ModelBaseInput extends Component<Props, State> {
   render() {
     if (this.props.no_grid) {
       return [
-        <StringBox key="description"
-          value={this.props.obj.description} 
-          name="Description"
-          multiline
-          onBlur={(value: string) => {
-            const obj = this.props.obj;
-            obj.description = value;
-            this.props.onChange();
-          }}
-        />
+        this.render_description(),
+        this.render_source()
       ]; 
     } else {
       return [
         <Grid item key="description">
-          <StringBox 
-            value={this.props.obj.description} 
-            name="Description"
-            multiline
-            onBlur={(value: string) => {
+          { this.render_description() }
+        </Grid>,
+        <Grid item key="source">
+          { this.render_source() }
+        </Grid>
+      ]; 
+    }
+  }
+
+  render_description() {
+    return (
+      <StringBox key="description"
+        value={this.props.obj.description} 
+        name="Description"
+        multiline
+        onBlur={(value: string) => {
+          const obj = this.props.obj;
+          obj.description = value;
+          this.props.onChange();
+        }}
+      />
+    );
+  }
+
+  render_source() {
+    return (
+      <Grid key="source" container spacing={1} direction="row">
+        <Grid item xs={6}>
+          <SelectStringBox
+            name="Source Type"
+            value={this.props.obj.source_type} 
+            options={["Source Book","Homebrew"]} // Really I'll probably just automate this for when it's homebrew.  In fact I might put homebrews in different collections.
+            onChange={(value: string) => {
               const obj = this.props.obj;
-              obj.description = value;
+              obj.source_type = value;
               this.props.onChange();
             }}
           />
         </Grid>
-      ]; 
-    }
+        <Grid item xs={6}>
+          { this.props.obj.source_type === "Source Book" ?
+            <SelectObjectBox
+              name="Source Book"
+              value={this.props.obj.source_id} 
+              type="source_book"
+              extra_options={["Basic Rules"]}
+              onChange={(value: string) => {
+                const obj = this.props.obj;
+                obj.source_id = value;
+                this.props.onChange();
+              }}
+            />
+          : this.props.obj.source_type === "Homebrew" &&
+            <SelectObjectBox
+              name="Owner"
+              value={this.props.obj.source_id} 
+              type="user"
+              onChange={(value: string) => {
+                const obj = this.props.obj;
+                obj.source_id = value;
+                this.props.onChange();
+              }}
+            />
+          }
+        </Grid>
+      </Grid>
+    );
   }
 }
 

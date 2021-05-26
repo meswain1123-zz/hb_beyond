@@ -6,8 +6,8 @@ import { Spell } from "./Spell";
 
 export class SpellTemplate extends TemplateBase {
   saving_throw_ability_score: string | null; // Ability Score saving throw the target(s) have to make
-  effect: AbilityEffect; // Formula for how much damage/healing to do
-  effect_2: AbilityEffect; // Some abilities have a second (like Ice Knife or Booming Blade or things that do different types of damage)
+  effects: AbilityEffect[]; // Formula for how much damage/healing to do
+  // effect_2: AbilityEffect; // Some abilities have a second (like Ice Knife or Booming Blade or things that do different types of damage)
   range: string | null; // Self, Touch, or a number
   range_2: string | null; // For some there are multiple ranges.  It can be an AoE size, or sometimes something else.
   concentration: boolean;
@@ -24,8 +24,16 @@ export class SpellTemplate extends TemplateBase {
     super(obj);
     this.type = "Spell";
     this.saving_throw_ability_score = obj ? obj.saving_throw_ability_score : "";
-    this.effect = obj ? new AbilityEffect(obj.effect) : new AbilityEffect();
-    this.effect_2 = obj ? new AbilityEffect(obj.effect_2) : new AbilityEffect();
+    this.effects = []; 
+    if (obj && obj.effects && obj.effects.length) {
+      obj.effects.forEach((effect: any) => {
+        this.effects.push(new AbilityEffect(effect));
+      });
+    } else if (obj && obj.effect) {
+      this.effects.push(new AbilityEffect(obj.effect));
+    }
+    // this.effect = obj ? new AbilityEffect(obj.effect) : new AbilityEffect();
+    // this.effect_2 = obj ? new AbilityEffect(obj.effect_2) : new AbilityEffect();
     this.range = obj ? obj.range : "";
     this.range_2 = obj ? obj.range_2 : "";
     this.concentration = obj ? obj.concentration : false;
@@ -40,6 +48,10 @@ export class SpellTemplate extends TemplateBase {
   }
 
   toDBObj = () => {
+    const effects: any[] = [];
+    for (let i = 0; i < this.effects.length; i++) {
+      effects.push(this.effects[i].toDBObj());
+    }
     return {
       _id: this._id,
       name: this.name,
@@ -49,8 +61,7 @@ export class SpellTemplate extends TemplateBase {
       type: "Spell",
       category: this.category,
       saving_throw_ability_score: this.saving_throw_ability_score,
-      effect: this.effect ? this.effect.toDBObj() : null,
-      effect_2: this.effect_2 ? this.effect_2.toDBObj() : null,
+      effects,
       range: this.range,
       range_2: this.range_2,
       concentration: this.concentration,
@@ -78,8 +89,7 @@ export class SpellTemplate extends TemplateBase {
     this.type = "Spell";
     this.category = copyMe.category;
     this.saving_throw_ability_score = copyMe.saving_throw_ability_score;
-    this.effect = copyMe.effect;
-    this.effect_2 = copyMe.effect_2;
+    this.effects = [...copyMe.effects];
     this.range = copyMe.range;
     this.range_2 = copyMe.range_2;
     this.concentration = copyMe.concentration;
@@ -100,8 +110,7 @@ export class SpellTemplate extends TemplateBase {
     this.source_id = copyMe.source_id;
     this.type = "Spell";
     this.saving_throw_ability_score = copyMe.saving_throw_ability_score;
-    this.effect = copyMe.effect;
-    this.effect_2 = copyMe.effect_2;
+    this.effects = [...copyMe.effects];
     this.range = copyMe.range;
     this.range_2 = copyMe.range_2;
     this.concentration = copyMe.concentration;

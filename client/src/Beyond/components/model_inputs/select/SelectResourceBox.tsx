@@ -62,6 +62,7 @@ class SelectResourceBox extends Component<Props, State> {
   api: APIClass;
 
   componentDidMount() {
+    this.load();
   }
 
   load() {

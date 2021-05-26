@@ -12,9 +12,10 @@ import {
 } from "@material-ui/core";
 
 import { 
-  SpellList, 
+  SourceBook, 
 } from "../../models";
 
+import StringBox from "../../components/input/StringBox";
 import ModelBaseInput from "../../components/model_inputs/ModelBaseInput";
 
 import API from "../../utilities/smart_api";
@@ -50,20 +51,20 @@ type Props = PropsFromRedux & RouteComponentProps<MatchParams> & { }
 
 export interface State { 
   redirectTo: string | null;
-  obj: SpellList;
+  obj: SourceBook;
   processing: boolean;
-  spell_lists: SpellList[] | null;
+  source_books: SourceBook[] | null;
   loading: boolean;
 }
 
-class SpellListEdit extends Component<Props, State> {
+class SourceBookEdit extends Component<Props, State> {
   constructor(props: Props) {
     super(props);
     this.state = {
       redirectTo: null,
-      obj: new SpellList(),
+      obj: new SourceBook(),
       processing: false,
-      spell_lists: null,
+      source_books: null,
       loading: false
     };
     this.api = API.getInstance();
@@ -77,15 +78,15 @@ class SpellListEdit extends Component<Props, State> {
 
   submit() {
     this.setState({ processing: true }, () => {
-      this.api.upsertObject("spell_list", this.state.obj).then((res: any) => {
-        this.setState({ processing: false, redirectTo: "/beyond/spell_list" });
+      this.api.upsertObject("source_book", this.state.obj).then((res: any) => {
+        this.setState({ processing: false, redirectTo: "/beyond/source_book" });
       });
     });
   }
 
   // Loads the editing obj into state
   load_object(id: string) {
-    const objFinder = this.state.spell_lists ? this.state.spell_lists.filter(a => a._id === id) : [];
+    const objFinder = this.state.source_books ? this.state.source_books.filter(a => a._id === id) : [];
     if (objFinder.length === 1) {
       this.setState({ obj: objFinder[0].clone(), loading: false });
     }
@@ -93,15 +94,15 @@ class SpellListEdit extends Component<Props, State> {
 
   load() {
     this.setState({ loading: true }, () => {
-      this.api.getObjects("spell_list").then((res: any) => {
+      this.api.getObjects("source_book").then((res: any) => {
         if (res && !res.error) {
           let { id } = this.props.match.params;
           if (id !== undefined && this.state.obj._id !== id) {
-            this.setState({ spell_lists: res }, () => {
+            this.setState({ source_books: res }, () => {
               this.load_object(id);
             });
           } else {
-            this.setState({ spell_lists: res, loading: false });
+            this.setState({ source_books: res, loading: false });
           }
         }
       });
@@ -109,7 +110,7 @@ class SpellListEdit extends Component<Props, State> {
   }
 
   render() {
-    if (this.state.loading || this.state.spell_lists === null) {
+    if (this.state.loading || this.state.source_books === null) {
       return <span>Loading</span>;
     } else if (this.state.redirectTo !== null) {
       return <Redirect to={this.state.redirectTo} />;
@@ -118,10 +119,10 @@ class SpellListEdit extends Component<Props, State> {
       return (
         <Grid container spacing={1} direction="column">
           <Grid item>
-            <Tooltip title={`Back to Spell Lists`}>
+            <Tooltip title={`Back to Source Books`}>
               <Fab size="small" color="primary" style={{marginLeft: "8px"}}
                 onClick={ () => {
-                  this.setState({ redirectTo:`/beyond/spell_list` });
+                  this.setState({ redirectTo:`/beyond/source_book` });
                 }}>
                 <ArrowBack/>
               </Fab>
@@ -129,7 +130,7 @@ class SpellListEdit extends Component<Props, State> {
           </Grid>
           <Grid item>
             <span className={"MuiTypography-root MuiListItemText-primary header"}>
-              { this.state.obj._id === "" ? "Create Spell List" : `Edit ${this.state.obj.name}` }
+              { this.state.obj._id === "" ? "Create Source Book" : `Edit ${this.state.obj.name}` }
             </span>
           </Grid>
           <Grid item 
@@ -146,6 +147,17 @@ class SpellListEdit extends Component<Props, State> {
                   this.setState({ obj });
                 }}
               />
+              <Grid item>
+                <StringBox 
+                  name="Abbreviation"
+                  value={this.state.obj.abbreviation}
+                  onBlur={(changed: string) => {
+                    const obj = this.state.obj;
+                    obj.abbreviation = changed;
+                    this.setState({ obj });
+                  }}
+                />
+              </Grid>
             </Grid>
           </Grid>
           <Grid item>
@@ -163,7 +175,7 @@ class SpellListEdit extends Component<Props, State> {
               disabled={this.state.processing}
               style={{ marginLeft: "4px" }}
               onClick={ () => { 
-                this.setState({ redirectTo:`/beyond/spell_list` });
+                this.setState({ redirectTo:`/beyond/source_book` });
               }}>
               Cancel
             </Button>
@@ -174,4 +186,4 @@ class SpellListEdit extends Component<Props, State> {
   }
 }
 
-export default connector(SpellListEdit);
+export default connector(SourceBookEdit);

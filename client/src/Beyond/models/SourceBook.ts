@@ -4,10 +4,12 @@ import { ModelBase } from "./ModelBase";
 export class SourceBook extends ModelBase {
   static data_type: string = "source_book";
   owner_id: string;
+  abbreviation: string;
 
   constructor(obj?: any) {
     super(obj);
     this.owner_id = obj ? obj.owner_id : "";
+    this.abbreviation = obj ? obj.abbreviation : "";
   }
 
   toDBObj = () => {
@@ -18,6 +20,7 @@ export class SourceBook extends ModelBase {
       source_type: this.source_type,
       source_id: this.source_id,
       owner_id: this.owner_id,
+      abbreviation: this.abbreviation
     };
   }
 
@@ -30,5 +33,6 @@ export class SourceBook extends ModelBase {
     this.name = copyMe.name;
     this.description = copyMe.description;
     this.owner_id = copyMe.owner_id;
+    this.abbreviation = copyMe.abbreviation;
   }
 }

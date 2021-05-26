@@ -48,8 +48,8 @@ export class MinionAbility {
   name: string;
   description: string;
   saving_throw_ability_score: string | null; // Ability Score saving throw the target(s) have to make
-  effect: AbilityEffectUpgradable; // Formula for how much damage/healing to do
-  effect_2: AbilityEffectUpgradable; // Some abilities have a second (like Ice Knife or Booming Blade or things that do different types of damage)
+  effects: AbilityEffectUpgradable[]; // Formula for how much damage/healing to do
+  // effect_2: AbilityEffectUpgradable; // Some abilities have a second (like Ice Knife or Booming Blade or things that do different types of damage)
   range: string | null; // Self, Touch, or a number
   range_2: string | null; // For some there are multiple ranges.  It can be an AoE size, or sometimes something else.
   concentration: boolean;
@@ -76,8 +76,16 @@ export class MinionAbility {
     this.name = obj ? obj.name : "";
     this.description = obj ? obj.description : "";
     this.saving_throw_ability_score = obj ? obj.saving_throw_ability_score : "";
-    this.effect = obj ? new AbilityEffectUpgradable(obj.effect) : new AbilityEffectUpgradable();
-    this.effect_2 = obj ? new AbilityEffectUpgradable(obj.effect_2) : new AbilityEffectUpgradable();
+    this.effects = []; 
+    if (obj && obj.effects && obj.effects.length) {
+      obj.effects.forEach((effect: any) => {
+        this.effects.push(new AbilityEffectUpgradable(effect));
+      });
+    } else if (obj && obj.effect) {
+      this.effects.push(new AbilityEffectUpgradable(obj.effect));
+    }
+    // this.effect = obj ? new AbilityEffectUpgradable(obj.effect) : new AbilityEffectUpgradable();
+    // this.effect_2 = obj ? new AbilityEffectUpgradable(obj.effect_2) : new AbilityEffectUpgradable();
     this.range = obj ? obj.range : null;
     this.range_2 = obj ? obj.range_2 : null;
     this.concentration = obj ? obj.concentration : false;
@@ -95,13 +103,16 @@ export class MinionAbility {
   }
 
   toDBObj = () => {
+    const effects: any[] = [];
+    for (let i = 0; i < this.effects.length; i++) {
+      effects.push(this.effects[i].toDBObj());
+    }
     return {
       true_id: this.true_id,
       name: this.name,
       description: this.description,
       saving_throw_ability_score: this.saving_throw_ability_score,
-      effect: this.effect.toDBObj(),
-      effect_2: this.effect_2.toDBObj(),
+      effects,
       range: this.range,
       range_2: this.range_2,
       concentration: this.concentration,
@@ -119,6 +130,14 @@ export class MinionAbility {
     };
   }
 
+  get effect(): AbilityEffectUpgradable {
+    if (this.effects.length > 0) {
+      return this.effects[0];
+    } else {
+      return new AbilityEffectUpgradable();
+    }
+  }
+
   clone(): MinionAbility {
     return new MinionAbility(this);
   }
@@ -129,8 +148,7 @@ export class MinionAbility {
     this.name = copyMe.name;
     this.description = copyMe.description;
     this.saving_throw_ability_score = copyMe.saving_throw_ability_score;
-    this.effect = copyMe.effect;
-    this.effect_2 = copyMe.effect_2;
+    this.effects = [...copyMe.effects];
     this.range = copyMe.range;
     this.range_2 = copyMe.range_2;
     this.concentration = copyMe.concentration;
@@ -158,8 +176,11 @@ export class MinionAbility {
     creature_ability.dc = this.dc.value(char, class_id, base_slot_level, slot_level);
     creature_ability.description = this.description;
     creature_ability.duration = this.duration;
-    creature_ability.effect = this.effect.convert_to_ability_effect(char, class_id, base_slot_level, slot_level);
-    creature_ability.effect_2 = this.effect_2.convert_to_ability_effect(char, class_id, base_slot_level, slot_level);
+    creature_ability.effects = [];
+    this.effects.forEach(effect => {
+      creature_ability.effects.push(effect.convert_to_ability_effect(char, class_id, base_slot_level, slot_level));
+    });
+    // creature_ability.effect_2 = this.effect_2.convert_to_ability_effect(char, class_id, base_slot_level, slot_level);
     creature_ability.feature_id = this.feature_id;
     creature_ability.material_component = this.material_component;
     creature_ability.name = this.name;

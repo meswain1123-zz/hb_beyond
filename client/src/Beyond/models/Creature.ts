@@ -29,7 +29,8 @@ export class Creature extends ModelBase {
   xp: number;
   creature_type: string; // Beast, Dragon, Humanoid, etc.
   subtype: string; // Drow, Bronze, etc.
-  hit_dice: HitDice;
+  hit_dice: HitDice[];
+  hit_dice_bonus: number;
   max_hit_points: number;
   initiative_modifier: number;
   armor_class: number;
@@ -93,7 +94,18 @@ export class Creature extends ModelBase {
         this.special_abilities.push(new Feature(o));
       });
     }
-    this.hit_dice = obj ? new HitDice(obj.hit_dice) : new HitDice();
+    this.hit_dice = []; 
+    if (obj && obj.hit_dice) {
+      if (obj.hit_dice.length) {
+        obj.hit_dice.forEach((hd: any) => {
+          this.hit_dice.push(new HitDice(hd));
+        });
+      } else {
+        this.hit_dice.push(new HitDice(obj.hit_dice));
+      }
+    }
+    //  ? new HitDice(obj.hit_dice) : new HitDice();
+    this.hit_dice_bonus = obj && obj.hit_dice_bonus ? obj.hit_dice_bonus : 0;
     this.max_hit_points = obj ? obj.max_hit_points : 0;
     this.speed = obj ? obj.speed : {
       walk: 0,
@@ -149,6 +161,10 @@ export class Creature extends ModelBase {
     for (let i = 0; i < this.special_abilities.length; i++) {
       special_abilities.push(this.special_abilities[i].toDBObj());
     }
+    const hit_dice: any[] = [];
+    for (let i = 0; i < this.hit_dice.length; i++) {
+      hit_dice.push(this.hit_dice[i].toDBObj());
+    }
     return {
       _id: this._id,
       imported_object: this.imported_object,
@@ -160,7 +176,8 @@ export class Creature extends ModelBase {
       subtype: this.subtype,
       image_url: this.image_url,
       ability_scores: this.ability_scores.toDBObj(),
-      hit_dice: this.hit_dice.toDBObj(),
+      hit_dice,
+      hit_dice_bonus: this.hit_dice_bonus,
       actions,
       legendary_actions,
       special_abilities,
@@ -183,7 +200,18 @@ export class Creature extends ModelBase {
   }
 
   get hit_dice_string(): string {
-    let response = `${this.hit_dice.count}d${this.hit_dice.size}`;
+    let response = "";
+    this.hit_dice.forEach(hd => {
+      if (response.length > 0) {
+        response += ", ";
+      }
+      response += `${hd.count}d${hd.size}`;
+    });
+    if (this.hit_dice_bonus < 0) {
+      response += ` ${this.hit_dice_bonus}`;
+    } else if (this.hit_dice_bonus > 0) {
+      response += ` + ${this.hit_dice_bonus}`;
+    }
     return response;
   }
 
@@ -204,7 +232,7 @@ export class Creature extends ModelBase {
       if (response.length > 0) {
         response += ", ";
       }
-      response += `${key}: ${this.tool_proficiencies[key]}`;
+      response += `${key}`;
     });
     return response;
   }
@@ -277,12 +305,10 @@ export class Creature extends ModelBase {
   get immunities_string(): string {
     let return_me = "";
     this.damage_multipliers.filter(o => o.multiplier === 0).forEach(dm => {
-      dm.damage_types.forEach(dt => {
-        if (return_me.length > 0) {
-          return_me += ", ";
-        }
-        return_me += dt;
-      });
+      if (return_me.length > 0) {
+        return_me += "; ";
+      }
+      return_me += dm.toString();
     });
     return return_me;
   }
@@ -290,12 +316,10 @@ export class Creature extends ModelBase {
   get resistances_string(): string {
     let return_me = "";
     this.damage_multipliers.filter(o => o.multiplier === 0.5).forEach(dm => {
-      dm.damage_types.forEach(dt => {
-        if (return_me.length > 0) {
-          return_me += ", ";
-        }
-        return_me += dt;
-      });
+      if (return_me.length > 0) {
+        return_me += "; ";
+      }
+      return_me += dm.toString();
     });
     return return_me;
   }
@@ -303,12 +327,10 @@ export class Creature extends ModelBase {
   get vulnerabilities_string(): string {
     let return_me = "";
     this.damage_multipliers.filter(o => o.multiplier === 2).forEach(dm => {
-      dm.damage_types.forEach(dt => {
-        if (return_me.length > 0) {
-          return_me += ", ";
-        }
-        return_me += dt;
-      });
+      if (return_me.length > 0) {
+        return_me += "; ";
+      }
+      return_me += dm.toString();
     });
     return return_me;
   }
@@ -339,7 +361,8 @@ export class Creature extends ModelBase {
     this.ability_scores = new AbilityScores(copyMe.ability_scores);
     this.image_url = copyMe.image_url;
     this.subtype = copyMe.subtype;
-    this.hit_dice = new HitDice(copyMe.hit_dice);
+    this.hit_dice = [...copyMe.hit_dice];
+    this.hit_dice_bonus = copyMe.hit_dice_bonus;
     this.challenge_rating = copyMe.challenge_rating;
     this.max_hit_points = copyMe.max_hit_points;
     this.speed = {...copyMe.speed};
@@ -390,7 +413,8 @@ export class Creature extends ModelBase {
     this.ability_scores = new AbilityScores(copyMe.ability_scores);
     this.image_url = copyMe.image_url;
     this.subtype = copyMe.subtype;
-    this.hit_dice = new HitDice(copyMe.hit_dice);
+    this.hit_dice = [...copyMe.hit_dice];
+    this.hit_dice_bonus = copyMe.hit_dice_bonus;
     this.challenge_rating = copyMe.challenge_rating;
     this.max_hit_points = copyMe.max_hit_points;
     this.speed = {...copyMe.speed};
@@ -447,11 +471,11 @@ export class Creature extends ModelBase {
     if (copyMe.subtype) {
       this.subtype = data_util.capitalize_firsts(copyMe.subtype);
     }
-    const hd_pieces = copyMe.hit_dice.split("d");
-    const hit_dice = new HitDice();
-    hit_dice.size = hd_pieces[1];
-    hit_dice.count = hd_pieces[0];
-    this.hit_dice = hit_dice;
+    // const hd_pieces = copyMe.hit_dice.split("d");
+    // const hit_dice = new HitDice();
+    // hit_dice.size = hd_pieces[1];
+    // hit_dice.count = hd_pieces[0];
+    // this.hit_dice = hit_dice;
     Object.keys(copyMe.speed).forEach((key: string) => {
       const speed = copyMe.speed[key];
       if (typeof speed === "string") {
@@ -617,7 +641,7 @@ export class Creature extends ModelBase {
             potence.rolls.size = size;
             potence.rolls.count = count;
             effect.potences.push(potence);
-            ability.effect = effect;
+            ability.effects.push(effect);
           }
           feature.feature_type = "Creature Ability";
           feature.the_feature = ability;
@@ -670,7 +694,7 @@ export class Creature extends ModelBase {
             potence.rolls.size = size;
             potence.rolls.count = count;
             effect.potences.push(potence);
-            ability.effect = effect;
+            ability.effects.push(effect);
           }
           feature.feature_type = "Creature Ability";
           feature.the_feature = ability;
@@ -723,7 +747,7 @@ export class Creature extends ModelBase {
             potence.rolls.size = size;
             potence.rolls.count = count;
             effect.potences.push(potence);
-            ability.effect = effect;
+            ability.effects.push(effect);
           }
           feature.feature_type = "Creature Ability";
           feature.the_feature = ability;
