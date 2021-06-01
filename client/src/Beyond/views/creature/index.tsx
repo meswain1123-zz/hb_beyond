@@ -3,7 +3,6 @@ import { connect, ConnectedProps } from 'react-redux';
 import { Redirect } from "react-router-dom";
 import {
   Add, 
-  Edit,
   GetApp,
   ArrowBack
 } from "@material-ui/icons";
@@ -21,8 +20,13 @@ import StringBox from "../../components/input/StringBox";
 import API from "../../utilities/smart_api";
 import { APIClass } from "../../utilities/smart_api_class";
 
+import ObjectIndex from "../../components/Navigation/ObjectIndex";
+import LetterLinks from "../../components/Navigation/LetterLinks";
+import SelectObjectBox from "../../components/input/SelectObjectBox";
+
 
 interface AppState {
+  source_book: string;
   height: number;
   width: number;
 }
@@ -32,11 +36,13 @@ interface RootState {
 }
 
 const mapState = (state: RootState) => ({
+  source_book: state.app.source_book,
   height: state.app.height,
   width: state.app.width
 })
 
 const mapDispatch = {
+  setSourceBook: (sb: string) => ({ type: 'SET', dataType: 'source_book', payload: sb })
 }
 
 const connector = connect(mapState, mapDispatch)
@@ -141,18 +147,34 @@ class CreatureIndex extends Component<Props, State> {
     });
   }
 
+  get_filter() {
+    const filter: any = {};
+    
+    if (this.state.start_letter !== "") {
+      filter.start_letter = this.state.start_letter;
+    }
+    if (this.state.search_string !== "") {
+      filter.search_string = this.state.search_string;
+    }
+    if (this.props.source_book !== "Any") {
+      filter.source_id = this.props.source_book;
+    }
+
+    return filter;
+  }
+
   render() {
     if (this.state.loading) {
       return <span>Loading</span>;
     } else if (this.state.redirectTo !== null) {
       return <Redirect to={this.state.redirectTo} />;
     } else if (this.state.mode === "index") {
-      const page_size = 7;
-      const filtered: any[] = this.state.creatures ? this.state.creatures.filter(o => 
-        (this.state.start_letter === "" || o.name.toUpperCase().startsWith(this.state.start_letter)) && 
-        (this.state.search_string === "" || o.name.toLowerCase().includes(this.state.search_string.toLowerCase()) || o.description.toLowerCase().includes(this.state.search_string.toLowerCase()))).sort((a,b) => {return a.name.localeCompare(b.name)}) : [];
-      const page_count = Math.ceil(filtered.length / page_size);
-      const filtered_and_paged: any[] = filtered.slice(page_size * this.state.page_num, page_size * (this.state.page_num + 1));
+      // const page_size = 7;
+      // const filtered: any[] = this.state.creatures ? this.state.creatures.filter(o => 
+      //   (this.state.start_letter === "" || o.name.toUpperCase().startsWith(this.state.start_letter)) && 
+      //   (this.state.search_string === "" || o.name.toLowerCase().includes(this.state.search_string.toLowerCase()) || o.description.toLowerCase().includes(this.state.search_string.toLowerCase()))).sort((a,b) => {return a.name.localeCompare(b.name)}) : [];
+      // const page_count = Math.ceil(filtered.length / page_size);
+      // const filtered_and_paged: any[] = filtered.slice(page_size * this.state.page_num, page_size * (this.state.page_num + 1));
       return (
         <Grid container spacing={1} direction="column">
           <Grid item container spacing={1} direction="row">
@@ -186,7 +208,7 @@ class CreatureIndex extends Component<Props, State> {
                 </Fab>
               </Tooltip> }
             </Grid>
-            <Grid item xs={9}>
+            <Grid item xs={6}>
               <StringBox
                 name="Search"
                 value={`${this.state.search_string}`}
@@ -195,9 +217,33 @@ class CreatureIndex extends Component<Props, State> {
                 }}
               />
             </Grid>
+            <Grid item xs={3}>
+              <SelectObjectBox
+                name="Source Book"
+                value={this.props.source_book} 
+                type="source_book"
+                extra_options={["Any","Basic Rules"]}
+                onChange={(value: string) => {
+                  this.props.setSourceBook(value);
+                  this.setState({ });
+                }}
+              />
+            </Grid>
           </Grid>
           <Grid item>
-            <Grid container spacing={1} direction="column">
+            <ObjectIndex 
+              filter={this.get_filter()}
+              data_type="creature"
+            />
+          </Grid>
+          <Grid item>
+            <LetterLinks 
+              onChange={(start_letter: string) => {
+                this.setState({ start_letter });
+              }} 
+            />
+          </Grid>
+            {/* <Grid container spacing={1} direction="column">
               { filtered_and_paged.map((o, key) => {
                 return (
                   <Grid key={key} item container spacing={1} direction="row">
@@ -238,8 +284,8 @@ class CreatureIndex extends Component<Props, State> {
               <Grid item>
                 { this.renderLetterLinks() }
               </Grid>
-            </Grid>
-          </Grid>
+            </Grid> */}
+          {/* </Grid> */}
         </Grid>
       ); 
     } else if (this.state.mode === "import") {

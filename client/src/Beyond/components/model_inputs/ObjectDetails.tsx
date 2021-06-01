@@ -94,7 +94,9 @@ class ObjectDetails extends Component<Props, State> {
             <Tooltip title={`Delete ${this.props.obj.name}`}>
               <Fab size="small" color="primary" style={{marginLeft: "8px"}}
                 onClick={ () => {
-                  this.setState({ redirectTo:`/beyond/${this.props.data_type}` });
+                  this.api.deleteObject(this.props.data_type, this.props.obj).then((res: any) => {
+                    this.setState({ redirectTo:`/beyond/${this.props.data_type}` });
+                  });
                 }}>
                 <DeleteForever/>
               </Fab>

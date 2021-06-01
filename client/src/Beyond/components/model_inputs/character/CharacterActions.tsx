@@ -13,9 +13,9 @@ import {
   INumHash,
 } from "../../../models";
 
-import ToggleButtonBox from "../../input/ToggleButtonBox";
-
 import CharacterAction from "./CharacterAction";
+
+import CenteredMenu from "../../input/CenteredMenu";
 
 import API from "../../../utilities/smart_api";
 import { APIClass } from "../../../utilities/smart_api_class";
@@ -122,87 +122,13 @@ class CharacterActions extends Component<Props, State> {
                 Actions
               </div>
             </div>
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "center"
-              }}>
-              <span>
-                <ToggleButtonBox 
-                  name="ALL"
-                  height={15}
-                  lineHeight={1.5}
-                  border=""
-                  color="gray"
-                  width={30}
-                  bold
-                  value={this.state.view === "ALL"}
-                  onToggle={() => {
-                    this.setState({ view: "ALL" });
-                  }}
-                />
-              </span>
-              <span>
-                <ToggleButtonBox 
-                  name="Action"
-                  height={15}
-                  lineHeight={1.5}
-                  border=""
-                  color="gray"
-                  width={30}
-                  bold
-                  value={this.state.view === "Action"}
-                  onToggle={() => {
-                    this.setState({ view: "Action" });
-                  }}
-                />
-              </span>
-              <span>
-                <ToggleButtonBox 
-                  name="Bonus Action"
-                  height={15}
-                  lineHeight={1.5}
-                  border=""
-                  color="gray"
-                  width={80}
-                  bold
-                  value={this.state.view === "Bonus Action"}
-                  onToggle={() => {
-                    this.setState({ view: "Bonus Action" });
-                  }}
-                />
-              </span>
-              <span>
-                <ToggleButtonBox 
-                  name="Reaction"
-                  height={15}
-                  lineHeight={1.5}
-                  border=""
-                  color="gray"
-                  width={40}
-                  bold
-                  value={this.state.view === "Reaction"}
-                  onToggle={() => {
-                    this.setState({ view: "Reaction" });
-                  }}
-                />
-              </span>
-              <span>
-                <ToggleButtonBox 
-                  name="Other"
-                  height={15}
-                  lineHeight={1.5}
-                  border=""
-                  color="gray"
-                  width={40}
-                  bold
-                  value={this.state.view === "Other"}
-                  onToggle={() => {
-                    this.setState({ view: "Other" });
-                  }}
-                />
-              </span>
-            </div>
+            <CenteredMenu
+              options={["ALL","Action","Bonus Action","Reaction","Other"]}
+              selected={this.state.view}
+              onSelect={(view: string) => {
+                this.setState({ view });
+              }}
+            />
           </Grid>
           <Grid item xs={3}>
             

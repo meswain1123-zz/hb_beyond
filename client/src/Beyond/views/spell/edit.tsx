@@ -3,7 +3,7 @@ import { connect, ConnectedProps } from 'react-redux';
 import { RouteComponentProps } from 'react-router';
 import { Redirect } from "react-router-dom";
 import {
-  ArrowBack
+  ArrowBack, Add
 } from "@material-ui/icons";
 import {
   Grid, 
@@ -28,6 +28,7 @@ import {
 import StringBox from "../../components/input/StringBox";
 import SelectStringBox from "../../components/input/SelectStringBox";
 import CheckBox from "../../components/input/CheckBox";
+import ToggleButtonBox from "../../components/input/ToggleButtonBox";
 
 import TemplateBox from "../../components/model_inputs/TemplateBox";
 import AbilityEffectInput from "../../components/model_inputs/feature/AbilityEffect";
@@ -70,7 +71,8 @@ export interface State {
   obj: Spell;
   processing: boolean;
   loading: boolean;
-  show_effect: number;
+  show_effect: string;
+  reloading: boolean;
 }
 
 class SpellEdit extends Component<Props, State> {
@@ -81,7 +83,8 @@ class SpellEdit extends Component<Props, State> {
       obj: new Spell(),
       processing: false,
       loading: false,
-      show_effect: 0
+      show_effect: "",
+      reloading: false
     };
     this.api = API.getInstance();
   }
@@ -250,7 +253,7 @@ class SpellEdit extends Component<Props, State> {
                 </Grid>
               </Grid>
               <Grid item container spacing={1} direction="row">
-                <Grid item xs={3} container spacing={1} direction="row">
+                <Grid item xs={4} container spacing={1} direction="row">
                   <Grid item xs={ this.state.obj.duration === "Instantaneous" ? 12 : 9}>
                     <SelectStringBox 
                       name="Duration"
@@ -290,7 +293,7 @@ class SpellEdit extends Component<Props, State> {
                     </Grid>
                   } 
                 </Grid>
-                <Grid item xs={3}>
+                <Grid item xs={4}>
                   <SelectStringBox 
                     options={SCHOOLS}
                     value={this.state.obj.school} 
@@ -302,7 +305,7 @@ class SpellEdit extends Component<Props, State> {
                     }}
                   />
                 </Grid>
-                <Grid item xs={3}>
+                <Grid item xs={4}>
                   <SelectStringBox 
                     name="Saving Throw"
                     options={ABILITY_SCORES}
@@ -313,28 +316,6 @@ class SpellEdit extends Component<Props, State> {
                       this.setState({ obj });
                     }}
                   /> 
-                </Grid>
-                <Grid item xs={3} container spacing={1} direction="row">
-                  <Grid item xs={6}>
-                    <Button
-                      variant="contained"
-                      color={ this.state.show_effect === 1 ? "primary" : "default" }
-                      onClick={ () => { 
-                        this.setState({ show_effect: (this.state.show_effect === 1 ? 0 : 1) });
-                      }}>
-                      { this.state.obj.effect.type } { this.state.obj.effect.attack_type === "None" ? "" : this.state.obj.effect.attack_type }
-                    </Button>
-                  </Grid>
-                  <Grid item xs={6}>
-                    {/* <Button
-                      variant="contained"
-                      color={ this.state.show_effect === 2 ? "primary" : "default" }
-                      onClick={ () => { 
-                        this.setState({ show_effect: (this.state.show_effect === 2 ? 0 : 2) });
-                      }}>
-                      { this.state.obj.effect_2.type } { ["None","Self Condition"].includes(this.state.obj.effect_2.type) || this.state.obj.effect_2.attack_type === "None" ? "" : this.state.obj.effect_2.attack_type }
-                    </Button> */}
-                  </Grid>
                 </Grid>
               </Grid>
               { this.state.obj.components.includes("M") &&
@@ -350,38 +331,60 @@ class SpellEdit extends Component<Props, State> {
                   /> 
                 </Grid>
               }
-              { this.state.show_effect === 1 &&
+              <Grid item container spacing={1} direction="column">
                 <Grid item>
-                  <AbilityEffectInput 
-                    obj={this.state.obj.effect}
-                    name="Effect 1"
-                    slot_level={this.state.obj.level}
-                    onChange={(changed: AbilityEffect) => {
-                      const obj = this.state.obj;
-                      if (obj.effects.length > 0) {
-                        obj.effects[0] = changed;
-                      } else {
-                        obj.effects.push(changed);
+                  <span className={"MuiTypography-root MuiListItemText-primary header"}>
+                    Effects
+                  </span>
+                  <Tooltip title={`Add Effect`}>
+                    <Fab size="small" color="primary" style={{marginLeft: "8px"}}
+                      onClick={ () => {
+                        const obj = this.state.obj;
+                        const effect = new AbilityEffect();
+                        obj.effects.push(effect);
+                        this.setState({ obj, show_effect: effect.true_id });
+                      }}>
+                      <Add/>
+                    </Fab>
+                  </Tooltip>
+                </Grid>
+                { !this.state.reloading && this.state.obj.effects.map((effect, key) => {
+                  let name = effect.type;
+                  if (!["None","Self Condition"].includes(effect.type) && effect.attack_type !== "None") {
+                    name += ` ${effect.attack_type}`
+                  }
+    
+                  return (
+                    <Grid item key={key} container spacing={1} direction="column">
+                      <Grid item>
+                        <ToggleButtonBox
+                          name={ name }
+                          value={ this.state.show_effect === effect.true_id }
+                          onToggle={ () => { 
+                            this.setState({ show_effect: (this.state.show_effect === effect.true_id ? "" : effect.true_id) });
+                          }}
+                        />
+                      </Grid>
+                      { this.state.show_effect === effect.true_id && 
+                        <Grid item>
+                          <AbilityEffectInput 
+                            obj={effect}
+                            onChange={() => {
+                              const obj = this.state.obj;
+                              this.setState({ obj });
+                            }}
+                            onDelete={() => {
+                              const obj = this.state.obj;
+                              obj.effects = obj.effects.filter(o => o.true_id !== effect.true_id);
+                              this.setState({ obj, reloading: true }, () => { this.setState({ reloading: false }); });
+                            }}
+                          />
+                        </Grid>        
                       }
-                      this.setState({ obj });
-                    }}
-                  />
-                </Grid>
-              }
-              {/* { this.state.show_effect === 2 &&
-                <Grid item>
-                  <AbilityEffectInput 
-                    obj={this.state.obj.effect_2}
-                    name="Effect 2"
-                    slot_level={this.state.obj.level}
-                    onChange={(changed: AbilityEffect) => {
-                      const obj = this.state.obj;
-                      obj.effect_2 = changed;
-                      this.setState({ obj });
-                    }}
-                  />
-                </Grid>
-              } */}
+                    </Grid>
+                  );
+                })}
+              </Grid>
               <ModelBaseDetails key="description"
                 obj={this.state.obj}
                 onChange={() => {

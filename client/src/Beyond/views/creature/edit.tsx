@@ -15,6 +15,7 @@ import {
 } from "@material-ui/core";
 import {  
   AbilityScores,
+  AbilityEffect,
   Creature, 
   CreatureTemplate,
   CreatureAbility,
@@ -27,7 +28,8 @@ import {
   Condition,
   Sense,
   IStringHash,
-  HitDice
+  HitDice,
+  Potence
 } from "../../models";
 import {
   DAMAGE_TYPES
@@ -54,6 +56,7 @@ import { DataUtilitiesClass } from "../../utilities/data_utilities_class";
 
 
 interface AppState {
+  source_book: string;
   height: number;
   width: number;
 }
@@ -67,6 +70,7 @@ interface MatchParams {
 }
 
 const mapState = (state: RootState) => ({
+  source_book: state.app.source_book,
   height: state.app.height,
   width: state.app.width
 })
@@ -100,9 +104,13 @@ export interface State {
 class CreatureEdit extends Component<Props, State> {
   constructor(props: Props) {
     super(props);
+    const obj = new Creature();
+    if (this.props.source_book !== "Any") {
+      obj.source_id = this.props.source_book;
+    }
     this.state = {
       redirectTo: null,
-      obj: new Creature(),
+      obj,
       processing: false,
       expanded_feature: null,
       child_names_valid: true,
@@ -573,267 +581,10 @@ class CreatureEdit extends Component<Props, State> {
       return (
         <StringToJSONBox 
           onParse={(pieces: IStringHash[]) => {
-            console.log(pieces); 
-            const obj = this.state.obj;
-            pieces.forEach(piece => {
-              if (piece.type === "Name") {
-                obj.name = this.data_util.capitalize_firsts(piece.str, true);
-              } else if (piece.type === "Description") {
-                obj.description = piece.str;
-              } else if (piece.type === "Type") {
-                obj.creature_type = this.data_util.capitalize_firsts(piece.str);
-              } else if (piece.type === "Subtype") {
-                obj.subtype = this.data_util.capitalize_firsts(piece.str);
-              } else if (piece.type === "Hit Dice") {
-                const bonus_pieces = piece.str.split("+");
-                obj.hit_dice_bonus = 0;
-                bonus_pieces.forEach(bp => {
-                  if (bp.includes("d")) {
-                    const hd_pieces = bp.split("d");
-                    const hd = new HitDice();
-                    hd.count = this.data_util.fix_number_string(hd_pieces[0]);
-                    hd.size = this.data_util.fix_number_string(hd_pieces[1]);
-                    obj.hit_dice.push(hd);
-                  } else {
-                    obj.hit_dice_bonus += this.data_util.fix_number_string(bp);
-                  }
-                });
-              } else if (piece.type === "Max HP") {
-                obj.max_hit_points = this.data_util.fix_number_string(piece.str);
-              } else if (piece.type === "Size") {
-                obj.size = this.data_util.capitalize_firsts(piece.str);
-              } else if (piece.type === "CR") {
-                obj.challenge_rating = this.data_util.fix_number_string(piece.str);
-              } else if (piece.type === "Exp Points") {
-                obj.xp = this.data_util.fix_number_string(piece.str);
-              } else if (piece.type === "Init Mod") {
-                obj.initiative_modifier = this.data_util.fix_number_string(piece.str);
-              } else if (piece.type === "AC") {
-                obj.armor_class = this.data_util.fix_number_string(piece.str);
-              } else if (piece.type === "Alignment") {
-                obj.alignment = this.data_util.capitalize_firsts(piece.str);
-              } else if (piece.type === "Speed") {
-                const speed_pieces = piece.str.split(" ");
-                let speed_type = "";
-                speed_pieces.forEach(sp => {
-                  if (["speed","walk","run"].includes(sp.toLowerCase())) {
-                    speed_type = "walk";
-                  } else if (sp.toLowerCase() === "swim") {
-                    speed_type = "swim";
-                  } else if (sp.toLowerCase() === "climb") {
-                    speed_type = "climb";
-                  } else if (sp.toLowerCase() === "fly") {
-                    speed_type = "fly";
-                  } else if (sp.toLowerCase() === "burrow") {
-                    speed_type = "burrow";
-                  } else if (sp.includes("hover")) {
-                    obj.speed.hover = 1;
-                  } else if (speed_type !== "") {
-                    obj.speed[speed_type] = this.data_util.fix_number_string(sp);
-                    speed_type = "";
-                  }
-                });
-              } else if (piece.type === "Ability Scores") {
-                const as_pieces = piece.str.split(" ");
-                let as_type = "";
-                as_pieces.forEach(asp => {
-                  if (["STR","DEX","CON","INT","WIS","CHA"].includes(asp.toUpperCase())) {
-                    as_type = asp.toUpperCase();
-                  } else if (as_type !== "") {
-                    obj.ability_scores.setAbilityScore(as_type, this.data_util.fix_number_string(asp));
-                    as_type = "";
-                  }
-                });
-              } else if (piece.type === "Saving Throws") {
-                const st_pieces = piece.str.split(" ");
-                let st_type = "";
-                st_pieces.forEach(stp => {
-                  if (["STR","DEX","CON","INT","WIS","CHA"].includes(stp.toUpperCase())) {
-                    st_type = stp.toUpperCase();
-                  } else if (st_type !== "") {
-                    obj.saving_throws[st_type] = this.data_util.fix_number_string(stp);
-                    st_type = "";
-                  }
-                });
-              } else if (piece.type === "Skill") {
-                const skill_pieces = piece.str.split(" ");
-                let skill = "";
-                skill_pieces.forEach(sp => {
-                  if (skill !== "") {
-                    obj.skill_proficiencies[skill] = this.data_util.fix_number_string(sp);
-                    skill = "";
-                  } else {
-                    skill = this.data_util.capitalize_firsts(sp);
-                  }
-                });
-              } else if (piece.type === "Tool") {
-                const tool_pieces = this.data_util.capitalize_firsts(piece.str).split(",");
-                tool_pieces.forEach(p => {
-                  obj.tool_proficiencies[p.trim()] = 1;
-                });
-              } else if (piece.type === "Language") {
-                obj.languages = this.data_util.capitalize_firsts(piece.str);
-              } else if (piece.type === "Damage Immunity") {
-                const more_pieces = this.data_util.capitalize_firsts(piece.str).split(";");
-                more_pieces.forEach(mp => {
-                  const dm = new DamageMultiplier();
-                  if (mp.includes("From ")) {
-                    const from_pieces = mp.split("From ");
-                    dm.details = `From ${from_pieces[1]}`;
-                    mp = from_pieces[0];
-                  }
-                  const mult_pieces = mp.split(",");
-                  dm.multiplier = 0;
-                  mult_pieces.forEach(p => {
-                    if (p.includes("And ")) {
-                      const p2 = p.split("And ");
-                      p2.forEach(p3 => {
-                        if (p3.trim() !== "") {
-                          dm.damage_types.push(p3.trim());
-                        }
-                      });
-                    } else {
-                      if (p.trim() !== "") {
-                        dm.damage_types.push(p.trim());
-                      }
-                    }
-                  });
-                  obj.damage_multipliers.push(dm);
-                });
-              } else if (piece.type === "Damage Resistance") {
-                const more_pieces = this.data_util.capitalize_firsts(piece.str).split(";");
-                more_pieces.forEach(mp => {
-                  const dm = new DamageMultiplier();
-                  if (mp.includes("From ")) {
-                    const from_pieces = mp.split("From ");
-                    dm.details = `From ${from_pieces[1]}`;
-                    mp = from_pieces[0];
-                  }
-                  const mult_pieces = mp.split(",");
-                  dm.multiplier = 0.5;
-                  mult_pieces.forEach(p => {
-                    if (p.includes("And ")) {
-                      const p2 = p.split("And ");
-                      p2.forEach(p3 => {
-                        if (p3.trim() !== "") {
-                          dm.damage_types.push(p3.trim());
-                        }
-                      });
-                    } else {
-                      if (p.trim() !== "") {
-                        dm.damage_types.push(p.trim());
-                      }
-                    }
-                  });
-                  obj.damage_multipliers.push(dm);
-                });
-              } else if (piece.type === "Damage Vulnerability") {
-                const more_pieces = this.data_util.capitalize_firsts(piece.str).split(";");
-                more_pieces.forEach(mp => {
-                  const dm = new DamageMultiplier();
-                  if (mp.includes("From ")) {
-                    const from_pieces = mp.split("From ");
-                    dm.details = `From ${from_pieces[1]}`;
-                    mp = from_pieces[0];
-                  }
-                  const mult_pieces = mp.split(",");
-                  dm.multiplier = 2;
-                  mult_pieces.forEach(p => {
-                    if (p.includes("And ")) {
-                      const p2 = p.split("And ");
-                      p2.forEach(p3 => {
-                        if (p3.trim() !== "") {
-                          dm.damage_types.push(p3.trim());
-                        }
-                      });
-                    } else {
-                      if (p.trim() !== "") {
-                        dm.damage_types.push(p.trim());
-                      }
-                    }
-                  });
-                  obj.damage_multipliers.push(dm);
-                });
-              } else if (piece.type === "Condition Immunity") {
-                const immunity_pieces = this.data_util.capitalize_firsts(piece.str).split(",");
-                immunity_pieces.forEach(p => {
-                  obj.condition_immunities.push(p.trim());
-                });
-              } else if (piece.type === "Sense") {
-                if (this.state.senses) {
-                  const sense_pieces = this.data_util.capitalize_firsts(piece.str).split(",");
-                  for (let i = 0; i < sense_pieces.length; ++i) {
-                    const sp = sense_pieces[i];
-                    const more_pieces = sp.trim().split(" ");
-                    if (more_pieces[0] === "Passive") {
-                      if (more_pieces[1] === "Perception") {
-                        obj.passives.passive_perception = this.data_util.fix_number_string(more_pieces[2]);
-                      } else if (more_pieces[1] === "Investigation") {
-                        obj.passives.passive_investigation = this.data_util.fix_number_string(more_pieces[2]);
-                      } else if (more_pieces[1] === "Insight") {
-                        obj.passives.passive_insight = this.data_util.fix_number_string(more_pieces[2]);
-                      }
-                    } else {
-                      const sense_name = more_pieces[0];
-                      const sense_finder = this.state.senses.filter(o => this.data_util.replaceAll(o.name, " ","").toLowerCase() === this.data_util.replaceAll(sense_name, " ","").toLowerCase());
-                      if (sense_finder.length === 1) {
-                        const sf = sense_finder[0];
-                        const char_sense = new CharacterSense();
-                        char_sense.name = sf.name;
-                        char_sense.sense_id = sf._id;
-                        char_sense.range = this.data_util.fix_number_string(more_pieces[1]);
-                        obj.senses.push(char_sense);
-                      }
-                    }
-                  }
-                }
-              } else if (piece.type === "Special") {
-                const abilities: Feature[] = [];
-                // obj.special_abilities.push()
-                // Needs to identify the beginning for each ability
-                // We can identify them by periods and spaces.  
-                // If there's a period and the 'sentence' before it 
-                // has < 4 words then it's probably the name of the next one.
-                const sentences = piece.str.split(".");
-                let sentence_num = 0;
-                let ability = new Feature();
-                while (sentence_num < sentences.length) {
-                  const sentence = sentences[sentence_num];
-                  const words = sentence.split(" ");
-                  if (words.length < 4) {
-                    // new ability
-                    if (ability.name !== "") {
-                      abilities.push(ability);
-                    }
-                    ability = new Feature();
-                    ability.name = sentence;
-                    ability.feature_type = "Creature Ability";
-                    ability.the_feature = new CreatureAbility();
-                  } else {
-                    ability.description += `${sentence}. `;
-                    const creature_ability = ability.the_feature as CreatureAbility;
-                    // Look for certain keywords: 
-                    // ft (for range), 
-                    // to hit (for attack bonus)
-                    // DC (for save and dc), 
-                    // damage (for damage type and amount)
-                  }
-                  sentence_num++;
-                }
-              } else {
-                console.log(piece);
-              } 
-              // } else if (piece.type === "Action") {
-
-              // } else if (piece.type === "Legendary Action") {
-
-              // } else if (piece.type === "Lair Action") {
-
-              // } else if (piece.type === "Special") {
-
-              // }
-              this.setState({ obj, mode: "home" });
-            });
+            this.parse_pieces(pieces);
+          }}
+          onParseAll={(parse_me: string) => {
+            this.parse_all(parse_me);
           }}
         />
       );
@@ -927,7 +678,7 @@ class CreatureEdit extends Component<Props, State> {
               }}
             />
           </Grid>
-          <Grid item xs={4}>
+          <Grid item xs={2}>
             <StringBox 
               value={`${this.state.obj.armor_class}`} 
               name="Armor Class"
@@ -935,6 +686,17 @@ class CreatureEdit extends Component<Props, State> {
               onBlur={(value: string) => {
                 const obj = this.state.obj;
                 obj.armor_class = +value;
+                this.setState({ obj });
+              }}
+            />
+          </Grid>
+          <Grid item xs={2}>
+            <StringBox 
+              value={this.state.obj.ac_flavor} 
+              name="Flavor"
+              onBlur={(value: string) => {
+                const obj = this.state.obj;
+                obj.ac_flavor = value;
                 this.setState({ obj });
               }}
             />
@@ -1014,7 +776,7 @@ class CreatureEdit extends Component<Props, State> {
                     </Grid>
                     <Grid item xs={5}>
                       <SelectStringBox 
-                        options={["d6","d8","d10","d12"]}
+                        options={["d4","d6","d8","d10","d12","d20"]}
                         value={`d${hd.size}`} 
                         name="Hit Dice Size"
                         onChange={(value: string) => {
@@ -1052,6 +814,1031 @@ class CreatureEdit extends Component<Props, State> {
         </Grid>
       ); 
     }
+  }
+
+  /**
+   * Name is start to size
+
+    Size is recognizable from keywords (tiny, small, medium, large, huge, gargantuan)
+    but it will need tweaking for some because they can have options
+
+    Type is after size, and may not have a space between them.  
+    It's also recognizable from the list of types.
+
+    Next is alignment, also recognizable
+
+    AC is labeled
+
+    AC flavor (if present) is after AC and in 'parentheses'
+
+    HP is labeled
+
+    Hit Dice is after HP and in 'parentheses'
+
+    Speed is labeled
+
+    Ability Scores is recognizable by capitalized ability score abbreviations
+    They may be split up
+
+    Skills (if present) is labeled
+
+    Tools (if present) is labeled
+
+    Saving Throws (if present) is labeled
+
+    Damage Immunities is labeled
+
+    Damage Resistances is labeled
+
+    Damage Vulnerabilities is labeled
+
+    Condition Immunities is labeled
+
+    Senses is labeled
+
+    Languages is labeled
+
+    CR is labeled (Challenge)
+
+    XP is after CR in 'parentheses'
+
+    Special Abilities is after CR and XP and before Actions
+
+    Actions is labeled
+
+    Legendary Actions (if present) is labeled
+    There's a standard description between the label
+    and the actual Actions
+
+   * 
+   * @param parse_me 
+   */
+  parse_all(parse_me: string) {
+    let name = "";
+    let size = "";
+    let type = "";
+    let subtype = "";
+    let alignment = "";
+    let ac = "";
+    // let ac_flavor = "";
+    let hp = "";
+    // let hit_dice = "";
+    let speed = "";
+    let ability_scores: string[] = [];
+    let skill_proficiencies = ""; 
+    let tool_proficiencies = ""; 
+    let saving_throws = ""; 
+    let damage_immunities = "";
+    let damage_resistances = "";
+    let damage_vulnerabilities = "";
+    let condition_immunities = "";
+    let senses = "";
+    let languages = "";
+    let cr = "";
+    // let xp = "";
+    let special_abilities = "";
+    let actions = "";
+    let legendary_actions = "";
+
+    const words = parse_me.split(" ");
+    let currently_building = "";
+    for (let i = 0; i < words.length; ++i) {
+      const word = this.data_util.clean_for_parse(words[i]);
+      if (size === "") {
+        const found = this.data_util.find_one_in_string(word, ["tiny", "small", "medium", "large", "huge", "gargantuan"]);
+        if (found !== "") {
+          size = found;
+          if (size !== word) {
+            type = this.data_util.replaceAll(word, size, "");
+          }
+          for (let j = 0; j < i; ++j) {
+            name += this.data_util.clean_for_parse(words[j]) + " ";
+          }
+        }
+      } else if (type === "") {
+        const found = this.data_util.find_one_in_string(word, 
+          [
+            "aberration",
+            "animal",
+            "beast",
+            "celestial",
+            "construct",
+            "dragon",
+            "elemental",
+            "fey",
+            "fiend",
+            "giant",
+            "humanoid",
+            "magical", // Beast",
+            "monstrosity",
+            "monstrous", // Humanoid",
+            "ooze",
+            "outsider",
+            "plant",
+            "swarm",
+            "undead",
+            "vermin",
+          ]);
+        if (found !== "") {
+          type = found;
+          if (type !== word) {
+            type = this.data_util.replaceAll(word, type, "");
+          }
+          if (name === "") {
+            for (let j = 0; j < i; ++j) {
+              name += this.data_util.clean_for_parse(words[j]) + " ";
+            }
+          }
+        }
+      } else if (type === "magical" && word === "beast") {
+        type = "magical beast";
+      } else if (type === "monstrous" && word === "humanoid") {
+        type = "monstrous humanoid";
+      } else if (type === "swarm" && alignment === "") {
+        if (["neutral","lawful","chaotic","unaligned"].includes(word)) {
+          alignment = word;
+        } else {
+          subtype += word + " ";
+        }
+      } else if (alignment === "") {
+        if (["neutral","lawful","chaotic","unaligned"].includes(word)) {
+          alignment = word;
+        } else {
+          subtype += word + " ";
+        }
+      } else if (["neutral","lawful","chaotic"].includes(alignment)) {
+        if (["neutral","good","evil"].includes(word)) {
+          alignment += " " + word;
+        } else {
+          console.log(word);
+        }
+      } else if (cr === "") {
+        // Everything from AC to CR should be labeled (except ability scores)
+        // So let's look for labels and ability scores
+        if ((this.data_util.find_one_in_string(word, 
+          ["speed", "skills", "tools", "senses", 
+          "languages", "challenge", "armor", "hit", 
+          "damage", "condition", "saving"], true) !== "" &&
+          (word === "damage" || !currently_building.startsWith(word))) || ["STR","DEX","CON","INT","WIS","CHA"].includes(words[i])) {
+          if (["speed", "skills", "tools", "senses", 
+            "languages", "challenge", "armor", "hit", 
+            "damage", "condition", "saving"].includes(word) || ["STR","DEX","CON","INT","WIS","CHA"].includes(words[i])) {
+            if (currently_building.startsWith("speed")) {
+              speed = currently_building;
+            } else if (currently_building.startsWith("skills")) {
+              skill_proficiencies = currently_building;
+            } else if (currently_building.startsWith("tools")) {
+              tool_proficiencies = currently_building;
+            } else if (currently_building.startsWith("senses")) {
+              senses = currently_building;
+            } else if (currently_building.startsWith("languages")) {
+              languages = currently_building;
+            } else if (currently_building.startsWith("armor class")) {
+              ac = currently_building;
+            } else if (currently_building.startsWith("hit points")) {
+              hp = currently_building;
+            } else if (currently_building.toLowerCase().startsWith("damage resistances")) {
+              damage_resistances = currently_building;
+            } else if (currently_building.toLowerCase().startsWith("damage immunities")) {
+              damage_immunities = currently_building;
+            } else if (currently_building.toLowerCase().startsWith("damage vulnerabilities")) {
+              damage_vulnerabilities = currently_building;
+            } else if (currently_building.toLowerCase().startsWith("condition immunities")) {
+              condition_immunities = currently_building;
+            } else if (currently_building.toLowerCase().startsWith("saving throws")) {
+              saving_throws = currently_building;
+            } else if (this.data_util.find_one_in_string(currently_building, ["STR","DEX","CON","INT","WIS","CHA"], true)) {
+              ability_scores.push(currently_building);
+            }
+            if (["STR","DEX","CON","INT","WIS","CHA"].includes(words[i])) {
+              currently_building = words[i];
+            } else {
+              currently_building = word;
+            }
+          } else {
+            let found = this.data_util.find_one_in_string(word, 
+              ["speed", "skills", "tools", "senses", 
+              "languages", "challenge", "armor", "hit", 
+              "damage", "condition", "saving"], true);
+            let rest = word.replace(found, "");
+            found = this.data_util.find_one_in_string(rest, 
+              ["speed", "skills", "tools", "senses", 
+              "languages", "challenge", "armor", "hit", 
+              "damage", "condition", "saving"], true);
+            while (rest !== found && rest !== "" && found !== "") {
+              rest = word.replace(found, "");
+              found = this.data_util.find_one_in_string(rest, 
+                ["speed", "skills", "tools", "senses", 
+                "languages", "challenge", "armor", "hit", 
+                "damage", "condition", "saving"], true);
+            }
+            currently_building = rest;
+          }
+        } else {
+          if (this.data_util.find_one_in_string(currently_building, ["condition","languages","senses","damage","challenge","hit points"], true) !== "") {
+            currently_building += " " + words[i];
+          } else {
+            currently_building += " " + word;
+          }
+          if (currently_building.startsWith("challenge") && currently_building.endsWith(")")) {
+            // No keyword to mark the beginning of the next one, 
+            // so we need to watch for the end of this one.
+            cr = currently_building;
+            currently_building = "";
+          }
+        }
+      } else {
+        if (ability_scores.length < 6) {
+          if (["STR","DEX","CON","INT","WIS","CHA"].includes(words[i])) {
+            if (this.data_util.find_one_in_string(currently_building, ["STR","DEX","CON","INT","WIS","CHA"], true) !== "") {
+              ability_scores.push(currently_building);
+            }
+            currently_building = words[i];
+          } else if (ability_scores.length === 5) {
+            currently_building += " " + words[i];
+            if (words[i].includes(")")) {
+              ability_scores.push(currently_building);
+              currently_building = "";
+            }
+          } else if (this.data_util.find_one_in_string(currently_building, ["STR","DEX","CON","INT","WIS","CHA"], true) !== "") {
+            currently_building += " " + words[i];
+          }
+        } else if ((words[i] === "ACTIONS" && !currently_building.startsWith("LEGENDARY")) || 
+          words[i] === "LEGENDARY" ||
+          (words[i] === "Actions" && !currently_building.startsWith("Legendary")) || 
+          words[i] === "Legendary") {
+          if (currently_building.startsWith("ACTIONS") || currently_building.startsWith("Actions")) {
+            actions = currently_building;
+          } else {
+            special_abilities = currently_building;
+          }
+          currently_building = words[i];
+        } else {
+          currently_building += " " + words[i];
+        }
+      }
+    }
+    if (currently_building.startsWith("ACTIONS") || currently_building.startsWith("Actions")) {
+      actions = currently_building;
+    } else if (currently_building.startsWith("LEGENDARY ACTIONS") || currently_building.startsWith("Legendary Actions")) {
+      legendary_actions = currently_building;
+    } else if (currently_building !== "") {
+      special_abilities = currently_building;
+    }
+
+    const pieces: IStringHash[] = [];
+    if (name !== "") {
+      pieces.push({
+        type: "Name",
+        str: name
+      });
+    }
+    if (size !== "") {
+      pieces.push({
+        type: "Size",
+        str: size
+      });
+    }
+    if (type !== "") {
+      pieces.push({
+        type: "Type",
+        str: type
+      });
+    }
+    if (subtype !== "") {
+      pieces.push({
+        type: "Subtype",
+        str: subtype
+      });
+    }
+    if (alignment !== "") {
+      pieces.push({
+        type: "Alignment",
+        str: alignment
+      });
+    }
+    if (ac !== "") {
+      pieces.push({
+        type: "AC",
+        str: ac.replace("armor class", "")
+      });
+    }
+    // if (ac_flavor !== "") {
+    //   pieces.push({
+    //     type: "AC Flavor",
+    //     str: ac_flavor
+    //   });
+    // }
+    if (hp !== "") {
+      pieces.push({
+        type: "Max HP",
+        str: hp.replace("hit points", "")
+      });
+    }
+    // if (hit_dice !== "") {
+    //   pieces.push({
+    //     type: "Hit Dice",
+    //     str: hit_dice
+    //   });
+    // }
+    if (speed !== "") {
+      pieces.push({
+        type: "Speed",
+        str: speed
+      });
+    }
+    ability_scores.forEach(score => {
+      pieces.push({
+        type: "Ability Scores",
+        str: score
+      });
+    });
+    if (skill_proficiencies !== "") {
+      pieces.push({
+        type: "Skill",
+        str: skill_proficiencies.replace("skills", "")
+      });
+    }
+    if (tool_proficiencies !== "") {
+      pieces.push({
+        type: "Tool",
+        str: tool_proficiencies.replace("tools", "")
+      });
+    }
+    if (saving_throws !== "") {
+      pieces.push({
+        type: "Saving Throws",
+        str: saving_throws.replace("saving throws", "")
+      });
+    }
+    if (damage_immunities !== "") {
+      pieces.push({
+        type: "Damage Immunity",
+        str: damage_immunities.toLowerCase().replace("damage immunities", "")
+      });
+    }
+    if (damage_resistances !== "") {
+      pieces.push({
+        type: "Damage Resistance",
+        str: damage_resistances.toLowerCase().replace("damage resistances", "")
+      });
+    }
+    if (damage_vulnerabilities !== "") {
+      pieces.push({
+        type: "Damage Vulnerability",
+        str: damage_vulnerabilities.toLowerCase().replace("damage vulnerabilities", "")
+      });
+    }
+    if (condition_immunities !== "") {
+      pieces.push({
+        type: "Condition Immunity",
+        str: condition_immunities.toLowerCase().replace("condition immunities", "")
+      });
+    }
+    if (senses !== "") {
+      pieces.push({
+        type: "Sense",
+        str: senses.replace("senses", "")
+      });
+    }
+    if (languages !== "") {
+      pieces.push({
+        type: "Language",
+        str: languages.replace("languages", "")
+      });
+    }
+    if (cr !== "") {
+      pieces.push({
+        type: "CR",
+        str: cr.replace("challenge", "")
+      });
+    }
+    // if (xp !== "") {
+    //   pieces.push({
+    //     type: "Exp Points",
+    //     str: xp
+    //   });
+    // }
+    if (special_abilities !== "") {
+      pieces.push({
+        type: "Special",
+        str: special_abilities
+      });
+    }
+    if (actions !== "") {
+      pieces.push({
+        type: "Action",
+        str: actions.replace("ACTIONS", "").replace("Actions", "")
+      });
+    }
+    if (legendary_actions !== "") {
+      pieces.push({
+        type: "Legendary Action",
+        str: legendary_actions.replace("LEGENDARY ACTIONS", "").replace("Legendary Actions", "")
+      });
+    }
+    this.parse_pieces(pieces); 
+  }
+
+  parse_pieces(pieces: IStringHash[]) {
+    const obj = this.state.obj;
+    pieces.forEach(piece => {
+      if (piece.type === "Name") {
+        obj.name = this.data_util.capitalize_firsts(piece.str, true);
+      } else if (piece.type === "Description") {
+        obj.description = piece.str.trim();
+      } else if (piece.type === "Type") {
+        obj.creature_type = this.data_util.capitalize_firsts(piece.str);
+      } else if (piece.type === "Subtype") {
+        obj.subtype = this.data_util.capitalize_firsts(piece.str);
+      } else if (piece.type === "Hit Dice") {
+        const bonus_pieces = piece.str.split("+");
+        obj.hit_dice_bonus = 0;
+        bonus_pieces.forEach(bp => {
+          if (bp.includes("d")) {
+            const hd_pieces = bp.split("d");
+            const hd = new HitDice();
+            hd.count = this.data_util.fix_number_string(hd_pieces[0]);
+            hd.size = this.data_util.fix_number_string(hd_pieces[1]);
+            obj.hit_dice.push(hd);
+          } else {
+            obj.hit_dice_bonus += this.data_util.fix_number_string(bp);
+          }
+        });
+      } else if (piece.type === "Max HP") {
+        const words = piece.str.split(" ");
+        let max_hp = "";
+        let hit_dice = "";
+        for (let i = 0; i < words.length; ++i) {
+          const word = this.data_util.clean_for_parse(words[i]);
+          if (!["hit","points"].includes(word)) {
+            if (max_hp === "") {
+              max_hp = word;
+            } else {
+              hit_dice += word + " ";
+            }
+          }
+        }
+        obj.max_hit_points = this.data_util.fix_number_string(max_hp);
+        if (hit_dice !== "") {
+          const bonus_pieces = hit_dice.split("+");
+          obj.hit_dice_bonus = 0;
+          bonus_pieces.forEach(bp => {
+            if (bp.includes("d")) {
+              const hd_pieces = bp.split("d");
+              const hd = new HitDice();
+              hd.count = this.data_util.fix_number_string(hd_pieces[0]);
+              hd.size = this.data_util.fix_number_string(hd_pieces[1]);
+              obj.hit_dice.push(hd);
+            } else {
+              obj.hit_dice_bonus += this.data_util.fix_number_string(bp);
+            }
+          });
+        }
+      } else if (piece.type === "Size") {
+        obj.size = this.data_util.capitalize_firsts(piece.str);
+      } else if (piece.type === "CR") {
+        const words = piece.str.split(" ");
+        let cr = "";
+        let exp = "";
+        for (let i = 0; i < words.length; ++i) {
+          const word = this.data_util.clean_for_parse(words[i]);
+          if (!["challenge","xp"].includes(word)) {
+            if (cr === "") {
+              cr = word;
+            } else {
+              exp += word + " ";
+            }
+          }
+        }
+        obj.challenge_rating = this.data_util.fix_number_string(cr);
+        obj.xp = this.data_util.fix_number_string(exp.replace("xp",""));
+      } else if (piece.type === "Exp Points") {
+        obj.xp = this.data_util.fix_number_string(piece.str);
+      } else if (piece.type === "Init Mod") {
+        obj.initiative_modifier = this.data_util.fix_number_string(piece.str);
+      } else if (piece.type === "AC") {
+        const words = piece.str.split(" ");
+        let ac = "";
+        let flavor = "";
+        for (let i = 0; i < words.length; ++i) {
+          const word = this.data_util.clean_for_parse(words[i]);
+          if (!["class"].includes(word)) {
+            if (ac === "") {
+              ac = word;
+            } else {
+              flavor += word + " ";
+            }
+          }
+        }
+        obj.armor_class = this.data_util.fix_number_string(ac);
+        obj.ac_flavor = flavor.trim();
+      } else if (piece.type === "Alignment") {
+        obj.alignment = this.data_util.capitalize_firsts(piece.str);
+      } else if (piece.type === "Speed") {
+        const speed_pieces = piece.str.split(" ");
+        let speed_type = "";
+        speed_pieces.forEach(sp => {
+          if (["speed","walk","run"].includes(sp.toLowerCase())) {
+            speed_type = "walk";
+          } else if (sp.toLowerCase() === "swim") {
+            speed_type = "swim";
+          } else if (sp.toLowerCase() === "climb") {
+            speed_type = "climb";
+          } else if (sp.toLowerCase() === "fly") {
+            speed_type = "fly";
+          } else if (sp.toLowerCase() === "burrow") {
+            speed_type = "burrow";
+          } else if (sp.includes("hover")) {
+            obj.speed.hover = 1;
+          } else if (speed_type !== "") {
+            obj.speed[speed_type] = this.data_util.fix_number_string(sp);
+            speed_type = "";
+          }
+        });
+      } else if (piece.type === "Ability Scores") {
+        const as_pieces = piece.str.split(" ");
+        let as_type = "";
+        as_pieces.forEach(asp => {
+          if (["STR","DEX","CON","INT","WIS","CHA"].includes(asp.toUpperCase())) {
+            as_type = asp.toUpperCase();
+          } else if (as_type !== "") {
+            obj.ability_scores.setAbilityScore(as_type, this.data_util.fix_number_string(asp));
+            as_type = "";
+          }
+        });
+      } else if (piece.type === "Saving Throws") {
+        const st_pieces = piece.str.split(" ");
+        let st_type = "";
+        st_pieces.forEach(stp => {
+          if (["STR","DEX","CON","INT","WIS","CHA"].includes(stp.toUpperCase())) {
+            st_type = stp.toUpperCase();
+          } else if (st_type !== "") {
+            obj.saving_throws[st_type] = this.data_util.fix_number_string(stp);
+            st_type = "";
+          }
+        });
+      } else if (piece.type === "Skill") {
+        const skill_pieces = piece.str.split(" ");
+        let skill = "";
+        skill_pieces.forEach(sp => {
+          if (sp !== "skills") {
+            if (skill !== "") {
+              if (["acrobatics",
+                "animalhandling",
+                "arcana",
+                "athletics",
+                "deception",
+                "history",
+                "insight",
+                "intimidation",
+                "investigation",
+                "medicine",
+                "nature",
+                "perception",
+                "performance",
+                "persuasion",
+                "religion",
+                "sleightofhand",
+                "stealth",
+                "survival"].includes(skill)) {
+                if (skill === "sleightofhand") {
+                  skill = "Sleight of Hand";
+                } else if (skill === "animalhandling") {
+                  skill = "Animal Handling";
+                } else {
+                  skill = this.data_util.capitalize_first(skill);
+                }
+                obj.skill_proficiencies[skill] = this.data_util.fix_number_string(sp);
+                skill = "";
+              } else {
+                skill += sp.toLowerCase();
+              }
+            } else {
+              skill = sp.toLowerCase();
+            }
+          }
+        });
+      } else if (piece.type === "Tool") {
+        const tool_pieces = this.data_util.capitalize_firsts(piece.str).split(" ");
+        tool_pieces.forEach(p => {
+          if (p !== "tool") {
+            obj.tool_proficiencies[p] = 1;
+          }
+        });
+      } else if (piece.type === "Language") {
+        obj.languages = piece.str;
+      } else if (piece.type === "Damage Immunity") {
+        const more_pieces = this.data_util.capitalize_firsts(piece.str).split(";");
+        more_pieces.forEach(mp => {
+          const dm = new DamageMultiplier();
+          if (mp.includes("From ")) {
+            const from_pieces = mp.split("From ");
+            dm.details = `From ${from_pieces[1]}`;
+            mp = from_pieces[0];
+          }
+          const mult_pieces = mp.split(",");
+          dm.multiplier = 0;
+          mult_pieces.forEach(p => {
+            if (p.includes("And ")) {
+              const p2 = p.split("And ");
+              p2.forEach(p3 => {
+                if (p3.trim() !== "") {
+                  dm.damage_types.push(p3.trim());
+                }
+              });
+            } else {
+              if (p.trim() !== "") {
+                dm.damage_types.push(p.trim());
+              }
+            }
+          });
+          obj.damage_multipliers.push(dm);
+        });
+      } else if (piece.type === "Damage Resistance") {
+        const more_pieces = this.data_util.capitalize_firsts(piece.str).split(";");
+        more_pieces.forEach(mp => {
+          const dm = new DamageMultiplier();
+          if (mp.includes("From ")) {
+            const from_pieces = mp.split("From ");
+            dm.details = `From ${from_pieces[1]}`;
+            mp = from_pieces[0];
+          }
+          const mult_pieces = mp.split(",");
+          dm.multiplier = 0.5;
+          mult_pieces.forEach(p => {
+            if (p.includes("And ")) {
+              const p2 = p.split("And ");
+              p2.forEach(p3 => {
+                if (p3.trim() !== "") {
+                  dm.damage_types.push(p3.trim());
+                }
+              });
+            } else {
+              if (p.trim() !== "") {
+                dm.damage_types.push(p.trim());
+              }
+            }
+          });
+          obj.damage_multipliers.push(dm);
+        });
+      } else if (piece.type === "Damage Vulnerability") {
+        const more_pieces = this.data_util.capitalize_firsts(piece.str).split(";");
+        more_pieces.forEach(mp => {
+          const dm = new DamageMultiplier();
+          if (mp.includes("From ")) {
+            const from_pieces = mp.split("From ");
+            dm.details = `From ${from_pieces[1]}`;
+            mp = from_pieces[0];
+          }
+          const mult_pieces = mp.split(",");
+          dm.multiplier = 2;
+          mult_pieces.forEach(p => {
+            if (p.includes("And ")) {
+              const p2 = p.split("And ");
+              p2.forEach(p3 => {
+                if (p3.trim() !== "") {
+                  dm.damage_types.push(p3.trim());
+                }
+              });
+            } else {
+              if (p.trim() !== "") {
+                dm.damage_types.push(p.trim());
+              }
+            }
+          });
+          obj.damage_multipliers.push(dm);
+        });
+      } else if (piece.type === "Condition Immunity") {
+        const immunity_pieces = this.data_util.capitalize_firsts(piece.str).split(",");
+        immunity_pieces.forEach(p => {
+          obj.condition_immunities.push(p.trim());
+        });
+      } else if (piece.type === "Sense") {
+        if (this.state.senses) {
+          const sense_pieces = this.data_util.capitalize_firsts(piece.str).split(",");
+          for (let i = 0; i < sense_pieces.length; ++i) {
+            const sp = sense_pieces[i];
+            const more_pieces = sp.trim().split(" ");
+            if (more_pieces[0] === "Passive") {
+              if (more_pieces[1] === "Perception") {
+                obj.passives.passive_perception = this.data_util.fix_number_string(more_pieces[2]);
+              } else if (more_pieces[1] === "Investigation") {
+                obj.passives.passive_investigation = this.data_util.fix_number_string(more_pieces[2]);
+              } else if (more_pieces[1] === "Insight") {
+                obj.passives.passive_insight = this.data_util.fix_number_string(more_pieces[2]);
+              }
+            } else {
+              const sense_name = more_pieces[0];
+              const sense_finder = this.state.senses.filter(o => this.data_util.replaceAll(o.name, " ","").toLowerCase() === this.data_util.replaceAll(sense_name, " ","").toLowerCase());
+              if (sense_finder.length === 1) {
+                const sf = sense_finder[0];
+                const char_sense = new CharacterSense();
+                char_sense.name = sf.name;
+                char_sense.sense_id = sf._id;
+                char_sense.range = this.data_util.fix_number_string(more_pieces[1]);
+                obj.senses.push(char_sense);
+              }
+            }
+          }
+        }
+      } else if (piece.type === "Special") {
+        const abilities: Feature[] = [];
+        // Needs to identify the beginning for each ability
+        // We can identify them by periods and spaces.  
+        // If there's a period and the 'sentence' before it 
+        // has < 4 words then it's probably the name of the next one.
+        const sentences = piece.str.split(".");
+        let sentence_num = 0;
+        let ability = new Feature();
+        while (sentence_num < sentences.length) {
+          const sentence = sentences[sentence_num].trim();
+          const words = sentence.split(" ");
+          if (words.length < 4) {
+            // new ability
+            if (ability.name !== "") {
+              ability.description = ability.description.trim();
+              abilities.push(ability);
+            }
+            ability = new Feature();
+            ability.feature_type = "Creature Ability";
+            ability.the_feature = new CreatureAbility();
+            ability.name = sentence;
+            // ability.the_feature.name = sentence;
+          } else {
+            const creature_ability = ability.the_feature as CreatureAbility;
+            ability.description += `${sentence}. `;
+            for (let j = 0; j < words.length; ++j) {
+              // Look for certain keywords: 
+              // ft (for range), 
+              // to hit (for attack bonus)
+              // DC (for save and dc), 
+              // damage (for damage type and amount)
+              const word = words[j].toLowerCase();
+              if (word === "ft" || word === "feet") {
+                if (j > 1) {
+                  if (creature_ability.range) {
+                    creature_ability.range_2 = `${this.data_util.fix_number_string(words[j - 1])}`;
+                  } else {
+                    creature_ability.range = `${this.data_util.fix_number_string(words[j - 1])}`;
+                  }
+                }
+              } else if (word === "hit") {
+                if (j > 2) {
+                  if (words[j - 1].toLowerCase() === "to") {
+                    creature_ability.attack_bonus = this.data_util.fix_number_string(words[j - 2]);
+                  }
+                }
+              } else if (word === "dc") {
+                if (words.length > (j + 4)) {
+                  if (words[j + 3].toLowerCase() === "saving" && ["throw","throws"].includes(words[j + 4].toLowerCase())) {
+                    creature_ability.dc = this.data_util.fix_number_string(words[j + 1]);
+                    creature_ability.saving_throw_ability_score = this.data_util.ability_score_abbreviation(words[j + 2]);
+                  }
+                }
+              } else if (word === "damage") {
+                // if (words.length > (j + 4)) {
+                //   if (words[j + 3].toLowerCase() === "saving" && ["throw","throws"].includes(words[j + 4].toLowerCase())) {
+                //     creature_ability.dc = this.data_util.fix_number_string(words[j + 1]);
+                //     creature_ability.saving_throw_ability_score = this.data_util.ability_score_abbreviation(words[j + 2]);
+                //   }
+                // }
+              }
+            }
+          }
+          sentence_num++;
+        }
+        obj.special_abilities = this.parse_actions(piece.str);
+      } else if (piece.type === "Action") {
+        const abilities: Feature[] = [];
+        // obj.special_abilities.push()
+        // Needs to identify the beginning for each ability
+        // We can identify them by periods and spaces.  
+        // If there's a period and the 'sentence' before it 
+        // has < 4 words then it's probably the name of the next one.
+        const sentences = piece.str.split(".");
+        let sentence_num = 0;
+        let ability = new Feature();
+        while (sentence_num < sentences.length) {
+          const sentence = sentences[sentence_num];
+          const words = sentence.split(" ");
+          if (words.length < 4) {
+            // new ability
+            if (ability.name !== "") {
+              ability.description = ability.description.trim();
+              abilities.push(ability);
+            }
+            ability = new Feature();
+            ability.feature_type = "Creature Ability";
+            ability.the_feature = new CreatureAbility();
+            ability.name = sentence;
+            // ability.the_feature.name = sentence;
+          } else {
+            const creature_ability = ability.the_feature as CreatureAbility;
+            ability.description += `${sentence}. `;
+            for (let j = 0; j < words.length; ++j) {
+              // Look for certain keywords: 
+              // ft (for range), 
+              // to hit (for attack bonus)
+              // DC (for save and dc), 
+              // damage (for damage type and amount)
+              const word = words[j].toLowerCase();
+              if (word === "ft" || word === "feet") {
+                if (j > 1) {
+                  if (creature_ability.range) {
+                    creature_ability.range_2 = `${this.data_util.fix_number_string(words[j - 1])}`;
+                  } else {
+                    creature_ability.range = `${this.data_util.fix_number_string(words[j - 1])}`;
+                  }
+                }
+              } else if (word === "hit") {
+                if (j > 2) {
+                  if (words[j - 1].toLowerCase() === "to") {
+                    creature_ability.attack_bonus = this.data_util.fix_number_string(words[j - 2]);
+                  }
+                }
+              } else if (word === "dc") {
+                if (words.length > (j + 4)) {
+                  if (words[j + 3].toLowerCase() === "saving" && ["throw","throws"].includes(words[j + 4].toLowerCase())) {
+                    creature_ability.dc = this.data_util.fix_number_string(words[j + 1]);
+                    creature_ability.saving_throw_ability_score = this.data_util.ability_score_abbreviation(words[j + 2]);
+                  }
+                }
+              } else if (word === "damage") {
+                // if (words.length > (j + 4)) {
+                //   if (words[j + 3].toLowerCase() === "saving" && ["throw","throws"].includes(words[j + 4].toLowerCase())) {
+                //     creature_ability.dc = this.data_util.fix_number_string(words[j + 1]);
+                //     creature_ability.saving_throw_ability_score = this.data_util.ability_score_abbreviation(words[j + 2]);
+                //   }
+                // }
+              }
+            }
+          }
+          sentence_num++;
+        }
+        obj.actions = this.parse_actions(piece.str);
+      } else if (piece.type === "Legendary Action") {
+        obj.legendary_actions = this.parse_actions(piece.str);
+      } else {
+        console.log(piece);
+      } 
+    });
+    this.setState({ obj, mode: "home" });
+  }
+
+  parse_actions(actions: string) {
+    const abilities: Feature[] = [];
+    // obj.special_abilities.push()
+    // Needs to identify the beginning for each ability
+    // We can identify them by periods and spaces.  
+    // If there's a period and the 'sentence' before it 
+    // has < 4 words then it's probably the name of the next one.
+    const sentences = this.data_util.replaceAll(actions, "ft.", "feet").split(".");
+    let sentence_num = 0;
+    let ability = new Feature();
+    while (sentence_num < sentences.length) {
+      const sentence = sentences[sentence_num];
+      const words = sentence.trim().split(" ");
+      if (words.length < 4 || 
+        (words[words.length - 1].endsWith(")") && 
+          (words[0].startsWith("(") || 
+            words[1].startsWith("(") || 
+            words[2].startsWith("(") || 
+            words[3].startsWith("(")))) {
+        // new ability
+        if (ability.name !== "") {
+          if (ability.description.length > 0) {
+            ability.description = ability.description.trim();
+            abilities.push(ability);
+          }
+        }
+        ability = new Feature();
+        ability.feature_type = "Creature Ability";
+        ability.the_feature = new CreatureAbility();
+        ability.name = sentence;
+      } else {
+        const creature_ability = ability.the_feature as CreatureAbility;
+        ability.description += `${sentence}. `;
+        for (let j = 0; j < words.length; ++j) {
+          // Look for certain keywords: 
+          // ft (for range), 
+          // to hit (for attack bonus)
+          // DC (for save and dc), 
+          // damage (for damage type and amount)
+          const word = this.data_util.clean_for_parse(words[j]);
+          if (word === "ft" || word === "feet") {
+            if (j > 1) {
+              if (creature_ability.range) {
+                creature_ability.range_2 = `${this.data_util.fix_number_string(words[j - 1])}`;
+              } else {
+                creature_ability.range = `${this.data_util.fix_number_string(words[j - 1])}`;
+              }
+            }
+          } else if (word === "hit") {
+            if (j > 2) {
+              if (words[j - 1].toLowerCase() === "to") {
+                creature_ability.attack_bonus = this.data_util.fix_number_string(words[j - 2]);
+              }
+            }
+          } else if (word === "dc") {
+            if (words.length > (j + 4)) {
+              if (words[j + 3].toLowerCase() === "saving" && ["throw","throws"].includes(words[j + 4].toLowerCase())) {
+                creature_ability.dc = this.data_util.fix_number_string(words[j + 1]);
+                creature_ability.saving_throw_ability_score = this.data_util.ability_score_abbreviation(words[j + 2]);
+                if (creature_ability.effects.length === 0) {
+                  const effect = new AbilityEffect();
+                  effect.attack_type = "Save";
+                  if (effect.type === "None") {
+                    effect.type = "Control";
+                  }
+                  creature_ability.effects.push(effect);
+                } else {
+                  const effect = creature_ability.effects[0];
+                  if (effect.attack_type === "None") {
+                    effect.attack_type = "Save";
+                  }
+                }
+              }
+            }
+          } else if (word === "attack") {
+            let melee = "";
+            let spell = "";
+            let k = j - 1;
+            while (k > -1 && (melee === "" || spell === "")) {
+              const word2 = this.data_util.clean_for_parse(words[k]);
+              if (word2 === "melee" || word2 === "ranged") {
+                melee = word2;
+              } else if (word2 === "spell") {
+                spell = word2;
+              }
+              k--;
+            }
+            if (melee !== "") {
+              if (creature_ability.effects.length === 0) {
+                const effect = new AbilityEffect();
+                effect.attack_type = this.data_util.capitalize_first(melee);
+                if (spell !== "") {
+                  effect.attack_type += " Spell";
+                }
+                if (effect.type === "None") {
+                  effect.type = "Control";
+                }
+                creature_ability.effects.push(effect);
+              } else {
+                const effect = creature_ability.effects[0];
+                effect.attack_type = this.data_util.capitalize_first(melee);
+                if (spell !== "") {
+                  effect.attack_type += " Spell";
+                }
+              }
+            }
+          } else if (word === "damage") {
+            if (j > 4) {
+              const dmg_type = this.data_util.capitalize_first(words[j - 1]);
+              if (this.data_util.in_list_ignore_case(dmg_type, DAMAGE_TYPES) !== "") {
+                const dice_roll = ["+", "-"].includes(words[j - 3]) ? 
+                  this.data_util.parse_dice_roll(words[j - 4]) : 
+                  this.data_util.parse_dice_roll(words[j - 2]);
+                const dmg_bonus = ["+", "-"].includes(words[j - 3]) ? (words[j - 3] === "-" ? -1 : 1) * this.data_util.fix_number_string(words[j - 2]) : 0;
+                if (creature_ability.effects.length === 0) {
+                  const effect = new AbilityEffect();
+                  effect.attack_type = "None";
+                  effect.bonus.base = dmg_bonus;
+                  effect.type = dmg_type;
+                  const potence = new Potence();
+                  potence.rolls = dice_roll;
+                  effect.potences.push(potence);
+                  creature_ability.effects.push(effect);
+                } else {
+                  let effect = creature_ability.effects[0];
+                  if (effect.type === "None" || effect.type === "Control") {
+                    effect.bonus.base = dmg_bonus;
+                    effect.type = dmg_type;
+                    const potence = new Potence();
+                    potence.rolls = dice_roll;
+                    effect.potences.push(potence);
+                  } else {
+                    effect = new AbilityEffect();
+                    effect.attack_type = "None";
+                    effect.bonus.base = dmg_bonus;
+                    effect.type = dmg_type;
+                    const potence = new Potence();
+                    potence.rolls = dice_roll;
+                    effect.potences.push(potence);
+                    creature_ability.effects.push(effect);
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+      sentence_num++;
+    }
+    if (ability.name !== "" && abilities.filter(o => o.true_id === ability.true_id).length === 0) {
+      abilities.push(ability);
+    }
+    return abilities;
   }
 
   render_attributes() {

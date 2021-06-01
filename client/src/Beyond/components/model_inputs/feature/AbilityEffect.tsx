@@ -2,13 +2,13 @@ import React, { Component } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
 
 import {
+  Add, DeleteForever
+} from "@material-ui/icons";
+import {
   Grid,
   Tooltip,
   Fab
 } from "@material-ui/core";
-import {
-  Add
-} from "@material-ui/icons";
 
 import { 
   AbilityEffect, 
@@ -52,9 +52,9 @@ type PropsFromRedux = ConnectedProps<typeof connector>
 
 type Props = PropsFromRedux & {
   obj: AbilityEffect;
-  name: string;
   slot_level: number;
-  onChange: (changed: AbilityEffect) => void;
+  onChange: () => void;
+  onDelete: () => void;
 }
 
 export interface State { 
@@ -76,21 +76,18 @@ class AbilityEffectInput extends Component<Props, State> {
   componentDidMount() {
   }
 
-  getModalStyle = () => {
-    const top = Math.round(window.innerHeight / 2) - 50;
-    const left = Math.round(window.innerWidth / 2) - 200;
-  
-    return {
-      top: `${top}%`,
-      left: `${left}%`,
-      transform: `translate(${left}px, ${top}px)`,
-    };
-  }
-
   render() {
     return (
       <Grid item container spacing={1} direction="column">
         <Grid item>
+          <Tooltip title={`Delete`}>
+            <Fab size="small" color="primary" style={{marginLeft: "8px"}}
+              onClick={ () => {
+                this.props.onDelete();
+              }}>
+              <DeleteForever/>
+            </Fab>
+          </Tooltip>
           <SelectStringBox 
             options={["None","Control","Summon","Transform","Create Resource","Utility","Healing","Max HP","Temp HP","Bonus Roll","Self Condition",...DAMAGE_TYPES]}
             value={this.props.obj.type} 
@@ -98,7 +95,7 @@ class AbilityEffectInput extends Component<Props, State> {
             onChange={(changed: string) => {
               const obj = this.props.obj;
               obj.type = changed;
-              this.props.onChange(obj);
+              this.props.onChange();
             }}
           />
         </Grid>
@@ -111,7 +108,7 @@ class AbilityEffectInput extends Component<Props, State> {
               onChange={(changed: string) => {
                 const obj = this.props.obj;
                 obj.potence_type = changed;
-                this.props.onChange(obj);
+                this.props.onChange();
               }}
             />
           </Grid>
@@ -125,7 +122,7 @@ class AbilityEffectInput extends Component<Props, State> {
               onChange={(changed: string) => {
                 const obj = this.props.obj;
                 obj.attack_type = changed;
-                this.props.onChange(obj);
+                this.props.onChange();
               }}
             />
           </Grid>
@@ -138,7 +135,7 @@ class AbilityEffectInput extends Component<Props, State> {
               onBlur={(changed: string) => {
                 const obj = this.props.obj;
                 obj.add_modifier = changed;
-                this.props.onChange(obj);
+                this.props.onChange();
               }}
             />
           </Grid>
@@ -167,7 +164,7 @@ class AbilityEffectInput extends Component<Props, State> {
                     potence.rolls.count = count;
                     potence.rolls.size = size;
                     obj.potences.push(potence);
-                    this.props.onChange(obj);
+                    this.props.onChange();
                   }}>
                   <Add/>
                 </Fab>
@@ -189,12 +186,12 @@ class AbilityEffectInput extends Component<Props, State> {
                           potence.rolls.count = changed.rolls.count;
                           potence.rolls.size = changed.rolls.size;
                         }
-                        this.props.onChange(obj);
+                        this.props.onChange();
                       }}
                       onDelete={() => {
                         const obj = this.props.obj;
                         obj.potences = obj.potences.filter(o => o.true_id !== p.true_id);
-                        this.props.onChange(obj);
+                        this.props.onChange();
                       }}
                     />
                   </Grid>
@@ -213,12 +210,12 @@ class AbilityEffectInput extends Component<Props, State> {
                           potence.rolls.count = changed.rolls.count;
                           potence.rolls.size = changed.rolls.size;
                         }
-                        this.props.onChange(obj);
+                        this.props.onChange();
                       }}
                       onDelete={() => {
                         const obj = this.props.obj;
                         obj.potences = obj.potences.filter(o => o.true_id !== p.true_id);
-                        this.props.onChange(obj);
+                        this.props.onChange();
                       }}
                     />
                   </Grid>
@@ -235,7 +232,7 @@ class AbilityEffectInput extends Component<Props, State> {
               onChange={(changed: UpgradableNumber) => {
                 const obj = this.props.obj;
                 obj.bonus = changed;
-                this.props.onChange(obj);
+                this.props.onChange();
               }}
             />
           </Grid>
@@ -249,7 +246,7 @@ class AbilityEffectInput extends Component<Props, State> {
               onChange={(ids: string[]) => {
                 const obj = this.props.obj;
                 obj.conditions_applied = ids;
-                this.props.onChange(obj);
+                this.props.onChange();
               }}
             />
           </Grid>
@@ -264,7 +261,7 @@ class AbilityEffectInput extends Component<Props, State> {
               onChange={(value: string) => {
                 const obj = this.props.obj;
                 obj.create_resource_type = value;
-                this.props.onChange(obj);
+                this.props.onChange();
               }}
             /> 
           </Grid>
@@ -278,7 +275,7 @@ class AbilityEffectInput extends Component<Props, State> {
               onBlur={(value: string) => {
                 const obj = this.props.obj;
                 obj.create_resource_level = +value;
-                this.props.onChange(obj);
+                this.props.onChange();
               }}
             /> 
           </Grid>
@@ -292,7 +289,7 @@ class AbilityEffectInput extends Component<Props, State> {
               onChange={(changed: UpgradableNumber) => {
                 const obj = this.props.obj;
                 obj.create_resource_amount = changed;
-                this.props.onChange(obj);
+                this.props.onChange();
               }}
             />
           </Grid>

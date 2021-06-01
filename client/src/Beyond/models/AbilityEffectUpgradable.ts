@@ -1,4 +1,5 @@
 
+import { v4 as uuidv4 } from "uuid";
 import {
   PotenceUpgradable,
   Potence,
@@ -9,6 +10,7 @@ import {
 } from ".";
 
 export class AbilityEffectUpgradable {
+  true_id: string;
   type: string; // damage type or 'Control', 'Utility', 'Healing', 'Max HP', or 'Temp HP'
   potence_type: string; // Character, Class, or Slot (Level)
   add_modifier: string; // boolean or condition
@@ -19,6 +21,7 @@ export class AbilityEffectUpgradable {
 
   
   constructor(obj?: any) {
+    this.true_id = obj && obj.true_id ? obj.true_id : uuidv4().toString();
     this.type = obj ? obj.type : "None";
     this.potence_type = obj ? obj.potence_type : "Slot";
     this.add_modifier = obj ? obj.add_modifier : "false";

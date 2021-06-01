@@ -5,7 +5,8 @@ const initialState = {
   height: 0,
   width: 0,
   item_type: "ALL",
-  special_feature_type: "Any"
+  special_feature_type: "Any",
+  source_book: "Any"
 };
 function rootReducer(state = initialState, action) {
   if (action.type === "SET") {

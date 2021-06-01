@@ -132,13 +132,13 @@ class FeatureInput extends Component<Props, State> {
   }
 
   load() {
-    this.setState({ feature: this.props.feature });
+    this.setState({ feature: this.props.feature, loading: true }, () => { this.setState({ loading: false }); });
   }
 
   render() {
     if (this.props.feature.parent_type !== this.state.feature.parent_type || 
       this.props.feature.id !== this.state.feature.id || 
-      this.state.reloading) {
+      this.state.loading) {
       return (
         <Grid item>Loading</Grid>
       );
@@ -201,8 +201,8 @@ class FeatureInput extends Component<Props, State> {
                   const feature = this.state.feature;
                   feature.copyTemplate(feature_template);
                   this.props.onChange(feature);
-                  this.setState({ feature, reloading: true }, () => {
-                    this.setState({ reloading: false });
+                  this.setState({ feature, loading: true }, () => {
+                    this.setState({ loading: false });
                   });
                 }}
               />

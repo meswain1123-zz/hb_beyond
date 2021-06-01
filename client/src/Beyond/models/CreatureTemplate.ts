@@ -25,6 +25,7 @@ export class CreatureTemplate extends TemplateBase {
   max_hit_points: number;
   initiative_modifier: number;
   armor_class: number;
+  ac_flavor: string;
   size: string;
   alignment: string;
   // attributes
@@ -105,6 +106,7 @@ export class CreatureTemplate extends TemplateBase {
     this.skill_proficiencies = obj ? obj.skill_proficiencies : {};
     this.initiative_modifier = obj ? obj.initiative_modifier : 0;
     this.armor_class = obj ? obj.armor_class : 0;
+    this.ac_flavor = obj && obj.ac_flavor ? obj.ac_flavor : "";
     this.size = obj ? obj.size : "Medium";
     this.alignment = obj ? obj.alignment : "Neutral";
     this.xp = obj ? obj.xp : 0;
@@ -166,6 +168,7 @@ export class CreatureTemplate extends TemplateBase {
       tool_proficiencies: this.tool_proficiencies,
       initiative_modifier: this.initiative_modifier,
       armor_class: this.armor_class,
+      ac_flavor: this.ac_flavor,
       size: this.size,
       alignment: this.alignment,
       xp: this.xp,
@@ -202,6 +205,7 @@ export class CreatureTemplate extends TemplateBase {
     this.tool_proficiencies = {...copyMe.tool_proficiencies};
     this.initiative_modifier = copyMe.initiative_modifier;
     this.armor_class = copyMe.armor_class;
+    this.ac_flavor = copyMe.ac_flavor;
     this.actions = [];
     if (copyMe.actions && copyMe.actions.length > 0) {
       copyMe.actions.forEach((o: any) => {
@@ -255,6 +259,7 @@ export class CreatureTemplate extends TemplateBase {
     this.tool_proficiencies = {...copyMe.tool_proficiencies};
     this.initiative_modifier = copyMe.initiative_modifier;
     this.armor_class = copyMe.armor_class;
+    this.ac_flavor = copyMe.ac_flavor;
     this.actions = [];
     if (copyMe.actions && copyMe.actions.length > 0) {
       copyMe.actions.forEach((o: any) => {

@@ -16,12 +16,14 @@ import {
 
 import StringBox from "../../components/input/StringBox";
 import SelectStringBox from "../../components/input/SelectStringBox";
+import SelectObjectBox from "../../components/input/SelectObjectBox";
 
 import ObjectIndex from "../../components/Navigation/ObjectIndex";
 import LetterLinks from "../../components/Navigation/LetterLinks";
 
 
 interface AppState {
+  source_book: string;
   height: number;
   width: number;
 }
@@ -31,11 +33,13 @@ interface RootState {
 }
 
 const mapState = (state: RootState) => ({
+  source_book: state.app.source_book,
   height: state.app.height,
   width: state.app.width
 })
 
 const mapDispatch = {
+  setSourceBook: (sb: string) => ({ type: 'SET', dataType: 'source_book', payload: sb })
 }
 
 const connector = connect(mapState, mapDispatch)
@@ -79,6 +83,9 @@ class SpellIndex extends Component<Props, State> {
     if (this.state.search_string !== "") {
       filter.search_string = this.state.search_string;
     }
+    if (this.props.source_book !== "Any") {
+      filter.source_id = this.props.source_book;
+    }
 
     return filter;
   }
@@ -112,7 +119,7 @@ class SpellIndex extends Component<Props, State> {
                 }}
               />
             </Grid>
-            <Grid item xs={3}>
+            <Grid item xs={2}>
               <SelectStringBox
                 name="Level"
                 options={["ALL","0","1","2","3","4","5","6","7","8","9"]}
@@ -122,13 +129,25 @@ class SpellIndex extends Component<Props, State> {
                 }}
               />
             </Grid>
-            <Grid item xs={3}>
+            <Grid item xs={2}>
               <SelectStringBox
                 name="School"
                 options={["ALL",...SCHOOLS]}
                 value={this.state.school}
                 onChange={(school: string) => {
                   this.setState({ school });
+                }}
+              />
+            </Grid>
+            <Grid item xs={2}>
+              <SelectObjectBox
+                name="Source Book"
+                value={this.props.source_book} 
+                type="source_book"
+                extra_options={["Any","Basic Rules"]}
+                onChange={(value: string) => {
+                  this.props.setSourceBook(value);
+                  this.setState({ });
                 }}
               />
             </Grid>

@@ -14,8 +14,9 @@ import {
 } from "../../../models";
 
 import StringBox from "../../input/StringBox";
-import ToggleButtonBox from "../../input/ToggleButtonBox";
 import ButtonBox from "../../input/ButtonBox";
+import CenteredMenu from "../../input/CenteredMenu";
+
 import CharacterManageSpells from "./CharacterManageSpells";
 import CharacterAction from "./CharacterAction";
 import CharacterResourceBoxes from "./CharacterResourceBoxes";
@@ -358,79 +359,25 @@ class CharacterSpells extends Component<Props, State> {
   }
 
   renderSpellFilters() {
-    const return_me: any[] = [
-      <span key="ALL">
-        <ToggleButtonBox 
-          name="ALL"
-          height={15}
-          lineHeight={1.5}
-          border=""
-          color="gray"
-          width={30}
-          bold
-          value={this.state.view === "ALL"}
-          onToggle={() => {
-            this.setState({ view: "ALL" });
-          }}
-        />
-      </span>,
-      ...Object.keys(this.state.levels).map((level, key) => (
-        <span key={key}>
-          <ToggleButtonBox 
-            name={`${level}`}
-            height={15}
-            lineHeight={1.5}
-            border=""
-            color="gray"
-            width={30}
-            bold
-            value={this.state.view === `${level}`}
-            onToggle={() => {
-              this.setState({ view: `${level}` });
-            }}
-          />
-        </span>
-      ))
+    const options: string[] = [
+      "ALL",
+      ...Object.keys(this.state.levels).map((level, key) => (`${level}`))
     ];
-    if (this.state.concentration){
-      return_me.push(
-        <span key="concentration">
-          <ToggleButtonBox 
-            name=" C "
-            height={15}
-            lineHeight={1.5}
-            border=""
-            color="gray"
-            width={30}
-            bold
-            value={this.state.view === "C"}
-            onToggle={() => {
-              this.setState({ view: "C" });
-            }}
-          />
-        </span>
-      );
+    if (this.state.concentration) {
+      options.push(" C ");
     }
     if (this.state.ritual) {
-      return_me.push(
-        <span key="ritual">
-          <ToggleButtonBox 
-            name=" R "
-            height={15}
-            lineHeight={1.5}
-            border=""
-            color="gray"
-            width={30}
-            bold
-            value={this.state.view === "R"}
-            onToggle={() => {
-              this.setState({ view: "R" });
-            }}
-          />
-        </span>
-      );  
+      options.push(" R ");  
     }
-    return return_me;
+    return (
+      <CenteredMenu
+        options={options}
+        selected={this.state.view}
+        onSelect={(view: string) => {
+          this.setState({ view });
+        }}
+      />
+    );
   }
 
   renderSpellGroups() {
@@ -440,9 +387,9 @@ class CharacterSpells extends Component<Props, State> {
         o.name.toLowerCase().includes(this.state.search_string.toLowerCase()));
     }
     if (this.state.view !== "ALL") {
-      if (this.state.view === "C") {
+      if (this.state.view === " C ") {
         filtered = filtered.filter(o => o.spell && o.spell.concentration);
-      } else if (this.state.view === "R") {
+      } else if (this.state.view === " R ") {
         filtered = filtered.filter(o => o.spell && o.spell.ritual);
       } else {
         filtered = filtered.filter(o => o.spell && o.spell.level === +this.state.view);

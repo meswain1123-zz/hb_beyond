@@ -1,3 +1,6 @@
+import { 
+  RollPlus 
+} from "../models";
 
 
 export class DataUtilitiesClass {
@@ -22,7 +25,7 @@ export class DataUtilitiesClass {
         return_me += this.capitalize_first(fm, only);
       });
     }
-    return return_me;
+    return return_me.trim();
   }
 
   // Takes a string of what should be a number, and fixes it.
@@ -35,15 +38,24 @@ export class DataUtilitiesClass {
       const c = fix_me[i];
       if (c === "S") {
         return_me += "5";
-      } else if (c === "O") {
+      } else if (["O","o"].includes(c)) {
         return_me += "0";
       } else if (["L","l","I"].includes(c)) {
         return_me += "1";
-      } else if (!["+",","," "].includes(c)) {
+      } else if (!["+",","," ","(",")","{", "}", "[", "]", "!", "'", '"'].includes(c)) {
         return_me += c;
       }
     }
-    return +return_me;
+    if (return_me.includes("/")) {
+      const pieces = return_me.split("/");
+      if (pieces.length === 2) {
+        return +pieces[0] / +pieces[1];
+      } else {
+        return 0;
+      }
+    } else {
+      return +return_me;
+    }
   }
 
   add_plus_maybe(add_to_me: string | number, blank_on_0: (boolean | null) = null): string {
@@ -116,41 +128,41 @@ export class DataUtilitiesClass {
 
   ability_score_abbreviation(score: string): string {
     let abbreviation = "";
-    switch(score) {
-      case "STR":
+    switch(score.toLowerCase().trim()) {
+      case "str":
         abbreviation = "STR";
       break;
-      case "Strength":
+      case "strength":
         abbreviation = "STR";
       break;
-      case "DEX":
+      case "dex":
         abbreviation = "DEX";
       break;
-      case "Dexterity":
+      case "dexterity":
         abbreviation = "DEX";
       break;
-      case "CON":
+      case "con":
         abbreviation = "CON";
       break;
-      case "Constitution":
+      case "constitution":
         abbreviation = "CON";
       break;
-      case "INT":
+      case "int":
         abbreviation = "INT";
       break;
-      case "Intelligence":
+      case "intelligence":
         abbreviation = "INT";
       break;
-      case "WIS":
+      case "wis":
         abbreviation = "WIS";
       break;
-      case "Wisdom":
+      case "wisdom":
         abbreviation = "WIS";
       break;
-      case "CHA":
+      case "cha":
         abbreviation = "CHA";
       break;
-      case "Charisma":
+      case "charisma":
         abbreviation = "CHA";
       break;
     }
@@ -200,14 +212,77 @@ export class DataUtilitiesClass {
     return score;
   }
 
+  clean_for_parse(clean_me: string): string {
+    let cleaned = this.replaceAll(clean_me, ",", "");
+    cleaned = this.replaceAll(cleaned, ".", "");
+    cleaned = this.replaceAll(cleaned, ";", "");
+    cleaned = this.replaceAll(cleaned, ":", "");
+    cleaned = this.replaceAll(cleaned, "(", " ");
+    cleaned = this.replaceAll(cleaned, ")", " ");
+    cleaned = this.replaceAll(cleaned, "{", " ");
+    cleaned = this.replaceAll(cleaned, "}", " ");
+    cleaned = this.replaceAll(cleaned, "[", " ");
+    cleaned = this.replaceAll(cleaned, "]", " ");
+    cleaned = this.replaceAll(cleaned, "!", "");
+    cleaned = this.replaceAll(cleaned, "'", "");
+    cleaned = this.replaceAll(cleaned, '"', "");
+    cleaned = this.replaceAll(cleaned, "·", "");
+
+    return cleaned.toLowerCase();
+  }
+
+  parse_dice_roll(str: string): RollPlus {
+    const dice_roll = new RollPlus();
+    const pieces = str.split("d");
+    if (pieces.length === 2) {
+      dice_roll.count = this.fix_number_string(pieces[0]);
+      dice_roll.size = this.fix_number_string(pieces[1]);
+    }
+    return dice_roll;
+  }
+
   replaceAll(cleanMe: string, replaceMe: string, withMe: string) {
     let dirtyString = cleanMe;
     let newString = "";
     while (dirtyString.indexOf(replaceMe) > -1) {
       newString += dirtyString.substring(0, dirtyString.indexOf(replaceMe)) + withMe;
-      dirtyString = dirtyString.substring(dirtyString.indexOf(replaceMe) + 1);
+      dirtyString = dirtyString.substring(dirtyString.indexOf(replaceMe) + replaceMe.length);
     }
     newString += dirtyString;
     return newString;
+  }
+
+  find_overlap(arr1: string[], arr2: string[]) {
+    for (let i = 0; i < arr1.length; ++i) {
+      if (arr2.includes(arr1[i])) {
+        return arr1[i];
+      }
+    }
+    return "";
+  }
+
+  find_one_in_string(str: string, arr: string[], starts_with: boolean = false) {
+    for (let i = 0; i < arr.length; ++i) {
+      if (starts_with) {
+        if (str.startsWith(arr[i])) {
+          return arr[i];
+        }
+      } else {
+        if (str.includes(arr[i])) {
+          return arr[i];
+        }
+      }
+    }
+    return "";
+  }
+
+  in_list_ignore_case(str: string, arr: string[]) {
+    str = str.toLowerCase().trim();
+    for (let i = 0; i < arr.length; ++i) {
+      if (arr[i].toLowerCase().trim() === str) {
+        return arr[i];
+      }
+    }
+    return "";
   }
 }

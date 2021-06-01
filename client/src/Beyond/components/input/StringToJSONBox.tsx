@@ -30,6 +30,7 @@ type PropsFromRedux = ConnectedProps<typeof connector>
 
 type Props = PropsFromRedux & {
   onParse: (json: IStringHash[]) => void;
+  onParseAll: (parse_me: string) => void;
 }
 
 export interface State { 
@@ -129,6 +130,15 @@ class StringToJSONBox extends Component<Props, State> {
               this.props.onParse(parsed);
             }}>
             Parse
+          </Button>
+          <Button
+            variant="contained"
+            color="primary"
+            disabled={ this.state.parse_string.length === 0 }
+            onClick={ () => { 
+              this.props.onParseAll(this.state.parse_string);
+            }}>
+            Parse All
           </Button>
         </Grid>
       </Grid>
