@@ -70,7 +70,6 @@ export interface State {
 class CharacterManageSpells extends Component<Props, State> {
   constructor(props: Props) {
     super(props);
-    
     this.state = {
       spells: null,
       spell_lists: null,
@@ -109,7 +108,7 @@ class CharacterManageSpells extends Component<Props, State> {
             const sl_finder = spell_lists.filter(o => o._id === char_class.spell_list_id);
             if (sl_finder.length === 1) {
               const list = sl_finder[0];
-              let bonus_spells: Spell[] = [];
+              // let bonus_spells: Spell[] = [];
               let always_known: Spell[] = [];
               let list_spells = spells.filter(o => 
                 list.spell_ids.includes(o._id) && 
@@ -119,12 +118,21 @@ class CharacterManageSpells extends Component<Props, State> {
                   Object.keys(bs.spell_ids).includes(o._id) && 
                   bs.spell_ids[o._id] <= char_class.level && 
                   (!o.level || o.level <= char_class.spell_level_max));
-                bonus_spells = [...bonus_spells,...bspells.filter(o => list_spells.filter(o2 => o2._id === o._id).length === 0)];
+                // bonus_spells = [...bonus_spells,...bspells.filter(o => list_spells.filter(o2 => o2._id === o._id).length === 0)];
+                bspells.forEach(bspell => {
+                  if (list_spells.filter(o => o._id === bspell._id).length === 0) {
+                    list_spells.push(bspell);
+                  }
+                });
                 if (bs.always_known) {
                   always_known = [...always_known,...bspells];
                 }
               });
-              list_spells = [...list_spells,...bonus_spells];
+              
+              // console.log(list_spells);
+              // list_spells = [...list_spells,...bonus_spells];
+              // console.log(list_spells);
+              // console.log(bonus_spells);
               my_spell_lists[char_class.game_class_id] = list_spells;
               my_always_known[char_class.game_class_id] = always_known;
             }
@@ -142,7 +150,9 @@ class CharacterManageSpells extends Component<Props, State> {
   }
 
   render() {
-    if (this.state.loading || this.state.spells === null) {
+    if (this.state.loading || 
+      this.state.spells === null || 
+      this.state.spell_lists === null) {
       return <span style={{ width: "324px" }}>Loading</span>;
     } else { 
       return (
@@ -255,6 +265,7 @@ class CharacterManageSpells extends Component<Props, State> {
 
   renderMagicalClasses() {
     const return_me: any[] = [];
+    // Something's not right here.  
     if (this.props.obj instanceof Character && this.state.selected_class) {
       this.props.obj.classes.filter(o => o.spellcasting_ability !== "").forEach(char_class => {
         if (char_class.game_class) {

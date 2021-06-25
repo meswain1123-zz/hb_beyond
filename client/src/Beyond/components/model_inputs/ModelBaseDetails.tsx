@@ -98,7 +98,7 @@ class ModelBaseInput extends Component<Props, State> {
             <SelectObjectBox
               name="Source Book"
               value={this.props.obj.source_id} 
-              type="source_book"
+              data_type="source_book"
               extra_options={["Basic Rules"]}
               onChange={(value: string) => {
                 const obj = this.props.obj;
@@ -110,7 +110,7 @@ class ModelBaseInput extends Component<Props, State> {
             <SelectObjectBox
               name="Owner"
               value={this.props.obj.source_id} 
-              type="user"
+              data_type="user"
               onChange={(value: string) => {
                 const obj = this.props.obj;
                 obj.source_id = value;

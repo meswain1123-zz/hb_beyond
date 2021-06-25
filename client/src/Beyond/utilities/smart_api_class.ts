@@ -224,6 +224,35 @@ export class APIClass {
       return [{ _id: -1, vttID: -1, Name: "Alice" }];
     }
   };
+  getObjectFieldValues = async (data_type: string, field: string, filter: any = {}, refresh = false) => {
+    if (refresh) {
+      return this.getObjectFieldValuesFromAPI(data_type, field, filter);
+    } else {
+      if (this.smart_hash[data_type]) {
+        const found: string[] = [];
+        let filtered = this.filter(this.smart_hash[data_type], filter);
+
+        while (filtered.length > 0) {
+          found.push((filtered[0] as any)[field]);
+          filtered = filtered.filter(o => !found.includes((o as any)[field]));
+        }
+        return found;
+      } else {
+        return this.getObjectFieldValuesFromAPI(data_type, field, filter);
+      }
+    }
+  };
+  getObjectFieldValuesFromAPI = async (data_type: string, field: string, filter: any = {}) => {
+    if (this.real) {
+      const response = await this.postData(
+        `/api/beyond/getObjectFieldValues/${data_type}`, { field, filter }
+      );
+      const body = await response.json();
+      return body.values;
+    } else {
+      return [{ _id: -1, vttID: -1, Name: "Alice" }];
+    }
+  };
 
   filter = (objects: ModelBase[], filter: any) => {
     let filtered = [...objects];
@@ -232,6 +261,8 @@ export class APIClass {
         filtered = filtered.filter(o => o.name.startsWith(filter[key]));
       } else if (key === "search_string") {
         filtered = filtered.filter(o => o.name.includes(filter[key]));
+      } else if (key === "ids") {
+        filtered = filtered.filter(o => filter[key].includes(o._id));
       } else {
         // // Keeping this here to make it easier to debug if something goes wrong with future filters
         // const new_filtered: ModelBase[] = [];

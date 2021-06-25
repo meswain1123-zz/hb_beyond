@@ -60,7 +60,7 @@ export class MinionAbility {
   casting_time: string; // A, BA, RA, X minute(s), etc
   resource_consumed: string | null; // Slot-X, Ki, Lay on Hands, Charge, etc.
   amount_consumed: number;
-  special_resource_amount: string;
+  special_resource_amount: UpgradableNumber;
   special_resource_refresh_rule: string; // Short Rest, Long Rest, Dawn, 1 Hour, 8 Hours, 24 Hours
   attack_bonus: UpgradableNumber;
   dc: UpgradableNumber;
@@ -96,7 +96,15 @@ export class MinionAbility {
     this.casting_time = obj ? obj.casting_time : "A";
     this.resource_consumed = obj ? obj.resource_consumed : "None";
     this.amount_consumed = obj && obj.amount_consumed ? obj.amount_consumed : 0;
-    this.special_resource_amount = obj ? obj.special_resource_amount : "0";
+    if (obj && obj.special_resource_amount && obj.special_resource_amount.base === undefined) {
+      // Translate old set up to new
+      this.special_resource_amount = new UpgradableNumber();
+      this.special_resource_amount.base = obj.special_resource_amount;
+    } else if (obj && obj.special_resource_amount) {
+      this.special_resource_amount = new UpgradableNumber(obj.special_resource_amount);
+    } else {
+      this.special_resource_amount = new UpgradableNumber();
+    }
     this.special_resource_refresh_rule = obj ? obj.special_resource_refresh_rule : "";
     this.attack_bonus = obj && obj.attack_bonus ? new UpgradableNumber(obj.attack_bonus) : new UpgradableNumber();
     this.dc = obj && obj.dc ? new UpgradableNumber(obj.dc) : new UpgradableNumber();
@@ -123,7 +131,7 @@ export class MinionAbility {
       casting_time: this.casting_time,
       resource_consumed: this.resource_consumed,
       amount_consumed: this.amount_consumed,
-      special_resource_amount: this.special_resource_amount,
+      special_resource_amount: this.special_resource_amount.toDBObj(),
       special_resource_refresh_rule: this.special_resource_refresh_rule,
       attack_bonus: this.attack_bonus,
       dc: this.dc
@@ -159,7 +167,7 @@ export class MinionAbility {
     this.casting_time = copyMe.casting_time;
     this.resource_consumed = copyMe.resource_consumed;
     this.amount_consumed = copyMe.amount_consumed;
-    this.special_resource_amount = copyMe.special_resource_amount;
+    this.special_resource_amount = new UpgradableNumber(copyMe.special_resource_amount);
     this.special_resource_refresh_rule = copyMe.special_resource_refresh_rule;
     this.attack_bonus = copyMe.attack_bonus;
     this.dc = copyMe.dc;
@@ -191,7 +199,7 @@ export class MinionAbility {
     creature_ability.range_2 = this.range_2;
     creature_ability.resource_consumed = this.resource_consumed;
     creature_ability.saving_throw_ability_score = this.saving_throw_ability_score;
-    creature_ability.special_resource_amount = this.special_resource_amount;
+    this.special_resource_amount = new UpgradableNumber(this.special_resource_amount);
     creature_ability.special_resource_refresh_rule = this.special_resource_refresh_rule;
     creature_ability.true_id = this.true_id;
     return creature_ability;

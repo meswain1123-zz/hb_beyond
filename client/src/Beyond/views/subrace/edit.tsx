@@ -87,7 +87,7 @@ class SubraceEdit extends Component<Props, State> {
   submit() {
     this.setState({ processing: true }, () => {
       this.api.upsertObject("subrace", this.state.obj).then((res: any) => {
-        this.setState({ processing: false, redirectTo: "/beyond/subrace" });
+        this.setState({ processing: false, redirectTo: "/beyond/race" });
       });
     });
   }
@@ -181,7 +181,7 @@ class SubraceEdit extends Component<Props, State> {
         />
       );
     } else { 
-      const formHeight = this.props.height - (this.props.width > 600 ? 198 : 198);
+      const formHeight = this.props.height - (this.props.width > 600 ? 220 : 220);
       return (
         <Grid container spacing={1} direction="column">
           <Grid item>

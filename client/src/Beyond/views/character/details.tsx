@@ -120,6 +120,7 @@ class CharacterDetails extends Component<Props, State> {
   data_util: DataUtilitiesClass;
 
   componentDidMount() {
+    this.load();
   }
 
   // Loads the editing Character into state
@@ -128,7 +129,7 @@ class CharacterDetails extends Component<Props, State> {
       if (res) {
         const obj = res;
         this.char_util.recalcAll(obj);
-        this.setState({ obj });
+        this.setState({ obj, loading: false });
       }
     });
   }
@@ -169,8 +170,12 @@ class CharacterDetails extends Component<Props, State> {
           skills: res.skill,
           spell_slot_types: res.spell_slot_type,
           eldritch_invocations: res.eldritch_invocation,
-          weapon_keywords: res.weapon_keyword,
-          loading: false 
+          weapon_keywords: res.weapon_keyword
+        }, () => {
+          let { id } = this.props.match.params;
+          if (id !== undefined && this.state.obj._id !== id) {
+            this.load_object(id);
+          }
         });
       });
     });
@@ -183,42 +188,40 @@ class CharacterDetails extends Component<Props, State> {
   }
 
   render() {
-    if (this.state.loading) {
-      return <span>Loading</span>;
-    } else if (this.state.armor_types === null) {
-      this.load();
+    if (this.state.loading || 
+      this.state.conditions === null || 
+      this.state.spells === null || 
+      this.state.skills === null || 
+      this.state.spell_slot_types === null || 
+      this.state.eldritch_invocations === null || 
+      this.state.weapon_keywords === null || 
+      this.state.armor_types === null) {
       return <span>Loading</span>;
     } else if (this.state.redirectTo !== null) {
       return <Redirect to={this.state.redirectTo} />;
     } else { 
-      let { id } = this.props.match.params;
-      if (id !== undefined && this.state.obj._id !== id) {
-        this.load_object(id);
-        return (<span>Loading...</span>);
-      } else {
-        return (
-          <Grid container spacing={1} direction="column" style={{ lineHeight: "1.5" }}>
-            <Grid item container spacing={1} direction="row" 
-              style={{ 
-                backgroundColor: "#333333",
-                color: "white" 
-              }}>
-              { this.renderBar1() }
-              { this.renderBar2() }
-            </Grid>
-            <Grid item>
-              <CharacterMainDetails 
-                bar3_mode={this.state.bar3_mode}
-                obj={this.state.obj}
-                onChange={() => {
-                  this.setState({ });
-                }}
-              />
-            </Grid>
-            { this.renderExtras() }
+      return (
+        <Grid container spacing={1} direction="column" style={{ lineHeight: "1.5" }}>
+          <Grid item container spacing={1} direction="row" 
+            style={{ 
+              backgroundColor: "#333333",
+              color: "white" 
+            }}>
+            { this.renderBar1() }
+            { this.renderBar2() }
           </Grid>
-        ); 
-      }
+          <Grid item>
+            <CharacterMainDetails 
+              bar3_mode={this.state.bar3_mode}
+              obj={this.state.obj}
+              onChange={() => {
+                this.setState({ });
+              }}
+            />
+          </Grid>
+          { this.renderExtras() }
+        </Grid>
+      ); 
     }
   }
 

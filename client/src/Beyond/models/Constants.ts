@@ -1,6 +1,6 @@
 
 export const ABILITY_SCORES = [
-    "STR","DEX","CON","INT","WIS","CHA","None"
+    "STR","DEX","CON","INT","WIS","CHA","Spellcasting","None"
 ];
 export const DAMAGE_TYPES = [
     "Bludgeoning", 

@@ -43,6 +43,7 @@ import {
 import StringBox from "../../input/StringBox";
 import SelectStringBox from "../../input/SelectStringBox";
 import UpgradableNumberBox from "../../input/UpgradableNumberBox";
+import SelectObjectBox from "../../input/SelectObjectBox";
 
 import ProficiencyFeatureInput from "./ProficiencyFeature";
 import ASIBaseFeatureInput from "./ASIBaseFeature";
@@ -62,7 +63,7 @@ import TemplateBox from "../TemplateBox";
 import SpellBookInput from "./SpellBook";
 import SelectSpecialFeatureTypeBox from "../select/SelectSpecialFeatureTypeBox";
 import SelectSpecialFeatureBox from "../select/SelectSpecialFeatureBox";
-import SelectFightingStyleBox from "../select/SelectFightingStyleBox";
+// import SelectFightingStyleBox from "../select/SelectFightingStyleBox";
 import SelectSpellListBox from "../select/SelectSpellListBox";
 import SelectGameClassBox from "../select/SelectGameClassBox";
 import DamageMultiplierInput from "./DamageMultiplier";
@@ -99,6 +100,7 @@ type Props = PropsFromRedux & {
   choice_name: string | null;
   feature: Feature;
   slot_level: number;
+  minion: boolean;
   onChange: (feature: Feature) => void; 
   onDelete: () => void; 
   onDone: (target: string) => void;
@@ -113,7 +115,8 @@ export interface State {
 class FeatureInput extends Component<Props, State> {
   public static defaultProps = {
     choice_name: null,
-    slot_level: -1
+    slot_level: -1,
+    minion: false
   };
   constructor(props: Props) {
     super(props);
@@ -368,6 +371,9 @@ class FeatureInput extends Component<Props, State> {
                   case "Spellcasting":
                     the_feature = new SpellcastingFeature();
                   break;
+                  case "Spellcasting Focus":
+                    the_feature = "Arcane Focus";
+                  break;
                   case "Bonus Spells":
                     the_feature = new BonusSpells();
                   break;
@@ -465,8 +471,9 @@ class FeatureInput extends Component<Props, State> {
           if (typeof this.state.feature.the_feature === "object") {
             const choices: string[] = this.state.feature.the_feature as string[];
             feature_details = 
-              <SelectFightingStyleBox
+              <SelectObjectBox
                 name="Fighting Style Options"
+                data_type="fighting_style"
                 values={choices}
                 multiple
                 onChange={(changed: string[]) => {

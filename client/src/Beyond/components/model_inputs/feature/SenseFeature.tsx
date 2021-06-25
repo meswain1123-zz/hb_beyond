@@ -82,7 +82,7 @@ class SenseFeatureInput extends Component<Props, State> {
           <Grid item>
             <SelectObjectBox
               name="Sense"
-              type="sense"
+              data_type="sense"
               value={this.props.obj.sense_id}
               onChange={(id: string) => {
                 this.props.obj.sense_id = id;

@@ -10,9 +10,9 @@ import {
   Checkbox
 } from "@material-ui/core";
 
-import { 
-  ModelBase 
-} from "../../models/ModelBase";
+// import { 
+//   ModelBase 
+// } from "../../models/ModelBase";
 
 import API from "../../utilities/smart_api";
 import { APIClass } from "../../utilities/smart_api_class";
@@ -36,12 +36,14 @@ type PropsFromRedux = ConnectedProps<typeof connector>
 
 type Props = PropsFromRedux & {
   data_type: string;
+  field: string;
+  filter: any;
   value: string | null;
   values: string[];
-  filter: any;
   extra_options: string[];
   multiple: boolean;
   allow_all: boolean;
+  allow_any: boolean;
   allow_none: boolean;
   name: string;
   onChange: Function;
@@ -50,7 +52,7 @@ type Props = PropsFromRedux & {
 }
 
 export interface State { 
-  objects: ModelBase[] | null;
+  field_values: string[] | null;
   labelWidth: number;
   loading: boolean;
 }
@@ -66,13 +68,14 @@ const MenuProps = {
   },
 };
 
-class SelectObjectBox extends Component<Props, State> {
+class SelectObjectFieldBox extends Component<Props, State> {
   public static defaultProps = {
     labelWidth: null,
     multiple: false,
     value: null,
     values: [],
     allow_all: false,
+    allow_any: false,
     allow_none: false,
     color: "",
     extra_options: [],
@@ -81,7 +84,7 @@ class SelectObjectBox extends Component<Props, State> {
   constructor(props: Props) {
     super(props);
     this.state = {
-      objects: null,
+      field_values: null,
       labelWidth: this.getLabelWidth(props.name),
       loading: false
     };
@@ -110,43 +113,23 @@ class SelectObjectBox extends Component<Props, State> {
     return searchMe.split(findMe).length - 1;
   }
 
-  renderValues(selected: string[]) {
-    let rendered = "";
-    if (this.state.objects) {
-      for (let i = 0; i < selected.length; i++) {
-        const s = selected[i];
-        const oFinder = this.state.objects.filter(o => o._id === s);
-        if (oFinder.length === 1) {
-          if (i > 0) {
-            rendered += ",";
-          }
-          rendered += oFinder[0].name;
-        } else {
-          // To get ALL and None to show up
-          if (i > 0) {
-            rendered += ",";
-          }
-          rendered += s;
-        }
-      }
-    }
-    return rendered;
-  }
-
   load() {
     this.setState({ loading: true }, () => {
-      this.api.getObjects(this.props.data_type, this.props.filter).then((res: any) => {
+      console.log(this.props.data_type);
+      console.log(this.props.field);
+      console.log(this.props.filter);
+      this.api.getObjectFieldValues(this.props.data_type, this.props.field, this.props.filter).then((res: any) => {
         if (res && !res.error) {
-          this.setState({ objects: res, loading: false });
+          this.setState({ field_values: res, loading: false });
         }
       });
     });
   }
 
   render() {
-    if (this.props.data_type === "") {
+    if (this.props.data_type === "" || this.props.field === "") {
       return <span></span>;
-    } else if (this.state.loading || this.state.objects === null) {
+    } else if (this.state.loading || this.state.field_values === null) {
       return <span>Loading</span>;
     } else {
       if (this.props.color !== "") {
@@ -161,6 +144,18 @@ class SelectObjectBox extends Component<Props, State> {
         return this.renderControl();
       }
     }
+  }
+
+  renderValues(selected: string[]) {
+    let rendered = "";
+    for (let i = 0; i < selected.length; i++) {
+      const s = selected[i];
+      if (i > 0) {
+        rendered += ",";
+      }
+      rendered += s;
+    }
+    return rendered;
   }
 
   renderControl() {
@@ -188,6 +183,12 @@ class SelectObjectBox extends Component<Props, State> {
                 <ListItemText primary="ALL" />
               </MenuItem>
             }
+            { this.props.allow_any && 
+              <MenuItem value="Any">
+                <Checkbox checked={ this.props.values.indexOf("Any") > -1 } />
+                <ListItemText primary="Any" />
+              </MenuItem>
+            }
             { this.props.allow_none && 
               <MenuItem value="None">
                 <Checkbox checked={ this.props.values.indexOf("None") > -1 } />
@@ -202,10 +203,10 @@ class SelectObjectBox extends Component<Props, State> {
                 </MenuItem>
               );
             })}
-            { this.state.objects && this.state.objects.map((opt: ModelBase, i: any) => (
-              <MenuItem key={i} value={opt._id}>
-                <Checkbox checked={ this.props.values.indexOf(opt._id) > -1 } />
-                <ListItemText primary={opt.name} />
+            { this.state.field_values && this.state.field_values.map((opt: string, i: any) => (
+              <MenuItem key={i} value={opt}>
+                <Checkbox checked={ this.props.values.indexOf(opt) > -1 } />
+                <ListItemText primary={opt} />
               </MenuItem>
             ))}
           </Select>
@@ -223,6 +224,9 @@ class SelectObjectBox extends Component<Props, State> {
             { this.props.allow_all && 
               <MenuItem value="ALL">ALL</MenuItem>
             }
+            { this.props.allow_any && 
+              <MenuItem value="Any">Any</MenuItem>
+            }
             { this.props.allow_none && 
               <MenuItem value="None">None</MenuItem>
             }
@@ -231,8 +235,8 @@ class SelectObjectBox extends Component<Props, State> {
                 <MenuItem key={key} value={extra_option}>{extra_option}</MenuItem>
               );
             })}
-            { this.state.objects && this.state.objects.map((opt: ModelBase, i: any) => {
-              return (<MenuItem key={i} value={opt._id}>{opt.name}</MenuItem>);
+            { this.state.field_values && this.state.field_values.map((opt: string, i: any) => {
+              return (<MenuItem key={i} value={opt}>{opt}</MenuItem>);
             })}
           </Select>
         }
@@ -241,4 +245,4 @@ class SelectObjectBox extends Component<Props, State> {
   }
 }
 
-export default connector(SelectObjectBox);
+export default connector(SelectObjectFieldBox);

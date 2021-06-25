@@ -118,7 +118,7 @@ class SkillEdit extends Component<Props, State> {
     } else if (this.state.redirectTo !== null) {
       return <Redirect to={this.state.redirectTo} />;
     } else { 
-      const formHeight = this.props.height - (this.props.width > 600 ? 198 : 198);
+      const formHeight = this.props.height - (this.props.width > 600 ? 220 : 220);
       return (
         <Grid container spacing={1} direction="column">
           <Grid item>

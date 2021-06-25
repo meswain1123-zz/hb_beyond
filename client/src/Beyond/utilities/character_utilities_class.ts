@@ -555,11 +555,10 @@ export class CharacterUtilitiesClass {
           f.feature_type === "Mystic Arcanum" ||
           f.feature_type === "Spell Mastery") {
           const char_spellcasting = new CharacterSpellcasting();
-          if (source_type === "Class") {
-            char_spellcasting.class_id = source_id;
-            char_spellcasting.copyFeature(f);
-            spellcasting.push(char_spellcasting);
-          }
+          char_spellcasting.source_id = source_id;
+          char_spellcasting.source_type = source_type;
+          char_spellcasting.copyFeature(f);
+          spellcasting.push(char_spellcasting);
         } else if (f.feature_type === "Special Spell") {
           f.feature_options.forEach((id: string) => {
             const obj_finder = all_spells.filter(o => o._id === id);
@@ -706,7 +705,7 @@ export class CharacterUtilitiesClass {
           char_class.class_features.forEach(fb => {
             let good = true;
             if (fb.feature_base) {
-              if (fb.feature_base.required_condition_ids.length > 0 && fb.feature_base.required_condition_ids.filter(o => o !== "ALL").length > 0) {
+              if (fb.feature_base.required_condition_ids.filter(o => o !== "All" && o !== "ALL").length > 0) {
                 good = false;
                 for (let i = 0; i < fb.feature_base.required_condition_ids.length; ++i) {
                   if (me.conditions.includes(fb.feature_base.required_condition_ids[i])) {
@@ -717,7 +716,9 @@ export class CharacterUtilitiesClass {
               }
             }
             if (good) {
-              fb.features.forEach(f => { processCharacterFeature(f, "Class", char_class.game_class_id, char_class.game_class ? char_class.game_class.name : ""); });
+              fb.features.forEach(f => { 
+                processCharacterFeature(f, "Class", char_class.game_class_id, char_class.game_class ? char_class.game_class.name : ""); 
+              });
             }
           });
           char_class.subclass_features.forEach(fb => {
@@ -1213,8 +1214,7 @@ export class CharacterUtilitiesClass {
         char_class.cantrips_max = 0;
         char_class.spell_dc = 0;
         char_class.spell_attack = 0;
-
-        spellcasting.filter(sc => sc.class_id === char_class.game_class_id).forEach(sc => {
+        spellcasting.filter(sc => sc.source_type !== "Class" || sc.source_id === char_class.game_class_id).forEach(sc => {
           if (sc.feature_type === "Spellcasting") {
             const feature = sc.the_feature as SpellcastingFeature;
             char_class.spellcasting_ability = feature.ability;

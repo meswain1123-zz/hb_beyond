@@ -22,10 +22,10 @@ export class AbilityEffect {
   
   constructor(obj?: any) {
     this.true_id = obj && obj.true_id ? obj.true_id : uuidv4().toString();
-    this.type = obj ? `${obj.type}` : "None";
-    this.potence_type = obj ? `${obj.potence_type}` : "Slot";
-    this.add_modifier = obj ? `${obj.add_modifier}` : "false";
-    this.attack_type = obj ? `${obj.attack_type}` : "Ranged Spell";
+    this.type = obj ? obj.type : "None";
+    this.potence_type = obj ? obj.potence_type : "Slot";
+    this.add_modifier = obj ? obj.add_modifier : "false";
+    this.attack_type = obj ? obj.attack_type : "None";
     this.potences = [];
     if (obj && obj.potences) {
       if (obj.potences.length) {

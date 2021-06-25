@@ -298,7 +298,7 @@ class RaceIndex extends Component<Props, State> {
         </Grid>
       ); 
     } else if (this.state.mode === "import") {
-      const formHeight = this.props.height - (this.props.width > 600 ? 198 : 198);
+      const formHeight = this.props.height - (this.props.width > 600 ? 220 : 220);
       const page_size = 7;
       const filtered: any[] = this.state.import_races ? this.state.import_races.filter(o => 
         (this.state.start_letter === "" || o.name.toUpperCase().startsWith(this.state.start_letter)) && 

@@ -34,6 +34,12 @@ export class Character extends ModelBase {
   static data_type: string = "character";
   static always_store: boolean = false;
   connected: boolean;
+
+  source_books: string[];
+  allow_homebrew: boolean;
+  custom_origins: boolean;
+  optional_features: boolean;
+
   image_url: string;
   race: CharacterRace;
   classes: CharacterClass[];
@@ -82,6 +88,7 @@ export class Character extends ModelBase {
   advantage: boolean | null;
   minions: CreatureInstance[];
   transform: CreatureInstance | null;
+  optional_feature_base_ids: string[];
   // Partially Calculated
   hit_dice: HitDice[];
   resources: CharacterResource[];
@@ -144,6 +151,13 @@ export class Character extends ModelBase {
 
   constructor(obj?: any) {
     super(obj);
+
+    this.source_books = obj && obj.source_books ? obj.source_books : [];
+    this.allow_homebrew = obj && obj.allow_homebrew ? obj.allow_homebrew : false;
+    this.custom_origins = obj && obj.custom_origins ? obj.custom_origins : false;
+    this.optional_features = obj && obj.optional_features ? obj.optional_features : false;
+    this.optional_feature_base_ids = obj && obj.optional_feature_base_ids ? obj.optional_feature_base_ids : [];
+
     this.image_url = obj && obj.image_url ? obj.image_url : "";
     this.inspiration = obj && obj.inspiration ? obj.inspiration : 0;
     this.race = obj ? new CharacterRace(obj.race) : new CharacterRace();
@@ -427,6 +441,11 @@ export class Character extends ModelBase {
       _id: this._id,
       name: this.name,
       description: this.description,
+      source_books: this.source_books,
+      allow_homebrew: this.allow_homebrew,
+      custom_origins: this.custom_origins,
+      optional_features: this.optional_features,
+      optional_feature_base_ids: this.optional_feature_base_ids,
       source_type: this.source_type,
       source_id: this.source_id,
       image_url: this.image_url,
@@ -497,6 +516,11 @@ export class Character extends ModelBase {
   copy(copyMe: Character): void {
     this._id = copyMe._id;
     this.connected = copyMe.connected;
+    this.source_books = copyMe.source_books;
+    this.allow_homebrew = copyMe.allow_homebrew;
+    this.custom_origins = copyMe.custom_origins;
+    this.optional_features = copyMe.optional_features;
+    this.optional_feature_base_ids = copyMe.optional_feature_base_ids;
     this.race = copyMe.race;
     this.classes = copyMe.classes;
     this.background = copyMe.background;

@@ -54,7 +54,10 @@ class DisplayObjects extends Component<Props, State> {
 
   load() {
     this.setState({ loading: true }, () => {
-      this.api.getObjects(this.props.type).then((res: any) => {
+      const filter: any = {
+        ids: this.props.ids
+      };
+      this.api.getObjects(this.props.type, filter).then((res: any) => {
         if (res && !res.error) {
           this.setState({ objects: res, loading: false });
         }

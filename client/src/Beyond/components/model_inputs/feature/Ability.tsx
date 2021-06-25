@@ -337,19 +337,6 @@ class AbilityInput extends Component<Props, State> {
             />
           </Grid>
         }
-        {/* { (this.state.special_refresh_rule || refresh_rule_helper === "Special") &&
-          <Grid item>
-            <StringBox 
-              value={ this.props.obj.special_resource_refresh_rule } 
-              name="Refresh Rule"
-              onBlur={(value: string) => {
-                const obj = this.props.obj;
-                obj.special_resource_refresh_rule = value;
-                this.props.onChange(obj);
-              }}
-            />
-          </Grid>
-        } */}
       </Grid>
     );
   }

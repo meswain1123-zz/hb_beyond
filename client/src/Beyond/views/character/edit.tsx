@@ -21,9 +21,13 @@ import {
   FeatureBase,
   WeaponKeyword,
   Spell,
-  SpellSlotType
+  SpellSlotType,
+  SourceBook
 } from "../../models";
+
 import StringBox from "../../components/input/StringBox";
+import ToggleButtonBox from "../../components/input/ToggleButtonBox";
+
 import CharacterRaceInput from "../../components/model_inputs/character/CharacterRace";
 import CharacterBackgroundInput from "../../components/model_inputs/character/CharacterBackground";
 import CharacterAbilityScoresInput from "../../components/model_inputs/character/CharacterAbilityScoresInput";
@@ -76,6 +80,7 @@ export interface State {
   spells: Spell[] | null;
   spell_slot_types: SpellSlotType[] | null;
   eldritch_invocations: EldritchInvocation[] | null;
+  source_books: SourceBook[] | null;
   loading: boolean;
 }
 
@@ -94,6 +99,7 @@ class CharacterEdit extends Component<Props, State> {
       spells: null,
       spell_slot_types: null,
       eldritch_invocations: null,
+      source_books: null,
       loading: false
     };
     this.api = API.getInstance();
@@ -129,14 +135,14 @@ class CharacterEdit extends Component<Props, State> {
       if (res) {
         const obj = res;
         this.char_util.recalcAll(obj);
-        this.setState({ obj });
+        this.setState({ obj, loading: false });
       }
     });
   }
 
   load() {
     this.setState({ loading: true }, () => {
-      this.api.getSetOfObjects(["armor_type","spell","spell_slot_type","eldritch_invocation","weapon_keyword"]).then((res: any) => {
+      this.api.getSetOfObjects(["armor_type","spell","spell_slot_type","eldritch_invocation","weapon_keyword","source_book"]).then((res: any) => {
         const armor_types: ArmorType[] = res.armor_type;
         const spells: Spell[] = res.spell;
         this.setState({ 
@@ -145,7 +151,12 @@ class CharacterEdit extends Component<Props, State> {
           spell_slot_types: res.spell_slot_type,
           eldritch_invocations: res.eldritch_invocation,
           weapon_keywords: res.weapon_keyword,
-          loading: false 
+          source_books: res.source_book
+        }, () => {
+          let { id } = this.props.match.params;
+          if (id !== undefined && this.state.obj._id !== id) {
+            this.load_object(id);
+          }
         });
       });
     });
@@ -288,7 +299,7 @@ class CharacterEdit extends Component<Props, State> {
     if (this.state.mode === "race") {
       return (
         <CharacterRaceInput 
-          obj={this.state.obj}
+          character={this.state.obj}
           onChange={(changed: CharacterRace) => {
             const obj = this.state.obj;
             obj.race = changed;
@@ -324,7 +335,7 @@ class CharacterEdit extends Component<Props, State> {
     } else if (this.state.mode === "class") {
       return (
         <CharacterClassInput
-          obj={this.state.obj}
+          character={this.state.obj}
           onChange={(changed: Character) => {
             const obj = changed;
             this.char_util.recalcAll(obj);
@@ -359,17 +370,57 @@ class CharacterEdit extends Component<Props, State> {
             />
           </Grid>
           <Grid item>
-            <StringBox 
-              value={this.state.obj.description} 
-              name="Description"
-              multiline
-              onBlur={(value: string) => {
+            <ToggleButtonBox 
+              name="Custom Origins"
+              value={this.state.obj.custom_origins} 
+              onToggle={() => {
                 const obj = this.state.obj;
-                obj.description = value;
+                obj.custom_origins = !obj.custom_origins;
                 this.setState({ obj });
               }}
             />
           </Grid>
+          <Grid item>
+            <ToggleButtonBox 
+              name="Optional Features"
+              value={this.state.obj.optional_features} 
+              onToggle={() => {
+                const obj = this.state.obj;
+                obj.optional_features = !obj.optional_features;
+                this.setState({ obj });
+              }}
+            />
+          </Grid>
+          <Grid item>
+            <ToggleButtonBox 
+              name="Homebrew Content"
+              value={this.state.obj.allow_homebrew} 
+              onToggle={() => {
+                const obj = this.state.obj;
+                obj.allow_homebrew = !obj.allow_homebrew;
+                this.setState({ obj });
+              }}
+            />
+          </Grid>
+          { this.state.source_books && this.state.source_books.map((book, key) => {
+            return (
+              <Grid item key={key}>
+                <ToggleButtonBox 
+                  name={`${book.abbreviation} Content`}
+                  value={this.state.obj.source_books.includes(book._id)} 
+                  onToggle={() => {
+                    const obj = this.state.obj;
+                    if (this.state.obj.source_books.includes(book._id)) {
+                      obj.source_books = obj.source_books.filter(o => o !== book._id);
+                    } else {
+                      obj.source_books.push(book._id);
+                    }
+                    this.setState({ obj });
+                  }}
+                />
+              </Grid>
+            );
+          })}
         </Grid>
       ); 
     }

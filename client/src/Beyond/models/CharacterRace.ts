@@ -50,9 +50,11 @@ export class CharacterRace {
     this.features = [];
     for (let i = 0; i < race.features.length; i++) {
       const fb = race.features[i];
-      const char_feature_base = new CharacterFeatureBase();
-      char_feature_base.copyFeatureBase(fb);
-      this.features.push(char_feature_base);
+      if (!fb.optional) {
+        const char_feature_base = new CharacterFeatureBase();
+        char_feature_base.copyFeatureBase(fb);
+        this.features.push(char_feature_base);
+      }
     }
     if (subrace) {
       this.subrace = new CharacterSubRace();

@@ -264,11 +264,11 @@ export class DataUtilitiesClass {
   find_one_in_string(str: string, arr: string[], starts_with: boolean = false) {
     for (let i = 0; i < arr.length; ++i) {
       if (starts_with) {
-        if (str.startsWith(arr[i])) {
+        if (str.toLowerCase().startsWith(arr[i].toLowerCase())) {
           return arr[i];
         }
       } else {
-        if (str.includes(arr[i])) {
+        if (str.toLowerCase().includes(arr[i].toLowerCase())) {
           return arr[i];
         }
       }

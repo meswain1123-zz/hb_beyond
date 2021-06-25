@@ -24,6 +24,7 @@ import {
 import StringBox from "../../input/StringBox";
 import SelectStringBox from "../../input/SelectStringBox"; 
 import CharacterFeatureBasesInput from "./CharacterFeatureBases";
+import CharacterFeatureBaseOptionsInput from "./CharacterFeatureBaseOptions";
 
 import API from "../../../utilities/smart_api";
 import { APIClass } from "../../../utilities/smart_api_class";
@@ -49,7 +50,7 @@ const connector = connect(mapState, mapDispatch)
 type PropsFromRedux = ConnectedProps<typeof connector>
 
 type Props = PropsFromRedux & {
-  obj: Character;
+  character: Character;
   onChange: (changed: Character) => void;
 }
 
@@ -65,6 +66,7 @@ export interface State {
   loading: boolean;
   expanded_class_id: string;
   expanded_feature_base_id: string;
+  optional: boolean | null;
 }
 
 class CharacterClassInput extends Component<Props, State> {
@@ -81,7 +83,8 @@ class CharacterClassInput extends Component<Props, State> {
       new_class: false,
       loading: false,
       expanded_class_id: "",
-      expanded_feature_base_id: ""
+      expanded_feature_base_id: "",
+      optional: false
     };
     this.api = API.getInstance();
   }
@@ -108,10 +111,10 @@ class CharacterClassInput extends Component<Props, State> {
   load() {
     this.setState({ loading: true }, () => {
       this.api.getSetOfObjects(["game_class","subclass"]).then((res: any) => {
-        const obj = this.props.obj;
+        const character = this.props.character;
         const game_classes: GameClass[] = res.game_class;
         const subclasses: Subclass[] = res.subclass;
-        obj.classes.forEach(char_class => {
+        character.classes.forEach(char_class => {
           if (!char_class.game_class) {
             const objFinder = game_classes.filter(o => o._id === char_class.game_class_id);
             if (objFinder.length === 1) {
@@ -125,9 +128,9 @@ class CharacterClassInput extends Component<Props, State> {
             }
           }
         });
-        this.props.onChange(obj);
+        this.props.onChange(character);
         this.setState({ 
-          expanded_class_id: (obj.classes.length === 1 ? obj.classes[0].game_class_id : ""),
+          expanded_class_id: (character.classes.length === 1 ? character.classes[0].game_class_id : ""),
           game_classes, 
           subclasses,
           loading: false 
@@ -139,7 +142,7 @@ class CharacterClassInput extends Component<Props, State> {
   render() {
     if (this.state.loading || this.state.game_classes === null) {
       return <span>Loading</span>;
-    } else if (this.props.obj.classes.length === 0 || this.state.new_class) {
+    } else if (this.props.character.classes.length === 0 || this.state.new_class) {
       const page_size = 7;
       const filtered: any[] = this.state.game_classes ? this.state.game_classes.filter(o => 
         (this.state.start_letter === "" || 
@@ -197,13 +200,13 @@ class CharacterClassInput extends Component<Props, State> {
       return (
         <Grid container spacing={1} direction="column">
           <Grid item className={"MuiTypography-root MuiListItemText-primary header"}>
-            Character Level { this.props.obj.character_level }
+            Character Level { this.props.character.character_level }
           </Grid>
           <Grid item>
-            Max Hit Points: { this.props.obj.max_hit_points }
+            Max Hit Points: { this.props.character.max_hit_points }
           </Grid>
           <Grid item>
-            Hit Dice: { this.props.obj.hit_dice_string() }
+            Hit Dice: { this.props.character.hit_dice_string() }
           </Grid>
           { this.renderCharClasses() }
           <Grid item>
@@ -223,8 +226,8 @@ class CharacterClassInput extends Component<Props, State> {
   renderCharClasses() {
     return (
       <Grid item container spacing={1} direction="column">
-        { this.props.obj.classes.map((char_class, key) => {
-          let other_class_levels = this.props.obj.character_level - char_class.level;
+        { this.props.character.classes.map((char_class, key) => {
+          let other_class_levels = this.props.character.character_level - char_class.level;
           const class_levels: string[] = [];
           for (let i = 1; i <= (20 - other_class_levels); ++i) {
             class_levels.push(`${i}`);
@@ -257,24 +260,24 @@ class CharacterClassInput extends Component<Props, State> {
                           }
                         }
                         char_class.level = level;
-                        const obj = this.props.obj;
-                        this.props.onChange(obj);
+                        const character = this.props.character;
+                        this.props.onChange(character);
                       }}
                     />
                   </Grid>
                   <Grid item xs={2}>
                     <Close style={{ cursor: "pointer" }}
                       onClick={() => {
-                        const obj = this.props.obj;
-                        obj.classes = obj.classes.filter(o => o.game_class_id !== char_class.game_class_id);
-                        obj.classes.filter(o => o.position > char_class.position).forEach(cc => {
+                        const character = this.props.character;
+                        character.classes = character.classes.filter(o => o.game_class_id !== char_class.game_class_id);
+                        character.classes.filter(o => o.position > char_class.position).forEach(cc => {
                           cc.position--;
                           if (cc.position === 0) {
                             cc.fixWithGameClass();
                           }
                         });
-                        obj.spells = obj.spells.filter(o => o.source_type !== "Class" || o.source_id !== char_class.game_class_id);
-                        this.props.onChange(obj);
+                        character.spells = character.spells.filter(o => o.source_type !== "Class" || o.source_id !== char_class.game_class_id);
+                        this.props.onChange(character);
                         this.setState({ new_class: false });
                       }} 
                     />
@@ -289,6 +292,47 @@ class CharacterClassInput extends Component<Props, State> {
                     { this.state.expanded_class_id === char_class.game_class_id ? "Hide" : "Show" } Class Features
                   </Link>
                 </Grid>
+                { this.props.character.optional_features ? 
+                  <Grid item xs={12} container spacing={0} direction="row">
+                    <Grid item xs={6}>
+                      <Link href="#" 
+                        onClick={(event: React.SyntheticEvent) => {
+                          event.preventDefault();
+                          this.setState({ 
+                            expanded_class_id: char_class.game_class_id,
+                            optional: (this.state.optional === false ? null : false)
+                          });
+                        }}>
+                        Class Features
+                      </Link>
+                    </Grid>
+                    <Grid item xs={6}>
+                      <Link href="#" 
+                        onClick={(event: React.SyntheticEvent) => {
+                          event.preventDefault();
+                          this.setState({ 
+                            expanded_class_id: char_class.game_class_id,
+                            optional: (this.state.optional === true ? null : true)
+                          });
+                        }}>
+                        Optional Features
+                      </Link>
+                    </Grid>
+                  </Grid>
+                :
+                  <Grid item xs={12}>
+                    <Link href="#" 
+                      onClick={(event: React.SyntheticEvent) => {
+                        event.preventDefault();
+                        this.setState({ 
+                          expanded_class_id: char_class.game_class_id,
+                          optional: (this.state.optional === false ? null : false)
+                        });
+                      }}>
+                      Class Features
+                    </Link>
+                  </Grid>
+                }
                 { this.renderCharClassFeatures(char_class) }
               </Grid>
             );
@@ -301,38 +345,107 @@ class CharacterClassInput extends Component<Props, State> {
   }
 
   renderCharClassFeatures(char_class: CharacterClass) {
-    if (char_class.game_class && this.state.expanded_class_id === char_class.game_class_id) {
-      const combined_features = [...char_class.class_features,...char_class.subclass_features];
-      if (char_class.level >= char_class.game_class.subclass_level) {
-        const subclass_choice = new CharacterFeatureBase();
-        subclass_choice.source_id = char_class.game_class_id;
-        subclass_choice.true_id = "Subclass";
-        subclass_choice.feature_base = new FeatureBase();
-        subclass_choice.feature_base.level = char_class.game_class.subclass_level;
-        subclass_choice.feature_base.name = char_class.game_class.subclasses_called;
-        subclass_choice.needs_attention = char_class.subclass_id === "";
-        if (this.state.subclasses) {
-          const subclass_feature = new CharacterFeature();
-          subclass_feature.name = char_class.game_class.subclasses_called;
-          subclass_feature.feature_type = "Subclass";
-          subclass_feature.feature = new Feature();
-          subclass_feature.feature.name = char_class.game_class.subclasses_called;
-          subclass_feature.feature.feature_type = "Subclass";
-          subclass_feature.feature_options = [char_class.game_class_id, char_class.subclass_id];
-          subclass_feature.source_id = char_class.game_class_id;
-          subclass_choice.features.push(subclass_feature);
+    if (char_class.game_class && this.state.expanded_class_id === char_class.game_class_id && this.state.optional !== null) {
+      if (this.state.optional) {
+        return (
+          <Grid item xs={12} container spacing={1} direction="column">
+            <Grid item>
+              Optional Features
+            </Grid>
+            <CharacterFeatureBaseOptionsInput 
+              character={this.props.character}
+              features={ char_class.subclass ? [...char_class.game_class.features, ...char_class.subclass.features] : char_class.game_class.features }
+              onChange={(true_id: string, value: boolean) => {
+                const character = this.props.character;
+                if (char_class.game_class) {
+                  let feature_finder = char_class.game_class.features.filter(o => o.true_id === true_id);
+                  let use_subrace = false;
+                  if (feature_finder.length === 0 && char_class.subclass) {
+                    feature_finder = char_class.subclass.features.filter(o => o.true_id === true_id);
+                    use_subrace = true;
+                  }
+                  if (feature_finder.length === 1) {
+                    const feature = feature_finder[0];
+                    if (value) {
+                      if (!this.props.character.optional_feature_base_ids.includes(feature.true_id)) {
+                        character.optional_feature_base_ids.push(feature.true_id);
+                        const character_feature = new CharacterFeatureBase();
+                        character_feature.copyFeatureBase(feature);
+                        if (use_subrace && char_class.subclass) {
+                          char_class.subclass_features.push(character_feature);
+                          if (feature.replaces_feature_base_id !== "") {
+                            char_class.subclass_features = char_class.subclass_features.filter(o => o.true_id !== feature.replaces_feature_base_id);
+                          }
+                        } else {
+                          char_class.class_features.push(character_feature);
+                          if (feature.replaces_feature_base_id !== "") {
+                            char_class.class_features = char_class.class_features.filter(o => o.true_id !== feature.replaces_feature_base_id);
+                          }
+                        }
+                      }
+                    } else {
+                      if (this.props.character.optional_feature_base_ids.includes(feature.true_id)) {
+                        character.optional_feature_base_ids = character.optional_feature_base_ids.filter(o => o !== feature.true_id);
+                        char_class.class_features = char_class.class_features.filter(o => o.true_id !== feature.true_id);
+                        if (feature.replaces_feature_base_id !== "") {
+                          let feature_finder2 = char_class.game_class.features.filter(o => o.true_id === feature.replaces_feature_base_id);
+                          if (feature_finder2.length === 1) {
+                            const feature2 = feature_finder2[0];
+                            const character_feature = new CharacterFeatureBase();
+                            character_feature.copyFeatureBase(feature2);
+                            char_class.class_features.push(character_feature);
+                          } else if (char_class.subclass) {
+                            feature_finder2 = char_class.subclass.features.filter(o => o.true_id === feature.replaces_feature_base_id);
+                            if (feature_finder2.length === 1) {
+                              const feature2 = feature_finder2[0];
+                              const character_feature = new CharacterFeatureBase();
+                              character_feature.copyFeatureBase(feature2);
+                              char_class.subclass_features.push(character_feature);
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                  this.props.onChange(character);
+                }
+              }}
+            />
+          </Grid>
+        );
+      } else {
+        const combined_features = [...char_class.class_features,...char_class.subclass_features];
+        if (char_class.level >= char_class.game_class.subclass_level) {
+          const subclass_choice = new CharacterFeatureBase();
+          subclass_choice.source_id = char_class.game_class_id;
+          subclass_choice.true_id = "Subclass";
+          subclass_choice.feature_base = new FeatureBase();
+          subclass_choice.feature_base.level = char_class.game_class.subclass_level;
+          subclass_choice.feature_base.name = char_class.game_class.subclasses_called;
+          subclass_choice.needs_attention = char_class.subclass_id === "";
+          if (this.state.subclasses) {
+            const subclass_feature = new CharacterFeature();
+            subclass_feature.name = char_class.game_class.subclasses_called;
+            subclass_feature.feature_type = "Subclass";
+            subclass_feature.feature = new Feature();
+            subclass_feature.feature.name = char_class.game_class.subclasses_called;
+            subclass_feature.feature.feature_type = "Subclass";
+            subclass_feature.feature_options = [char_class.game_class_id, char_class.subclass_id];
+            subclass_feature.source_id = char_class.game_class_id;
+            subclass_choice.features.push(subclass_feature);
+          }
+          combined_features.push(subclass_choice);
         }
-        combined_features.push(subclass_choice);
+        return (
+          <CharacterFeatureBasesInput 
+            character={this.props.character}
+            features={combined_features.sort((a, b) => (a.feature_base && b.feature_base && a.feature_base.level > b.feature_base.level) ? 1 : -1)}
+            onChange={() => {
+              this.props.onChange(this.props.character);
+            }}
+          />
+        );
       }
-      return (
-        <CharacterFeatureBasesInput 
-          character={this.props.obj}
-          features={combined_features.sort((a, b) => (a.feature_base && b.feature_base && a.feature_base.level > b.feature_base.level) ? 1 : -1)}
-          onChange={() => {
-            this.props.onChange(this.props.obj);
-          }}
-        />
-      );
     }
     return null;
   }
@@ -342,25 +455,25 @@ class CharacterClassInput extends Component<Props, State> {
     let reasons = "";
     if (this.state.new_class) {
       // Check if they already have the class
-      const obj = this.props.obj;
-      if (obj.classes.filter(o => o.game_class_id === game_class._id).length === 1) {
+      const character = this.props.character;
+      if (character.classes.filter(o => o.game_class_id === game_class._id).length === 1) {
         disabled = true;
       } else {
         // Need to check all the char_classes' primary and secondary abilities
         // As well as the game_class's
         // I should also check these if the ability_scores are being modified
-        obj.classes.forEach(char_class => {
+        character.classes.forEach(char_class => {
           if (char_class.game_class) {
             let reason = "";
             if (char_class.game_class.primary_ability.length === 3) {
-              const score = obj.current_ability_scores.getAbilityScore(char_class.game_class.primary_ability);
+              const score = character.current_ability_scores.getAbilityScore(char_class.game_class.primary_ability);
               if (score && score < 13) {
                 disabled = true;
                 reason = `Prerequisites not met: ${char_class.game_class.primary_ability} 13 (${score})`;
               }
             } else if (char_class.game_class.primary_ability.length > 3) {
-              const score1 = obj.current_ability_scores.getAbilityScore(char_class.game_class.primary_ability.substring(0,3));
-              const score2 = obj.current_ability_scores.getAbilityScore(char_class.game_class.primary_ability.substring(7,3));
+              const score1 = character.current_ability_scores.getAbilityScore(char_class.game_class.primary_ability.substring(0,3));
+              const score2 = character.current_ability_scores.getAbilityScore(char_class.game_class.primary_ability.substring(7,3));
               
               if ((score1 && score1 < 13) && (score2 && score2 < 13)) {
                 disabled = true;
@@ -368,7 +481,7 @@ class CharacterClassInput extends Component<Props, State> {
               }
             }
             if (char_class.game_class.secondary_ability.length === 3) {
-              const score = obj.current_ability_scores.getAbilityScore(char_class.game_class.secondary_ability);
+              const score = character.current_ability_scores.getAbilityScore(char_class.game_class.secondary_ability);
               if (score && score < 13) {
                 disabled = true;
                 if (reason === "") {
@@ -379,8 +492,8 @@ class CharacterClassInput extends Component<Props, State> {
                 reason += `${char_class.game_class.secondary_ability} 13 (${score})`;
               }
             } else if (char_class.game_class.secondary_ability.length > 3) {
-              const score1 = obj.current_ability_scores.getAbilityScore(char_class.game_class.secondary_ability.substring(0,3));
-              const score2 = obj.current_ability_scores.getAbilityScore(char_class.game_class.secondary_ability.substring(7,3));
+              const score1 = character.current_ability_scores.getAbilityScore(char_class.game_class.secondary_ability.substring(0,3));
+              const score2 = character.current_ability_scores.getAbilityScore(char_class.game_class.secondary_ability.substring(7,3));
               
               if ((score1 && score1 < 13) && (score2 && score2 < 13)) {
                 disabled = true;
@@ -400,14 +513,14 @@ class CharacterClassInput extends Component<Props, State> {
         });
         let reason2 = "";
         if (game_class.primary_ability.length === 3) {
-          const score = obj.current_ability_scores.getAbilityScore(game_class.primary_ability);
+          const score = character.current_ability_scores.getAbilityScore(game_class.primary_ability);
           if (score && score < 13) {
             disabled = true;
             reason2 = `Prerequisites not met: ${game_class.primary_ability} 13 (${score})`;
           }
         } else if (game_class.primary_ability.length > 3) {
-          const score1 = obj.current_ability_scores.getAbilityScore(game_class.primary_ability.substring(0,3));
-          const score2 = obj.current_ability_scores.getAbilityScore(game_class.primary_ability.substring(7,3));
+          const score1 = character.current_ability_scores.getAbilityScore(game_class.primary_ability.substring(0,3));
+          const score2 = character.current_ability_scores.getAbilityScore(game_class.primary_ability.substring(7,3));
           
           if ((score1 && score1 < 13) && (score2 && score2 < 13)) {
             disabled = true;
@@ -415,7 +528,7 @@ class CharacterClassInput extends Component<Props, State> {
           }
         }
         if (game_class.secondary_ability.length === 3) {
-          const score = obj.current_ability_scores.getAbilityScore(game_class.secondary_ability);
+          const score = character.current_ability_scores.getAbilityScore(game_class.secondary_ability);
           if (score && score < 13) {
             disabled = true;
             if (reason2 === "") {
@@ -426,8 +539,8 @@ class CharacterClassInput extends Component<Props, State> {
             reason2 += `${game_class.secondary_ability} 13 (${score})`;
           }
         } else if (game_class.secondary_ability.length > 3) {
-          const score1 = obj.current_ability_scores.getAbilityScore(game_class.secondary_ability.substring(0,3));
-          const score2 = obj.current_ability_scores.getAbilityScore(game_class.secondary_ability.substring(7,3));
+          const score1 = character.current_ability_scores.getAbilityScore(game_class.secondary_ability.substring(0,3));
+          const score2 = character.current_ability_scores.getAbilityScore(game_class.secondary_ability.substring(7,3));
           
           if ((score1 && score1 < 13) && (score2 && score2 < 13)) {
             disabled = true;
@@ -453,14 +566,14 @@ class CharacterClassInput extends Component<Props, State> {
               fullWidth variant="contained" color="primary" 
               disabled={disabled}
               onClick={ () => {
-                const obj = this.props.obj;
+                const character = this.props.character;
                 const char_class = new CharacterClass();
-                char_class.position = obj.classes.length;
+                char_class.position = character.classes.length;
                 char_class.copyGameClass(game_class, 1);
                 char_class.level = 1;
-                obj.classes.push(char_class);
+                character.classes.push(char_class);
                 
-                this.props.onChange(obj);
+                this.props.onChange(character);
                 this.setState({ new_class: false, expanded_class_id: game_class._id });
               }}>
               {game_class.name}
@@ -477,14 +590,14 @@ class CharacterClassInput extends Component<Props, State> {
               <Button 
                 fullWidth variant="contained" color="primary" 
                 onClick={ () => {
-                  const obj = this.props.obj;
+                  const character = this.props.character;
                   const char_class = new CharacterClass();
-                  char_class.position = obj.classes.length;
+                  char_class.position = character.classes.length;
                   char_class.copyGameClass(game_class, 1);
                   char_class.level = 1;
-                  obj.classes.push(char_class);
+                  character.classes.push(char_class);
                   
-                  this.props.onChange(obj);
+                  this.props.onChange(character);
                   this.setState({ new_class: false, expanded_class_id: game_class._id });
                 }}>
                 {game_class.name}

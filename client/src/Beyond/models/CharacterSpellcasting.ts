@@ -6,13 +6,15 @@ import { CharacterFeature } from "./CharacterFeature";
 
 export class CharacterSpellcasting {
   id: number;
-  class_id: string | null;
+  source_id: string;
+  source_type: string;
   feature_type: string; 
   the_feature: SpellcastingFeature | SpellBook | BonusSpells | string | number | null;
 
   constructor(obj?: any) {
     this.id = obj ? obj.id : 0;
-    this.class_id = obj ? obj.class_id : "";
+    this.source_id = obj && obj.source_id ? obj.source_id : (obj ? obj.class_id : "");
+    this.source_type = obj && obj.source_type ? obj.source_type : (obj && obj.class_id ? "Class" : "");
     this.feature_type = obj ? obj.feature_type : "";
     if (this.feature_type === "Spell Book") {
       this.the_feature = obj ? new SpellBook(obj.the_feature) : new SpellBook();
@@ -30,7 +32,8 @@ export class CharacterSpellcasting {
     }
     return {
       id: this.id,
-      class_id: this.class_id,
+      source_id: this.source_id,
+      source_type: this.source_type,
       feature_type: this.feature_type,
       the_feature
     };

@@ -143,7 +143,7 @@ class SpellIndex extends Component<Props, State> {
               <SelectObjectBox
                 name="Source Book"
                 value={this.props.source_book} 
-                type="source_book"
+                data_type="source_book"
                 extra_options={["Any","Basic Rules"]}
                 onChange={(value: string) => {
                   this.props.setSourceBook(value);

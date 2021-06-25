@@ -580,9 +580,6 @@ class CreatureEdit extends Component<Props, State> {
     } else if (this.state.mode === "parse") {
       return (
         <StringToJSONBox 
-          onParse={(pieces: IStringHash[]) => {
-            this.parse_pieces(pieces);
-          }}
           onParseAll={(parse_me: string) => {
             this.parse_all(parse_me);
           }}
@@ -969,6 +966,8 @@ class CreatureEdit extends Component<Props, State> {
       } else if (["neutral","lawful","chaotic"].includes(alignment)) {
         if (["neutral","good","evil"].includes(word)) {
           alignment += " " + word;
+        } else if (alignment === "neutral") {
+          alignment = "Neutral";
         } else {
           console.log(word);
         }

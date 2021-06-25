@@ -6,14 +6,17 @@ import {
 } from "@material-ui/core";
 
 import { 
+  ModelBase,
   Race, 
   Subrace,
   Character,
   CharacterRace,
+  CharacterFeatureBase
 } from "../../../models";
 
 import StringBox from "../../input/StringBox";
 import CharacterFeatureBasesInput from "./CharacterFeatureBases";
+import CharacterFeatureBaseOptionsInput from "./CharacterFeatureBaseOptions";
 
 import API from "../../../utilities/smart_api";
 import { APIClass } from "../../../utilities/smart_api_class";
@@ -39,7 +42,7 @@ const connector = connect(mapState, mapDispatch)
 type PropsFromRedux = ConnectedProps<typeof connector>
 
 type Props = PropsFromRedux & {
-  obj: Character;
+  character: Character;
   onChange: (changed: CharacterRace) => void;
 }
 
@@ -54,6 +57,7 @@ export interface State {
   loading: boolean;
   expanded_is_subrace: boolean;
   expanded_feature_base_id: number;
+  custom_origins: boolean;
 }
 
 class CharacterRaceInput extends Component<Props, State> {
@@ -69,7 +73,8 @@ class CharacterRaceInput extends Component<Props, State> {
       change_race: false,
       loading: false,
       expanded_is_subrace: false,
-      expanded_feature_base_id: -1
+      expanded_feature_base_id: -1,
+      custom_origins: false
     };
     this.api = API.getInstance();
   }
@@ -96,8 +101,8 @@ class CharacterRaceInput extends Component<Props, State> {
   load() {
     this.setState({ loading: true }, () => {
       this.api.getSetOfObjects(["race","subrace"]).then((res: any) => {
-        const races: Race[] = res.race;
-        const subraces: Subrace[] = res.subrace;
+        const races: Race[] = res.race.filter((o: ModelBase) => o.source_id === "Basic Rules" || this.props.character.source_books.includes(o.source_id));
+        const subraces: Subrace[] = res.subrace.filter((o: ModelBase) => o.source_id === "Basic Rules" || this.props.character.source_books.includes(o.source_id));
         races.forEach((race: Race) => {
           race.subraces = [];
         });
@@ -110,10 +115,10 @@ class CharacterRaceInput extends Component<Props, State> {
             }
           }
         });
-        const obj = this.props.obj;
+        const character = this.props.character;
 
-        if (obj.race.race_id && !obj.race.race) {
-          const char_race = obj.race;
+        if (character.race.race_id && !character.race.race) {
+          const char_race = character.race;
           const race_finder = races.filter(o => o._id === char_race.race_id);
           if (race_finder.length === 1) {
             const race = race_finder[0];
@@ -139,10 +144,10 @@ class CharacterRaceInput extends Component<Props, State> {
   }
 
   render() {
-    let obj_race = this.props.obj.race;
+    let character_race = this.props.character.race;
     if (this.state.loading || this.state.races === null) {
       return <span>Loading</span>;
-    } else if (!obj_race || obj_race.race_id === "" || this.state.change_race) {
+    } else if (!character_race || character_race.race_id === "" || this.state.change_race) {
       const page_size = 7;
       const filtered: any[] = this.state.races ? this.state.races.filter(o => 
         (this.state.start_letter === "" || 
@@ -160,10 +165,10 @@ class CharacterRaceInput extends Component<Props, State> {
       const filtered_and_paged: any[] = filtered.slice(page_size * this.state.page_num, page_size * (this.state.page_num + 1));
       return (
         <Grid container spacing={1} direction="column">
-          { obj_race && obj_race.race && this.state.change_race && 
+          { character_race && character_race.race && this.state.change_race && 
             <Grid item>
-              { obj_race.race.name } 
-              { obj_race.subrace && obj_race.subrace.subrace && <span>{ obj_race.subrace.subrace.name }</span> }
+              { character_race.race.name } 
+              { character_race.subrace && character_race.subrace.subrace && <span>{ character_race.subrace.subrace.name }</span> }
               <Button 
                 fullWidth variant="contained" color="primary" 
                 onClick={ () => {
@@ -204,11 +209,13 @@ class CharacterRaceInput extends Component<Props, State> {
           </Grid>
         </Grid>
       );
-    } else {
+    } else if (character_race.race) {
+      const race = character_race.race;
+      const subrace = character_race.subrace;
       return (
         <Grid container spacing={1} direction="row">
           <Grid item xs={6} className={"MuiTypography-root MuiListItemText-primary header"}>
-            { obj_race.race && <span>{ obj_race.race.name }</span> } { obj_race.subrace && obj_race.subrace.subrace && <span>{ obj_race.subrace.subrace.name }</span> }
+            { character_race.race && <span>{ character_race.race.name }</span> } { character_race.subrace && character_race.subrace.subrace && <span>{ character_race.subrace.subrace.name }</span> }
           </Grid>
           <Grid item xs={6}>
             <Button 
@@ -219,25 +226,108 @@ class CharacterRaceInput extends Component<Props, State> {
                 Change Race
             </Button>
           </Grid>
-          <CharacterFeatureBasesInput 
-            character={this.props.obj}
-            features={obj_race.features}
-            onChange={() => {
-              this.props.onChange(obj_race);
-            }}
-          />
-          { obj_race.subrace && 
+          { this.props.character.custom_origins && 
+            <Grid item xs={12} container spacing={0} direction="row">
+              <Grid item xs={6} 
+                style={{ cursor: "pointer" }} 
+                onClick={() => {
+                  this.setState({ custom_origins: false });
+                }}>
+                Racial Features
+              </Grid>
+              <Grid item xs={6} 
+                style={{ cursor: "pointer" }} 
+                onClick={() => {
+                  this.setState({ custom_origins: true });
+                }}>
+                Origin Manager
+              </Grid>
+            </Grid>
+          }
+          { this.state.custom_origins ? 
+            <Grid item xs={12} container spacing={1} direction="column">
+              <Grid item>
+                Origin Options
+              </Grid>
+              <CharacterFeatureBaseOptionsInput 
+                character={this.props.character}
+                features={ subrace && subrace.subrace ? [...race.features, ...subrace.subrace.features] : race.features }
+                onChange={(true_id: string, value: boolean) => {
+                  const character = this.props.character;
+                  let feature_finder = race.features.filter(o => o.true_id === true_id);
+                  let use_subrace = false;
+                  if (feature_finder.length === 0 && subrace && subrace.subrace) {
+                    feature_finder = subrace.subrace.features.filter(o => o.true_id === true_id);
+                    use_subrace = true;
+                  }
+                  if (feature_finder.length === 1) {
+                    const feature = feature_finder[0];
+                    if (value) {
+                      if (!this.props.character.optional_feature_base_ids.includes(feature.true_id)) {
+                        character.optional_feature_base_ids.push(feature.true_id);
+                        const character_feature = new CharacterFeatureBase();
+                        character_feature.copyFeatureBase(feature);
+                        if (use_subrace && character_race.subrace) {
+                          character_race.subrace.features.push(character_feature);
+                          if (feature.replaces_feature_base_id !== "") {
+                            character_race.subrace.features = character_race.subrace.features.filter(o => o.true_id !== feature.replaces_feature_base_id);
+                          }
+                        } else {
+                          character_race.features.push(character_feature);
+                          if (feature.replaces_feature_base_id !== "") {
+                            character_race.features = character_race.features.filter(o => o.true_id !== feature.replaces_feature_base_id);
+                          }
+                        }
+                      }
+                    } else {
+                      if (this.props.character.optional_feature_base_ids.includes(feature.true_id)) {
+                        character.optional_feature_base_ids = character.optional_feature_base_ids.filter(o => o !== feature.true_id);
+                        character_race.features = character_race.features.filter(o => o.true_id !== feature.true_id);
+                        if (feature.replaces_feature_base_id !== "") {
+                          let feature_finder2 = race.features.filter(o => o.true_id === feature.replaces_feature_base_id);
+                          if (feature_finder2.length === 1) {
+                            const feature2 = feature_finder2[0];
+                            const character_feature = new CharacterFeatureBase();
+                            character_feature.copyFeatureBase(feature2);
+                            character_race.features.push(character_feature);
+                          } else if (subrace && subrace.subrace) {
+                            feature_finder2 = subrace.subrace.features.filter(o => o.true_id === feature.replaces_feature_base_id);
+                            if (feature_finder2.length === 1 && character_race.subrace) {
+                              const feature2 = feature_finder2[0];
+                              const character_feature = new CharacterFeatureBase();
+                              character_feature.copyFeatureBase(feature2);
+                              character_race.subrace.features.push(character_feature);
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                  this.props.onChange(character_race);
+                }}
+              />
+            </Grid>
+            :
             <CharacterFeatureBasesInput 
-              character={this.props.obj}
-              features={obj_race.subrace.features}
+              character={this.props.character}
+              features={character_race.features}
               onChange={() => {
-                this.props.onChange(obj_race);
+                this.props.onChange(character_race);
+              }}
+            />
+          }
+          { !this.state.custom_origins && character_race.subrace && 
+            <CharacterFeatureBasesInput 
+              character={this.props.character}
+              features={character_race.subrace.features}
+              onChange={() => {
+                this.props.onChange(character_race);
               }}
             />
           }
         </Grid>
       );
-    }
+    } else return null;
   }
 
   renderRace(race: Race, key: number) {

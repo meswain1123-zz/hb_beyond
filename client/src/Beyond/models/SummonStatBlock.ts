@@ -132,6 +132,10 @@ export class SummonStatBlock {
     for (let i = 0; i < this.special_abilities.length; i++) {
       special_abilities.push(this.special_abilities[i].toDBObj());
     }
+    const senses: any[] = [];
+    for (let i = 0; i < this.senses.length; i++) {
+      senses.push(this.senses[i].toDBObj());
+    }
     return {
       true_id: this.true_id,
       name: this.name,
@@ -149,6 +153,7 @@ export class SummonStatBlock {
       max_hit_points: this.max_hit_points.toDBObj(),
       speed: this.speed,
       passives: this.passives,
+      senses: this.senses,
       saving_throws: this.saving_throws,
       skill_proficiencies: this.skill_proficiencies,
       tool_proficiencies: this.tool_proficiencies,
@@ -346,6 +351,12 @@ export class SummonStatBlock {
         this.special_abilities.push(new Feature(o));
       });
     }
+    this.senses = [];
+    if (copyMe.senses && copyMe.senses.length > 0) {
+      copyMe.senses.forEach((o: any) => {
+        this.senses.push(new CharacterSense(o));
+      });
+    }
     this.size = copyMe.size;
     this.alignment = copyMe.alignment;
     this.condition_immunities = [...copyMe.condition_immunities];
@@ -394,6 +405,12 @@ export class SummonStatBlock {
     if (copyMe.special_abilities && copyMe.special_abilities.length > 0) {
       copyMe.special_abilities.forEach((o: any) => {
         this.special_abilities.push(new Feature(o));
+      });
+    }
+    this.senses = [];
+    if (copyMe.senses && copyMe.senses.length > 0) {
+      copyMe.senses.forEach((o: any) => {
+        this.senses.push(new CharacterSense(o));
       });
     }
     this.size = copyMe.size;

@@ -29,22 +29,17 @@ const connector = connect(mapState, mapDispatch)
 type PropsFromRedux = ConnectedProps<typeof connector>
 
 type Props = PropsFromRedux & {
+  filter: any;
   name: string;
   value: string;
   creatures: Creature[] | null;
   onChange: (id: string) => void;
   color: string;
-  creature_types: string[];
-  subtypes: string[];
-  sizes: string[];
-  swimming: boolean;
-  flying: boolean;
-  min_cr: number;
-  max_cr: number;
 }
 
 export interface State {
-  creatures: Creature[] | null;
+  creatures: Creature[];
+  count: 0;
   loading: boolean;
 }
 
@@ -52,18 +47,12 @@ class SelectCreatureBox extends Component<Props, State> {
   public static defaultProps = {
     color: "",
     creatures: null,
-    creature_types: ["Any"],
-    subtypes: ["Any"],
-    sizes: ["Any"],
-    swimming: false,
-    flying: false,
-    min_cr: 0,
-    max_cr: 100
   };
   constructor(props: Props) {
     super(props);
     this.state = {
-      creatures: null,
+      creatures: [],
+      count: 0,
       loading: false
     };
     this.api = API.getInstance();
@@ -75,13 +64,36 @@ class SelectCreatureBox extends Component<Props, State> {
     this.load();
   }
 
+  // componentDidUpdate(prevProps: Props, prevState: State) {
+  //   if (!this.state.loading && (prevProps.filter !== this.props.filter)) {
+  //     this.load();
+  //   }
+  // }
+
   load() {
-    this.setState({ loading: true }, () => {
-      this.api.getObjects("creature").then((res: any) => {
-        if (res && !res.error) {
-          this.setState({ creatures: res, loading: false });
-        }
+    if (this.props.creatures) {
+      this.setState({ creatures: this.props.creatures });
+    } else {
+      this.setState({ loading: true, creatures: [] }, () => {
+        this.api.getObjectCount("creature", this.props.filter).then((res: any) => {
+          if (!res.error) {
+            if (res.count < 50) {
+              this.setState({ count: res.count }, this.load_some);
+            } else {
+              this.setState({ count: res.count, loading: false });
+            }
+          }
+        });
       });
+    }
+  }
+
+  load_some() {
+    this.api.getObjects("creature", this.props.filter, 0, 50).then((res: any) => {
+      if (res && !res.error) {
+        let objects: Creature[] = res;
+        this.setState({ creatures: objects.sort((a, b) => { return a.name.localeCompare(b.name); }), loading: false });
+      }
     });
   }
 
@@ -89,27 +101,28 @@ class SelectCreatureBox extends Component<Props, State> {
     if (this.state.loading || this.state.creatures === null) {
       return <span>Loading</span>;
     } else {
-      let creatures = this.props.creatures ? this.props.creatures : this.state.creatures;
-      creatures = creatures.filter(o => 
-        (this.props.creature_types.includes("Any") || this.props.creature_types.includes(o.creature_type)) &&
-        (this.props.subtypes.includes("Any") || this.props.subtypes.includes(o.subtype)) &&
-        (this.props.sizes.includes("Any") || this.props.sizes.includes(o.size)) &&
-        (this.props.swimming || o.speed.swim === 0) &&
-        (this.props.flying || o.speed.fly === 0) &&
-        this.props.min_cr <= o.challenge_rating && 
-        o.challenge_rating <= this.props.max_cr
-      );
-      return (
-        <SelectBox 
-          options={creatures}
-          value={this.props.value} 
-          name={this.props.name}
-          color={this.props.color}
-          onChange={(id: string) => {
-            this.props.onChange(id);
-          }}
-        />
-      );
+      let creatures = this.state.creatures;
+      if (creatures.length > 0) {
+        return (
+          <SelectBox 
+            options={creatures}
+            value={this.props.value} 
+            name={this.props.name}
+            color={this.props.color}
+            onChange={(id: string) => {
+              this.props.onChange(id);
+            }}
+          />
+        );
+      } else if (this.state.count === 0) {
+        return (
+          <span>None found</span>
+        );
+      } else {
+        return (
+          <span>More than 50 found</span>
+        );
+      }
     }
   }
 }

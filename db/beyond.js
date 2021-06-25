@@ -28,11 +28,27 @@ function open() {
     // addItems();
     // fixItems();
     // deleteCreatures();
+    // parseDoc();
   });
 }
 function close() {
   client.close();
 }
+
+// let fs = require('fs'),
+//     PDFParser = require("pdf2json");
+
+// function parseDoc() {
+//   let pdfParser = new PDFParser();
+//   console.log(pdfParser);
+//   pdfParser.on("pdfParser_dataError", errData => console.error(errData.parserError) );
+//   pdfParser.on("pdfParser_dataReady", pdfData => {
+//     console.log(pdfData);
+//     fs.writeFile("./Volo's Guide to Monsters.json", JSON.stringify(pdfData));
+//   });
+
+//   pdfParser.loadPDF("./Source Books/Volo's Guide to Monsters.pdf");
+// }
 
 function deleteCreatures() {
   function gotCreatures(items) {
@@ -334,9 +350,17 @@ function getObjects(respond, data_type, filter, skip, take) {
       delete filter.search_string;
     } else if (filter.search_string) {
       filter.name = { $regex : new RegExp(filter.search_string, "i") };
+      delete filter.search_string;
     } else if (filter.start_letter) {
       filter.name = { $regex : new RegExp("^" + filter.start_letter, "i") };
       delete filter.start_letter;
+    } else if (filter.ids) {
+      const ids = [];
+      filter.ids.forEach(id => {
+        ids.push(ObjectID(id));
+      });
+      filter._id = { $in: ids };
+      delete filter.ids;
     }
     if (take === -1) {
       db.collection(data_type)
@@ -376,10 +400,51 @@ function getObjectCount(respond, data_type, filter) {
     } else if (filter.start_letter) {
       filter.name = { $regex : new RegExp("^" + filter.start_letter, "i") };
       delete filter.start_letter;
+    } else if (filter.ids) {
+      const ids = [];
+      filter.ids.forEach(id => {
+        ids.push(ObjectID(id));
+      });
+      filter._id = { $in: ids };
+      delete filter.ids;
     }
     db.collection(data_type).find(filter).count(function(err, count) {
       if (err) respond({ error: `Error: ${err}.` });
       else respond({ count });
+    }); 
+  } catch (err) {
+    console.log(err);
+    respond(err);
+  }
+}
+
+function getObjectFieldValues(respond, data_type, field, filter) {
+  try {
+    const db = client.db(dbName);
+    if (filter.name && filter.start_letter) {
+      filter.$and = [
+        { name: { $regex : new RegExp(filter.name, "i") }},
+        { name: { $regex : new RegExp("^" + filter.start_letter, "i") }}
+      ];
+      delete filter.start_letter;
+      delete filter.name;
+    } else if (filter.name) {
+      filter.name = { $regex : new RegExp(filter.name, "i") };
+    } else if (filter.start_letter) {
+      filter.name = { $regex : new RegExp("^" + filter.start_letter, "i") };
+      delete filter.start_letter;
+    } else if (filter.ids) {
+      const ids = [];
+      filter.ids.forEach(id => {
+        ids.push(ObjectID(id));
+      });
+      filter._id = { $in: ids };
+      delete filter.ids;
+    }
+    filter[field] = { $ne: "" };
+    db.collection(data_type).distinct(field, filter, function(err, values) {
+      if (err) respond({ error: `Error: ${err}.` });
+      else respond({ values });
     }); 
   } catch (err) {
     console.log(err);
@@ -457,6 +522,7 @@ module.exports = {
   getUserByEmail,
   register,
   getObjectCount,
+  getObjectFieldValues,
   getObject,
   getObjects,
   getUserObjects,

@@ -157,7 +157,7 @@ class BaseItemEdit extends Component<Props, State> {
           }
         }
       }
-      const formHeight = this.props.height - (this.props.width > 600 ? 198 : 198);
+      const formHeight = this.props.height - (this.props.width > 600 ? 220 : 220);
       const tool_types = ["Artisan's Tools","Game Set","Instrument","Vehicles"];
       return (
         <Grid container spacing={1} direction="column">

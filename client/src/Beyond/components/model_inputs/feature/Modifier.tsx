@@ -258,18 +258,33 @@ class ModifierInput extends Component<Props, State> {
             />
           </Grid>
         }
-        <Grid item>
-          <SelectStringBox 
-            name="Modification Type" 
-            options={["Flat","Attack Ability Modifier","Attack Ability Option","Damage Dice Option","Character Level","Class Level",...ABILITY_SCORES]}
-            value={this.props.obj.type} 
-            onChange={(value: string) => {
-              const obj = this.props.obj;
-              obj.type = value;
-              this.props.onChange(obj);
-            }} 
-          />
-        </Grid>
+        { this.props.obj.modifies === "Speed" && !this.props.obj.modifies_details.includes("Walking") ?
+          <Grid item>
+            <SelectStringBox 
+              name="Modification Type" 
+              options={["Match Walk","Flat","Attack Ability Modifier","Attack Ability Option","Damage Dice Option","Character Level","Class Level",...ABILITY_SCORES]}
+              value={this.props.obj.type} 
+              onChange={(value: string) => {
+                const obj = this.props.obj;
+                obj.type = value;
+                this.props.onChange(obj);
+              }} 
+            />
+          </Grid>
+          :
+          <Grid item>
+            <SelectStringBox 
+              name="Modification Type" 
+              options={["Flat","Attack Ability Modifier","Attack Ability Option","Damage Dice Option","Character Level","Class Level",...ABILITY_SCORES]}
+              value={this.props.obj.type} 
+              onChange={(value: string) => {
+                const obj = this.props.obj;
+                obj.type = value;
+                this.props.onChange(obj);
+              }} 
+            />
+          </Grid>
+        }
         { ["Flat","Character Level","Class Level"].includes(this.props.obj.type) && 
           <Grid item>
             <StringBox 

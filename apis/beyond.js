@@ -46,6 +46,12 @@ router
     }
     db.getObjectCount(respond, req.params.data_type, req.body.filter);
   })
+  .post("/getObjectFieldValues/:data_type", function(req, res) {
+    function respond(values) {
+      res.send(values);
+    }
+    db.getObjectFieldValues(respond, req.params.data_type, req.body.field, req.body.filter);
+  })
   .post("/getObjects/:data_type", function(req, res) {
     function respond(objects) {
       res.send({objects});

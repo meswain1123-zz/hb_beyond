@@ -221,7 +221,7 @@ class CreatureIndex extends Component<Props, State> {
               <SelectObjectBox
                 name="Source Book"
                 value={this.props.source_book} 
-                type="source_book"
+                data_type="source_book"
                 extra_options={["Any","Basic Rules"]}
                 onChange={(value: string) => {
                   this.props.setSourceBook(value);
@@ -289,7 +289,7 @@ class CreatureIndex extends Component<Props, State> {
         </Grid>
       ); 
     } else if (this.state.mode === "import") {
-      const formHeight = this.props.height - (this.props.width > 600 ? 198 : 198);
+      const formHeight = this.props.height - (this.props.width > 600 ? 220 : 220);
       const page_size = 7;
       const filtered: any[] = this.state.import_creatures ? this.state.import_creatures.filter(o => 
         (this.state.start_letter === "" || o.name.toUpperCase().startsWith(this.state.start_letter)) && 

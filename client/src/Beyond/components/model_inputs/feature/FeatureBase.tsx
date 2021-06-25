@@ -175,6 +175,8 @@ class FeatureBaseInput extends Component<Props, State> {
       } else {
         return <span>?</span>;
       }
+    } else if (this.state.reloading) {
+      return <span>Reloading</span>;
     } else {
       return (
         <Grid item container spacing={1} direction="column">
@@ -204,6 +206,7 @@ class FeatureBaseInput extends Component<Props, State> {
                 obj={this.props.feature_base}
                 type="FeatureBase"
                 useTemplate={(template: TemplateBase) => {
+                  console.log(template);
                   const feature_base_template: FeatureBaseTemplate = template as FeatureBaseTemplate;
                   const feature_base = this.props.feature_base;
                   feature_base.copyTemplate(feature_base_template);

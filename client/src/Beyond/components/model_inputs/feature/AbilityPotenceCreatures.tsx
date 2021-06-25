@@ -19,12 +19,12 @@ import {
 import StringBox from "../../input/StringBox";
 import SelectStringBox from "../../input/SelectStringBox"; 
 import ToggleButtonBox from "../../input/ToggleButtonBox"; 
+import SelectObjectFieldBox from "../../input/SelectObjectFieldBox";
+import SelectObjectBox from "../../input/SelectObjectBox";
 
 import DisplayObjects from "../display/DisplayObjects"; 
 
-import SelectCreatureTypeBox from "../select/SelectCreatureTypeBox";
-import SelectCreatureSubtypeBox from "../select/SelectCreatureSubtypeBox";
-import SelectCreatureBox from "../select/SelectCreatureBox";
+// import SelectCreatureBox from "../select/SelectCreatureBox";
 
 import SummonStatBlockInput from "./SummonStatBlock";
 
@@ -83,6 +83,33 @@ class AbilityPotenceCreaturesInput extends Component<Props, State> {
       left: `${left}%`,
       transform: `translate(${left}px, ${top}px)`,
     };
+  }
+
+  get_filter(option: SummonOption) {
+    const filter: any = {};
+    
+    if (option.creature_type !== "Any") {
+      filter.creature_type = option.creature_type;
+    }
+    if (option.subtype !== "Any") {
+      filter.subtype = option.subtype;
+    }
+    if (option.size !== "Any") {
+      filter.size = option.size;
+    }
+    if (option.swimming) {
+      filter["speed.swim"] = { $gt : 0 };
+    } else {
+      filter["speed.swim"] = 0;
+    }
+    if (option.flying) {
+      filter["speed.fly"] = { $gt : 0 };
+    } else {
+      filter["speed.fly"] = 0;
+    }
+    filter.challenge_rating = { $lte : option.challenge_rating };
+
+    return filter;
   }
 
   render() {
@@ -191,9 +218,11 @@ class AbilityPotenceCreaturesInput extends Component<Props, State> {
               </Grid>
               { option.true_id === this.state.expanded_option && !option.custom &&
                 <Grid item xs={6}>
-                  <SelectCreatureTypeBox 
+                  <SelectObjectFieldBox 
                     value={option.creature_type} 
                     name="Creature Type"
+                    data_type="creature"
+                    field="creature_type"
                     allow_any
                     onChange={(changed: string) => {
                       option.creature_type = changed;
@@ -206,10 +235,12 @@ class AbilityPotenceCreaturesInput extends Component<Props, State> {
               { option.true_id === this.state.expanded_option && !option.custom &&
                 <Grid item xs={6}>
                   { option.creature_type !== "" &&
-                    <SelectCreatureSubtypeBox 
+                    <SelectObjectFieldBox 
                       value={option.subtype} 
                       name="Subtype"
-                      creature_type={option.creature_type}
+                      data_type="creature"
+                      field="subtype"
+                      filter={option.creature_type === "Any" ? {} : {creature_type: option.creature_type}}
                       allow_any
                       onChange={(changed: string) => {
                         option.subtype = changed;
@@ -290,13 +321,11 @@ class AbilityPotenceCreaturesInput extends Component<Props, State> {
               }
               { option.true_id === this.state.expanded_option && !option.custom && option.specific &&
                 <Grid item xs={4}>
-                  <SelectCreatureBox 
+                  <SelectObjectBox 
+                    data_type="creature"
                     value={option.specific_id} 
                     name="Specific Creature"
-                    creature_types={[option.creature_type]}
-                    subtypes={[option.subtype]}
-                    swimming={option.swimming}
-                    flying={option.flying}
+                    filter={this.get_filter(option)}
                     onChange={(changed: string) => {
                       option.specific_id = changed;
                       const obj = this.props.obj;
