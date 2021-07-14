@@ -179,10 +179,14 @@ class CharacterFeatureInput extends Component<Props, State> {
       break;
       case "Sense":
         let sense = feature.feature_options[0] as CharacterSense;
-        details = 
-          <Grid item>
-            { sense.name }: { sense.range }
-          </Grid>;
+        if (sense) {
+          console.log(feature);
+          console.log(sense);
+          details = 
+            <Grid item>
+              { sense.name }: { sense.range }
+            </Grid>;
+        }
       break;
       case "Pact Boon":
         details = 

@@ -29,6 +29,7 @@ function open() {
     // fixItems();
     // deleteCreatures();
     // parseDoc();
+    // fixFeatureBases();
   });
 }
 function close() {
@@ -294,6 +295,33 @@ function fixResources() {
   }
 
   getObjects(gotResources, "resource", 0);
+}
+
+function fixFeatureBases() {
+  function gotObjects(objs) {
+    let pos = 0;
+    function respond(response) {
+      pos++;
+      if (pos < objs.length) {
+        const obj2 = objs[pos];
+        obj2.features.forEach(fb => {
+          fb.display = true;
+        });
+        
+        updateObject(respond, "eldritch_invocation", obj2);
+      } else {
+        console.log('done');
+      }
+    }
+    const obj = objs[pos];
+    obj.features.forEach(fb => {
+      fb.display = true;
+    });
+    
+    updateObject(respond, "eldritch_invocation", obj);
+  }
+
+  getObjects(gotObjects, "eldritch_invocation", {}, 0, -1);
 }
 
 function getUserByLogin(respond, email, password) {

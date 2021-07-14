@@ -83,7 +83,6 @@ class CharacterCastButton extends Component<Props, State> {
     const level = this.props.level === -1 ? this.props.obj.level : this.props.level;
     if (obj instanceof CharacterAbility) {
       const the_ability = obj.the_ability;
-      // const self_condition_ids = obj.self_condition();
           
       if (the_ability && !(the_ability instanceof ItemAffectingAbility)) {
         if (the_ability.resource_consumed === "Slot") {
@@ -253,7 +252,6 @@ class CharacterCastButton extends Component<Props, State> {
               <ButtonBox name={obj.use_string(this.props.character)}
                 disabled={obj.disabled(this.props.character, level)}
                 onClick={() => {
-                  obj.special_resource_used += +the_ability.amount_consumed;
                   if (the_ability.concentration) {
                     this.props.character.concentrating_on = obj;
                   }
@@ -318,7 +316,7 @@ class CharacterCastButton extends Component<Props, State> {
           // Get the resources
           const resources = this.props.character.resources.filter(o => the_ability.resource_consumed);
           
-          if (resources.length === 1) {
+          if (resources.length > 0) {
             // const resource = resources[0];
             if (the_ability.concentration && this.props.character.concentrating_on) {
               if (this.props.simple) {
@@ -897,14 +895,19 @@ class CharacterCastButton extends Component<Props, State> {
           // Get the resources
           const resources = this.props.character.resources.filter(o => the_ability.resource_consumed);
           
-          if (resources.length === 1) {
-            const resource = resources[0];
+          if (resources.length > 0) {
+            let used = 0;
+            let total = 0;
+            resources.forEach(o => {
+              used += o.used;
+              total += o.total;
+            });
             if (the_ability.concentration && this.props.character.concentrating_on) {
               return (
                 <div>
                   You're already concentrating on <ViewSpell spell={this.props.character.concentrating_on} show_ritual />
                   <ButtonBox name="Use Anyway"
-                    disabled={resource.used + +the_ability.amount_consumed > resource.total}
+                    disabled={used + +the_ability.amount_consumed > total}
                     onClick={() => {
                       this.triggerAbilityEffect("Slots");
                     }} 
@@ -946,7 +949,6 @@ class CharacterCastButton extends Component<Props, State> {
 
   triggerAbilityEffect(slot_type: string) {
     const obj = this.props.obj;
-    const self_condition_ids = obj.self_condition();
     if (obj instanceof CharacterAbility) {
       const the_ability = obj.the_ability;
       if (the_ability) {
@@ -965,7 +967,7 @@ class CharacterCastButton extends Component<Props, State> {
             }
           }
         } else if (the_ability.resource_consumed === "Special") {
-          if (obj.special_resource_used + +the_ability.amount_consumed <= obj.special_resource_amount) {
+          if (obj.special_resource_used + +the_ability.amount_consumed <= +obj.special_resource_amount) {
             obj.special_resource_used += +the_ability.amount_consumed;
             go = true;
           }
@@ -974,12 +976,28 @@ class CharacterCastButton extends Component<Props, State> {
         } else {
           const resources = this.props.character.resources.filter(o => the_ability.resource_consumed);
           
-          if (resources.length === 1) {
-            const resource = resources[0];
-            if (resource.used + +the_ability.amount_consumed <= resource.total) {
-              resource.used += +the_ability.amount_consumed;
+          if (resources.length > 0) {
+            let used = 0;
+            let total = 0;
+            resources.forEach(o => {
+              used += o.used;
+              total += o.total;
+            });
+            let to_add = +the_ability.amount_consumed;
+            if (used + to_add <= total) {
               go = true;
               change_types.push("Resources");
+              let i = 0;
+              while (i < resources.length && to_add > 0) {
+                const resource = resources[i];
+                if (to_add < (resource.total - resource.used)) {
+                  resource.used += to_add;
+                } else {
+                  to_add -= resource.total - resource.used;
+                  resource.used = resource.total;
+                }
+                i++;
+              }
             }
           }
         }
@@ -989,14 +1007,14 @@ class CharacterCastButton extends Component<Props, State> {
             this.props.character.concentrating_on = obj;
             change_types.push("Concentration");
           }
-          if (self_condition_ids.length > 0) {
-            // Apply the conditions
-            const character = this.props.character;
-            self_condition_ids.forEach(cond_id => {
-              character.conditions.push(cond_id);
-              change_types.push("Condition");
-            });
-          }
+          // if (self_condition_ids.length > 0) {
+          //   // Apply the conditions
+          //   const character = this.props.character;
+          //   self_condition_ids.forEach(cond_id => {
+          //     character.conditions.push(cond_id);
+          //     change_types.push("Condition");
+          //   });
+          // }
           if (the_ability instanceof Ability && the_ability.effect.type === "Create Resource") {
             this.props.character.create_resource(the_ability.effect, obj.source_id, the_ability.slot_level, level);
             change_types.push("Resources");
@@ -1080,14 +1098,14 @@ class CharacterCastButton extends Component<Props, State> {
         if (spell.concentration) {
           this.props.character.concentrating_on = spell;
         }
-        if (self_condition_ids.length > 0) {
-          // Apply the conditions
-          const character = this.props.character;
-          self_condition_ids.forEach(cond_id => {
-            character.conditions.push(cond_id);
-            change_types.push("Condition");
-          });
-        }
+        // if (self_condition_ids.length > 0) {
+        //   // Apply the conditions
+        //   const character = this.props.character;
+        //   self_condition_ids.forEach(cond_id => {
+        //     character.conditions.push(cond_id);
+        //     change_types.push("Condition");
+        //   });
+        // }
         if (spell.spell && spell.spell.effect.type === "Create Resource") {
           this.props.character.create_resource(spell.spell.effect, obj.source_id, spell.level, level);
           change_types.push("Resources");
@@ -1109,14 +1127,14 @@ class CharacterCastButton extends Component<Props, State> {
         this.props.character.concentrating_on = spell;
         change_types.push("Concentration");
       }
-      if (self_condition_ids.length > 0) {
-        // Apply the conditions
-        const character = this.props.character;
-        self_condition_ids.forEach(cond_id => {
-          character.conditions.push(cond_id);
-          change_types.push("Condition");
-        });
-      }
+      // if (self_condition_ids.length > 0) {
+      //   // Apply the conditions
+      //   const character = this.props.character;
+      //   self_condition_ids.forEach(cond_id => {
+      //     character.conditions.push(cond_id);
+      //     change_types.push("Condition");
+      //   });
+      // }
       if (spell.spell && spell.spell.effect.type === "Create Resource") {
         this.props.character.create_resource(spell.spell.effect, obj.source_id, spell.level, level);
         change_types.push("Resources");

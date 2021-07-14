@@ -643,9 +643,9 @@ export class Creature extends ModelBase {
                 }
               }
             }
-            potence.rolls.flat = flat;
-            potence.rolls.size = size;
-            potence.rolls.count = count;
+            potence.rolls.flat = +flat;
+            potence.rolls.size = +size;
+            potence.rolls.count = +count;
             effect.potences.push(potence);
             ability.effects.push(effect);
           }
@@ -696,9 +696,9 @@ export class Creature extends ModelBase {
                 }
               }
             }
-            potence.rolls.flat = flat;
-            potence.rolls.size = size;
-            potence.rolls.count = count;
+            potence.rolls.flat = +flat;
+            potence.rolls.size = +size;
+            potence.rolls.count = +count;
             effect.potences.push(potence);
             ability.effects.push(effect);
           }
@@ -749,9 +749,9 @@ export class Creature extends ModelBase {
                 }
               }
             }
-            potence.rolls.flat = flat;
-            potence.rolls.size = size;
-            potence.rolls.count = count;
+            potence.rolls.flat = +flat;
+            potence.rolls.size = +size;
+            potence.rolls.count = +count;
             effect.potences.push(potence);
             ability.effects.push(effect);
           }

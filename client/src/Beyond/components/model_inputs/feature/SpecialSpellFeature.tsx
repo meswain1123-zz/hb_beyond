@@ -147,7 +147,7 @@ class SpecialSpellFeatureInput extends Component<Props, State> {
                 type="number"
                 onBlur={(value: number) => {
                   const feature = this.props.feature;
-                  feature.amount_consumed = value;
+                  feature.amount_consumed = +value;
                   this.props.onChange(feature);
                 }}
               />

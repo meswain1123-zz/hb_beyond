@@ -11,7 +11,7 @@ export class RollPlus extends DiceRoll {
 
   constructor(obj?: any) {
     super(obj);
-    this.flat = obj && obj.flat ? obj.flat : 0;
+    this.flat = obj && obj.flat ? +obj.flat : 0;
     this.ability_score = obj && obj.ability_score ? obj.ability_score : "";
     this.type = obj && obj.type ? obj.type : "";
     this.as_string = "";
@@ -32,7 +32,7 @@ export class RollPlus extends DiceRoll {
   recalculate_string() {
     let the_string = "";
     let the_bonus = 0;
-    the_bonus += this.flat;
+    the_bonus += +this.flat;
     if (this.size === 1) {
       the_bonus += this.count;
     } else {

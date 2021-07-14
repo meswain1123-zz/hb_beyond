@@ -288,7 +288,7 @@ class CharacterSkills extends Component<Props, State> {
       }
       const roll_plus = new RollPlus();
       roll_plus.ability_score = skill.use_ability_score;
-      roll_plus.flat = modifier;
+      roll_plus.flat = +modifier;
       rolls.push(roll_plus);
       this.props.obj.check_bonuses.forEach(bonus => {
         if (bonus.types.includes(skill.use_ability_score)) {

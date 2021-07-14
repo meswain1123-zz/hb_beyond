@@ -15,7 +15,12 @@ import {
   Checkbox,
   Link
 } from "@material-ui/core";
-import { Race, Subrace, Language } from "../../models";
+import { 
+  Race, 
+  Subrace, 
+  Lineage,
+  Language 
+} from "../../models";
 
 import StringBox from "../../components/input/StringBox";
 
@@ -472,7 +477,26 @@ class RaceIndex extends Component<Props, State> {
             </Fab>
           </Tooltip> 
         </Grid>
-        <Grid item xs={8}>
+        <Grid item xs={1}>
+          <Tooltip title={`Create Lineage Based on ${race.name}`}>
+            <Fab size="small" color="primary"
+              disabled={this.state.processing} style={{marginLeft: "8px"}}
+              onClick={ () => {
+                this.setState({ processing: true }, () => {
+                  const new_obj = new Lineage();
+                  new_obj.copyRace(race);
+                  new_obj.name = "Copy of " + new_obj.name;
+                  new_obj._id = "";
+                  this.api.createObject("lineage", new_obj).then((res: any) => {
+                    this.setState({ processing: false, redirectTo: `/beyond/lineage/edit/${res.id}` });
+                  });
+                });
+              }}>
+              <FileCopy/>
+            </Fab>
+          </Tooltip> 
+        </Grid>
+        <Grid item xs={7}>
           { this.renderDescription(race) }
         </Grid>
         { this.state.show_subraces === race._id &&
@@ -534,7 +558,26 @@ class RaceIndex extends Component<Props, State> {
             </Fab>
           </Tooltip> 
         </Grid>
-        <Grid item xs={7}>
+        <Grid item xs={1}>
+          <Tooltip title={`Create Lineage Based on ${subrace.name}`}>
+            <Fab size="small" color="primary"
+              disabled={this.state.processing} style={{marginLeft: "8px"}}
+              onClick={ () => {
+                this.setState({ processing: true }, () => {
+                  const new_obj = new Lineage();
+                  new_obj.copySubrace(subrace);
+                  new_obj.name = "Copy of " + new_obj.name;
+                  new_obj._id = "";
+                  this.api.createObject("lineage", new_obj).then((res: any) => {
+                    this.setState({ processing: false, redirectTo: `/beyond/lineage/edit/${res.id}` });
+                  });
+                });
+              }}>
+              <FileCopy/>
+            </Fab>
+          </Tooltip> 
+        </Grid>
+        <Grid item xs={6}>
           <Tooltip title={subrace.description}>
             <div style={this.descriptionStyle()}>
               { subrace.description }

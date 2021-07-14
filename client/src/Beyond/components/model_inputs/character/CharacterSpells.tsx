@@ -489,7 +489,7 @@ class CharacterSpells extends Component<Props, State> {
         return (
           <CharacterAction 
             key={key}
-            obj={this.props.obj}
+            character={this.props.obj}
             level={level}
             action={spell}
             group={""}

@@ -225,7 +225,7 @@ class CharacterSavingThrows extends Component<Props, State> {
     const roll_plus = new RollPlus();
     roll_plus.ability_score = this.state.popoverSave;
     if (this.props.obj.saving_throw_proficiencies.includes(this.state.popoverSave)) {
-      roll_plus.flat = this.props.obj.proficiency_modifier;
+      roll_plus.flat = +this.props.obj.proficiency_modifier;
     }
     rolls.push(roll_plus);
     this.props.obj.saving_throw_bonuses.forEach(bonus => {

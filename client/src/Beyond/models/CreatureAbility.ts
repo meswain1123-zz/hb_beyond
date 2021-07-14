@@ -92,7 +92,7 @@ export class CreatureAbility {
     this.material_component = obj ? obj.material_component : "";
     this.casting_time = obj ? obj.casting_time : "A";
     this.resource_consumed = obj ? obj.resource_consumed : "None";
-    this.amount_consumed = obj && obj.amount_consumed ? obj.amount_consumed : 0;
+    this.amount_consumed = obj && obj.amount_consumed ? +obj.amount_consumed : 0;
     this.special_resource_amount = obj ? obj.special_resource_amount : "0";
     this.special_resource_refresh_rule = obj ? obj.special_resource_refresh_rule : "";
     this.attack_bonus = obj && obj.attack_bonus ? obj.attack_bonus : 0;

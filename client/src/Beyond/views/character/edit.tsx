@@ -9,7 +9,6 @@ import {
   Grid, 
   Button, 
   Tooltip, Fab,
-  Link,
 } from "@material-ui/core";
 import {  
   ArmorType,
@@ -17,6 +16,7 @@ import {
   Character, 
   CharacterBackground,
   CharacterRace,
+  CharacterLineage,
   EldritchInvocation,
   FeatureBase,
   WeaponKeyword,
@@ -27,8 +27,10 @@ import {
 
 import StringBox from "../../components/input/StringBox";
 import ToggleButtonBox from "../../components/input/ToggleButtonBox";
+import CenteredMenu from "../../components/input/CenteredMenu";
 
 import CharacterRaceInput from "../../components/model_inputs/character/CharacterRace";
+import CharacterLineageInput from "../../components/model_inputs/character/CharacterLineageInput";
 import CharacterBackgroundInput from "../../components/model_inputs/character/CharacterBackground";
 import CharacterAbilityScoresInput from "../../components/model_inputs/character/CharacterAbilityScoresInput";
 import CharacterClassInput from "../../components/model_inputs/character/CharacterClassInput";
@@ -93,7 +95,7 @@ class CharacterEdit extends Component<Props, State> {
       processing: false,
       expanded_feature_base: null,
       child_names_valid: true,
-      mode: "main",
+      mode: "Home",
       armor_types: null,
       weapon_keywords: null,
       spells: null,
@@ -188,79 +190,14 @@ class CharacterEdit extends Component<Props, State> {
               { this.state.obj._id === "" ? "Create Character" : `Edit ${this.state.obj.name}` }
             </span>
           </Grid>
-          <Grid item container spacing={1} direction="row">
-            <Grid item xs={2}>
-              <Link href="#" 
-                style={{
-                  borderBottom: `${this.state.mode === "main" ? "2px solid blue" : "none"}`
-                }}
-                onClick={(event: React.SyntheticEvent) => {
-                  event.preventDefault();
-                  this.setState({ mode: "main" });
-                }}>
-                Home
-              </Link>
-            </Grid>
-            <Grid item xs={2}>
-              <Link href="#"  
-                style={{
-                  borderBottom: `${this.state.mode === "race" ? "2px solid blue" : "none"}`
-                }}
-                onClick={(event: React.SyntheticEvent) => {
-                  event.preventDefault();
-                  this.setState({ mode: "race" });
-                }}>
-                Race
-              </Link>
-            </Grid>
-            <Grid item xs={2}>
-              <Link href="#" 
-                style={{
-                  borderBottom: `${this.state.mode === "background" ? "2px solid blue" : "none"}`
-                }}
-                onClick={(event: React.SyntheticEvent) => {
-                  event.preventDefault();
-                  this.setState({ mode: "background" });
-                }}>
-                Background
-              </Link>
-            </Grid>
-            <Grid item xs={2}>
-              <Link href="#" 
-                style={{
-                  borderBottom: `${this.state.mode === "abilities" ? "2px solid blue" : "none"}`
-                }}
-                onClick={(event: React.SyntheticEvent) => {
-                  event.preventDefault();
-                  this.setState({ mode: "abilities" });
-                }}>
-                Abilities
-              </Link>
-            </Grid>
-            <Grid item xs={2}>
-              <Link href="#" 
-                style={{
-                  borderBottom: `${this.state.mode === "class" ? "2px solid blue" : "none"}`
-                }}
-                onClick={(event: React.SyntheticEvent) => {
-                  event.preventDefault();
-                  this.setState({ mode: "class" });
-                }}>
-                Class
-              </Link>
-            </Grid>
-            <Grid item xs={2}>
-              <Link href="#" 
-                style={{
-                  borderBottom: `${this.state.mode === "equipment" ? "2px solid blue" : "none"}`
-                }}
-                onClick={(event: React.SyntheticEvent) => {
-                  event.preventDefault();
-                  this.setState({ mode: "equipment" });
-                }}>
-                Equipment
-              </Link>
-            </Grid>
+          <Grid item>
+            <CenteredMenu
+              options={["Home","Race","Background","Abilities","Class","Equipment","Lineage"]}
+              selected={this.state.mode}
+              onSelect={(mode: string) => {
+                this.setState({ mode });
+              }}
+            />
           </Grid>
           <Grid item 
             style={{ 
@@ -296,7 +233,7 @@ class CharacterEdit extends Component<Props, State> {
   }
 
   render_tab() {
-    if (this.state.mode === "race") {
+    if (this.state.mode === "Race") {
       return (
         <CharacterRaceInput 
           character={this.state.obj}
@@ -308,7 +245,7 @@ class CharacterEdit extends Component<Props, State> {
           }}
         />
       );
-    } else if (this.state.mode === "background") {
+    } else if (this.state.mode === "Background") {
       return (
         <CharacterBackgroundInput 
           obj={this.state.obj}
@@ -320,7 +257,7 @@ class CharacterEdit extends Component<Props, State> {
           }}
         />
       );
-    } else if (this.state.mode === "abilities") {
+    } else if (this.state.mode === "Abilities") {
       return (
         <CharacterAbilityScoresInput
           obj={this.state.obj}
@@ -332,7 +269,7 @@ class CharacterEdit extends Component<Props, State> {
           }}
         />
       );
-    } else if (this.state.mode === "class") {
+    } else if (this.state.mode === "Class") {
       return (
         <CharacterClassInput
           character={this.state.obj}
@@ -343,12 +280,24 @@ class CharacterEdit extends Component<Props, State> {
           }}
         />
       );
-    } else if (this.state.mode === "equipment") {
+    } else if (this.state.mode === "Equipment") {
       return (
         <CharacterEquipment
           obj={this.state.obj}
           onChange={() => {
             const obj = this.state.obj;
+            this.char_util.recalcAll(obj);
+            this.setState({ obj });
+          }}
+        />
+      );
+    } else if (this.state.mode === "Lineage") {
+      return (
+        <CharacterLineageInput 
+          character={this.state.obj}
+          onChange={(changed: CharacterLineage) => {
+            const obj = this.state.obj;
+            obj.lineage = changed;
             this.char_util.recalcAll(obj);
             this.setState({ obj });
           }}

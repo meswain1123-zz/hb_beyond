@@ -111,6 +111,10 @@ import LanguageIndex from "./language";
 import LanguageEdit from "./language/edit";
 import LanguageDetails from "./language/details";
 
+import LineageIndex from "./lineage";
+import LineageEdit from "./lineage/edit";
+import LineageDetails from "./lineage/details";
+
 import SpellListIndex from "./spell_list";
 import SpellListEdit from "./spell_list/edit";
 import SpellListDetails from "./spell_list/details";
@@ -214,6 +218,11 @@ class MainPage extends Component<Props, State> {
           <Route exact path="/beyond/language/details/:id" component={LanguageDetails} />
           <Route exact path="/beyond/language/create" component={LanguageEdit} />
           <Route exact path="/beyond/language/edit/:id" component={LanguageEdit} />
+
+          <Route exact path="/beyond/lineage" component={LineageIndex} />
+          <Route exact path="/beyond/lineage/details/:id" component={LineageDetails} />
+          <Route exact path="/beyond/lineage/create" component={LineageEdit} />
+          <Route exact path="/beyond/lineage/edit/:id" component={LineageEdit} />
 
           <Route exact path="/beyond/background" component={BackgroundIndex} />
           <Route exact path="/beyond/background/details/:id" component={BackgroundDetails} />

@@ -34,7 +34,7 @@ export class SpecialSpellFeature {
     this.spell_list = obj ? obj.spell_list : "Class";
     this.level = obj ? obj.level : 0;
     this.slot_override = obj ? obj.slot_override : "At Will";
-    this.amount_consumed = obj && obj.amount_consumed ? obj.amount_consumed : 0;
+    this.amount_consumed = obj && obj.amount_consumed ? +obj.amount_consumed : 0;
     if (obj && obj.special_resource_amount && obj.special_resource_amount.base === undefined) {
       // Translate old set up to new
       this.special_resource_amount = new UpgradableNumber();

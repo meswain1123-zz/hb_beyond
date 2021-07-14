@@ -24,7 +24,7 @@ import ButtonBox from "../../input/ButtonBox";
 
 import ViewSpell from "../ViewSpell";
 import CharacterSpellDetails from './CharacterSpellDetails';
-import CharacterAbilityDetails from './CharacterAbilityDetails';
+// import CharacterAbilityDetails from './CharacterAbilityDetails';
 import CharacterCastButton from "./CharacterCastButton";
 
 import Roller from "../Roller";
@@ -55,7 +55,7 @@ const connector = connect(mapState, mapDispatch)
 type PropsFromRedux = ConnectedProps<typeof connector>
 
 type Props = PropsFromRedux & {
-  obj: Character;
+  character: Character;
   level: number;
   show_casting_time: boolean;
   action: any;
@@ -114,7 +114,7 @@ class CharacterAction extends Component<Props, State> {
   }
 
   updateCharacter(change_types: string[]) {
-    this.api.updateObject("character", this.props.obj).then((res: any) => {
+    this.api.updateObject("character", this.props.character).then((res: any) => {
       if (change_types.length > 0) {
         this.setState({ 
           popoverAnchorEl: null, 
@@ -168,11 +168,11 @@ class CharacterAction extends Component<Props, State> {
     } else if (action instanceof CharacterSpecialSpell || action instanceof CharacterSpell) {
       const spell = action;
       const level = this.props.level === -1 ? spell.level : this.props.level;
-      let slots = this.props.obj.slots.filter(o => o.level === level);
+      let slots = this.props.character.slots.filter(o => o.level === level);
       let level2 = level;
       if (slots.length === 0) {
         level2 = 9; 
-        this.props.obj.slots.filter(o => o.level > level).forEach(s => {
+        this.props.character.slots.filter(o => o.level > level).forEach(s => {
           if (s.level < level2) {
             level2 = s.level;
           }
@@ -183,8 +183,9 @@ class CharacterAction extends Component<Props, State> {
           <Grid item xs={1}>
             <CharacterCastButton
               obj={spell}
-              character={this.props.obj}
+              character={this.props.character}
               level={level2}
+              simple
               onChange={(change_types: string[]) => {
                 this.props.onChange(change_types);
               }}
@@ -221,7 +222,8 @@ class CharacterAction extends Component<Props, State> {
           <Grid item xs={1}>
             <CharacterCastButton
               obj={action}
-              character={this.props.obj}
+              simple
+              character={this.props.character}
               onChange={(change_types: string[]) => {
                 this.props.onChange(change_types);
               }}
@@ -274,8 +276,8 @@ class CharacterAction extends Component<Props, State> {
         }}>
         { this.state.selected_spell && this.state.selected_level !== null &&
           <CharacterSpellDetails
-            obj={this.props.obj}
-            spell={this.state.selected_spell}
+            character={this.props.character}
+            obj={this.state.selected_spell}
             level={this.state.selected_level}
             onChange={(change_types: string[]) => {
               this.updateCharacter(change_types);
@@ -286,9 +288,10 @@ class CharacterAction extends Component<Props, State> {
           />
         }
         { this.state.selected_ability &&
-          <CharacterAbilityDetails
-            obj={this.props.obj}
-            ability={this.state.selected_ability}
+          <CharacterSpellDetails
+            character={this.props.character}
+            obj={this.state.selected_ability}
+            level={-1}
             onChange={(change_types: string[]) => {
               this.updateCharacter(change_types);
             }}
@@ -354,7 +357,7 @@ class CharacterAction extends Component<Props, State> {
   }
 
   renderSpellAttacks(spell: CharacterSpell | CharacterAbility, level2: number) {
-    // console.log(spell);
+    const potence_string = spell.get_potence_string(level2, this.props.character);
     return (
       <Grid item xs={6} container spacing={0} direction="row">
         <Grid item xs={6} style={{
@@ -382,11 +385,23 @@ class CharacterAction extends Component<Props, State> {
           { !["Control","Utility","Summon","Transform","Create Resource"].includes(spell.effect_string) ?
             <ButtonBox
               fontSize={9}
-              name={ spell.get_potence_string(level2, this.props.obj) }
+              name={ potence_string }
               image={ spell.effect_string }
               onClick={(event: React.MouseEvent<HTMLDivElement>) => {
-                this.setState({ popoverAction: spell, popoverActionLevel: level2, popoverMode: "Damage" })
-                this.setPopoverAnchorEl(event.currentTarget);
+                if (potence_string === "Apply") {
+                  const self_condition_ids = spell.self_condition();
+                  if (self_condition_ids.length > 0) {
+                    // Apply the conditions
+                    const character = this.props.character;
+                    self_condition_ids.forEach(cond_id => {
+                      character.conditions.push(cond_id);
+                    });
+                    this.updateCharacter(["Condition"]);
+                  }
+                } else {
+                  this.setState({ popoverAction: spell, popoverActionLevel: level2, popoverMode: "Damage" })
+                  this.setPopoverAnchorEl(event.currentTarget);
+                }
               }} 
             />
           :
@@ -408,14 +423,14 @@ class CharacterAction extends Component<Props, State> {
           return (
             <Roller 
               name={spell.name}
-              char={this.props.obj}
+              char={this.props.character}
               rolls={spell.attack.attack_rolls} 
               type="Attack" 
             />
           );
         } else if (mode === "Damage") {
           const level = this.state.popoverActionLevel;
-          const potence = spell.get_potence(level, this.props.obj);
+          const potence = spell.get_potence(level, this.props.character);
           let damage_rolls: RollPlus[] = [];
           if (potence) {
             const roll_plus = new RollPlus(potence.rolls);
@@ -424,34 +439,34 @@ class CharacterAction extends Component<Props, State> {
           damage_rolls = [...damage_rolls,...spell.attack.damage_rolls];
           
           const rerolls: Reroll[] = [];
-          this.props.obj.rerolls.forEach(r => {
+          this.props.character.rerolls.forEach(r => {
             let good = false;
             if (r.allowed_armor_types.includes("ALL")) {
               // Check for required
               if (r.required_armor_types.includes("None")) {
                 good = true;
               } else if (r.required_armor_types.includes("Any")) {
-                good = this.props.obj.equipped_items.filter(o => 
+                good = this.props.character.equipped_items.filter(o => 
                   o.base_item &&
                   o.base_item.item_type === "Armor" &&
                   o.base_item.name !== "Shield"
                 ).length > 0;
               } else {
                 const missing_armor_types = r.required_armor_types.filter(a =>
-                  this.props.obj.equipped_items.filter(o =>
+                  this.props.character.equipped_items.filter(o =>
                     o.base_item &&
                     o.base_item.item_type === "Armor" &&
                     o.base_item.armor_type_id === a).length === 0);
                 good = missing_armor_types.length === 0;
               }
             } else if (r.allowed_armor_types.includes("None")) {
-              good = this.props.obj.equipped_items.filter(o => 
+              good = this.props.character.equipped_items.filter(o => 
                 o.base_item &&
                 o.base_item.item_type === "Armor" &&
                 o.base_item.name !== "Shield"
               ).length === 0;
             } else {
-              const bad_armor_items = this.props.obj.equipped_items.filter(o =>
+              const bad_armor_items = this.props.character.equipped_items.filter(o =>
                 o.base_item &&
                 o.base_item.item_type === "Armor" &&
                 !r.allowed_armor_types.includes(o.base_item.armor_type_id));
@@ -476,7 +491,7 @@ class CharacterAction extends Component<Props, State> {
             return (
               <Roller 
                 name={spell.name}
-                char={this.props.obj}
+                char={this.props.character}
                 rolls={damage_rolls} 
                 rerolls={rerolls}
                 type={spell.effect_string} 
@@ -486,7 +501,7 @@ class CharacterAction extends Component<Props, State> {
             return (
               <Roller 
                 name={spell.name}
-                char={this.props.obj}
+                char={this.props.character}
                 rolls={damage_rolls} 
                 rerolls={rerolls}
                 type="Damage" 
@@ -501,7 +516,7 @@ class CharacterAction extends Component<Props, State> {
         return (
           <Roller 
             name={attack.type}
-            char={this.props.obj}
+            char={this.props.character}
             rolls={attack.attack_rolls} 
             type="Attack" 
           />
@@ -510,34 +525,34 @@ class CharacterAction extends Component<Props, State> {
         const weapon = this.state.popoverWeapon;
         const rerolls: Reroll[] = [];
         if (weapon) {
-          this.props.obj.rerolls.forEach(r => {
+          this.props.character.rerolls.forEach(r => {
             let good = false;
             if (r.allowed_armor_types.includes("ALL")) {
               // Check for required
               if (r.required_armor_types.includes("None")) {
                 good = true;
               } else if (r.required_armor_types.includes("Any")) {
-                good = this.props.obj.equipped_items.filter(o => 
+                good = this.props.character.equipped_items.filter(o => 
                   o.base_item &&
                   o.base_item.item_type === "Armor" &&
                   o.base_item.name !== "Shield"
                 ).length > 0;
               } else {
                 const missing_armor_types = r.required_armor_types.filter(a =>
-                  this.props.obj.equipped_items.filter(o =>
+                  this.props.character.equipped_items.filter(o =>
                     o.base_item &&
                     o.base_item.item_type === "Armor" &&
                     o.base_item.armor_type_id === a).length === 0);
                 good = missing_armor_types.length === 0;
               }
             } else if (r.allowed_armor_types.includes("None")) {
-              good = this.props.obj.equipped_items.filter(o => 
+              good = this.props.character.equipped_items.filter(o => 
                 o.base_item &&
                 o.base_item.item_type === "Armor" &&
                 o.base_item.name !== "Shield"
               ).length === 0;
             } else {
-              const bad_armor_items = this.props.obj.equipped_items.filter(o =>
+              const bad_armor_items = this.props.character.equipped_items.filter(o =>
                 o.base_item &&
                 o.base_item.item_type === "Armor" &&
                 !r.allowed_armor_types.includes(o.base_item.armor_type_id));
@@ -583,7 +598,7 @@ class CharacterAction extends Component<Props, State> {
         return (
           <Roller 
             name={attack.type}
-            char={this.props.obj}
+            char={this.props.character}
             rolls={attack.damage_rolls} 
             rerolls={rerolls}
             type="Damage" 
@@ -598,14 +613,14 @@ class CharacterAction extends Component<Props, State> {
             return (
               <Roller 
                 name={ability.name}
-                char={this.props.obj}
+                char={this.props.character}
                 rolls={ability.attack.attack_rolls} 
                 type="Attack" 
               />
             );
           } else if (mode === "Damage") {
             const level = this.state.popoverActionLevel;
-            const potence = ability.get_potence(level, this.props.obj);
+            const potence = ability.get_potence(level, this.props.character);
             let damage_rolls: RollPlus[] = [];
             if (potence) {
               const roll_plus = new RollPlus(potence.rolls);
@@ -614,34 +629,34 @@ class CharacterAction extends Component<Props, State> {
             damage_rolls = [...damage_rolls,...ability.attack.damage_rolls];
             
             const rerolls: Reroll[] = [];
-            this.props.obj.rerolls.forEach(r => {
+            this.props.character.rerolls.forEach(r => {
               let good = false;
               if (r.allowed_armor_types.includes("ALL")) {
                 // Check for required
                 if (r.required_armor_types.includes("None")) {
                   good = true;
                 } else if (r.required_armor_types.includes("Any")) {
-                  good = this.props.obj.equipped_items.filter(o => 
+                  good = this.props.character.equipped_items.filter(o => 
                     o.base_item &&
                     o.base_item.item_type === "Armor" &&
                     o.base_item.name !== "Shield"
                   ).length > 0;
                 } else {
                   const missing_armor_types = r.required_armor_types.filter(a =>
-                    this.props.obj.equipped_items.filter(o =>
+                    this.props.character.equipped_items.filter(o =>
                       o.base_item &&
                       o.base_item.item_type === "Armor" &&
                       o.base_item.armor_type_id === a).length === 0);
                   good = missing_armor_types.length === 0;
                 }
               } else if (r.allowed_armor_types.includes("None")) {
-                good = this.props.obj.equipped_items.filter(o => 
+                good = this.props.character.equipped_items.filter(o => 
                   o.base_item &&
                   o.base_item.item_type === "Armor" &&
                   o.base_item.name !== "Shield"
                 ).length === 0;
               } else {
-                const bad_armor_items = this.props.obj.equipped_items.filter(o =>
+                const bad_armor_items = this.props.character.equipped_items.filter(o =>
                   o.base_item &&
                   o.base_item.item_type === "Armor" &&
                   !r.allowed_armor_types.includes(o.base_item.armor_type_id));
@@ -666,7 +681,7 @@ class CharacterAction extends Component<Props, State> {
               return (
                 <Roller 
                   name={ability.name}
-                  char={this.props.obj}
+                  char={this.props.character}
                   rolls={damage_rolls} 
                   rerolls={rerolls}
                   type={ability.effect_string} 
@@ -676,7 +691,7 @@ class CharacterAction extends Component<Props, State> {
               return (
                 <Roller 
                   name={ability.name}
-                  char={this.props.obj}
+                  char={this.props.character}
                   rolls={damage_rolls} 
                   rerolls={rerolls}
                   type="Damage" 
@@ -689,14 +704,14 @@ class CharacterAction extends Component<Props, State> {
             return (
               <Roller 
                 name={ability.name}
-                char={this.props.obj}
+                char={this.props.character}
                 rolls={ability.attack.attack_rolls} 
                 type="Attack" 
               />
             );
           } else if (mode === "Damage") {
             const level = this.state.popoverActionLevel;
-            const potence = ability.get_potence(level, this.props.obj);
+            const potence = ability.get_potence(level, this.props.character);
             let damage_rolls: RollPlus[] = [];
             if (potence) {
               const roll_plus = new RollPlus(potence.rolls);
@@ -705,34 +720,34 @@ class CharacterAction extends Component<Props, State> {
             damage_rolls = [...damage_rolls,...ability.attack.damage_rolls];
             
             const rerolls: Reroll[] = [];
-            this.props.obj.rerolls.forEach(r => {
+            this.props.character.rerolls.forEach(r => {
               let good = false;
               if (r.allowed_armor_types.includes("ALL")) {
                 // Check for required
                 if (r.required_armor_types.includes("None")) {
                   good = true;
                 } else if (r.required_armor_types.includes("Any")) {
-                  good = this.props.obj.equipped_items.filter(o => 
+                  good = this.props.character.equipped_items.filter(o => 
                     o.base_item &&
                     o.base_item.item_type === "Armor" &&
                     o.base_item.name !== "Shield"
                   ).length > 0;
                 } else {
                   const missing_armor_types = r.required_armor_types.filter(a =>
-                    this.props.obj.equipped_items.filter(o =>
+                    this.props.character.equipped_items.filter(o =>
                       o.base_item &&
                       o.base_item.item_type === "Armor" &&
                       o.base_item.armor_type_id === a).length === 0);
                   good = missing_armor_types.length === 0;
                 }
               } else if (r.allowed_armor_types.includes("None")) {
-                good = this.props.obj.equipped_items.filter(o => 
+                good = this.props.character.equipped_items.filter(o => 
                   o.base_item &&
                   o.base_item.item_type === "Armor" &&
                   o.base_item.name !== "Shield"
                 ).length === 0;
               } else {
-                const bad_armor_items = this.props.obj.equipped_items.filter(o =>
+                const bad_armor_items = this.props.character.equipped_items.filter(o =>
                   o.base_item &&
                   o.base_item.item_type === "Armor" &&
                   !r.allowed_armor_types.includes(o.base_item.armor_type_id));
@@ -757,7 +772,7 @@ class CharacterAction extends Component<Props, State> {
               return (
                 <Roller 
                   name={ability.name}
-                  char={this.props.obj}
+                  char={this.props.character}
                   rolls={damage_rolls} 
                   rerolls={rerolls}
                   type={ability.effect_string} 
@@ -767,7 +782,7 @@ class CharacterAction extends Component<Props, State> {
               return (
                 <Roller 
                   name={ability.name}
-                  char={this.props.obj}
+                  char={this.props.character}
                   rolls={damage_rolls} 
                   rerolls={rerolls}
                   type="Damage" 

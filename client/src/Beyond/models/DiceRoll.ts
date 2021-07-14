@@ -8,8 +8,12 @@ export class DiceRoll {
 
   constructor(obj?: any) {
     this.true_id = obj && obj.true_id ? obj.true_id : uuidv4().toString();
-    this.size = obj ? obj.size : 4;
-    this.count = obj ? obj.count : 0;
+    this.size = obj ? +obj.size : 4;
+    this.count = obj ? +obj.count : 0;
+    if (obj && obj.log) {
+      console.log(obj);
+      console.log(this);
+    }
   }
 
   toDBObj = () => {

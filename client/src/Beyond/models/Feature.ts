@@ -50,8 +50,10 @@ export class Feature {
     this.base_id = obj ? obj.base_id : 0;
     this.id = obj ? obj.id : 0;
     this.true_id = obj && obj.true_id ? obj.true_id : uuidv4().toString();
+    // if (obj && obj.name === "Burning Hands") {
+    //   console.log(obj);
+    // }
     this.name = obj ? obj.name : "";
-    // console.log(obj);
     this.true_description = obj ? obj.description : "";
     this.fake_description = "";
     this.feature_type = obj ? obj.feature_type : "";

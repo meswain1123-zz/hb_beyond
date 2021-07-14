@@ -13,6 +13,7 @@ import {
   CharacterEldritchInvocation,
   CharacterFeat,
   CharacterFeature,
+  CharacterFeatureBase,
   CharacterFightingStyle,
   CharacterItem,
   CharacterLanguageFeature,
@@ -420,9 +421,9 @@ export class CharacterUtilitiesClass {
       const resources: CharacterResource[] = [];
 
       // Ability, Spell As Ability, Item Affecting Ability
-      const abilities: CharacterAbility[] = [];
-      const spell_as_abilities: CharacterAbility[] = [];
-
+      const abilities: CharacterAbility[] = char.abilities;
+      const spell_as_abilities: CharacterAbility[] = char.spell_as_abilities;
+      
       // Spell List, Ritual Casting, 
       // Spellcasting,
       // Spell Book, Spells/Cantrips Known/Prepared,
@@ -438,6 +439,11 @@ export class CharacterUtilitiesClass {
       const saving_throw_bonuses: Bonus[] = [];
       const check_bonuses: Bonus[] = [];
       const rerolls: Reroll[] = [];
+
+      let level = 0;
+      char.classes.forEach(char_class => {
+        level += char_class.level;
+      });
 
       const processCharacterFeature = (f: CharacterFeature, source_type: string, source_id: string, source_name: string) => {
         if (f.feature_type === "Special Feature Choices") {
@@ -518,18 +524,30 @@ export class CharacterUtilitiesClass {
           advantages.push(f.feature.the_feature as Advantage);
         } else if (f.feature_type === "Resource") {
           if (f.feature.the_feature instanceof ResourceFeature) {
-            const char_resource = new CharacterResource();
-            char_resource.copyResource(f.feature.the_feature, char, source_id);
-            resources.push(char_resource);
+            const resource_finder = resources.filter(o => o.type_id && o.class_id === source_id);
+            if (resource_finder.length === 1) {
+              const char_resource = resource_finder[0];
+              char_resource.copyResource(f.feature.the_feature, char, source_id);
+            } else {
+              const char_resource = new CharacterResource();
+              char_resource.copyResource(f.feature.the_feature, char, source_id);
+              resources.push(char_resource);
+            }
           }
         } else if (f.feature_type === "Ability" ||
           f.feature_type === "Item Affecting Ability") {
-          const char_ability = new CharacterAbility();
+          let char_ability = new CharacterAbility();
           char_ability.copyFeature(f);
-          char_ability.source_type = source_type;
-          char_ability.source_id = source_id;
-          char_ability.source_name = source_name;
-          abilities.push(char_ability);
+          const ability_finder = abilities.filter(o => o.name === char_ability.name && o.source_type === source_type && o.source_id === source_id);
+          if (ability_finder.length === 0) {
+            char_ability.source_type = source_type;
+            char_ability.source_id = source_id;
+            char_ability.source_name = source_name;
+            abilities.push(char_ability);
+          } else {
+            char_ability = ability_finder[0];
+            char_ability.connectFeature(f);
+          }
         } else if (f.feature_type === "Spell as Ability") {
           if (f.feature.the_feature instanceof SpellAsAbility) {
             const the_feature = f.feature.the_feature;
@@ -537,13 +555,23 @@ export class CharacterUtilitiesClass {
             if (spell_finder.length === 1) {
               the_feature.connectSpell(spell_finder[0]);
             }
-            const char_ability = new CharacterAbility();
+            let char_ability = new CharacterAbility();
             char_ability.the_ability = f.feature.the_feature;
-            char_ability.source_type = source_type;
-            char_ability.source_id = source_id;
-            char_ability.source_name = source_name;
-            char_ability.spellcasting_ability = the_feature.spellcasting_ability;
-            spell_as_abilities.push(char_ability);
+            const true_id = f.true_id;
+            // The spell_as_abilities say true_id is empty.  That's the problem.
+            const ability_finder = spell_as_abilities.filter(o => o.true_id === true_id);
+            if (ability_finder.length === 0) {
+              char_ability.source_type = source_type;
+              char_ability.source_id = source_id;
+              char_ability.source_name = source_name;
+              char_ability.spellcasting_ability = the_feature.spellcasting_ability;
+              char_ability.connectFeature(f);
+              spell_as_abilities.push(char_ability);
+            } else {
+              char_ability = ability_finder[0];
+              char_ability.the_ability = f.feature.the_feature;
+              char_ability.connectFeature(f);
+            }
           }
         } else if (f.feature_type === "Spell Book" ||
           f.feature_type === "Bonus Spells" ||
@@ -583,15 +611,23 @@ export class CharacterUtilitiesClass {
             const obj_finder = all_spells.filter(o => o._id === id);
             if (obj_finder.length === 1) {
               const cfl = f.feature.the_feature as IStringHash;
-              const char_spell = new CharacterAbility();
+              let char_spell = new CharacterAbility();
               char_spell.the_ability = new SpellAsAbility();
               char_spell.the_ability.spell = obj_finder[0];
-              char_spell.spellcasting_ability = cfl.spellcasting_ability;
-              char_spell.source_type = source_type;
-              char_spell.source_id = source_id;
-              char_spell.source_name = source_name;
-              // char_spell.connectSource(char_class);
-              spell_as_abilities.push(char_spell);
+              const true_id = f.feature.true_id;
+              const ability_finder = spell_as_abilities.filter(o => o.true_id === true_id);
+              if (ability_finder.length === 0) {
+                char_spell.spellcasting_ability = cfl.spellcasting_ability;
+                char_spell.source_type = source_type;
+                char_spell.source_id = source_id;
+                char_spell.source_name = source_name;
+                spell_as_abilities.push(char_spell);
+              } else {
+                char_spell = ability_finder[0];
+                char_spell.the_ability = new SpellAsAbility();
+                char_spell.the_ability.spell = obj_finder[0];
+                char_spell.connectFeature(f);
+              }
             }
           });
         } else if (f.feature_type === "Spells from List") {
@@ -647,116 +683,50 @@ export class CharacterUtilitiesClass {
         }
       }
 
-      const processAll = (me: Character) => {
-        me.race.features.forEach(fb => {
-          let good = true;
-          if (fb.feature_base) {
-            if (fb.feature_base.required_condition_ids.length > 0 && fb.feature_base.required_condition_ids.filter(o => o !== "ALL").length > 0) {
+      const processCharacterFeatureBase = (me: Character, fb: CharacterFeatureBase, source_type: string, source_id: string, source_name: string) => {
+        let good = true;
+        if (fb.feature_base) {
+          if (fb.feature_base.required_condition_ids.length > 0 && fb.feature_base.required_condition_ids.filter(o => o.toUpperCase() !== "ALL").length > 0) {
+            good = false;
+            for (let i = 0; i < fb.feature_base.required_condition_ids.length; ++i) {
+              if (me.conditions.includes(fb.feature_base.required_condition_ids[i])) {
+                good = true;
+                break;
+              }
+            }
+          }
+          if (good && fb.feature_base.level > 1) {
+            if (source_type === "Class") {
+              // Check the class level
               good = false;
-              for (let i = 0; i < fb.feature_base.required_condition_ids.length; ++i) {
-                if (me.conditions.includes(fb.feature_base.required_condition_ids[i])) {
-                  good = true;
-                  break;
-                }
+              const class_finder = me.classes.filter(o => o.game_class_id === source_id);
+              if (class_finder.length === 1) {
+                good = class_finder[0].level >= fb.feature_base.level;
               }
+            } else {
+              // Check the char level
+              good = me.character_level >= fb.feature_base.level;
             }
           }
-          if (good) {
-            fb.features.forEach(f => { processCharacterFeature(f, "Race", me.race.race_id, me.race.race ? me.race.race.name : ""); });
-          }
-        });
-        if (me.race.subrace) {
-          me.race.subrace.features.forEach(fb => {
-            let good = true;
-            if (fb.feature_base) {
-              if (fb.feature_base.required_condition_ids.length > 0 && fb.feature_base.required_condition_ids.filter(o => o !== "ALL").length > 0) {
-                good = false;
-                for (let i = 0; i < fb.feature_base.required_condition_ids.length; ++i) {
-                  if (me.conditions.includes(fb.feature_base.required_condition_ids[i])) {
-                    good = true;
-                    break;
-                  }
-                }
-              }
-            }
-            if (good) {
-              fb.features.forEach(f => { processCharacterFeature(f, "Subrace", me.race.subrace ? me.race.subrace.subrace_id : "", me.race.subrace && me.race.subrace.subrace ? me.race.subrace.subrace.name : ""); });
-            }
-          });
         }
-        me.background.features.forEach(fb => {
-          let good = true;
-          if (fb.feature_base) {
-            if (fb.feature_base.required_condition_ids.length > 0 && fb.feature_base.required_condition_ids.filter(o => o !== "ALL").length > 0) {
-              good = false;
-              for (let i = 0; i < fb.feature_base.required_condition_ids.length; ++i) {
-                if (me.conditions.includes(fb.feature_base.required_condition_ids[i])) {
-                  good = true;
-                  break;
-                }
-              }
-            }
-          }
-          if (good) {
-            fb.features.forEach(f => { processCharacterFeature(f, "Background", me.background.background_id, me.background.background ? me.background.background.name : ""); });
-          }
-        });
+        if (good) {
+          fb.features.forEach(f => { processCharacterFeature(f, source_type, source_id, source_name); });
+        }
+      }
+
+      const processAll = (me: Character) => {
+        me.race.features.forEach(fb => { processCharacterFeatureBase(me, fb, "Race", me.race.race_id, me.race.race ? me.race.race.name : ""); });
+        if (me.race.subrace) {
+          me.race.subrace.features.forEach(fb => { processCharacterFeatureBase(me, fb, "Subrace", me.race.subrace ? me.race.subrace.subrace_id : "", me.race.subrace ? me.race.subrace.name : ""); });
+        }
+        me.lineage.features.forEach(fb => { processCharacterFeatureBase(me, fb, "Lineage", me.lineage.lineage_id, me.lineage.name); });
+        me.background.features.forEach(fb => { processCharacterFeatureBase(me, fb, "Background", me.background.background_id, me.background.background ? me.background.background.name : ""); });
         me.classes.forEach(char_class => {
-          char_class.class_features.forEach(fb => {
-            let good = true;
-            if (fb.feature_base) {
-              if (fb.feature_base.required_condition_ids.filter(o => o !== "All" && o !== "ALL").length > 0) {
-                good = false;
-                for (let i = 0; i < fb.feature_base.required_condition_ids.length; ++i) {
-                  if (me.conditions.includes(fb.feature_base.required_condition_ids[i])) {
-                    good = true;
-                    break;
-                  }
-                }
-              }
-            }
-            if (good) {
-              fb.features.forEach(f => { 
-                processCharacterFeature(f, "Class", char_class.game_class_id, char_class.game_class ? char_class.game_class.name : ""); 
-              });
-            }
-          });
-          char_class.subclass_features.forEach(fb => {
-            let good = true;
-            if (fb.feature_base) {
-              if (fb.feature_base.required_condition_ids.length > 0 && fb.feature_base.required_condition_ids.filter(o => o !== "ALL").length > 0) {
-                good = false;
-                for (let i = 0; i < fb.feature_base.required_condition_ids.length; ++i) {
-                  if (me.conditions.includes(fb.feature_base.required_condition_ids[i])) {
-                    good = true;
-                    break;
-                  }
-                }
-              }
-            }
-            if (good) {
-              fb.features.forEach(f => { processCharacterFeature(f, "Class", char_class.game_class_id, char_class.game_class ? char_class.game_class.name : ""); });
-            }
-          });
+          char_class.class_features.forEach(fb => { processCharacterFeatureBase(me, fb, "Class", char_class.game_class_id, char_class.name); });
+          char_class.subclass_features.forEach(fb => { processCharacterFeatureBase(me, fb, "Class", char_class.subclass_id, char_class.subclass ? char_class.subclass.name : ""); });
         });
         me.items.filter(item => item.equipped && item.magic_item && (!item.magic_item.attunement || item.attuned)).forEach(item => {
-          item.features.forEach(fb => {
-            let good = true;
-            if (fb.feature_base) {
-              if (fb.feature_base.required_condition_ids.length > 0 && fb.feature_base.required_condition_ids.filter(o => o !== "ALL").length > 0) {
-                good = false;
-                for (let i = 0; i < fb.feature_base.required_condition_ids.length; ++i) {
-                  if (me.conditions.includes(fb.feature_base.required_condition_ids[i])) {
-                    good = true;
-                    break;
-                  }
-                }
-              }
-            }
-            if (good) {
-              fb.features.forEach(f => { processCharacterFeature(f, "Item", item.true_id, item.name); });
-            }
-          });
+          item.features.forEach(fb => { processCharacterFeatureBase(me, fb, "Item", item.magic_item_id, item.magic_item ? item.magic_item.name : ""); });
         });
         ability_score_features.forEach(char_asi_base_feature => {
           if (char_asi_base_feature.feat_option && char_asi_base_feature.use_feat === true) {
@@ -770,23 +740,7 @@ export class CharacterUtilitiesClass {
           feats.push(feat);
         });
         feats.forEach(feat => {
-          feat.features.forEach(fb => {
-            let good = true;
-            if (fb.feature_base) {
-              if (fb.feature_base.required_condition_ids.length > 0 && fb.feature_base.required_condition_ids.filter(o => o !== "ALL").length > 0) {
-                good = false;
-                for (let i = 0; i < fb.feature_base.required_condition_ids.length; ++i) {
-                  if (me.conditions.includes(fb.feature_base.required_condition_ids[i])) {
-                    good = true;
-                    break;
-                  }
-                }
-              }
-            }
-            if (good) {
-              fb.features.forEach(f => { processCharacterFeature(f, "Feat", feat.feat_id, feat.feat ? feat.feat.name : ""); });
-            }
-          });
+          feat.features.forEach(fb => { processCharacterFeatureBase(me, fb, "Feat", feat.feat_id, feat.feat ? feat.feat.name : ""); });
         });
         pact_boon.features.forEach(f => { processCharacterFeature(f, "Pact Boon", pact_boon.pact_boon_id, pact_boon.pact_boon ? pact_boon.pact_boon.name : ""); });
         eldritch_invocations.forEach(ei => {
@@ -802,23 +756,7 @@ export class CharacterUtilitiesClass {
           const sf = special_features[processed_special_features];
           if (sf.special_feature) {
             const the_sf = sf.special_feature;
-            sf.features.forEach(fb => {
-              let good = true;
-              if (fb.feature_base) {
-                if (fb.feature_base.required_condition_ids.length > 0 && fb.feature_base.required_condition_ids.filter(o => o !== "ALL").length > 0) {
-                  good = false;
-                  for (let i = 0; i < fb.feature_base.required_condition_ids.length; ++i) {
-                    if (me.conditions.includes(fb.feature_base.required_condition_ids[i])) {
-                      good = true;
-                      break;
-                    }
-                  }
-                }
-              }
-              if (good) {
-                fb.features.forEach(f => { processCharacterFeature(f, "Special Feature", sf.special_feature_id, the_sf.name); });
-              }
-            });
+            sf.features.forEach(fb => { processCharacterFeatureBase(me, fb, "Special Feature", sf.special_feature_id, the_sf.name); });
           }
           processed_special_features++;
         }
@@ -912,12 +850,10 @@ export class CharacterUtilitiesClass {
         current.charisma += char.bonus_ability_score_modifiers.charisma;
       }
       char.max_ability_scores = new AbilityScores(20);
-      let level = 0;
       let max_hit_points = 0;
       const hit_dice: HitDice[] = [];
       let start_hit_dice: HitDice = new HitDice({ size: 6, count: 1 });
       char.classes.forEach(char_class => {
-        level += char_class.level;
         if (char_class.game_class && char_class.game_class.hit_die) {
           if (char_class.position === 0) {
             start_hit_dice = new HitDice({ size: char_class.game_class.hit_die, count: char_class.level });
@@ -1221,8 +1157,8 @@ export class CharacterUtilitiesClass {
             const spellcasting_ability_modifier = current.getModifier(feature.ability);
             if (spellcasting_ability_modifier !== null) {
               // They can only have one Spellcasting feature per class
-              char_class.spell_dc += 8 + char.proficiency_modifier + spellcasting_ability_modifier;
-              char_class.spell_attack += char.proficiency_modifier + spellcasting_ability_modifier;
+              char_class.spell_dc = 8 + char.proficiency_modifier + spellcasting_ability_modifier;
+              char_class.spell_attack = char.proficiency_modifier + spellcasting_ability_modifier;
             }
             if (feature.cantrips_max) {
               char_class.cantrips_max += +feature.cantrips_max;
@@ -1482,7 +1418,7 @@ export class CharacterUtilitiesClass {
           ability.customizations = a_finder[0].customizations;
         }
       });
-      char.abilities = abilities;
+      char.abilities = abilities.filter(o => o.the_ability);
       spell_as_abilities.forEach(ability => {
         const a_finder = char.spell_as_abilities.filter(o =>
           o.source_type === ability.source_type &&
@@ -1493,11 +1429,12 @@ export class CharacterUtilitiesClass {
         }
         const spellcasting_ability_modifier = current.getModifier(ability.spellcasting_ability);
         if (spellcasting_ability_modifier !== null) {
-          ability.spell_dc += 8 + char.proficiency_modifier + spellcasting_ability_modifier;
-          ability.spell_attack += char.proficiency_modifier + spellcasting_ability_modifier;
+          ability.spell_dc = 8 + char.proficiency_modifier + spellcasting_ability_modifier;
+          ability.spell_attack = char.proficiency_modifier + spellcasting_ability_modifier;
         }
+        ability.calc_special_resource_amount(char);
       });
-      char.spell_as_abilities = spell_as_abilities;
+      char.spell_as_abilities = spell_as_abilities.filter(o => o.the_ability && o.spell);
       if (char.concentrating_on) {
         if (char.concentrating_on instanceof CharacterSpell) {
           const spell_id = char.concentrating_on.spell_id;
@@ -1555,7 +1492,7 @@ export class CharacterUtilitiesClass {
               });
               if (spell.spell_dc !== 0) {
                 const rolls = new RollPlus();
-                rolls.flat = spell.spell_dc;
+                rolls.flat = +spell.spell_dc;
                 attack.attack_rolls.push(rolls);
               }
               char.damage_bonuses.filter(o => 
@@ -1573,7 +1510,7 @@ export class CharacterUtilitiesClass {
               });
               if (spell.spell_attack !== 0) {
                 const rolls = new RollPlus();
-                rolls.flat = spell.spell_attack;
+                rolls.flat = +spell.spell_attack;
                 attack.attack_rolls.push(rolls);
               }
               char.damage_bonuses.filter(o => 
@@ -1593,7 +1530,7 @@ export class CharacterUtilitiesClass {
               });
               if (spell.spell_dc !== 0) {
                 const rolls = new RollPlus();
-                rolls.flat = spell.spell_dc;
+                rolls.flat = +spell.spell_dc;
                 attack.attack_rolls.push(rolls);
               }
               char.damage_bonuses.filter(o => 
@@ -1613,7 +1550,7 @@ export class CharacterUtilitiesClass {
               });
               if (spell.spell_attack !== 0) {
                 const rolls = new RollPlus();
-                rolls.flat = spell.spell_attack;
+                rolls.flat = +spell.spell_attack;
                 attack.attack_rolls.push(rolls);
               }
               char.damage_bonuses.filter(o => 
@@ -1659,7 +1596,7 @@ export class CharacterUtilitiesClass {
                 });
                 if (spell.spell_dc !== 0) {
                   const rolls = new RollPlus();
-                  rolls.flat = spell.spell_dc;
+                  rolls.flat = +spell.spell_dc;
                   attack.attack_rolls.push(rolls);
                 }
                 char.damage_bonuses.filter(o => 
@@ -1677,7 +1614,7 @@ export class CharacterUtilitiesClass {
                 });
                 if (spell.spell_attack !== 0) {
                   const rolls = new RollPlus();
-                  rolls.flat = spell.spell_attack;
+                  rolls.flat = +spell.spell_attack;
                   attack.attack_rolls.push(rolls);
                 }
                 char.damage_bonuses.filter(o => 
@@ -1697,7 +1634,7 @@ export class CharacterUtilitiesClass {
                 });
                 if (spell.spell_dc !== 0) {
                   const rolls = new RollPlus();
-                  rolls.flat = spell.spell_dc;
+                  rolls.flat = +spell.spell_dc;
                   attack.attack_rolls.push(rolls);
                 }
                 char.damage_bonuses.filter(o => 
@@ -1717,7 +1654,7 @@ export class CharacterUtilitiesClass {
                 });
                 if (spell.spell_attack !== 0) {
                   const rolls = new RollPlus();
-                  rolls.flat = spell.spell_attack;
+                  rolls.flat = +spell.spell_attack;
                   attack.attack_rolls.push(rolls);
                 }
                 char.damage_bonuses.filter(o => 
@@ -1757,7 +1694,7 @@ export class CharacterUtilitiesClass {
               });
               if (spell.spell_dc !== 0) {
                 const rolls = new RollPlus();
-                rolls.flat = spell.spell_dc;
+                rolls.flat = +spell.spell_dc;
                 attack.attack_rolls.push(rolls);
               }
               char.damage_bonuses.filter(o => 
@@ -1775,7 +1712,7 @@ export class CharacterUtilitiesClass {
               });
               if (spell.spell_attack !== 0) {
                 const rolls = new RollPlus();
-                rolls.flat = spell.spell_attack;
+                rolls.flat = +spell.spell_attack;
                 attack.attack_rolls.push(rolls);
               }
               char.damage_bonuses.filter(o => 
@@ -1795,7 +1732,7 @@ export class CharacterUtilitiesClass {
               });
               if (spell.spell_dc !== 0) {
                 const rolls = new RollPlus();
-                rolls.flat = spell.spell_dc;
+                rolls.flat = +spell.spell_dc;
                 attack.attack_rolls.push(rolls);
               }
               char.damage_bonuses.filter(o => 
@@ -1815,7 +1752,7 @@ export class CharacterUtilitiesClass {
               });
               if (spell.spell_attack !== 0) {
                 const rolls = new RollPlus();
-                rolls.flat = spell.spell_attack;
+                rolls.flat = +spell.spell_attack;
                 attack.attack_rolls.push(rolls);
               }
               char.damage_bonuses.filter(o => 

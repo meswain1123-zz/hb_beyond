@@ -108,6 +108,9 @@ export class CharacterFeature {
         break;
       }
     }
+    // if (obj && obj.name === "Burning Hands") {
+    //   console.log(obj);
+    // }
     this.feature = obj && obj.feature ? new Feature(obj.feature) : new Feature();
     this.source_id = obj && obj.source_id ? obj.source_id : "";
   }

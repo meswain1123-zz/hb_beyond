@@ -206,7 +206,6 @@ class FeatureBaseInput extends Component<Props, State> {
                 obj={this.props.feature_base}
                 type="FeatureBase"
                 useTemplate={(template: TemplateBase) => {
-                  console.log(template);
                   const feature_base_template: FeatureBaseTemplate = template as FeatureBaseTemplate;
                   const feature_base = this.props.feature_base;
                   feature_base.copyTemplate(feature_base_template);
@@ -275,7 +274,7 @@ class FeatureBaseInput extends Component<Props, State> {
               type="number"
               onBlur={(value: number) => {
                 const feature_base = this.props.feature_base;
-                feature_base.level = value;
+                feature_base.level = +value;
                 this.setState({ feature_base });
               }}
             />
@@ -301,6 +300,9 @@ class FeatureBaseInput extends Component<Props, State> {
               name="Required Conditions"
               multiple
               allow_all
+              resistances
+              vulnerabilities
+              immunities
               values={this.props.feature_base.required_condition_ids}
               onChange={(ids: string[]) => {
                 const feature_base = this.props.feature_base;

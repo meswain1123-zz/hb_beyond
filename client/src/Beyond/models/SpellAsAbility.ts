@@ -61,7 +61,7 @@ export class SpellAsAbility {
     this.casting_time_override = obj ? obj.casting_time_override : "Normal";
     this.slot_override = obj ? obj.slot_override : "Normal";
     this.resource_consumed = obj ? obj.resource_consumed : "None";
-    this.amount_consumed = obj && obj.amount_consumed ? obj.amount_consumed : 0;
+    this.amount_consumed = obj && obj.amount_consumed ? +obj.amount_consumed : 0;
     this.slot_level = obj && obj.slot_level ? obj.slot_level : 1;
     this.slot_type = obj && obj.slot_type ? obj.slot_type : "";
     if (obj && obj.special_resource_amount && obj.special_resource_amount.base === undefined) {
@@ -74,7 +74,7 @@ export class SpellAsAbility {
       this.special_resource_amount = new UpgradableNumber();
     }
     this.special_resource_refresh_rule = obj ? obj.special_resource_refresh_rule : "";
-    this.spellcasting_ability = obj && obj.spellcasting_ability ? obj.spellcasting_ability : "CON";
+    this.spellcasting_ability = obj && obj.spellcasting_ability ? obj.spellcasting_ability : "CHA";
     this.ritual = obj && obj.ritual ? obj.ritual : false;
     this.ritual_only = this.ritual && obj && obj.ritual_only ? obj.ritual_only : false;
     this.at_will = obj && obj.at_will ? obj.at_will : false;

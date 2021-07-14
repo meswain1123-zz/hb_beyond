@@ -81,10 +81,9 @@ export interface State {
   eldritch_invocations: EldritchInvocation[] | null;
   loading: boolean;
   reloading: boolean;
-  view: string;
-  menu_open: string;
   minion: CreatureInstance | null;
   bar3_mode: string;
+  menu_open: string;
 }
 
 
@@ -103,10 +102,9 @@ class CharacterDetails extends Component<Props, State> {
       eldritch_invocations: null,
       loading: false,
       reloading: false,
-      view: "spells", // "main", // 
-      menu_open: "",
       minion: null,
-      bar3_mode: "Resources"
+      bar3_mode: "Resources",
+      menu_open: ""
     };
     this.api = API.getInstance();
     this.image_api = imageAPI.getInstance();
@@ -404,200 +402,6 @@ class CharacterDetails extends Component<Props, State> {
                     this.setState({ menu_open: "portrait" });
                   }}>
                   Change Portrait
-                </Grid>
-                <Grid item xs={2}>&nbsp;</Grid>
-              </Grid>
-            </Grid>
-          </Grid>
-        </div>
-      </Drawer>,
-      <Drawer key={1} anchor="right" 
-        open={ this.state.menu_open === "views" } 
-        onClose={() => {
-          this.setState({ menu_open: "" });
-        }}>
-        <div style={{ 
-            backgroundColor: "black",
-            color: "white",
-            border: "1px solid blue",
-            height: "800px",
-            width: "324px",
-            overflowX: "hidden"
-          }}>
-          <Grid container spacing={1} direction="column"
-            style={{ 
-              backgroundColor: "black",
-              color: "white",
-              border: "1px solid blue",
-              height: "800px",
-              width: "320px",
-              overflowX: "hidden"
-            }}>
-            <Grid item>&nbsp;</Grid>
-            <Grid item container spacing={1} direction="row"
-              style={{ 
-                backgroundColor: "#333333",
-                color: "white",
-                border: "1px solid #999999",
-                padding: "0px"
-              }}>
-              <Grid item xs={12} container spacing={0} direction="row"
-                style={{ 
-                  backgroundColor: "#333333",
-                  color: "white",
-                  border: "1px solid #555555", 
-                  cursor: "pointer"
-                }}
-                onClick={() => {
-                  this.setState({ view: "main", menu_open: "" });
-                }}>
-                <Grid item xs={2}>&nbsp;</Grid>
-                <Grid item xs={8}>
-                  Abilities, Saves, Senses
-                </Grid>
-                <Grid item xs={2}>&nbsp;</Grid>
-              </Grid>
-              <Grid item xs={6} container spacing={0} direction="row"
-                style={{ 
-                  backgroundColor: "#333333",
-                  color: "white",
-                  border: "1px solid #555555", 
-                  cursor: "pointer"
-                }}
-                onClick={() => {
-                  this.setState({ view: "skills", menu_open: "" });
-                }}>
-                <Grid item xs={2}>&nbsp;</Grid>
-                <Grid item xs={8}>
-                  Skills
-                </Grid>
-                <Grid item xs={2}>&nbsp;</Grid>
-              </Grid>
-              <Grid item xs={6} container spacing={0} direction="row"
-                style={{ 
-                  backgroundColor: "#333333",
-                  color: "white",
-                  border: "1px solid #555555", 
-                  cursor: "pointer"
-                }}
-                onClick={() => {
-                  this.setState({ view: "actions", menu_open: "" });
-                }}>
-                <Grid item xs={2}>&nbsp;</Grid>
-                <Grid item xs={8}>
-                  Actions
-                </Grid>
-                <Grid item xs={2}>&nbsp;</Grid>
-              </Grid>
-              <Grid item xs={6} container spacing={0} direction="row"
-                style={{ 
-                  backgroundColor: "#333333",
-                  color: "white",
-                  border: "1px solid #555555", 
-                  cursor: "pointer"
-                }}
-                onClick={() => {
-                  this.setState({ view: "equipment", menu_open: "" });
-                }}>
-                <Grid item xs={2}>&nbsp;</Grid>
-                <Grid item xs={8}>
-                  Equipment
-                </Grid>
-                <Grid item xs={2}>&nbsp;</Grid>
-              </Grid>
-              <Grid item xs={6} container spacing={0} direction="row"
-                style={{ 
-                  backgroundColor: "#333333",
-                  color: "white",
-                  border: "1px solid #555555", 
-                  cursor: "pointer"
-                }}
-                onClick={() => {
-                  this.setState({ view: "spells", menu_open: "" });
-                }}>
-                <Grid item xs={2}>&nbsp;</Grid>
-                <Grid item xs={8}>
-                  Spells
-                </Grid>
-                <Grid item xs={2}>&nbsp;</Grid>
-              </Grid>
-              <Grid item xs={6} container spacing={0} direction="row"
-                style={{ 
-                  backgroundColor: "#333333",
-                  color: "white",
-                  border: "1px solid #555555", 
-                  cursor: "pointer"
-                }}
-                onClick={() => {
-                  this.setState({ view: "features", menu_open: "" });
-                }}>
-                <Grid item xs={2}>&nbsp;</Grid>
-                <Grid item xs={8}>
-                  Features &amp; Traits
-                </Grid>
-                <Grid item xs={2}>&nbsp;</Grid>
-              </Grid>
-              <Grid item xs={6} container spacing={0} direction="row"
-                style={{ 
-                  backgroundColor: "#333333",
-                  color: "white",
-                  border: "1px solid #555555", 
-                  cursor: "pointer"
-                }}
-                onClick={() => {
-                  this.setState({ view: "profs", menu_open: "" });
-                }}>
-                <Grid item xs={2}>&nbsp;</Grid>
-                <Grid item xs={8}>
-                  Proficiencies &amp; Languages
-                </Grid>
-                <Grid item xs={2}>&nbsp;</Grid>
-              </Grid>
-              <Grid item xs={6} container spacing={0} direction="row"
-                style={{ 
-                  backgroundColor: "#333333",
-                  color: "white",
-                  border: "1px solid #555555", 
-                  cursor: "pointer"
-                }}
-                onClick={() => {
-                  this.setState({ view: "description", menu_open: "" });
-                }}>
-                <Grid item xs={2}>&nbsp;</Grid>
-                <Grid item xs={8}>
-                  Description
-                </Grid>
-                <Grid item xs={2}>&nbsp;</Grid>
-              </Grid>
-              <Grid item xs={6} container spacing={0} direction="row"
-                style={{ 
-                  backgroundColor: "#333333",
-                  color: "white",
-                  border: "1px solid #555555", 
-                  cursor: "pointer"
-                }}
-                onClick={() => {
-                  this.setState({ view: "notes", menu_open: "" });
-                }}>
-                <Grid item xs={2}>&nbsp;</Grid>
-                <Grid item xs={8}>
-                  Notes
-                </Grid>
-                <Grid item xs={2}>&nbsp;</Grid>
-              </Grid>
-              <Grid item xs={12} container spacing={0} direction="row"
-                style={{ 
-                  backgroundColor: "#333333",
-                  color: "white",
-                  border: "1px solid #555555", 
-                  cursor: "pointer"
-                }}
-                onClick={() => {
-                  this.setState({ view: "extras", menu_open: "" });
-                }}>
-                <Grid item xs={2}>&nbsp;</Grid>
-                <Grid item xs={8}>
-                  Extras
                 </Grid>
                 <Grid item xs={2}>&nbsp;</Grid>
               </Grid>

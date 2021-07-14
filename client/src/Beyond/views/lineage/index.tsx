@@ -11,15 +11,13 @@ import {
 } from "@material-ui/core";
 
 import StringBox from "../../components/input/StringBox";
-
-import SelectSpecialFeatureTypeBox from "../../components/model_inputs/select/SelectSpecialFeatureTypeBox";
+import SelectStringBox from "../../components/input/SelectStringBox";
 
 import ObjectIndex from "../../components/Navigation/ObjectIndex";
 import LetterLinks from "../../components/Navigation/LetterLinks";
 
 
 interface AppState {
-  special_feature_type: string;
   height: number;
   width: number;
 }
@@ -29,13 +27,11 @@ interface RootState {
 }
 
 const mapState = (state: RootState) => ({
-  special_feature_type: state.app.special_feature_type,
   height: state.app.height,
   width: state.app.width
 })
 
 const mapDispatch = {
-  setSpecialFeatureType: (type: string) => ({ type: 'SET', dataType: 'special_feature_type', payload: type })
 }
 
 const connector = connect(mapState, mapDispatch)
@@ -51,22 +47,22 @@ export interface State {
   type: string;
 }
 
-class SpecialFeatureIndex extends Component<Props, State> {
+class LineageIndex extends Component<Props, State> {
   constructor(props: Props) {
     super(props);
     this.state = {
       redirectTo: null,
       search_string: "",
       start_letter: "",
-      type: "Any"
+      type: "ALL"
     };
   }
 
   get_filter() {
     const filter: any = {};
     
-    if (this.props.special_feature_type !== "Any") {
-      filter.type = this.props.special_feature_type;
+    if (this.state.type !== "ALL") {
+      filter.type = this.state.type;
     }
     if (this.state.start_letter !== "") {
       filter.start_letter = this.state.start_letter;
@@ -87,12 +83,12 @@ class SpecialFeatureIndex extends Component<Props, State> {
           <Grid item container spacing={1} direction="row">
             <Grid item xs={3}>
               <span className={"MuiTypography-root MuiListItemText-primary header"}>
-                Special Features
+                Lineages
               </span>
-              <Tooltip title={`Create New Special Feature`}>
+              <Tooltip title={`Create New Lineage`}>
                 <Fab size="small" color="primary" style={{marginLeft: "8px"}}
                   onClick={ () => {
-                    this.setState({ redirectTo:`/beyond/special_feature/create` });
+                    this.setState({ redirectTo:`/beyond/lineage/create` });
                   }}>
                   <Add/>
                 </Fab>
@@ -108,21 +104,20 @@ class SpecialFeatureIndex extends Component<Props, State> {
               />
             </Grid>
             <Grid item xs={3}>
-              <SelectSpecialFeatureTypeBox 
-                name="Special Feature Type" 
-                value={this.props.special_feature_type} 
-                allowAny
+              <SelectStringBox 
+                name="Type"
+                options={["ALL","Standard","Exotic","Special"]}
+                value={this.state.type}
                 onChange={(value: string) => {
-                  this.props.setSpecialFeatureType(value);
                   this.setState({ type: value });
-                }} 
-              />
+                }}
+              /> 
             </Grid>
           </Grid>
           <Grid item>
             <ObjectIndex 
               filter={this.get_filter()}
-              data_type="special_feature"
+              data_type="lineage"
             />
           </Grid>
           <Grid item>
@@ -138,4 +133,4 @@ class SpecialFeatureIndex extends Component<Props, State> {
   }
 }
 
-export default connector(SpecialFeatureIndex);
+export default connector(LineageIndex);

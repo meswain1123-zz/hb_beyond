@@ -118,7 +118,7 @@ class CharacterMainDetails extends Component<Props, State> {
       eldritch_invocations: null,
       loading: false,
       reloading: false,
-      view: "spells", // "main", // 
+      view: "actions", // "main", // 
       menu_open: "",
       minion: null
     };
@@ -898,7 +898,7 @@ class CharacterMainDetails extends Component<Props, State> {
 
   renderResource(resource: CharacterResource) {
     return (
-      <span key={resource.type_id} style={{ 
+      <span key={`${resource.type_id}_${resource.class_id}`} style={{ 
         border: "1px solid lightgray" 
       }}>
         <Grid container spacing={0} direction="column">
@@ -906,7 +906,7 @@ class CharacterMainDetails extends Component<Props, State> {
             style={{
               fontWeight: "bold"
             }}>
-            <DisplayObjects type="resource" ids={[resource.type_id]} />
+            &nbsp;<DisplayObjects type="resource" ids={[resource.type_id]} />
             { resource.size > 1 && ` (d${resource.size})` }
           </Grid>
           <Grid item>

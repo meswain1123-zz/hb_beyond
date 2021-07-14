@@ -30,7 +30,7 @@ export class SpellAsAbilityTemplate extends TemplateBase {
     this.casting_time_override = obj ? obj.casting_time_override : "Normal";
     this.slot_override = obj ? obj.slot_override : "Normal";
     this.resource_consumed = obj ? obj.resource_consumed : "";
-    this.amount_consumed = obj && obj.amount_consumed ? obj.amount_consumed : 0;
+    this.amount_consumed = obj && obj.amount_consumed ? +obj.amount_consumed : 0;
     this.slot_level = obj && obj.slot_level ? obj.slot_level : 1;
     this.slot_type = obj && obj.slot_type ? obj.slot_type : "";
     if (obj && obj.special_resource_amount && obj.special_resource_amount.base === undefined) {

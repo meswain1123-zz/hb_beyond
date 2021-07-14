@@ -15,6 +15,11 @@ const menuRoutes = {
       
     },
     {
+      path: "/beyond/lineage",
+      name: "Lineages",
+      
+    },
+    {
       path: "/beyond/source_book",
       name: "Source Books",
       

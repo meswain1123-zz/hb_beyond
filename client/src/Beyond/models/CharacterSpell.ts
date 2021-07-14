@@ -57,10 +57,10 @@ export class CharacterSpell {
     this.ritual_only = this.ritual && obj && obj.ritual_only ? obj.ritual_only : false;
     this.at_will = obj && obj.at_will ? obj.at_will : false;
     this.spellcasting_ability = obj && obj.spellcasting_ability ? obj.spellcasting_ability : "";
-    this.spell_attack = obj && obj.spell_attack ? obj.spell_attack : "";
+    this.spell_attack = obj && obj.spell_attack ? +obj.spell_attack : 0;
     this.attack = obj && obj.attack ? obj.attack : new Attack();
-    this.bonus_damage = obj && obj.bonus_damage ? obj.bonus_damage : 0;
-    this.spell_dc = obj && obj.spell_dc ? obj.spell_dc : "";
+    this.bonus_damage = obj && obj.bonus_damage ? +obj.bonus_damage : 0;
+    this.spell_dc = obj && obj.spell_dc ? +obj.spell_dc : 0;
     this.prepared = obj ? obj.prepared : null;
     this.extra = obj ? obj.extra : null;
     this.attack_string = "";
@@ -428,8 +428,8 @@ export class CharacterSpell {
       this.source_type = "Class";
       this.source_id = source.game_class_id;
       this.spellcasting_ability = source.spellcasting_ability;
-      this.spell_attack = source.spell_attack;
-      this.spell_dc = source.spell_dc;
+      this.spell_attack = +source.spell_attack;
+      this.spell_dc = +source.spell_dc;
       if (source.game_class) {
         this.source_name = source.game_class.name;
         if (this.spell && this.spell.ritual && source.ritual_casting) {

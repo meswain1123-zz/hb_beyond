@@ -6,6 +6,7 @@ import {
 
 import { 
   Ability,
+  SpellAsAbility,
   Character,
   CharacterAbility,
   CharacterResource,
@@ -167,7 +168,7 @@ class CharacterResourceBoxes extends Component<Props, State> {
     } else if (this.props.resource instanceof CharacterAbility) {
       const ability = this.props.resource;
       const the_ability = ability.the_ability;
-      if (the_ability instanceof Ability && the_ability.resource_consumed) {
+      if ((the_ability instanceof Ability || the_ability instanceof SpellAsAbility) && the_ability.resource_consumed) {
         const character = this.props.character;
         if (the_ability.resource_consumed === "Special") {
           if (+ability.special_resource_amount > 6) {

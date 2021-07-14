@@ -87,9 +87,9 @@ export class AbilityEffectUpgradable {
       potence.level = p.level;
       potence.rolls = new RollPlus();
       potence.rolls.ability_score = p.rolls.ability_score;
-      potence.rolls.count = p.rolls.count.value(char, class_id, base_slot_level, slot_level);
-      potence.rolls.flat = p.rolls.flat.value(char, class_id, base_slot_level, slot_level);
-      potence.rolls.size = p.rolls.size.value(char, class_id, base_slot_level, slot_level);
+      potence.rolls.count = +p.rolls.count.value(char, class_id, base_slot_level, slot_level);
+      potence.rolls.flat = +p.rolls.flat.value(char, class_id, base_slot_level, slot_level);
+      potence.rolls.size = +p.rolls.size.value(char, class_id, base_slot_level, slot_level);
       if (potence.rolls.count > 0) {
         if (potence.rolls.flat > 0) {
           potence.rolls.as_string = `${potence.rolls.count}d${potence.rolls.size}+${potence.rolls.flat}`;

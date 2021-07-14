@@ -129,10 +129,6 @@ class CharacterManageSpells extends Component<Props, State> {
                 }
               });
               
-              // console.log(list_spells);
-              // list_spells = [...list_spells,...bonus_spells];
-              // console.log(list_spells);
-              // console.log(bonus_spells);
               my_spell_lists[char_class.game_class_id] = list_spells;
               my_always_known[char_class.game_class_id] = always_known;
             }

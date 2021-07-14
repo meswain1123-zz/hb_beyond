@@ -26,7 +26,8 @@ import {
   CreatureInstance,
   Reroll,
   AbilityEffect,
-  CharacterSpecialSpell
+  CharacterSpecialSpell,
+  CharacterLineage
 } from ".";
 
 
@@ -42,6 +43,7 @@ export class Character extends ModelBase {
 
   image_url: string;
   race: CharacterRace;
+  lineage: CharacterLineage;
   classes: CharacterClass[];
   background: CharacterBackground;
   base_ability_scores: AbilityScores;
@@ -161,6 +163,7 @@ export class Character extends ModelBase {
     this.image_url = obj && obj.image_url ? obj.image_url : "";
     this.inspiration = obj && obj.inspiration ? obj.inspiration : 0;
     this.race = obj ? new CharacterRace(obj.race) : new CharacterRace();
+    this.lineage = obj && obj.lineage ? new CharacterLineage(obj.lineage) : new CharacterLineage();
     this.classes = [];
     if (obj && obj.classes && obj.classes.length > 0) {
       for (let i = 0; i < obj.classes.length; i++) {
@@ -177,7 +180,7 @@ export class Character extends ModelBase {
     this.items = [];
     if (obj && obj.items && obj.items.length > 0) {
       for (let i = 0; i < obj.items.length; i++) {
-        const char_item = new CharacterItem(obj.items[i])
+        const char_item = new CharacterItem(obj.items[i]);
         this.items.push(char_item);
       }
     }
@@ -450,6 +453,7 @@ export class Character extends ModelBase {
       source_id: this.source_id,
       image_url: this.image_url,
       race: this.race.toDBObj(),
+      lineage: this.lineage.toDBObj(),
       classes,
       background: this.background.toDBObj(),
       base_ability_scores: this.base_ability_scores.toDBObj(),
@@ -522,6 +526,7 @@ export class Character extends ModelBase {
     this.optional_features = copyMe.optional_features;
     this.optional_feature_base_ids = copyMe.optional_feature_base_ids;
     this.race = copyMe.race;
+    this.lineage = copyMe.lineage;
     this.classes = copyMe.classes;
     this.background = copyMe.background;
     this.base_ability_scores = copyMe.base_ability_scores;

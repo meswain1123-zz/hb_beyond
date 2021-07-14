@@ -4,6 +4,9 @@ import { connect, ConnectedProps } from 'react-redux';
 import { 
   Condition
 } from "../../../models";
+import {
+  DAMAGE_TYPES
+} from "../../../models/Constants";
 
 import SelectBox from "../../input/SelectBox";
 
@@ -37,6 +40,9 @@ type Props = PropsFromRedux & {
   color: string;
   allow_all: boolean;
   multiple: boolean;
+  resistances: boolean;
+  vulnerabilities: boolean;
+  immunities: boolean;
 }
 
 export interface State {
@@ -51,7 +57,10 @@ class SelectConditionBox extends Component<Props, State> {
     allow_all: true,
     multiple: true,
     value: "",
-    values: []
+    values: [],
+    resistances: false,
+    vulnerabilities: false,
+    immunities: false
   };
   constructor(props: Props) {
     super(props);
@@ -86,6 +95,7 @@ class SelectConditionBox extends Component<Props, State> {
       return (
         <SelectBox 
           options={conditions}
+          extra_options={this.get_extra_options()}
           multiple
           allow_all={this.props.allow_all}
           values={this.props.values} 
@@ -100,6 +110,7 @@ class SelectConditionBox extends Component<Props, State> {
       return (
         <SelectBox 
           options={conditions}
+          extra_options={this.get_extra_options()}
           value={this.props.value} 
           name={this.props.name}
           color={this.props.color}
@@ -113,6 +124,27 @@ class SelectConditionBox extends Component<Props, State> {
         />
       );
     }
+  }
+
+  get_extra_options() {
+    const extra_options: string[] = [];
+    if (this.props.resistances) {
+      DAMAGE_TYPES.forEach(dt => {
+        extra_options.push(`${dt} Resistance`);
+      });
+    }
+    if (this.props.vulnerabilities) {
+      DAMAGE_TYPES.forEach(dt => {
+        extra_options.push(`${dt} Vulnerability`);
+      });
+    }
+    if (this.props.immunities) {
+      DAMAGE_TYPES.forEach(dt => {
+        extra_options.push(`${dt} Immunity`);
+      });
+    }
+
+    return extra_options;
   }
 }
 

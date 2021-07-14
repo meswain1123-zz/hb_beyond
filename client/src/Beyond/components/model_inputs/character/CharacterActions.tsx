@@ -204,7 +204,7 @@ class CharacterActions extends Component<Props, State> {
               return (
                 <CharacterAction 
                   key={key}
-                  obj={this.props.obj}
+                  character={this.props.obj}
                   action={action}
                   group={group2}
                   onChange={(change_types: string[]) => {

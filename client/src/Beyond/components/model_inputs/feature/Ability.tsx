@@ -297,7 +297,7 @@ class AbilityInput extends Component<Props, State> {
               type="number"
               onBlur={(value: number) => {
                 const obj = this.props.obj;
-                obj.amount_consumed = value;
+                obj.amount_consumed = +value;
                 this.props.onChange(obj);
               }}
             />

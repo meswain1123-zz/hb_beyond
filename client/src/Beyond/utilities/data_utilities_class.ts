@@ -117,6 +117,8 @@ export class DataUtilitiesClass {
           return `${first} ${second}`;
         } else if ((typeof second === "number" && second < 0) || (typeof second === "string" && second.length > 0 && second[0] === "-")) {
           return `${first}${second}`;
+        } else if (second === 0 || second === "0") {
+          return first;
         } else {
           return `${first}+${second}`;
         }

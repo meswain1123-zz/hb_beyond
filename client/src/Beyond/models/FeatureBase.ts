@@ -43,7 +43,7 @@ export class FeatureBase {
     this.description = obj ? `${obj.description}` : "";
     this.source_type = obj && obj.source_type ? obj.source_type : "";
     this.source_id = obj && obj.source_id ? obj.source_id : "";
-    this.level = obj ? obj.level : 1;
+    this.level = obj ? +obj.level : 1;
     this.features = [];
     if (obj && obj.features) {
       obj.features.forEach((f: any) => {
@@ -72,7 +72,7 @@ export class FeatureBase {
     this.prevent_duplicate_choices = obj ? obj.prevent_duplicate_choices : false;
     this.multiclassing = obj && obj.multiclassing ? obj.multiclassing : 0;
     this.required_condition_ids = obj && obj.required_condition_ids ? obj.required_condition_ids : ["ALL"];
-    this.display = obj && obj.display ? obj.display : false;
+    this.display = obj && obj.display !== undefined ? obj.display : true;
     this.optional = obj && obj.optional ? obj.optional : false;
     this.replaces_feature_base_id = obj && obj.replaces_feature_base_id ? obj.replaces_feature_base_id : "";
   }

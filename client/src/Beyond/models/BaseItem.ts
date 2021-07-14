@@ -49,14 +49,22 @@ export class BaseItem extends ModelBase {
     this.attack_damages = []; 
     if (obj && obj.attack_damages) {
       obj.attack_damages.forEach((d: any) => {
-        this.attack_damages.push(new RollPlus(d));
+        if (d.damage_rolls) {
+          d.damage_rolls.forEach((dr: any) => {
+            this.attack_damages.push(new RollPlus(dr));
+          });
+        } else {
+          this.attack_damages.push(new RollPlus(d));
+        }
       });
     } else if (obj && obj.base_attack_damage_formula) {
-      const formula_split = obj.base_attack_damage_formula.split("d");
+      let formula = obj.base_attack_damage_formula as string;
+      formula = formula.replace("{","").replace("}","");
+      const formula_split = formula.split("d");
       const damage = new RollPlus();
-      damage.count = formula_split[0];
+      damage.count = +formula_split[0];
       if (formula_split.length > 1) {
-        damage.size = formula_split[1];
+        damage.size = +formula_split[1];
       } else {
         damage.size = 1;
       }
@@ -67,14 +75,20 @@ export class BaseItem extends ModelBase {
     this.versatile_attack_damages = [];
     if (obj && obj.versatile_attack_damages) {
       obj.versatile_attack_damages.forEach((d: any) => {
-        this.versatile_attack_damages.push(new RollPlus(d));
+        if (d.damage_rolls) {
+          d.damage_rolls.forEach((dr: any) => {
+            this.versatile_attack_damages.push(new RollPlus(dr));
+          });
+        } else {
+          this.versatile_attack_damages.push(new RollPlus(d));
+        }
       });
     } else if (obj && obj.versatile_attack_damage_formula) {
       const formula_split = obj.versatile_attack_damage_formula.split("d");
       const damage = new RollPlus();
-      damage.count = formula_split[0];
+      damage.count = +formula_split[0];
       if (formula_split.length > 1) {
-        damage.size = formula_split[1];
+        damage.size = +formula_split[1];
       } else {
         damage.size = 1;
       }

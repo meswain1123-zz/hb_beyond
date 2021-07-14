@@ -137,7 +137,7 @@ class CreatureAction extends Component<Props, State> {
     if (mode === "Attack") {
       const rolls = new RollPlus();
       rolls.type = "Attack";
-      rolls.flat = this.props.action.attack_bonus;
+      rolls.flat = +this.props.action.attack_bonus;
       return (
         <Roller 
           name={this.props.action.name}

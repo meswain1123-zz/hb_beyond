@@ -242,6 +242,9 @@ class AbilityEffectInput extends Component<Props, State> {
             <SelectConditionBox
               name="Apply Conditions"
               multiple
+              resistances
+              vulnerabilities
+              immunities
               values={this.props.obj.conditions_applied}
               onChange={(ids: string[]) => {
                 const obj = this.props.obj;

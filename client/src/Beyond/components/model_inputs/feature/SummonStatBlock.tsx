@@ -1014,7 +1014,6 @@ class SummonStatBlockInput extends Component<Props, State> {
     const return_me: any[] = [];
     let sense_finder = this.props.obj.senses.filter(o => o.name === "Darkvision");
     let darkvision: CharacterSense | null = null;
-    console.log(darkvision);
     if (sense_finder.length === 1) {
       darkvision = sense_finder[0];
     }
@@ -1072,7 +1071,6 @@ class SummonStatBlockInput extends Component<Props, State> {
                 obj.senses.push(new_sense);
               }
             }
-            console.log(obj.senses);
             this.props.onChange();
           }}
         />

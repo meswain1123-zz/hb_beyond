@@ -115,9 +115,6 @@ class SelectObjectFieldBox extends Component<Props, State> {
 
   load() {
     this.setState({ loading: true }, () => {
-      console.log(this.props.data_type);
-      console.log(this.props.field);
-      console.log(this.props.filter);
       this.api.getObjectFieldValues(this.props.data_type, this.props.field, this.props.filter).then((res: any) => {
         if (res && !res.error) {
           this.setState({ field_values: res, loading: false });

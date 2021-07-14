@@ -37,6 +37,9 @@ export class CharacterFeatureBase {
     this.features = [];
     if (obj && obj.features && obj.features.length > 0) {
       for (let i = 0; i < obj.features.length; i++) {
+        // if (obj.features[i] && obj.features[i].name === "Burning Hands") {
+        //   console.log(obj);
+        // }
         const f = new CharacterFeature(obj.features[i]);
         f.source_id = this.source_id;
         this.features.push(f);

@@ -27,6 +27,7 @@ import {
   // MagicItemTemplate,
   Race,
   Subrace,
+  Lineage,
   Resource,
   Spell,
   SpellSlotType,
@@ -45,7 +46,9 @@ import {
   CharacterPactBoon,
   CharacterEldritchInvocation,
   CharacterFightingStyle,
-  SourceBook
+  SourceBook,
+  CharacterSpecialFeature,
+  CharacterFeatureBase
 } from "../models";
 
 // This is our special type of Error that represents
@@ -302,55 +305,20 @@ export class APIClass {
           }
         }
         for (let i = 0; i < char.race.features.length; ++i) {
-          const fb = char.race.features[i];
-          for (let j = 0; j < fb.features.length; ++j) {
-            const f = fb.features[j];
-            if (f.feature_type === "Feat") {
-              const opt = f.feature_options[0] as CharacterFeat;
-              if (opt.feat_id !== "") {
-                if (!this.smart_hash.feat) {
-                  await this.getObjects("feat");
-                }
-                const obj_finder2 = this.smart_hash.feat.filter(o => o._id === opt.feat_id);
-                if (obj_finder2.length === 1) {
-                  opt.connectFeat(obj_finder2[0] as Feat);
-                }
-              }
-            } else if (f.feature_type === "Pact Boon") {
-              const opt = f.feature_options[0] as CharacterPactBoon;
-              if (opt.pact_boon_id !== "") {
-                if (!this.smart_hash.pact_boon) {
-                  await this.getObjects("pact_boon");
-                }
-                const obj_finder2 = this.smart_hash.pact_boon.filter(o => o._id === opt.pact_boon_id);
-                if (obj_finder2.length === 1) {
-                  opt.connectPactBoon(obj_finder2[0] as PactBoon);
-                }
-              }
-            } else if (f.feature_type === "Eldritch Invocation") {
-              const opt = f.feature_options[0] as CharacterEldritchInvocation;
-              if (opt.eldritch_invocation_id !== "") {
-                if (!this.smart_hash.eldritch_invocation) {
-                  await this.getObjects("eldritch_invocation");
-                }
-                const obj_finder2 = this.smart_hash.eldritch_invocation.filter(o => o._id === opt.eldritch_invocation_id);
-                if (obj_finder2.length === 1) {
-                  opt.connectEldritchInvocation(obj_finder2[0] as EldritchInvocation);
-                }
-              }
-            } else if (f.feature_type === "Fighting Style") {
-              const opt = f.feature_options[0] as CharacterFightingStyle;
-              if (opt.fighting_style_id !== "") {
-                if (!this.smart_hash.fighting_style) {
-                  await this.getObjects("fighting_style");
-                }
-                const obj_finder2 = this.smart_hash.fighting_style.filter(o => o._id === opt.fighting_style_id);
-                if (obj_finder2.length === 1) {
-                  opt.connectFightingStyle(obj_finder2[0] as FightingStyle);
-                }
-              }
-            }
-          }
+          await this.connectFeatureBase(char.race.features[i]);
+        }
+      }
+      if (!char.lineage.lineage) {
+        if (!this.smart_hash.lineage) {
+          await this.getObjects("lineage");
+        }
+        const obj_finder = this.smart_hash.lineage.filter(o => o._id === char.lineage.lineage_id);
+        if (obj_finder.length === 1) {
+          const lineage = obj_finder[0];
+          char.lineage.connectLineage(lineage as Lineage);
+        }
+        for (let i = 0; i < char.lineage.features.length; ++i) {
+          await this.connectFeatureBase(char.lineage.features[i]);
         }
       }
       if (!char.background.background) {
@@ -360,6 +328,9 @@ export class APIClass {
         const obj_finder = this.smart_hash.background.filter(o => o._id === char.background.background_id);
         if (obj_finder.length === 1) {
           char.background.connectBackground(obj_finder[0] as Background);
+        }
+        for (let i = 0; i < char.background.features.length; ++i) {
+          await this.connectFeatureBase(char.background.features[i]);
         }
       }
       if (!this.smart_hash.game_class) {
@@ -379,111 +350,104 @@ export class APIClass {
           c.connectSubclass(subclass_finder[0] as Subclass);
         }
         for (let i = 0; i < c.class_features.length; ++i) {
-          const fb = c.class_features[i];
-          for (let j = 0; j < fb.features.length; ++j) {
-            const f = fb.features[j];
-            if (f.feature_type === "Feat") {
-              const opt = f.feature_options[0] as CharacterFeat;
-              if (opt.feat_id !== "") {
-                if (!this.smart_hash.feat) {
-                  await this.getObjects("feat");
-                }
-                const obj_finder2 = this.smart_hash.feat.filter(o => o._id === opt.feat_id);
-                if (obj_finder2.length === 1) {
-                  opt.connectFeat(obj_finder2[0] as Feat);
-                }
-              }
-            } else if (f.feature_type === "Pact Boon") {
-              const opt = f.feature_options[0] as CharacterPactBoon;
-              if (opt.pact_boon_id !== "") {
-                if (!this.smart_hash.pact_boon) {
-                  await this.getObjects("pact_boon");
-                }
-                const obj_finder2 = this.smart_hash.pact_boon.filter(o => o._id === opt.pact_boon_id);
-                if (obj_finder2.length === 1) {
-                  opt.connectPactBoon(obj_finder2[0] as PactBoon);
-                }
-              }
-            } else if (f.feature_type === "Eldritch Invocation") {
-              const opt = f.feature_options[0] as CharacterEldritchInvocation;
-              if (opt.eldritch_invocation_id !== "") {
-                if (!this.smart_hash.eldritch_invocation) {
-                  await this.getObjects("eldritch_invocation");
-                }
-                const obj_finder2 = this.smart_hash.eldritch_invocation.filter(o => o._id === opt.eldritch_invocation_id);
-                if (obj_finder2.length === 1) {
-                  opt.connectEldritchInvocation(obj_finder2[0] as EldritchInvocation);
-                }
-              }
-            } else if (f.feature_type === "Fighting Style") {
-              const opt = f.feature_options[0] as CharacterFightingStyle;
-              if (opt.fighting_style_id !== "") {
-                if (!this.smart_hash.fighting_style) {
-                  await this.getObjects("fighting_style");
-                }
-                const obj_finder2 = this.smart_hash.fighting_style.filter(o => o._id === opt.fighting_style_id);
-                if (obj_finder2.length === 1) {
-                  opt.connectFightingStyle(obj_finder2[0] as FightingStyle);
-                }
-              }
-            }
-          }
+          await this.connectFeatureBase(c.class_features[i]);
         }
         for (let i = 0; i < c.subclass_features.length; ++i) {
-          const fb = c.subclass_features[i];
-          for (let j = 0; j < fb.features.length; ++j) {
-            const f = fb.features[j];
-            if (f.feature_type === "Feat") {
-              const opt = f.feature_options[0] as CharacterFeat;
-              if (opt.feat_id !== "") {
-                if (!this.smart_hash.feat) {
-                  await this.getObjects("feat");
-                }
-                const obj_finder2 = this.smart_hash.feat.filter(o => o._id === opt.feat_id);
-                if (obj_finder2.length === 1) {
-                  opt.connectFeat(obj_finder2[0] as Feat);
-                }
-              }
-            } else if (f.feature_type === "Pact Boon") {
-              const opt = f.feature_options[0] as CharacterPactBoon;
-              if (opt.pact_boon_id !== "") {
-                if (!this.smart_hash.pact_boon) {
-                  await this.getObjects("pact_boon");
-                }
-                const obj_finder2 = this.smart_hash.pact_boon.filter(o => o._id === opt.pact_boon_id);
-                if (obj_finder2.length === 1) {
-                  opt.connectPactBoon(obj_finder2[0] as PactBoon);
-                }
-              }
-            } else if (f.feature_type === "Eldritch Invocation") {
-              const opt = f.feature_options[0] as CharacterEldritchInvocation;
-              if (opt.eldritch_invocation_id !== "") {
-                if (!this.smart_hash.eldritch_invocation) {
-                  await this.getObjects("eldritch_invocation");
-                }
-                const obj_finder2 = this.smart_hash.eldritch_invocation.filter(o => o._id === opt.eldritch_invocation_id);
-                if (obj_finder2.length === 1) {
-                  opt.connectEldritchInvocation(obj_finder2[0] as EldritchInvocation);
-                }
-              }
-            } else if (f.feature_type === "Fighting Style") {
-              const opt = f.feature_options[0] as CharacterFightingStyle;
-              if (opt.fighting_style_id !== "") {
-                if (!this.smart_hash.fighting_style) {
-                  await this.getObjects("fighting_style");
-                }
-                const obj_finder2 = this.smart_hash.fighting_style.filter(o => o._id === opt.fighting_style_id);
-                if (obj_finder2.length === 1) {
-                  opt.connectFightingStyle(obj_finder2[0] as FightingStyle);
-                }
-              }
+          await this.connectFeatureBase(c.subclass_features[i]);
+        }
+      }
+      for (let k = 0; k < char.items.length; ++k) {
+        const char_item = char.items[k];
+        if (char_item.magic_item_id !== "") {
+          const magic_item = await this.getFullObject("magic_item", char_item.magic_item_id);
+          if (magic_item instanceof MagicItem) {
+            char_item.magic_item = magic_item as MagicItem;
+            char_item.base_item = char_item.magic_item.base_item;
+            
+            for (let i = 0; i < char_item.features.length; ++i) {
+              await this.connectFeatureBase(char_item.features[i]);
             }
           }
+        } else {
+          const base_item = await this.getFullObject("base_item", char_item.base_item_id);
+          if (base_item instanceof BaseItem) {
+            char_item.base_item = base_item as BaseItem;
+          }
+        }
+      }
+    } else if (obj instanceof MagicItem) {
+      const magic_item = obj as MagicItem;
+      if (magic_item.base_item_id) {
+        const base_item = await this.getFullObject("base_item", magic_item.base_item_id);
+        if (base_item instanceof BaseItem) {
+          magic_item.base_item = base_item as BaseItem;
         }
       }
     }
     return obj;
   };
+
+  connectFeatureBase = async (fb: CharacterFeatureBase) => {
+    for (let j = 0; j < fb.features.length; ++j) {
+      const f = fb.features[j];
+      if (f.feature_type === "Feat") {
+        const opt = f.feature_options[0] as CharacterFeat;
+        if (opt.feat_id !== "") {
+          if (!this.smart_hash.feat) {
+            await this.getObjects("feat");
+          }
+          const obj_finder2 = this.smart_hash.feat.filter(o => o._id === opt.feat_id);
+          if (obj_finder2.length === 1) {
+            opt.connectFeat(obj_finder2[0] as Feat);
+          }
+        }
+      } else if (f.feature_type === "Pact Boon") {
+        const opt = f.feature_options[0] as CharacterPactBoon;
+        if (opt.pact_boon_id !== "") {
+          if (!this.smart_hash.pact_boon) {
+            await this.getObjects("pact_boon");
+          }
+          const obj_finder2 = this.smart_hash.pact_boon.filter(o => o._id === opt.pact_boon_id);
+          if (obj_finder2.length === 1) {
+            opt.connectPactBoon(obj_finder2[0] as PactBoon);
+          }
+        }
+      } else if (f.feature_type === "Eldritch Invocation") {
+        const opt = f.feature_options[0] as CharacterEldritchInvocation;
+        if (opt.eldritch_invocation_id !== "") {
+          if (!this.smart_hash.eldritch_invocation) {
+            await this.getObjects("eldritch_invocation");
+          }
+          const obj_finder2 = this.smart_hash.eldritch_invocation.filter(o => o._id === opt.eldritch_invocation_id);
+          if (obj_finder2.length === 1) {
+            opt.connectEldritchInvocation(obj_finder2[0] as EldritchInvocation);
+          }
+        }
+      } else if (f.feature_type === "Fighting Style") {
+        const opt = f.feature_options[0] as CharacterFightingStyle;
+        if (opt.fighting_style_id !== "") {
+          if (!this.smart_hash.fighting_style) {
+            await this.getObjects("fighting_style");
+          }
+          const obj_finder2 = this.smart_hash.fighting_style.filter(o => o._id === opt.fighting_style_id);
+          if (obj_finder2.length === 1) {
+            opt.connectFightingStyle(obj_finder2[0] as FightingStyle);
+          }
+        }
+      } else if (f.feature_type === "Special Feature") {
+        const opt = f.feature_options[0] as CharacterSpecialFeature;
+        if (opt.special_feature_id !== "") {
+          if (!this.smart_hash.special_feature) {
+            await this.getObjects("special_feature");
+          }
+          const obj_finder2 = this.smart_hash.special_feature.filter(o => o._id === opt.special_feature_id);
+          if (obj_finder2.length === 1) {
+            opt.connectSpecialFeature(obj_finder2[0] as SpecialFeature);
+          }
+        }
+      }
+    }
+  }
 
   createObject = async (data_type: string, obj: ModelBase) => {
     if (this.real) {
@@ -557,6 +521,9 @@ export class APIClass {
             break;
             case "subrace": 
               this.smart_hash[data_type].push(obj as Subrace);
+            break;
+            case "lineage": 
+              this.smart_hash[data_type].push(obj as Lineage);
             break;
             case "resource":
               this.smart_hash[data_type].push(obj as Resource);
@@ -986,6 +953,13 @@ export class APIClass {
               subraces.push(new Subrace(o));
             });
             response = subraces;
+          break;
+          case "lineage": 
+            const lineages: Lineage[] = [];
+            body.objects.forEach((o: any) => {
+              lineages.push(new Lineage(o));
+            });
+            response = lineages;
           break;
           case "resource": 
             const resources: Resource[] = [];

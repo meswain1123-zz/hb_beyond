@@ -13,6 +13,7 @@ import {
 
 import { 
   Character,
+  CharacterAbility,
   CharacterSpecialSpell,
   CharacterSpell,
   CreatureInstance,
@@ -57,8 +58,8 @@ const connector = connect(mapState, mapDispatch)
 type PropsFromRedux = ConnectedProps<typeof connector>
 
 type Props = PropsFromRedux & {
-  obj: Character;
-  spell: CharacterSpell;
+  character: Character;
+  obj: CharacterSpell | CharacterAbility;
   level: number;
   onChange: (change_types: string[]) => void;
   onClose: () => void;
@@ -114,7 +115,7 @@ class CharacterSpellDetails extends Component<Props, State> {
 
   load() {
     if (this.props.level === -1) {
-      this.setState({ level: this.props.spell.level });
+      this.setState({ level: this.props.obj.level });
     } else {
       this.setState({ level: this.props.level });
     }
@@ -123,21 +124,21 @@ class CharacterSpellDetails extends Component<Props, State> {
   render() {
     if (this.state.level === -1) {
       return (<span>Loading...</span>);
-    } else {
-      let the_spell = this.props.spell.the_spell;
+    } else if (this.props.obj instanceof CharacterSpell) {
+      let the_spell = this.props.obj.the_spell;
       let show_ritual = false;
-      if (this.props.spell.source_type === "Class" && this.props.obj instanceof Character) {
+      if (this.props.obj.source_type === "Class" && this.props.character instanceof Character) {
         // Check if their class can do rituals
-        const class_finder = this.props.obj.classes.filter(o => o.game_class_id === this.props.spell.source_id);
+        const class_finder = this.props.character.classes.filter(o => o.game_class_id === this.props.obj.source_id);
         if (class_finder.length === 1) {
           const char_class = class_finder[0];
           show_ritual = char_class.ritual_casting;
         }
       } 
       if (the_spell) {
-        const spell = this.props.spell;
-        const level = this.state.level === -1 ? this.props.spell.level : this.state.level;
-        const potence = this.props.spell.get_potence(level, this.props.obj);
+        const obj = this.props.obj;
+        const level = this.state.level === -1 ? this.props.obj.level : this.state.level;
+        const potence = this.props.obj.get_potence(level, this.props.character);
         return (
           <div 
             style={{ 
@@ -159,7 +160,7 @@ class CharacterSpellDetails extends Component<Props, State> {
                 overflowX: "hidden"
               }}>
               <Grid item style={{ width: "316px" }}>
-                <ViewSpell spell={this.props.spell}
+                <ViewSpell spell={this.props.obj}
                   show_level 
                   show_ritual={show_ritual}
                   fontSize={20}
@@ -167,13 +168,13 @@ class CharacterSpellDetails extends Component<Props, State> {
                 />
               </Grid>
               <Grid item style={{ width: "316px" }}>
-                { this.props.spell.level_and_school }
+                { this.props.obj.level_and_school }
               </Grid>
               <Grid item container spacing={0} direction="row">
                 <Grid item xs={6}>
                   <CharacterCastButton
-                    obj={this.props.spell}
-                    character={this.props.obj}
+                    obj={this.props.obj}
+                    character={this.props.character}
                     level={level}
                     onChange={(change_types: string[]) => {
                       this.props.onChange(change_types);
@@ -184,13 +185,13 @@ class CharacterSpellDetails extends Component<Props, State> {
                   { this.renderLevelOptions() }
                 </Grid>
               </Grid>
-              { spell.use_attack &&
+              { obj.use_attack &&
                 <Grid item style={{
                   display: "flex",
                   justifyContent: "center"
                 }}>
                   <ButtonBox
-                    name={ `Attack: ${spell.attack_string}` }
+                    name={ `Attack: ${obj.attack_string}` }
                     onClick={(event: React.MouseEvent<HTMLDivElement>) => {
                       this.setState({ 
                         popoverMode: "Attack", 
@@ -200,15 +201,15 @@ class CharacterSpellDetails extends Component<Props, State> {
                   />
                 </Grid>
               }
-              { !["Control","Utility","Summon","Transform","Create Resource"].includes(spell.effect_string) &&
+              { !["Control","Utility","Summon","Transform","Create Resource"].includes(obj.effect_string) &&
                 <Grid item style={{
                   display: "flex",
                   justifyContent: "center"
                 }}>
                   <ButtonBox
                     fontSize={9}
-                    name={ spell.get_potence_string(this.state.level, this.props.obj) }
-                    image={ spell.effect_string }
+                    name={ obj.get_potence_string(this.state.level, this.props.character) }
+                    image={ obj.effect_string }
                     onClick={(event: React.MouseEvent<HTMLDivElement>) => {
                       this.setState({ 
                         popoverAnchorEl: event.currentTarget, 
@@ -218,7 +219,7 @@ class CharacterSpellDetails extends Component<Props, State> {
                   />
                 </Grid>
               }
-              { potence && ["Summon","Transform"].includes(spell.effect_string) &&
+              { potence && ["Summon","Transform"].includes(obj.effect_string) &&
                 <Grid item style={{
                   display: "flex",
                   justifyContent: "center"
@@ -226,8 +227,8 @@ class CharacterSpellDetails extends Component<Props, State> {
                   <Grid item xs={9}>
                     <CharacterSummonTransformOptions 
                       name="Choose"
-                      obj={this.props.obj}
-                      spell={spell}
+                      obj={this.props.character}
+                      spell={obj}
                       potence={potence}
                       value={this.state.selected_option}
                       onChange={(selected_option: any) => {
@@ -238,7 +239,7 @@ class CharacterSpellDetails extends Component<Props, State> {
                   <Grid item xs={3}>
                     <ButtonBox 
                       disabled={ this.state.selected_option === null }
-                      name={spell.effect_string}
+                      name={obj.effect_string}
                       onClick={() => {
                         for (let i = 0; i < this.state.selected_option.count; ++i) {
                           const creature_instance = new CreatureInstance();
@@ -247,13 +248,13 @@ class CharacterSpellDetails extends Component<Props, State> {
                           } else if (this.state.selected_option.summon) {
                             creature_instance.copySummonStatBlock(
                               this.state.selected_option.summon, 
-                              this.props.obj, this.props.spell.source_id, this.props.spell.level, this.state.level
+                              this.props.character, this.props.obj.source_id, this.props.obj.level, this.state.level
                             );
                           }
                           if (i > 0) {
                             creature_instance.name += ` ${i}`;
                           }
-                          this.props.obj.minions.push(creature_instance);
+                          this.props.character.minions.push(creature_instance);
                         }
                         this.props.onChange(["Minions"]);
                       }}
@@ -286,14 +287,14 @@ class CharacterSpellDetails extends Component<Props, State> {
                         <Grid item xs={4}>
                           <StringBox
                             name="To hit Override"
-                            value={ this.props.spell.customizations.spell_attack ? `${this.props.spell.customizations.spell_attack}` : "" }
+                            value={ this.props.obj.customizations.spell_attack ? `${this.props.obj.customizations.spell_attack}` : "" }
                             type="number"
                             onBlur={(value: string) => {
                               if (value === "") {
-                                delete this.props.spell.customizations.spell_attack;
+                                delete this.props.obj.customizations.spell_attack;
                               } else {
                                 try {
-                                  this.props.spell.customizations.spell_attack = +value;
+                                  this.props.obj.customizations.spell_attack = +value;
                                 } catch {}
                               }
                               // this.props.onChange();
@@ -303,14 +304,14 @@ class CharacterSpellDetails extends Component<Props, State> {
                         <Grid item xs={4}>
                           <StringBox
                             name="To hit Bonus"
-                            value={ this.props.spell.customizations.spell_attack_bonus ? `${this.props.spell.customizations.spell_attack_bonus}` : "" }
+                            value={ this.props.obj.customizations.spell_attack_bonus ? `${this.props.obj.customizations.spell_attack_bonus}` : "" }
                             type="number"
                             onBlur={(value: string) => {
                               if (value === "") {
-                                delete this.props.spell.customizations.spell_attack_bonus;
+                                delete this.props.obj.customizations.spell_attack_bonus;
                               } else {
                                 try {
-                                  this.props.spell.customizations.spell_attack_bonus = +value;
+                                  this.props.obj.customizations.spell_attack_bonus = +value;
                                 } catch {}
                               }
                               // this.props.onChange();
@@ -320,14 +321,14 @@ class CharacterSpellDetails extends Component<Props, State> {
                         <Grid item xs={4}>
                           <StringBox
                             name="Damage Bonus"
-                            value={ this.props.spell.customizations.damage_bonus ? `${this.props.spell.customizations.damage_bonus}` : "" }
+                            value={ this.props.obj.customizations.damage_bonus ? `${this.props.obj.customizations.damage_bonus}` : "" }
                             type="number"
                             onBlur={(value: string) => {
                               if (value === "") {
-                                delete this.props.spell.customizations.damage_bonus;
+                                delete this.props.obj.customizations.damage_bonus;
                               } else {
                                 try {
-                                  this.props.spell.customizations.damage_bonus = +value;
+                                  this.props.obj.customizations.damage_bonus = +value;
                                 } catch {}
                               }
                               // this.props.onChange();
@@ -337,14 +338,14 @@ class CharacterSpellDetails extends Component<Props, State> {
                         <Grid item xs={4}>
                           <StringBox
                             name="DC Override"
-                            value={ this.props.spell.customizations.spell_dc ? `${this.props.spell.customizations.spell_dc}` : "" }
+                            value={ this.props.obj.customizations.spell_dc ? `${this.props.obj.customizations.spell_dc}` : "" }
                             type="number"
                             onBlur={(value: string) => {
                               if (value === "") {
-                                delete this.props.spell.customizations.spell_dc;
+                                delete this.props.obj.customizations.spell_dc;
                               } else {
                                 try {
-                                  this.props.spell.customizations.spell_dc = +value;
+                                  this.props.obj.customizations.spell_dc = +value;
                                 } catch {}
                               }
                               // this.props.onChange();
@@ -354,14 +355,14 @@ class CharacterSpellDetails extends Component<Props, State> {
                         <Grid item xs={4}>
                           <StringBox
                             name="DC Bonus"
-                            value={ this.props.spell.customizations.spell_dc_bonus ? `${this.props.spell.customizations.spell_dc_bonus}` : "" }
+                            value={ this.props.obj.customizations.spell_dc_bonus ? `${this.props.obj.customizations.spell_dc_bonus}` : "" }
                             type="number"
                             onBlur={(value: string) => {
                               if (value === "") {
-                                delete this.props.spell.customizations.spell_dc_bonus;
+                                delete this.props.obj.customizations.spell_dc_bonus;
                               } else {
                                 try {
-                                  this.props.spell.customizations.spell_dc_bonus = +value;
+                                  this.props.obj.customizations.spell_dc_bonus = +value;
                                 } catch {}
                               }
                               // this.props.onChange();
@@ -371,13 +372,13 @@ class CharacterSpellDetails extends Component<Props, State> {
                         <Grid item xs={4}>
                           <ToggleButtonBox
                             name="Display As Attack"
-                            value={ this.props.spell.customizations.display_as_attack ? this.props.spell.customizations.display_as_attack === "true" : false }
+                            value={ this.props.obj.customizations.display_as_attack ? this.props.obj.customizations.display_as_attack === "true" : false }
                             onToggle={() => {
-                              if (this.props.spell.customizations.display_as_attack) {
-                                delete this.props.spell.customizations.display_as_attack;
+                              if (this.props.obj.customizations.display_as_attack) {
+                                delete this.props.obj.customizations.display_as_attack;
                               } else {
                                 try {
-                                  this.props.spell.customizations.display_as_attack = "true";
+                                  this.props.obj.customizations.display_as_attack = "true";
                                 } catch {}
                               }
                               // this.props.onChange();
@@ -387,10 +388,12 @@ class CharacterSpellDetails extends Component<Props, State> {
                         <Grid item xs={12}>
                           <StringBox
                             name="Name"
-                            value={ this.props.spell._name }
+                            value={ this.props.obj._name }
                             onBlur={(value: string) => {
-                              this.props.spell._name = value;
-                              // this.props.onChange();
+                              if (this.props.obj instanceof CharacterSpell) {
+                                this.props.obj._name = value;
+                                // this.props.onChange();
+                              }
                             }}
                           />
                         </Grid>
@@ -398,13 +401,13 @@ class CharacterSpellDetails extends Component<Props, State> {
                           <StringBox
                             name="Notes"
                             multiline
-                            value={ this.props.spell.customizations.notes ? `${this.props.spell.customizations.notes}` : "" }
+                            value={ this.props.obj.customizations.notes ? `${this.props.obj.customizations.notes}` : "" }
                             onBlur={(value: string) => {
                               if (value === "") {
-                                delete this.props.spell.customizations.notes;
+                                delete this.props.obj.customizations.notes;
                               } else {
                                 try {
-                                  this.props.spell.customizations.notes = value;
+                                  this.props.obj.customizations.notes = value;
                                 } catch {}
                               }
                               // this.props.onChange();
@@ -417,31 +420,31 @@ class CharacterSpellDetails extends Component<Props, State> {
                 </Accordion>
               </Grid>
               <Grid item>
-                <b>Casting Time: </b><em style={{ fontStyle: "normal" }}>{ this.props.spell.casting_time_string }</em>
+                <b>Casting Time: </b><em style={{ fontStyle: "normal" }}>{ this.props.obj.casting_time_string }</em>
               </Grid>
               <Grid item>
-               <b>Range/Area: </b><em style={{ fontStyle: "normal" }}>{ this.props.spell.range_string }</em>
+               <b>Range/Area: </b><em style={{ fontStyle: "normal" }}>{ this.props.obj.range_string }</em>
               </Grid>
               <Grid item>
-                <b>Components: </b><em style={{ fontStyle: "normal" }}>{ this.props.spell.components_string }</em>
+                <b>Components: </b><em style={{ fontStyle: "normal" }}>{ this.props.obj.components_string }</em>
               </Grid>
               <Grid item>
-                <b>Duration: </b><em style={{ fontStyle: "normal" }}>{ this.props.spell.duration_string }</em>
+                <b>Duration: </b><em style={{ fontStyle: "normal" }}>{ this.props.obj.duration_string }</em>
               </Grid>
-              { this.props.spell.use_attack &&
+              { this.props.obj.use_attack &&
                 <Grid item>
                   <b>Attack/Save: </b>
                   <em style={{ fontStyle: "normal" }}>
-                    { this.props.spell.attack_string }
+                    { this.props.obj.attack_string }
                   </em>
                 </Grid>
               }
               <Grid item>
                 { the_spell.description }
               </Grid>
-              { spell instanceof CharacterSpecialSpell && spell.special_spell_feature &&
+              { obj instanceof CharacterSpecialSpell && obj.special_spell_feature &&
                 <Grid item>
-                  { spell.description }
+                  { obj.description }
                 </Grid>
               }
             </Grid>
@@ -465,15 +468,116 @@ class CharacterSpellDetails extends Component<Props, State> {
           </div>
         );
       } else return null;
+    } else if (this.props.obj instanceof CharacterAbility) {
+      const return_me: any[] = [];
+      const the_ability = this.props.obj.the_ability;
+      const level = this.state.level === -1 ? this.props.obj.level : this.state.level;
+      return_me.push(
+        <Grid item key="source" style={{ 
+          lineHeight: "1.1",
+          fontSize: "10px",
+          color: "gray"
+        }}>
+          { this.props.obj.source_name }
+        </Grid>
+      );
+      return_me.push(
+        <Grid item key="name" style={{ 
+          lineHeight: "1.1",
+          fontSize: "15px",
+          fontWeight: "bold"
+        }}>
+          { this.props.obj.name }
+        </Grid>
+      );
+      if (the_ability) {
+        if (the_ability.resource_consumed !== "Slot") {
+          // Make this work more like with a spell
+          return_me.push(
+            <Grid item key="Cast" container spacing={0} direction="row">
+              <Grid item xs={6}>
+                <CharacterCastButton
+                  obj={this.props.obj}
+                  character={this.props.character}
+                  level={level}
+                  onChange={(change_types: string[]) => {
+                    this.props.onChange(change_types);
+                  }}
+                />
+              </Grid>
+              <Grid item xs={6}>
+                <CharacterResourceBoxes 
+                  resource={this.props.obj}
+                  character={this.props.character}
+                  onChange={() => {
+                    this.props.onChange(["Resources"]);
+                  }}
+                />
+              </Grid>
+            </Grid>
+          );
+        } else {
+          // Make this work more like with a spell
+          return_me.push(
+            <Grid item key="Cast" container spacing={0} direction="row">
+              <Grid item xs={6}>
+                <CharacterCastButton
+                  obj={this.props.obj}
+                  character={this.props.character}
+                  level={level}
+                  onChange={(change_types: string[]) => {
+                    this.props.onChange(change_types);
+                  }}
+                />
+              </Grid>
+              <Grid item xs={6}>
+                { this.renderLevelOptions() }
+              </Grid>
+            </Grid>
+          );
+        }
+      }
+      return_me.push(this.renderAttacks());
+      if (the_ability) {
+        return_me.push(
+          <Grid item key="description">
+            { the_ability.description }
+          </Grid>
+        );
+      }
+      if (this.props.obj.spell) {
+        return_me.push(
+          <Grid item key="spell_description">
+            { this.props.obj.spell.description }
+          </Grid>
+        );
+      }
+      return (
+        <div 
+          style={{ 
+            backgroundColor: "white",
+            color: "black",
+            border: "1px solid blue",
+            height: "800px",
+            width: "324px",
+            overflowX: "hidden",
+            padding: "4px",
+            fontSize: "11px"
+          }}>
+          <Grid container spacing={0} direction="column">
+            { return_me }
+          </Grid>
+        </div>
+      );
     }
   }
 
   renderLevelOptions() {
-    const spell = this.props.spell;
-    const level = this.state.level === -1 ? this.props.spell.level : this.state.level;
-    if (spell instanceof CharacterSpecialSpell) {
-      if (spell.special_spell_feature) {
-        const ssf = spell.special_spell_feature;
+    const obj = this.props.obj;
+    const level = this.state.level === -1 ? this.props.obj.level : this.state.level;
+    if (obj instanceof CharacterSpecialSpell) {
+      if (obj.special_spell_feature) {
+        const ssf = obj.special_spell_feature;
         // "Normal","At Will","Only Special Resource","Or Special Resource","And Special Resource"
         const return_me: any[] = [];
         if (ssf.slot_override.includes("Special")) {
@@ -481,8 +585,8 @@ class CharacterSpellDetails extends Component<Props, State> {
           return_me.push(
             <CharacterResourceBoxes 
               key="special"
-              resource={spell}
-              character={this.props.obj}
+              resource={obj}
+              character={this.props.character}
               onChange={() => {
                 // this.props.onChange(["Resources"]);
               }}
@@ -491,8 +595,8 @@ class CharacterSpellDetails extends Component<Props, State> {
         }
         if (["At Will","Or Special Resource","And Special Resource"].includes(ssf.slot_override)) {
           // Need to show the slots for the level
-          const slot_levels = Array.from(new Set(this.props.obj.slots.filter(o => o.level >= spell.level).map(o => o.level)));
-          const slots = this.props.obj.slots.filter(o => o.level === level);
+          const slot_levels = Array.from(new Set(this.props.character.slots.filter(o => o.level >= obj.level).map(o => o.level)));
+          const slots = this.props.character.slots.filter(o => o.level === level);
           if (slot_levels.length > 1) {
             return_me.push(
               <Grid key="slots" container spacing={0} direction="row">
@@ -530,7 +634,7 @@ class CharacterSpellDetails extends Component<Props, State> {
                     <Grid item key={key} xs={12}>
                       <CharacterResourceBoxes 
                         resource={slot}
-                        character={this.props.obj}
+                        character={this.props.character}
                         onChange={() => {
                           this.props.onChange(["Resources"]);
                         }}
@@ -548,7 +652,7 @@ class CharacterSpellDetails extends Component<Props, State> {
                     <Grid item key={key} xs={12}>
                       <CharacterResourceBoxes 
                         resource={slot}
-                        character={this.props.obj}
+                        character={this.props.character}
                         onChange={() => {
                           this.props.onChange(["Resources"]);
                         }}
@@ -564,8 +668,8 @@ class CharacterSpellDetails extends Component<Props, State> {
       }
     } else {
       if (level > 0) { // and not at will and not ritual only
-        const slot_levels = Array.from(new Set(this.props.obj.slots.filter(o => o.level >= this.props.spell.level).map(o => o.level)));
-        const slots = this.props.obj.slots.filter(o => o.level === level);
+        const slot_levels = Array.from(new Set(this.props.character.slots.filter(o => o.level >= this.props.obj.level).map(o => o.level)));
+        const slots = this.props.character.slots.filter(o => o.level === level);
         if (slot_levels.length > 1) {
           return (
             <Grid container spacing={0} direction="row">
@@ -603,7 +707,7 @@ class CharacterSpellDetails extends Component<Props, State> {
                   <Grid item key={key} xs={12}>
                     <CharacterResourceBoxes 
                       resource={slot}
-                      character={this.props.obj}
+                      character={this.props.character}
                       onChange={() => {
                         this.props.onChange(["Resources"]);
                       }}
@@ -621,7 +725,7 @@ class CharacterSpellDetails extends Component<Props, State> {
                   <Grid item key={key} xs={12}>
                     <CharacterResourceBoxes 
                       resource={slot}
-                      character={this.props.obj}
+                      character={this.props.character}
                       onChange={() => {
                         this.props.onChange(["Resources"]);
                       }}
@@ -639,40 +743,40 @@ class CharacterSpellDetails extends Component<Props, State> {
 
   renderRoll() {
     const mode = this.state.popoverMode;
-    const spell = this.props.spell;
-    if (spell && spell.spell) {
+    const obj = this.props.obj;
+    if (obj && obj.spell) {
       if (mode === "Attack") {
         return (
           <Roller 
-            name={spell.name}
-            char={this.props.obj}
-            rolls={spell.attack.attack_rolls} 
+            name={obj.name}
+            char={this.props.character}
+            rolls={obj.attack.attack_rolls} 
             type="Attack" 
           />
         );
       } else if (mode === "Damage") {
         const level = this.state.level;
-        const potence = spell.get_potence(level, this.props.obj);
+        const potence = obj.get_potence(level, this.props.character);
         let damage_rolls: RollPlus[] = [];
         if (potence) {
           const roll_plus = new RollPlus(potence.rolls);
           damage_rolls.push(roll_plus);
         }
-        damage_rolls = [...damage_rolls,...spell.attack.damage_rolls];
-        if (["Healing","Temp HP","Max HP"].includes(spell.effect_string)) {
+        damage_rolls = [...damage_rolls,...obj.attack.damage_rolls];
+        if (["Healing","Temp HP","Max HP"].includes(obj.effect_string)) {
           return (
             <Roller 
-              name={spell.name}
-              char={this.props.obj}
+              name={obj.name}
+              char={this.props.character}
               rolls={damage_rolls} 
-              type={spell.effect_string} 
+              type={obj.effect_string} 
             />
           );
         } else {
           return (
             <Roller 
-              name={spell.name}
-              char={this.props.obj}
+              name={obj.name}
+              char={this.props.character}
               rolls={damage_rolls} 
               type="Damage" 
             />
@@ -681,6 +785,57 @@ class CharacterSpellDetails extends Component<Props, State> {
       }
     }
     return null;
+  }
+
+  renderAttacks() {
+    const ability = this.props.obj as CharacterAbility;
+    const level = this.state.level === -1 ? ability.level : this.state.level;
+    return (
+      <Grid item key="attacks" container spacing={0} direction="row">
+        { (ability.use_attack || ability.attack_string !== "--") &&
+          <Grid item xs={12} style={{
+              display: "flex",
+              justifyContent: "center"
+            }}>
+            { ability.use_attack ?
+              <ButtonBox
+                name={ ability.attack_string }
+                onClick={(event: React.MouseEvent<HTMLDivElement>) => {
+                  // this.setState({ popoverAction: ability, popoverActionLevel: level, popoverMode: "Attack" })
+                  // this.setPopoverAnchorEl(event.currentTarget);
+                }} 
+              />
+            :
+              <span>
+                { ability.attack_string }
+              </span> 
+            }
+          </Grid>
+        }
+        { !["Control","Utility","None"].includes(ability.effect_string) &&
+          <Grid item xs={12} style={{
+              display: "flex",
+              justifyContent: "center"
+            }}>
+            { !["Control","Utility","Summon","Transform","Create Resource"].includes(ability.effect_string) ?
+              <ButtonBox
+                fontSize={9}
+                name={ ability.get_potence_string(level, this.props.character) }
+                image={ ability.effect_string }
+                onClick={(event: React.MouseEvent<HTMLDivElement>) => {
+                  // this.setState({ popoverAction: ability, popoverActionLevel: level, popoverMode: "Damage" })
+                  // this.setPopoverAnchorEl(event.currentTarget);
+                }} 
+              />
+            :
+              <span>
+                { ability.effect_string }
+              </span> 
+            }
+          </Grid>
+        }
+      </Grid>
+    );
   }
 }
 

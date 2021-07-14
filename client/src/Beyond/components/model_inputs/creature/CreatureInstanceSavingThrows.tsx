@@ -167,7 +167,7 @@ class CreatureInstanceSavingThrows extends Component<Props, State> {
   renderRoll() {
     const rolls: RollPlus[] = [];
     const roll_plus = new RollPlus();
-    roll_plus.flat = this.props.obj.get_saving_throw(this.state.popoverSave);
+    roll_plus.flat = +this.props.obj.get_saving_throw(this.state.popoverSave);
     rolls.push(roll_plus);
     return (
       <Roller 

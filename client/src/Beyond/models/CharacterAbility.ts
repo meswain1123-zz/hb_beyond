@@ -21,7 +21,6 @@ import { AbilityScores } from "./AbilityScores";
 
 export class CharacterAbility {
   true_id: string;
-  id: number;
   ability_type: string; 
   the_ability: Ability | SpellAsAbility | ItemAffectingAbility | CreatureAbility | MinionAbility | null;
   source_type: string; // Class, Race, Feat, or Item
@@ -41,7 +40,6 @@ export class CharacterAbility {
 
   constructor(obj?: any) {
     this.true_id = obj && obj.true_id ? obj.true_id : "";
-    this.id = obj ? obj.id : 0;
     this.ability_type = obj ? obj.ability_type : "";
     switch (this.ability_type) {
       case "Ability":
@@ -64,7 +62,7 @@ export class CharacterAbility {
       break;
     }
     this.spellcasting_ability = obj && obj.spellcasting_ability ? obj.spellcasting_ability : "";
-    this.spell_attack = obj && obj.spell_attack ? obj.spell_attack : "";
+    this.spell_attack = obj && obj.spell_attack ? +obj.spell_attack : 0;
     this.attack = obj && obj.attack ? obj.attack : new Attack();
     this.spell_dc = obj && obj.spell_dc ? +obj.spell_dc : 0;
     this.customizations = obj ? obj.customizations : {};
@@ -123,6 +121,7 @@ export class CharacterAbility {
   }
 
   recalc_attack_string(ability_scores: AbilityScores | null) {
+    this.attack_string = "";
     if (this.spell && !["None","Utility","Healing","Max HP","Temp HP","Bonus Roll","Self Condition","Summon"].includes(this.effect_string)) {
       let bonuses = 0;
       let save = "";
@@ -330,7 +329,12 @@ export class CharacterAbility {
     } else if (bonuses < 0) {
       damage_string = `${damage_string}${bonuses}`;
     } else if (damage_string === "") {
-      damage_string = "0";
+      const self_condition_ids = this.self_condition();
+      if (self_condition_ids.length > 0) {
+        return "Apply";
+      } else {
+        damage_string = "0";
+      }
     }
     return damage_string;
   }
@@ -450,7 +454,7 @@ export class CharacterAbility {
 
   disabled(obj: Character, level: number = -1) {
     const the_ability = this.the_ability;
-    if (the_ability instanceof Ability && the_ability.resource_consumed) {
+    if ((the_ability instanceof Ability || the_ability instanceof SpellAsAbility) && the_ability.resource_consumed) {
       if (the_ability.resource_consumed === "Special") {
         return this.special_resource_used + +the_ability.amount_consumed > +this.special_resource_amount;
       } else if (the_ability.resource_consumed === "Slot") {
@@ -512,7 +516,6 @@ export class CharacterAbility {
     }
     return {
       true_id: this.true_id,
-      id: this.id,
       ability_type: this.ability_type,
       the_ability,
       customizations: this.customizations,
@@ -533,7 +536,10 @@ export class CharacterAbility {
       if (this.the_ability.description.length === 0) {
         this.the_ability.description = feature.feature.description;
       }
-      this.true_id = feature.feature.the_feature.true_id;
+      if (feature.feature.the_feature instanceof SpellAsAbility && feature.feature.the_feature.spellcasting_ability !== "") {
+        this.spellcasting_ability = feature.feature.the_feature.spellcasting_ability;
+      }
+      this.true_id = feature.true_id;
     }
   }
 
@@ -546,7 +552,7 @@ export class CharacterAbility {
       this.source_type = "Class";
       this.source_id = source.game_class_id;
       this.spellcasting_ability = source.spellcasting_ability;
-      this.spell_attack = source.spell_attack;
+      this.spell_attack = +source.spell_attack;
       this.spell_dc = +source.spell_dc;
       if (source.game_class) {
         this.source_name = source.game_class.name;
