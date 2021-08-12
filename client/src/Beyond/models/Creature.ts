@@ -676,7 +676,7 @@ export class Creature extends ModelBase {
           if (action.damage && action.damage.length > 0) {
             const effect = new AbilityEffect();
             effect.type = action.damage[0].damage_type.name;
-            effect.attack_type = ability.attack_bonus > 0 ? "Melee" : (ability.dc ? "Save" : "?");
+            effect.attack_type = ability.attack_bonus.isBlank() ? (ability.dc.isBlank() ? "Save" : "?") : "Melee";
             const potence = new Potence();
             potence.rolls.type = effect.type;
             let flat = 0;
@@ -729,7 +729,7 @@ export class Creature extends ModelBase {
           if (action.damage && action.damage.length > 0) {
             const effect = new AbilityEffect();
             effect.type = action.damage[0].damage_type.name;
-            effect.attack_type = ability.attack_bonus > 0 ? "Melee" : (ability.dc ? "Save" : "?");
+            effect.attack_type = ability.attack_bonus.isBlank() ? (ability.dc.isBlank() ? "Save" : "?") : "Melee";
             const potence = new Potence();
             potence.rolls.type = effect.type;
             let flat = 0;

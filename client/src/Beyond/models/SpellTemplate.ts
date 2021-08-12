@@ -1,6 +1,6 @@
 
 import { TemplateBase } from "./TemplateBase";
-import { AbilityEffect } from "./AbilityEffect";
+import { AbilityEffect, SlotLevel } from ".";
 import { Spell } from "./Spell";
 
 
@@ -16,9 +16,9 @@ export class SpellTemplate extends TemplateBase {
   duration: string;
   components: string[]; // VSM
   material_component: string;
-  casting_time: string; // A, BA, RA, X minute(s), etc
+  casting_time: 'A' | 'BA' | 'RA' | 'Special' | 'Attack'; // A, BA, RA, X minute(s), etc
   school: string | null;
-  level: number;
+  level: SlotLevel;
 
   constructor(obj?: any) {
     super(obj);
@@ -44,7 +44,7 @@ export class SpellTemplate extends TemplateBase {
     this.material_component = obj ? obj.material_component : "";
     this.casting_time = obj ? obj.casting_time : "A";
     this.school = obj ? obj.school : "";
-    this.level = obj ? obj.level : 0;
+    this.level = obj ? new SlotLevel(obj.level) : new SlotLevel(0);
   }
 
   toDBObj = () => {
@@ -72,7 +72,7 @@ export class SpellTemplate extends TemplateBase {
       material_component: this.material_component,
       casting_time: this.casting_time,
       school: this.school,
-      level: this.level
+      level: this.level.value
     };
   }
 

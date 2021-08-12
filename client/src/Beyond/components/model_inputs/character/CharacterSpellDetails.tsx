@@ -18,6 +18,7 @@ import {
   CharacterSpell,
   CreatureInstance,
   RollPlus,
+  AbilityEffect
 } from "../../../models";
 
 import ToggleButtonBox from "../../input/ToggleButtonBox";
@@ -70,6 +71,7 @@ export interface State {
   view: string;
   level: number;
   selected_option: any;
+  popoverEffect: AbilityEffect | null;
   popoverAnchorEl: HTMLDivElement | null;
   popoverMode: string;
 }
@@ -82,6 +84,7 @@ class CharacterSpellDetails extends Component<Props, State> {
       view: "", 
       level: -1,
       selected_option: null,
+      popoverEffect: null,
       popoverAnchorEl: null,
       popoverMode: ""
     };
@@ -115,7 +118,7 @@ class CharacterSpellDetails extends Component<Props, State> {
 
   load() {
     if (this.props.level === -1) {
-      this.setState({ level: this.props.obj.level });
+      this.setState({ level: this.props.obj.level.value });
     } else {
       this.setState({ level: this.props.level });
     }
@@ -125,6 +128,7 @@ class CharacterSpellDetails extends Component<Props, State> {
     if (this.state.level === -1) {
       return (<span>Loading...</span>);
     } else if (this.props.obj instanceof CharacterSpell) {
+      console.log(this.props.obj);
       let the_spell = this.props.obj.the_spell;
       let show_ritual = false;
       if (this.props.obj.source_type === "Class" && this.props.character instanceof Character) {
@@ -137,8 +141,16 @@ class CharacterSpellDetails extends Component<Props, State> {
       } 
       if (the_spell) {
         const obj = this.props.obj;
-        const level = this.state.level === -1 ? this.props.obj.level : this.state.level;
+        const level = this.state.level === -1 ? this.props.obj.level.value : this.state.level;
         const potence = this.props.obj.get_potence(level, this.props.character);
+        const class_finder = this.props.character.classes.filter(o => o.game_class_id === obj.source_id || o.subclass_id === obj.source_id);
+        let spell_attack = 0;
+        let spell_dc = 0;
+        if (class_finder.length === 1) {
+          const char_class = class_finder[0];
+          spell_attack = char_class.spell_attack;
+          spell_dc = char_class.spell_dc;
+        }
         return (
           <div 
             style={{ 
@@ -185,88 +197,114 @@ class CharacterSpellDetails extends Component<Props, State> {
                   { this.renderLevelOptions() }
                 </Grid>
               </Grid>
-              { obj.use_attack &&
-                <Grid item style={{
-                  display: "flex",
-                  justifyContent: "center"
-                }}>
-                  <ButtonBox
-                    name={ `Attack: ${obj.attack_string}` }
-                    onClick={(event: React.MouseEvent<HTMLDivElement>) => {
-                      this.setState({ 
-                        popoverMode: "Attack", 
-                        popoverAnchorEl: event.currentTarget 
-                      });
-                    }} 
-                  />
-                </Grid>
-              }
-              { !["Control","Utility","Summon","Transform","Create Resource"].includes(obj.effect_string) &&
-                <Grid item style={{
-                  display: "flex",
-                  justifyContent: "center"
-                }}>
-                  <ButtonBox
-                    fontSize={9}
-                    name={ obj.get_potence_string(this.state.level, this.props.character) }
-                    image={ obj.effect_string }
-                    onClick={(event: React.MouseEvent<HTMLDivElement>) => {
-                      this.setState({ 
-                        popoverAnchorEl: event.currentTarget, 
-                        popoverMode: "Damage" 
-                      });
-                    }} 
-                  />
-                </Grid>
-              }
-              { potence && ["Summon","Transform"].includes(obj.effect_string) &&
-                <Grid item style={{
-                  display: "flex",
-                  justifyContent: "center"
-                }} container spacing={1} direction="row">
-                  <Grid item xs={9}>
-                    <CharacterSummonTransformOptions 
-                      name="Choose"
-                      obj={this.props.character}
-                      spell={obj}
-                      potence={potence}
-                      value={this.state.selected_option}
-                      onChange={(selected_option: any) => {
-                        this.setState({ selected_option });
-                      }}
-                    />
+              { obj.spell && obj.spell.effects.map((effect, key) => {
+                return (
+                  <Grid item key={key} container spacing={1} direction="row"
+                    style={{
+                      display: "flex",
+                      justifyContent: "center"
+                    }}>
+                    { effect.attack_type === "Save" ?
+                      <Grid item xs={6} style={{
+                        display: "flex",
+                        justifyContent: "center"
+                      }}>
+                        { obj.spell && obj.spell.saving_throw_ability_score } { spell_dc }
+                      </Grid> 
+                    : effect.attack_type === "None" ?
+                      <Grid item xs={6} style={{
+                        display: "flex",
+                        justifyContent: "center"
+                      }}>
+                        --
+                      </Grid> 
+                    :
+                      <Grid item xs={6} style={{
+                        display: "flex",
+                        justifyContent: "center"
+                      }}>
+                        <ButtonBox
+                          name={ `Attack: ${ spell_attack > 0 ? "+" + spell_attack : spell_attack }` }
+                          onClick={(event: React.MouseEvent<HTMLDivElement>) => {
+                            this.setState({ 
+                              popoverEffect: effect,
+                              popoverMode: "Attack", 
+                              popoverAnchorEl: event.currentTarget 
+                            });
+                          }} 
+                        />
+                      </Grid>
+                    }
+                    { !["Control","Utility","Summon","Transform","Create Resource"].includes(effect.type) &&
+                      <Grid item xs={6} style={{
+                        display: "flex",
+                        justifyContent: "center"
+                      }}>
+                        <ButtonBox
+                          fontSize={9}
+                          name={ obj.get_potence_string(this.state.level, this.props.character, effect) }
+                          image={ effect.type }
+                          onClick={(event: React.MouseEvent<HTMLDivElement>) => {
+                            this.setState({ 
+                              popoverEffect: effect,
+                              popoverAnchorEl: event.currentTarget, 
+                              popoverMode: "Damage" 
+                            });
+                          }} 
+                        />
+                      </Grid>
+                    }
+                    { potence && ["Summon","Transform"].includes(obj.effect_string) &&
+                      <Grid item xs={6} style={{
+                        display: "flex",
+                        justifyContent: "center"
+                      }} container spacing={1} direction="row">
+                        <Grid item xs={9}>
+                          <CharacterSummonTransformOptions 
+                            name="Choose"
+                            obj={this.props.character}
+                            spell={obj}
+                            potence={potence}
+                            value={this.state.selected_option}
+                            onChange={(selected_option: any) => {
+                              this.setState({ selected_option });
+                            }}
+                          />
+                        </Grid>
+                        <Grid item xs={3}>
+                          <ButtonBox 
+                            disabled={ this.state.selected_option === null }
+                            name={obj.effect_string}
+                            onClick={() => {
+                              for (let i = 0; i < this.state.selected_option.count; ++i) {
+                                const creature_instance = new CreatureInstance();
+                                if (this.state.selected_option.creature) {
+                                  creature_instance.copyCreature(this.state.selected_option.creature);
+                                } else if (this.state.selected_option.summon) {
+                                  creature_instance.copySummonStatBlock(
+                                    this.state.selected_option.summon, 
+                                    this.props.character, this.props.obj.source_id, this.props.obj.level.value, this.state.level
+                                  );
+                                }
+                                if (i > 0) {
+                                  creature_instance.name += ` ${i}`;
+                                }
+                                this.props.character.minions.push(creature_instance);
+                              }
+                              this.props.onChange(["Minions"]);
+                            }}
+                          />
+                        </Grid>
+                      </Grid>
+                    }
+                    { potence && potence.extra.length > 0 &&
+                      <Grid item xs={12}>
+                        { potence.extra }
+                      </Grid>
+                    }
                   </Grid>
-                  <Grid item xs={3}>
-                    <ButtonBox 
-                      disabled={ this.state.selected_option === null }
-                      name={obj.effect_string}
-                      onClick={() => {
-                        for (let i = 0; i < this.state.selected_option.count; ++i) {
-                          const creature_instance = new CreatureInstance();
-                          if (this.state.selected_option.creature) {
-                            creature_instance.copyCreature(this.state.selected_option.creature);
-                          } else if (this.state.selected_option.summon) {
-                            creature_instance.copySummonStatBlock(
-                              this.state.selected_option.summon, 
-                              this.props.character, this.props.obj.source_id, this.props.obj.level, this.state.level
-                            );
-                          }
-                          if (i > 0) {
-                            creature_instance.name += ` ${i}`;
-                          }
-                          this.props.character.minions.push(creature_instance);
-                        }
-                        this.props.onChange(["Minions"]);
-                      }}
-                    />
-                  </Grid>
-                </Grid>
-              }
-              { potence && potence.extra.length > 0 &&
-                <Grid item>
-                  { potence.extra }
-                </Grid>
-              }
+                );
+              })}
               <Grid item style={{ width: "316px", fontWeight: "bold" }}>
                 <Accordion>
                   <AccordionSummary 
@@ -452,7 +490,7 @@ class CharacterSpellDetails extends Component<Props, State> {
               open={ this.state.popoverAnchorEl !== null && this.state.popoverMode !== "" }
               anchorEl={this.state.popoverAnchorEl}
               onClose={() => {
-                this.setState({ popoverAnchorEl: null, popoverMode: "" });
+                this.setState({ popoverAnchorEl: null, popoverMode: "", popoverEffect: null });
               }}
               anchorOrigin={{
                 vertical: 'top',
@@ -471,7 +509,7 @@ class CharacterSpellDetails extends Component<Props, State> {
     } else if (this.props.obj instanceof CharacterAbility) {
       const return_me: any[] = [];
       const the_ability = this.props.obj.the_ability;
-      const level = this.state.level === -1 ? this.props.obj.level : this.state.level;
+      const level = this.state.level === -1 ? this.props.obj.level.value : this.state.level;
       return_me.push(
         <Grid item key="source" style={{ 
           lineHeight: "1.1",
@@ -574,7 +612,7 @@ class CharacterSpellDetails extends Component<Props, State> {
 
   renderLevelOptions() {
     const obj = this.props.obj;
-    const level = this.state.level === -1 ? this.props.obj.level : this.state.level;
+    const level = this.state.level === -1 ? this.props.obj.level.value : this.state.level;
     if (obj instanceof CharacterSpecialSpell) {
       if (obj.special_spell_feature) {
         const ssf = obj.special_spell_feature;
@@ -595,8 +633,8 @@ class CharacterSpellDetails extends Component<Props, State> {
         }
         if (["At Will","Or Special Resource","And Special Resource"].includes(ssf.slot_override)) {
           // Need to show the slots for the level
-          const slot_levels = Array.from(new Set(this.props.character.slots.filter(o => o.level >= obj.level).map(o => o.level)));
-          const slots = this.props.character.slots.filter(o => o.level === level);
+          const slot_levels = Array.from(new Set(this.props.character.slots.filter(o => o.level.value >= obj.level.value).map(o => o.level.value)));
+          const slots = this.props.character.slots.filter(o => o.level.value === level);
           if (slot_levels.length > 1) {
             return_me.push(
               <Grid key="slots" container spacing={0} direction="row">
@@ -668,8 +706,8 @@ class CharacterSpellDetails extends Component<Props, State> {
       }
     } else {
       if (level > 0) { // and not at will and not ritual only
-        const slot_levels = Array.from(new Set(this.props.character.slots.filter(o => o.level >= this.props.obj.level).map(o => o.level)));
-        const slots = this.props.character.slots.filter(o => o.level === level);
+        const slot_levels = Array.from(new Set(this.props.character.slots.filter(o => o.level.value >= this.props.obj.level.value).map(o => o.level.value)));
+        const slots = this.props.character.slots.filter(o => o.level.value === level);
         if (slot_levels.length > 1) {
           return (
             <Grid container spacing={0} direction="row">
@@ -755,8 +793,9 @@ class CharacterSpellDetails extends Component<Props, State> {
           />
         );
       } else if (mode === "Damage") {
+        const effect = this.state.popoverEffect;
         const level = this.state.level;
-        const potence = obj.get_potence(level, this.props.character);
+        const potence = obj.get_potence(level, this.props.character, effect);
         let damage_rolls: RollPlus[] = [];
         if (potence) {
           const roll_plus = new RollPlus(potence.rolls);
@@ -789,7 +828,7 @@ class CharacterSpellDetails extends Component<Props, State> {
 
   renderAttacks() {
     const ability = this.props.obj as CharacterAbility;
-    const level = this.state.level === -1 ? ability.level : this.state.level;
+    const level = this.state.level === -1 ? ability.level.value : this.state.level;
     return (
       <Grid item key="attacks" container spacing={0} direction="row">
         { (ability.use_attack || ability.attack_string !== "--") &&

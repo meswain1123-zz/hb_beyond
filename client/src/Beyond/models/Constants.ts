@@ -37,7 +37,8 @@ export const CASTING_TIMES = [
     "1 Minute",
     "10 Minutes",
     "1 Hour",
-    "Special"
+    "Special",
+    "Attack"
 ];
 export const RESOURCES = [
     "None", 

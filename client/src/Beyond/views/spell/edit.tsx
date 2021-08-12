@@ -18,7 +18,8 @@ import {
   AbilityEffect,
   IStringHash,
   Condition,
-  Potence
+  Potence,
+  SlotLevel
 } from "../../models";
 import { 
   ABILITY_SCORES, 
@@ -226,11 +227,11 @@ class SpellEdit extends Component<Props, State> {
                   <Grid item xs={3}>
                     <SelectStringBox 
                       options={["0","1","2","3","4","5","6","7","8","9"]}
-                      value={`${this.state.obj.level}`} 
+                      value={`${this.state.obj.level.value}`} 
                       name="Spell Level"
                       onChange={(value: string) => {
                         const obj = this.state.obj;
-                        obj.level = +value;
+                        obj.level = new SlotLevel(+value);
                         this.setState({ obj });
                       }}
                     />
@@ -243,7 +244,17 @@ class SpellEdit extends Component<Props, State> {
                         value={this.state.obj.casting_time}
                         onChange={(value: string) => {
                           const obj = this.state.obj;
-                          obj.casting_time = value;
+                          if (value === 'A') {
+                            obj.casting_time = value;
+                          } else if (value === 'BA') {
+                            obj.casting_time = value;
+                          } else if (value === 'RA') {
+                            obj.casting_time = value;
+                          } else if (value === 'Special') {
+                            obj.casting_time = value;
+                          } else if (value === 'Attack') {
+                            obj.casting_time = value;
+                          }
                           this.setState({ obj });
                         }}
                       /> 
@@ -415,7 +426,7 @@ class SpellEdit extends Component<Props, State> {
                           <Grid item>
                             <AbilityEffectInput 
                               obj={effect}
-                              slot_level={this.state.obj.level}
+                              slot_level={this.state.obj.level.value}
                               onChange={() => {
                                 const obj = this.state.obj;
                                 this.setState({ obj });
@@ -692,14 +703,24 @@ class SpellEdit extends Component<Props, State> {
         obj.description = piece.str;
       } else if (piece.type === "Level") {
         if (piece.str === "cantrip") {
-          obj.level = 0;
+          obj.level = new SlotLevel(0);
         } else {
-          obj.level = +piece.str[0];
+          obj.level = new SlotLevel(+piece.str[0]);
         }
       } else if (piece.type === "School") {
         obj.school = this.data_util.capitalize_first(piece.str, true);
       } else if (piece.type === "Casting Time") {
-        obj.casting_time = piece.str;
+        if (piece.str === 'A') {
+          obj.casting_time = piece.str;
+        } else if (piece.str === 'BA') {
+          obj.casting_time = piece.str;
+        } else if (piece.str === 'RA') {
+          obj.casting_time = piece.str;
+        } else if (piece.str === 'Special') {
+          obj.casting_time = piece.str;
+        } else if (piece.str === 'Attack') {
+          obj.casting_time = piece.str;
+        }
       } else if (piece.type === "Range") {
         obj.range = this.data_util.capitalize_firsts(piece.str, true);
       } else if (piece.type === "Components") {
@@ -739,10 +760,10 @@ class SpellEdit extends Component<Props, State> {
         }
         const words = piece.str.split(" ");
         effect.type = this.data_util.capitalize_first(words[1]);
-        effect.potence_type = obj.level === 0 ? "Character" : "Slot";
+        effect.potence_type = obj.level.value === 0 ? "Character" : "Slot";
         const potence = new Potence();
         potence.rolls = this.data_util.parse_dice_roll(words[0]);
-        potence.level = obj.level === 0 ? 1 : obj.level;
+        potence.level = obj.level.value === 0 ? 1 : obj.level.value;
         effect.potences.push(potence);
       } else if (piece.type === "Attack") {
         if (effect.attack_type !== "None") {

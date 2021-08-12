@@ -10,7 +10,9 @@ import {
   CharacterSpell,
   CharacterAbility,
   Spell,
+  SpellAsAbility,
   INumHash,
+  CharacterAction
 } from "../../../models";
 
 import StringBox from "../../input/StringBox";
@@ -18,13 +20,15 @@ import ButtonBox from "../../input/ButtonBox";
 import CenteredMenu from "../../input/CenteredMenu";
 
 import CharacterManageSpells from "./CharacterManageSpells";
-import CharacterAction from "./CharacterAction";
+import CharacterActionInput from "./CharacterAction";
 import CharacterResourceBoxes from "./CharacterResourceBoxes";
 
 import API from "../../../utilities/smart_api";
 import { APIClass } from "../../../utilities/smart_api_class";
 import DataUtilities from "../../../utilities/data_utilities";
 import { DataUtilitiesClass } from "../../../utilities/data_utilities_class";
+import CharacterUtilities from "../../../utilities/character_utilities";
+import { CharacterUtilitiesClass } from "../../../utilities/character_utilities_class";
 
 interface AppState {
   width: number;
@@ -83,10 +87,12 @@ class CharacterSpells extends Component<Props, State> {
       ritual: false,
     };
     this.api = API.getInstance();
+    this.char_util = CharacterUtilities.getInstance();
     this.data_util = DataUtilities.getInstance();
   }
 
   api: APIClass;
+  char_util: CharacterUtilitiesClass;
   data_util: DataUtilitiesClass;
 
   componentDidMount() {
@@ -98,24 +104,26 @@ class CharacterSpells extends Component<Props, State> {
     const levels: INumHash = {};
     let concentration = false;
     let ritual = false;
-    if (search_filtered.filter(o => o.level === 0).length > 0) {
+    if (search_filtered.filter(o => o.level.value === 0).length > 0) {
       levels[0] = 1;
     }
-    this.props.obj.slots.forEach(o => {
-      if (!levels[o.level]) {
-        levels[o.level] = 1;
+    this.props.obj.slots.forEach(slot => {
+      if (!levels[slot.level.value]) {
+        levels[slot.level.value] = 1;
       }
     });
-    search_filtered.forEach(o => {
-      if (o.spell) {
-        if (o.spell.concentration) {
+    search_filtered.forEach(char_spell => {
+      if (char_spell instanceof CharacterAbility) {
+        levels[char_spell.level.value] = 1;
+      } else if (char_spell.spell) {
+        if (char_spell.spell.concentration) {
           concentration = true;
         }
-        if (o.spell.ritual) {
+        if (char_spell.spell.ritual) {
           ritual = true;
         }
-        if ((o.at_will || o.ritual_only) && !levels[o.level]) {
-          levels[o.level] = 1;
+        if ((char_spell.at_will || char_spell.ritual_only) && !levels[char_spell.level.value]) {
+          levels[char_spell.level.value] = 1;
         }
       }
     });
@@ -191,12 +199,18 @@ class CharacterSpells extends Component<Props, State> {
           <Drawer anchor="right" 
             open={ this.state.drawer === "manage" } 
             onClose={() => {
-              this.setState({ drawer: "" });
+              this.setState({ drawer: "", reloading: true }, () => {
+                this.char_util.recalcAll(this.props.obj);
+                this.setState({ reloading: false }, () => {
+                  this.resetSearch();
+                });
+              });
             }}>
             <CharacterManageSpells
               obj={this.props.obj}
               onChange={() => {
                 this.setState({ reloading: true }, () => {
+                  this.char_util.recalcAll(this.props.obj);
                   this.setState({ reloading: false }, () => {
                     this.resetSearch();
                   });
@@ -381,21 +395,26 @@ class CharacterSpells extends Component<Props, State> {
   }
 
   renderSpellGroups() {
-    let filtered = [...this.props.obj.spells, ...this.props.obj.spell_as_abilities, ...this.props.obj.ritual_only];
+    let filtered = this.props.obj.actions.filter(o => ["Spell","Special Spell","Spell As Ability"].includes(o.type));// [...this.props.obj.spells, ...this.props.obj.spell_as_abilities, ...this.props.obj.ritual_only];
     if (this.state.search_string.length > 0) {
       filtered = filtered.filter(o => 
         o.name.toLowerCase().includes(this.state.search_string.toLowerCase()));
     }
     if (this.state.view !== "ALL") {
       if (this.state.view === " C ") {
-        filtered = filtered.filter(o => o.spell && o.spell.concentration);
+        filtered = filtered.filter(o => o.action && (o.action instanceof CharacterSpell || o.action instanceof CharacterAbility) && o.action.spell && o.action.spell.concentration);
       } else if (this.state.view === " R ") {
-        filtered = filtered.filter(o => o.spell && o.spell.ritual);
+        filtered = filtered.filter(o => o.action && (o.action instanceof CharacterSpell || o.action instanceof CharacterAbility) && o.action.spell && o.action.spell.ritual);
       } else {
-        filtered = filtered.filter(o => o.spell && o.spell.level === +this.state.view);
+        filtered = filtered.filter(o => o.action && (o.action instanceof CharacterSpell || o.action instanceof CharacterAbility) && o.action.spell && o.action.spell.level.value === +this.state.view);
       }
     }
     // Render them by level
+    // Need to make it so SpellsAsAbilities 
+    // that can be done sans slots 
+    // show up at their appropriate level, 
+    // so include them as well, 
+    // even though they may not have slots of that level
     return (
       <div key="spell_groups">
         { Object.keys(this.state.levels).map((level, key) => {
@@ -409,8 +428,8 @@ class CharacterSpells extends Component<Props, State> {
     );
   }
 
-  renderSpellsForLevelHead(filtered: (CharacterSpell | CharacterAbility)[], level: number) {
-    if (this.state.view === `${level}` || filtered.filter(o => o.level === level).length > 0) {
+  renderSpellsForLevelHead(filtered: CharacterAction[], level: number) {
+    if (this.state.view === `${level}` || filtered.filter(o => o.level.value === level).length > 0) {
       return [
         <Grid key={level} container spacing={0} direction="row"
           style={{
@@ -445,7 +464,7 @@ class CharacterSpells extends Component<Props, State> {
   }
 
   renderSlotsForLevel(level: number) {
-    const slots = this.props.obj.slots.filter(o => o.level === level).sort((a,b) => {return a.slot_name.localeCompare(b.slot_name)});
+    const slots = this.props.obj.slots.filter(o => o.level.value === level).sort((a,b) => {return a.slot_name.localeCompare(b.slot_name)});
     return (
       <Grid item xs={6}>
         <div style={{ float: "right" }}>
@@ -467,27 +486,57 @@ class CharacterSpells extends Component<Props, State> {
     );
   }
 
-  renderSpellsForLevelBody(filtered: (CharacterSpell | CharacterAbility)[], level: number) {
-    let level_filtered: (CharacterSpell | CharacterAbility)[] = [];
-    if (level === 0) {
+  renderSpellsForLevelBody(filtered: CharacterAction[], level: number) {
+    let level_filtered: CharacterAction[] = [];
+    if (level === 0 || this.props.obj.slots.filter(o => o.level.value === level).length > 0) {
       level_filtered = filtered.filter(o => 
-        o.level === level).sort((a,b) => { 
-          return a.name < b.name ? -1 : 1;
-        });
+        o.level.value === level);
+      // filtered.forEach(o => {
+      //   // if (o.name === "Tasha's Caustic Brew") {
+      //   //   console.log(o);
+      //   //   console.log(o.level.value);
+      //   //   console.log(level);
+      //   //   console.log(o.level.value === level);
+      //   // }
+      //   if (o.level.value === level) { 
+      //     level_filtered.push(o);
+      //   }
+      // });
     } else {
+      // console.log(level);
       level_filtered = filtered.filter(o => 
-        ((o.at_will || o.ritual_only) && o.level === level) ||
-        // (!o.at_will && !o.ritual_only && o.level > 0 && o.level <= level)).sort((a,b) => { 
-          (!o.at_will && !o.ritual_only && o.level > 0 && o.level === level)).sort((a,b) => { 
-          return a.name < b.name ? -1 : 1;
-        });
+        o.level.value === level && 
+        o.action instanceof CharacterAbility &&
+        o.action.the_ability instanceof SpellAsAbility &&
+        !["Normal","And Special Resource"].includes(o.action.the_ability.slot_override)
+      );
+      // filtered.forEach(o => {
+      //   if (o.level.value === level) { 
+      //     if (o.name === "Tasha's Caustic Brew") {
+      //       console.log(o);
+      //     }
+      //     if (o.action instanceof CharacterAbility) {
+      //       if (o.action.the_ability instanceof SpellAsAbility) {
+      //         if (!["Normal","And Special Resource"].includes(o.action.the_ability.slot_override)) {
+      //           level_filtered.push(o);
+      //         }
+      //       }
+      //     }
+      //   }
+      // });
     }
-    return level_filtered.map((spell, key) => {
+    // console.log(level);
+    // console.log(filtered);
+    // console.log(level_filtered);
+    return level_filtered.sort((a,b) => 
+      { 
+        return a.name < b.name ? -1 : 1;
+      }).map((spell, key) => {
       if (this.state.reloading) {
         return (<span key={key}></span>);
       } else {
         return (
-          <CharacterAction 
+          <CharacterActionInput 
             key={key}
             character={this.props.obj}
             level={level}

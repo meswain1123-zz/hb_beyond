@@ -1,3 +1,4 @@
+import { SlotLevel } from ".";
 
 /**
  * This is a generic term for Spell Slots, Ki Points, Sorcery Points,
@@ -12,7 +13,7 @@
  */
 export class CharacterSlot {
   type_id: string; // ID of the table it connects to
-  level: number;
+  level: SlotLevel;
   true_total: number;
   true_used: number;
   true_created: number;
@@ -20,7 +21,7 @@ export class CharacterSlot {
 
   constructor(obj?: any) {
     this.type_id = obj ? obj.type_id : "";
-    this.level = obj ? +obj.level : 1;
+    this.level = obj ? new SlotLevel(+obj.level) : new SlotLevel(1);
     this.true_total = obj ? +obj.total : 0;
     this.true_used = obj ? +obj.used : 0;
     this.true_created = obj && obj.created ? +obj.created : 0;
@@ -30,7 +31,7 @@ export class CharacterSlot {
   toDBObj = () => {
     return {
       type_id: this.type_id,
-      level: this.level,
+      level: this.level.value,
       total: this.true_total,
       used: this.true_used,
       created: this.true_created

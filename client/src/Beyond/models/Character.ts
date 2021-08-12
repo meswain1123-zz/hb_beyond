@@ -27,7 +27,8 @@ import {
   Reroll,
   AbilityEffect,
   CharacterSpecialSpell,
-  CharacterLineage
+  CharacterLineage,
+  CharacterAction
 } from ".";
 
 
@@ -127,7 +128,7 @@ export class Character extends ModelBase {
   senses: CharacterSense[];
   advantages: Advantage[];
   damage_multipliers: DamageMultiplierSimple[];
-  actions: any;
+  actions: CharacterAction[];
   extra_attacks: number;
   unarmed_strike_scores: string[];
   unarmed_strike_bonus_action: boolean;
@@ -369,7 +370,7 @@ export class Character extends ModelBase {
     this.senses = [];
     this.advantages = [];
     this.damage_multipliers = [];
-    this.actions = {};
+    this.actions = [];
     this.extra_attacks = 0;
     this.unarmed_strike_scores = ["STR"];
     this.unarmed_strike_bonus_action = false;
@@ -639,9 +640,10 @@ export class Character extends ModelBase {
     const char_spell = new CharacterSpell();
     char_spell.copySpell(spell);
     char_spell.connectSource(source);
+    
     this.spells.push(char_spell);
     if (source instanceof CharacterClass) {
-      if (spell.level === 0) {
+      if (spell.level.value === 0) {
         source.cantrip_ids.push(spell._id);
       } else {
         source.spell_ids.push(spell._id);
@@ -702,7 +704,7 @@ export class Character extends ModelBase {
     const amount = effect.create_resource_amount.value(this, class_id, base_slot_level, slot_level);
     if (effect.create_resource_type === "Slot") {
       const level = effect.create_resource_level;
-      const slots_finder = this.slots.filter(o => o.level === level && o.slot_name === "Slots");
+      const slots_finder = this.slots.filter(o => o.level.value === level && o.slot_name === "Slots");
       if (slots_finder.length === 1) {
         const slots = slots_finder[0];
         slots.created += amount;

@@ -34,11 +34,11 @@ export class FeatureBase {
   replaces_feature_base_id: string;
   replaces_feature_base: FeatureBase | null = null;
 
-  constructor(obj?: any) {
+  constructor(obj?: any, is_new: boolean = false) {
     this.parent_type = obj ? obj.parent_type : "";
     this.parent_id = obj ? obj.parent_id : "";
     this.id = obj ? obj.id : 0;
-    this.true_id = obj && obj.true_id ? obj.true_id : uuidv4().toString();
+    this.true_id = obj && obj.true_id && !is_new ? obj.true_id : uuidv4().toString();
     this.name = obj ? `${obj.name}` : "";
     this.description = obj ? `${obj.description}` : "";
     this.source_type = obj && obj.source_type ? obj.source_type : "";
@@ -47,13 +47,14 @@ export class FeatureBase {
     this.features = [];
     if (obj && obj.features) {
       obj.features.forEach((f: any) => {
-        const feature = new Feature(f);
+        const feature = new Feature(f, is_new);
         feature.parent_type = this.parent_type;
         feature.parent_id = this.parent_id;
         feature.base_id = this.id;
         feature.id = this.features.length;
-        if (feature.description.length === 0) {
+        if (feature.description === this.description) {
           feature.fake_description = this.description;
+          feature.description = "";
         }
         this.features.push(feature);
       });
@@ -140,7 +141,9 @@ export class FeatureBase {
     this.level = copyMe.level;
     this.features = [];
     copyMe.features.forEach(f => {
-      const feature = new Feature(f);
+      const feature = new Feature();
+      feature.copy(f);
+      f.true_id = uuidv4().toString();
       feature.parent_type = this.parent_type;
       feature.parent_id = this.parent_id;
       feature.base_id = this.id;

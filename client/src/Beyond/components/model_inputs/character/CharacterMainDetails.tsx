@@ -118,7 +118,7 @@ class CharacterMainDetails extends Component<Props, State> {
       eldritch_invocations: null,
       loading: false,
       reloading: false,
-      view: "actions", // "main", // 
+      view: "spells", // "main", // 
       menu_open: "",
       minion: null
     };
@@ -877,13 +877,13 @@ class CharacterMainDetails extends Component<Props, State> {
 
   renderSlot(slot: CharacterSlot) {
     return (
-      <Grid item key={slot.level}>
+      <Grid item key={slot.level.value}>
         <div style={{ 
           display: "inline", 
           fontSize: "15px", 
           fontWeight: "bold",
           verticalAlign: "top" 
-        }}>{ slot.level }&nbsp;</div>
+        }}>{ slot.level.value }&nbsp;</div>
         <CharacterResourceBoxes 
           resource={slot}
           show_type={false}

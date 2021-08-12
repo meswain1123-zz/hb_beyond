@@ -34,7 +34,7 @@ export class SpecialFeature extends ModelBase {
   features: FeatureBase[];
   type: string;
 
-  constructor(obj?: any) {
+  constructor(obj?: any, is_new: boolean = false) {
     super(obj);
     this.features = [];
     if (obj && obj.features && obj.features.length > 0) {
@@ -43,7 +43,7 @@ export class SpecialFeature extends ModelBase {
         const fb = new FeatureBase();
         fb.name = obj.features[0].name;
         obj.features.forEach((o: any) => {
-          const feature = new Feature(o);
+          const feature = new Feature(o, is_new);
           if (feature.description.length === 0) {
             feature.fake_description = fb.description;
           }
@@ -52,7 +52,7 @@ export class SpecialFeature extends ModelBase {
         this.features.push(fb);
       } else {
         obj.features.forEach((o: any) => {
-          this.features.push(new FeatureBase(o));
+          this.features.push(new FeatureBase(o, is_new));
         });
       }
     }
@@ -76,7 +76,7 @@ export class SpecialFeature extends ModelBase {
   }
 
   clone(): SpecialFeature {
-    return new SpecialFeature(this);
+    return new SpecialFeature(this, true);
   }
 
   copy(copyMe: SpecialFeature): void {

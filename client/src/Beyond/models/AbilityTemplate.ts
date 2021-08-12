@@ -2,7 +2,7 @@
 import { TemplateBase } from "./TemplateBase";
 import { AbilityEffect } from "./AbilityEffect";
 import { Ability } from "./Ability";
-import { UpgradableNumber } from "./UpgradableNumber";
+import { UpgradableNumber, SlotLevel } from ".";
 
 
 export class AbilityTemplate extends TemplateBase {
@@ -16,15 +16,15 @@ export class AbilityTemplate extends TemplateBase {
   duration: string;
   components: string[]; // VSM
   material_component: string;
-  casting_time: string; // A, BA, RA, X minute(s), etc
+  casting_time: 'A' | 'BA' | 'RA' | 'Special' | 'Attack'; // A, BA, RA, X minute(s), etc
   resource_consumed: string | null; // Slot-X, Ki, Lay on Hands, Charge, etc.
   amount_consumed: number;
-  slot_level: number; // If it consumes slots then this is the minimum level of the slot
+  slot_level: SlotLevel; // If it consumes slots then this is the minimum level of the slot
   slot_type: string; // If it consumes a specific type of slot (usually Pact) then this holds that
   special_resource_amount: UpgradableNumber;
   special_resource_refresh_rule: string; // Short Rest, Long Rest, Dawn, 1 Hour, 8 Hours, 24 Hours
-  attack_bonus: number;
-  dc: number;
+  attack_bonus: UpgradableNumber;
+  dc: UpgradableNumber;
 
   constructor(obj?: any) {
     super(obj);
@@ -47,10 +47,22 @@ export class AbilityTemplate extends TemplateBase {
     this.duration = obj ? `${obj.duration}` : "Instantaneous";
     this.components = obj ? [...obj.components] : [];
     this.material_component = obj ? `${obj.material_component}` : "";
-    this.casting_time = obj ? `${obj.casting_time}` : "A";
+    if (obj.casting_time === 'A') {
+      this.casting_time = obj.casting_time;
+    } else if (obj.casting_time === 'BA') {
+      this.casting_time = obj.casting_time;
+    } else if (obj.casting_time === 'RA') {
+      this.casting_time = obj.casting_time;
+    } else if (obj.casting_time === 'Special') {
+      this.casting_time = obj.casting_time;
+    } else if (obj.casting_time === 'Attack') {
+      this.casting_time = obj.casting_time;
+    } else {
+      this.casting_time = "A";
+    }
     this.resource_consumed = obj ? `${obj.resource_consumed}` : null;
     this.amount_consumed = obj && obj.amount_consumed ? +obj.amount_consumed : 0;
-    this.slot_level = obj && obj.slot_level ? obj.slot_level : 1;
+    this.slot_level = obj && obj.slot_level ? new SlotLevel(obj.slot_level) : new SlotLevel(1);
     this.slot_type = obj && obj.slot_type ? obj.slot_type : "";
     if (obj && obj.special_resource_amount && obj.special_resource_amount.base === undefined) {
       // Translate old set up to new
@@ -62,8 +74,24 @@ export class AbilityTemplate extends TemplateBase {
       this.special_resource_amount = new UpgradableNumber();
     }
     this.special_resource_refresh_rule = obj ? `${obj.special_resource_refresh_rule}` : "";
-    this.attack_bonus = obj && obj.attack_bonus ? obj.attack_bonus : 0;
-    this.dc = obj && obj.dc ? obj.dc : 0;
+    if (obj && obj.attack_bonus && obj.attack_bonus.base === undefined) {
+      // Translate old set up to new
+      this.attack_bonus = new UpgradableNumber();
+      this.attack_bonus.base = +obj.attack_bonus;
+    } else if (obj && obj.attack_bonus) {
+      this.attack_bonus = new UpgradableNumber(obj.attack_bonus);
+    } else {
+      this.attack_bonus = new UpgradableNumber();
+    }
+    if (obj && obj.dc && obj.dc.base === undefined) {
+      // Translate old set up to new
+      this.dc = new UpgradableNumber();
+      this.dc.base = +obj.dc;
+    } else if (obj && obj.dc) {
+      this.dc = new UpgradableNumber(obj.dc);
+    } else {
+      this.dc = new UpgradableNumber();
+    }
   }
 
   toDBObj = () => {
@@ -91,12 +119,12 @@ export class AbilityTemplate extends TemplateBase {
       casting_time: this.casting_time,
       resource_consumed: this.resource_consumed,
       amount_consumed: this.amount_consumed,
-      slot_level: this.slot_level,
+      slot_level: this.slot_level.value,
       slot_type: this.slot_type,
       special_resource_amount: this.special_resource_amount.toDBObj(),
       special_resource_refresh_rule: this.special_resource_refresh_rule,
-      attack_bonus: this.attack_bonus,
-      dc: this.dc
+      attack_bonus: this.attack_bonus.toDBObj(),
+      dc: this.dc.toDBObj()
     };
   }
 
@@ -128,8 +156,8 @@ export class AbilityTemplate extends TemplateBase {
     this.slot_type = copyMe.slot_type;
     this.special_resource_amount = new UpgradableNumber(copyMe.special_resource_amount);
     this.special_resource_refresh_rule = copyMe.special_resource_refresh_rule;
-    this.attack_bonus = copyMe.attack_bonus;
-    this.dc = copyMe.dc;
+    this.attack_bonus = new UpgradableNumber(copyMe.attack_bonus);
+    this.dc = new UpgradableNumber(copyMe.dc);
   }
 
   copyObj(copyMe: Ability): void {
@@ -152,7 +180,7 @@ export class AbilityTemplate extends TemplateBase {
     this.slot_type = copyMe.slot_type;
     this.special_resource_amount = new UpgradableNumber(copyMe.special_resource_amount);
     this.special_resource_refresh_rule = copyMe.special_resource_refresh_rule;
-    this.attack_bonus = copyMe.attack_bonus;
-    this.dc = copyMe.dc;
+    this.attack_bonus = new UpgradableNumber(copyMe.attack_bonus);
+    this.dc = new UpgradableNumber(copyMe.dc);
   }
 }

@@ -55,40 +55,90 @@ export class UpgradableNumber {
     this.min = copyMe.min;
   }
 
-  value(char: Character, class_id: string = "", base_slot_level: number | null = null, slot_level: number | null = null) {
-    let value = this.base;
+  value(char: Character, class_id: string = "", base_slot_level: number | null = null, slot_level: number | null = null, log_it: boolean = false) {
+    let value = +this.base;
+    if (log_it) {
+      console.log(this);
+      console.log(value);
+      console.log(char.character_level);
+    }
     value += this.add_char_level_mult * char.character_level;
+    if (log_it) {
+      console.log(value);
+      console.log(char.classes);
+      console.log(class_id);
+    }
     let spellcasting_ability = "";
     if (class_id.length > 0) {
-      const obj_finder = char.classes.filter(o => o.game_class_id === class_id);
+      const obj_finder = char.classes.filter(o => o.game_class_id === class_id || o.subclass_id === class_id);
       if (obj_finder.length === 1) {
         value += this.add_class_level_mult * obj_finder[0].level;
         spellcasting_ability = obj_finder[0].spellcasting_ability;
+        if (log_it) {
+          console.log(obj_finder[0].level);
+          console.log(spellcasting_ability);
+        }
       }
     }
-    value += this.add_prof_bonus_mult * char.proficiency_modifier;
+    if (log_it) {
+      console.log(value);
+    }
+    value += +this.add_prof_bonus_mult * char.proficiency_modifier;
+    if (log_it) {
+      console.log(value);
+    }
     if (base_slot_level && slot_level) {
-      value += this.add_slot_level_mult * (slot_level - base_slot_level);
+      value += +this.add_slot_level_mult * (slot_level - base_slot_level);
+    }
+    if (log_it) {
+      console.log(value);
     }
     if (this.add_ability_score !== "None" && (this.add_ability_score_mult !== 0 || this.add_ability_mod_mult !== 0)) {
       let ability_score = this.add_ability_score;
       if (ability_score === "Spellcasting") {
         ability_score = spellcasting_ability;
       }
+      if (log_it) {
+        console.log(ability_score);
+      }
       if (this.add_ability_mod_mult !== 0) {
         const modifier = char.current_ability_scores.getModifier(ability_score);
-        if (modifier) {
-          value += this.add_ability_mod_mult * modifier;
+        if (log_it) {
+          console.log(modifier);
         }
+        if (modifier) {
+          value += +this.add_ability_mod_mult * modifier;
+        }
+      }
+      if (log_it) {
+        console.log(value);
       }
       if (this.add_ability_score_mult !== 0) {
         const score = char.current_ability_scores.getAbilityScore(ability_score);
         if (score) {
-          value += this.add_ability_score_mult * score;
+          value += +this.add_ability_score_mult * score;
         }
       }
+      if (log_it) {
+        console.log(value);
+      }
     }
-    value = Math.max(value, this.min);
+    value = Math.max(value, +this.min);
+    if (log_it) {
+      console.log(value);
+    }
     return value;
+  }
+
+  isBlank = () => {
+    return (this.base === 0 &&
+      this.add_char_level_mult === 0 &&
+      this.add_class_level_mult === 0 &&
+      this.add_prof_bonus_mult === 0 &&
+      this.add_slot_level_mult === 0 &&
+      this.add_ability_score === "None" &&
+      this.add_ability_score_mult === 0 &&
+      this.add_ability_mod_mult === 0 &&
+      this.min === 0);
   }
 }

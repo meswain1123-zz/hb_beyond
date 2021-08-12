@@ -95,23 +95,33 @@ class MinionAbilityInput extends Component<Props, State> {
               value={this.props.obj.casting_time}
               onChange={(value: string) => {
                 const obj = this.props.obj;
-                obj.casting_time = value;
+                if (value === 'A') {
+                  obj.casting_time = value;
+                } else if (value === 'BA') {
+                  obj.casting_time = value;
+                } else if (value === 'RA') {
+                  obj.casting_time = value;
+                } else if (value === 'Special') {
+                  obj.casting_time = value;
+                } else if (value === 'Attack') {
+                  obj.casting_time = value;
+                }
                 this.props.onChange(obj);
               }}
             /> 
           </Grid>
-            <Grid item xs={2}>
-              <UpgradableNumberBox 
-                name="Attack Bonus"
-                slot_level={this.props.slot_level}
-                value={this.props.obj.attack_bonus} 
-                onChange={(value: UpgradableNumber) => {
-                  const obj = this.props.obj;
-                  obj.attack_bonus = value;
-                  this.props.onChange(obj);
-                }}
-              />
-            </Grid>
+          <Grid item xs={2}>
+            <UpgradableNumberBox 
+              name="Attack Bonus"
+              slot_level={this.props.slot_level}
+              value={this.props.obj.attack_bonus} 
+              onChange={(value: UpgradableNumber) => {
+                const obj = this.props.obj;
+                obj.attack_bonus = value;
+                this.props.onChange(obj);
+              }}
+            />
+          </Grid>
           <Grid item xs={4} container spacing={1} direction="row">
             <Grid item xs={6}>
               <StringBox 
@@ -203,18 +213,18 @@ class MinionAbilityInput extends Component<Props, State> {
               }}
             /> 
           </Grid>
-            <Grid item xs={2}>
-              <UpgradableNumberBox 
-                name="DC"
-                slot_level={this.props.slot_level}
-                value={this.props.obj.dc} 
-                onChange={(value: UpgradableNumber) => {
-                  const obj = this.props.obj;
-                  obj.dc = value;
-                  this.props.onChange(obj);
-                }}
-              />
-            </Grid>
+          <Grid item xs={2}>
+            <UpgradableNumberBox 
+              name="DC"
+              slot_level={this.props.slot_level}
+              value={this.props.obj.dc} 
+              onChange={(value: UpgradableNumber) => {
+                const obj = this.props.obj;
+                obj.dc = value;
+                this.props.onChange(obj);
+              }}
+            />
+          </Grid>
         </Grid>
         { this.props.obj.components.includes("M") &&
           <Grid item>

@@ -15,7 +15,8 @@ import {
   CharacterRace,
   Potence,
   UpgradableNumber,
-  Spell
+  Spell,
+  SlotLevel
 } from ".";
 import { AbilityScores } from "./AbilityScores";
 
@@ -36,7 +37,7 @@ export class CharacterAbility {
   special_resource_used: number;
   special_resource_amount: number;
   customizations: IStringNumOrStringHash;
-  base_slot_level: number; // If it uses spell slots, this is the lowest level
+  base_slot_level: SlotLevel; // If it uses spell slots, this is the lowest level
 
   constructor(obj?: any) {
     this.true_id = obj && obj.true_id ? obj.true_id : "";
@@ -71,7 +72,7 @@ export class CharacterAbility {
     this.source_name = obj ? obj.source_name : "";
     this.special_resource_used = obj && obj.special_resource_used ? obj.special_resource_used : 0;
     this.special_resource_amount = -1;
-    this.base_slot_level = obj && obj.base_slot_level ? obj.base_slot_level : 1;
+    this.base_slot_level = obj && obj.base_slot_level ? new SlotLevel(obj.base_slot_level) : new SlotLevel();
     this.attack_string = "";
     this.damage_string = "";
     this.recalc_attack_string(null);
@@ -84,13 +85,15 @@ export class CharacterAbility {
     return "";
   }
 
-  get level(): number {
-    if (this.the_ability instanceof SpellAsAbility) {
+  get level(): SlotLevel {
+    if (this.base_slot_level.value > -1) {
+      return this.base_slot_level;
+    } else if (this.the_ability instanceof SpellAsAbility) {
       return this.the_ability.level;
     } else if (this.the_ability instanceof Ability) {
       return this.the_ability.slot_level;
     } else {
-      return 0;
+      return new SlotLevel(0);
     }
   }
 
@@ -106,6 +109,7 @@ export class CharacterAbility {
     if (this.the_ability instanceof SpellAsAbility) {
       if (this.spell && 
         !["Summon"].includes(this.spell.effect.type) && 
+        this.spell.effect.attack_type && 
         !["None","undefined"].includes(this.spell.effect.attack_type)) {
         if (this.spell.effect.attack_type !== "Save") {
           return true;
@@ -113,7 +117,7 @@ export class CharacterAbility {
       }
       return false;
     } else if (this.the_ability instanceof Ability) {
-      if (this.the_ability.attack_bonus > 0) {
+      if (this.spell_attack > 0) {
         return true;
       }
     }
@@ -310,6 +314,16 @@ export class CharacterAbility {
           damage_string += potence.rolls.as_string;
         }
       }
+    } else if (this.the_ability && this.the_ability instanceof Ability) {
+      // if (this.name === "Dark One's Blessing") { 
+      //   console.log(char);
+      //   console.log(this.base_slot_level);
+      //   console.log(slot_level);
+      //   console.log(this);
+      //   console.log(this.the_ability.effect);
+      //   console.log(this.the_ability.effect.bonus);
+      // }
+      bonuses += this.the_ability.effect.bonus.value(char, this.source_id, this.base_slot_level.value, slot_level, false);
     }
     if (this.the_ability && !(this.the_ability instanceof ItemAffectingAbility)) {
       if (this.the_ability instanceof SpellAsAbility) {
@@ -318,12 +332,16 @@ export class CharacterAbility {
 
       } else {
         if (this.the_ability.attack_bonus instanceof UpgradableNumber) {
-          bonuses += this.the_ability.attack_bonus.value(char, this.source_id, this.base_slot_level, slot_level);
+          bonuses += this.the_ability.attack_bonus.value(char, this.source_id, this.level.value, slot_level);
         } else {
 
         }
       }
     }
+    // if (this.name === "Dark One's Blessing") {
+    //   console.log(potence);
+    //   console.log(this);
+    // }
     if (bonuses > 0) {
       damage_string = `${damage_string}+${bonuses}`;
     } else if (bonuses < 0) {
@@ -459,10 +477,10 @@ export class CharacterAbility {
         return this.special_resource_used + +the_ability.amount_consumed > +this.special_resource_amount;
       } else if (the_ability.resource_consumed === "Slot") {
         if (level === -1) {
-          level = the_ability.slot_level;
+          level = the_ability.slot_level.value;
         }
         const filtered_slots = obj.slots.filter(o => 
-          o.level === level &&
+          o.level.value === level &&
           (the_ability.slot_type === "" || o.type_id === the_ability.slot_type)
         );
         if (filtered_slots.length === 1) {
@@ -523,11 +541,11 @@ export class CharacterAbility {
       source_id: this.source_id,
       source_name: this.source_name,
       special_resource_used: this.special_resource_used,
-      base_slot_level: this.base_slot_level
+      base_slot_level: this.base_slot_level.value
     };
   }
 
-  copyFeature = (feature: CharacterFeature) => {
+  copyFeature = (feature: CharacterFeature, char: Character, class_id: string = "") => {
     if (feature.feature.the_feature instanceof Ability ||
       feature.feature.the_feature instanceof SpellAsAbility ||
       feature.feature.the_feature instanceof ItemAffectingAbility) {
@@ -540,11 +558,19 @@ export class CharacterAbility {
         this.spellcasting_ability = feature.feature.the_feature.spellcasting_ability;
       }
       this.true_id = feature.true_id;
+      this.setAttackAndDC(char, class_id);
     }
   }
 
-  connectFeature = (feature: CharacterFeature) => {
-    this.copyFeature(feature);
+  connectFeature = (feature: CharacterFeature, char: Character, class_id: string = "") => {
+    this.copyFeature(feature, char, class_id);
+  }
+
+  setAttackAndDC = (char: Character, class_id: string = "") => {
+    if (this.the_ability instanceof Ability) {
+      this.spell_attack = this.the_ability.attack_bonus.value(char, class_id);
+      this.spell_dc = this.the_ability.dc.value(char, class_id);
+    }
   }
 
   connectSource(source: CharacterClass | CharacterRace | CharacterFeat | CharacterItem) {

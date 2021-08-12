@@ -107,7 +107,7 @@ class DisplayAbility extends Component<Props, State> {
         const spell = ability.spell;
         if (spell) {
           let description = "";
-          if (spell.level === 0) {
+          if (spell.level.value === 0) {
             description = `You know the ${spell.name} cantrip. ${ability.spellcasting_ability} is your spellcasting ability for it`;
           } else {
             // description = `You know the level ${spell.name} cantrip. ${ability.spellcasting_ability} is your spellcasting ability for it`;

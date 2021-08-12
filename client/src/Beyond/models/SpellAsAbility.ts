@@ -3,7 +3,8 @@ import { v4 as uuidv4 } from "uuid";
 import { 
   Spell,
   UpgradableNumber,
-  AbilityEffect
+  AbilityEffect,
+  SlotLevel
 } from ".";
 import { SpellAsAbilityTemplate } from "./SpellAsAbilityTemplate";
 
@@ -35,7 +36,7 @@ export class SpellAsAbility {
   slot_override: string;
   resource_consumed: string | null; // Slot-X, Ki, Lay on Hands, Charge, etc.
   amount_consumed: number;
-  slot_level: number; // If it consumes slots then this is the minimum level of the slot
+  slot_level: SlotLevel; // If it consumes slots then this is the minimum level of the slot
   slot_type: string; // If it consumes a specific type of slot (usually Pact) then this holds that
   special_resource_amount: UpgradableNumber;
   special_resource_refresh_rule: string; // Short Rest, Long Rest, Dawn, 1 Hour, 8 Hours, 24 Hours
@@ -44,7 +45,7 @@ export class SpellAsAbility {
   ritual_only: boolean;
   at_will: boolean;
   spell: Spell | null;
-  
+  cast_at_level: SlotLevel;
   
   constructor(obj?: any) {
     this.true_id = obj && obj.true_id ? obj.true_id : uuidv4().toString();
@@ -78,6 +79,7 @@ export class SpellAsAbility {
     this.ritual = obj && obj.ritual ? obj.ritual : false;
     this.ritual_only = this.ritual && obj && obj.ritual_only ? obj.ritual_only : false;
     this.at_will = obj && obj.at_will ? obj.at_will : false;
+    this.cast_at_level = obj && obj.cast_at_level && obj.cast_at_level.value ? new SlotLevel(obj.cast_at_level.value) : new SlotLevel(-1);
     this.spell = null;
   }
 
@@ -101,11 +103,13 @@ export class SpellAsAbility {
     return false;
   }
 
-  get level(): number {
-    if (this.spell) {
+  get level(): SlotLevel {
+    if (this.cast_at_level.value > -1) {
+      return this.cast_at_level;
+    } else if (this.spell) {
       return this.spell.level;
     }
-    return -1;
+    return new SlotLevel();
   }
 
   get effect(): AbilityEffect {
@@ -134,14 +138,15 @@ export class SpellAsAbility {
       slot_override: this.slot_override,
       resource_consumed: this.resource_consumed,
       amount_consumed: this.amount_consumed,
-      slot_level: this.slot_level,
+      slot_level: this.slot_level.value,
       slot_type: this.slot_type,
       special_resource_amount: this.special_resource_amount.toDBObj(),
       special_resource_refresh_rule: this.special_resource_refresh_rule,
       spellcasting_ability: this.spellcasting_ability,
       ritual: this.ritual,
       ritual_only: this.ritual_only,
-      at_will: this.at_will
+      at_will: this.at_will,
+      cast_at_level: this.cast_at_level
     };
   }
 
@@ -170,6 +175,7 @@ export class SpellAsAbility {
     this.ritual_only = copyMe.ritual_only;
     this.at_will = copyMe.at_will;
     this.spell = copyMe.spell;
+    this.cast_at_level = copyMe.cast_at_level;
   }
 
   copyTemplate(copyMe: SpellAsAbilityTemplate): void {
@@ -190,6 +196,7 @@ export class SpellAsAbility {
     this.ritual = copyMe.ritual;
     this.ritual_only = copyMe.ritual_only;
     this.at_will = copyMe.at_will;
+    this.cast_at_level = copyMe.cast_at_level;
   }
 
   connectSpell(spell: Spell) {

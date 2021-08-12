@@ -89,7 +89,17 @@ class CreatureAbilityInput extends Component<Props, State> {
               value={this.props.obj.casting_time}
               onChange={(value: string) => {
                 const obj = this.props.obj;
-                obj.casting_time = value;
+                if (value === 'A') {
+                  obj.casting_time = value;
+                } else if (value === 'BA') {
+                  obj.casting_time = value;
+                } else if (value === 'RA') {
+                  obj.casting_time = value;
+                } else if (value === 'Special') {
+                  obj.casting_time = value;
+                } else if (value === 'Attack') {
+                  obj.casting_time = value;
+                }
                 this.props.onChange(obj);
               }}
             /> 

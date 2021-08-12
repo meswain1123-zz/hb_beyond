@@ -11,14 +11,16 @@ import {
   IStringNumOrStringHash, 
   Potence,
   Attack,
-  AbilityScores
+  AbilityScores,
+  SlotLevel,
+  AbilityEffect
 } from ".";
 
 export class CharacterSpell {
   true_id: string;
   _name: string;
   spell_id: string;
-  spell: Spell | SpellAsAbility | null;
+  spell: Spell | null;
   customizations: IStringNumOrStringHash;
   source_type: string; // Class, Race, Feat, or Item
   source_id: string;
@@ -69,13 +71,7 @@ export class CharacterSpell {
   }
 
   get the_spell(): Spell | null {
-    let the_spell: Spell | null = null;
-    if (this.spell instanceof Spell) {
-      the_spell = this.spell;
-    } else if (this.spell instanceof SpellAsAbility) {
-      the_spell = this.spell.spell;
-    }
-    return the_spell;
+    return this.spell;
   }
 
   get name(): string {
@@ -91,18 +87,18 @@ export class CharacterSpell {
     this._name = value;
   }
 
-  get level(): number {
+  get level(): SlotLevel {
     if (this.the_spell) {
       return this.the_spell.level;
     } else {
-      return -1;
+      return new SlotLevel();
     }
   }
 
   get level_and_school(): string {
     let the_spell = this.the_spell;
     if (the_spell) {
-      if (the_spell.level === 0) {
+      if (the_spell.level.value === 0) {
         return `${the_spell.school} Cantrip`;
       } else {
         return `${this.level_string} Level ${the_spell.school}`;
@@ -114,16 +110,16 @@ export class CharacterSpell {
   get level_string(): string {
     const level = this.level;
     let level_str = "";
-    if (level === 0) {
+    if (level.value === 0) {
       level_str = "Cantrip";
-    } else if (level === 1) {
+    } else if (level.value === 1) {
       level_str = "1st";
-    } else if (level === 2) {
+    } else if (level.value === 2) {
       level_str = "2nd";
-    } else if (level === 3) {
+    } else if (level.value === 3) {
       level_str = "3rd";
     } else {
-      level_str = `${level}th`;
+      level_str = `${level.value}th`;
     }
     return level_str;
   }
@@ -146,7 +142,7 @@ export class CharacterSpell {
   }
 
   get use_attack(): boolean {
-    if (this.the_spell && !["Summon"].includes(this.the_spell.effect.type) && !["None","undefined"].includes(this.the_spell.effect.attack_type)) {
+    if (this.the_spell && !["Summon"].includes(this.the_spell.effect.type) && this.the_spell.effect.attack_type && !["None","undefined"].includes(this.the_spell.effect.attack_type)) {
       if (this.the_spell.effect.attack_type !== "Save") {
         return true;
       } 
@@ -168,7 +164,7 @@ export class CharacterSpell {
   disabled(character: Character, level: number = -1) {
     if (this.spell) {
       const filtered_slots = character.slots.filter(o => 
-        o.level === level && o.used < o.total
+        o.level.value === level && o.used < o.total
       );
       return filtered_slots.length > 0;
     }
@@ -176,17 +172,13 @@ export class CharacterSpell {
   }
 
   recalc_attack_string(ability_scores: AbilityScores | null): void {
-    if (this.the_spell && !["None","Utility","Healing","Max HP","Temp HP","Bonus Roll","Self Condition","Summon"].includes(this.effect_string)) {
+    if (this.the_spell && this.the_spell.effect.attack_type !== "None" && !["None","Utility","Healing","Max HP","Temp HP","Bonus Roll","Self Condition","Summon"].includes(this.effect_string)) {
       this.attack_string = "";
       let bonuses = 0;
       let save = "";
       if (this.spell instanceof Spell) {
         if (this.spell.effect.attack_type === "Save" && this.spell.saving_throw_ability_score) {
           save = this.spell.saving_throw_ability_score;
-        }
-      } else if (this.spell instanceof SpellAsAbility && this.spell.spell) {
-        if (this.spell.spell.effect.attack_type === "Save" && this.spell.spell.saving_throw_ability_score) {
-          save = this.spell.spell.saving_throw_ability_score;
         }
       }
       this.attack.attack_rolls.forEach(rolls => {
@@ -208,6 +200,10 @@ export class CharacterSpell {
           }
         }
       });
+      // console.log(this.attack.attack_rolls);
+      // console.log(this.attack_string);
+      // console.log(save);
+      // console.log(bonuses);
       if (!["","None","undefined"].includes(save)) {
         this.attack_string = `${save} ${bonuses}`;
       } else if (bonuses > 0) {
@@ -277,10 +273,10 @@ export class CharacterSpell {
     return effect_string;
   }
 
-  get_potence_string(slot_level: number, char: Character): string {
+  get_potence_string(slot_level: number, char: Character, effect: AbilityEffect | null = null): string {
     let damage_string = "";
     let bonuses = 0;
-    const potence = this.get_potence(slot_level, char);
+    const potence = this.get_potence(slot_level, char, effect);
     const ability_scores = char.current_ability_scores;
     if (potence) {
       bonuses += potence.rolls.flat;
@@ -329,32 +325,33 @@ export class CharacterSpell {
     return damage_string;
   }
 
-  get_potence(slot_level: number, char: Character): Potence | null {
+  get_potence(slot_level: number, char: Character, effect: AbilityEffect | null = null): Potence | null {
     if (this.the_spell) {
-      if (!["Control","Utility"].includes(this.effect_string)) {
+      const the_effect = effect ? effect : this.the_spell.effect;
+      if (!["Control","Utility"].includes(the_effect.type)) {
         let level = -1;
-        if (this.the_spell.effect.potence_type === "Slot") {
+        if (the_effect.potence_type === "Slot") {
           level = slot_level;
-        } else if (this.the_spell.effect.potence_type === "Character") {
+        } else if (the_effect.potence_type === "Character") {
           level = char.character_level;
-        } else if (this.the_spell.effect.potence_type === "Class" && this.source_type === "Class") {
+        } else if (the_effect.potence_type === "Class" && this.source_type === "Class") {
           const class_finder = char.classes.filter(o => o.game_class_id === this.source_id);
           if (class_finder.length === 1) {
             level = class_finder[0].level;
           }
         }
         let potence_finder: Potence[] = [];
-        potence_finder = this.the_spell.effect.potences.filter(o => o.level === level);
+        potence_finder = the_effect.potences.filter(o => o.level === level);
         if (potence_finder.length === 0) {
-          potence_finder = this.the_spell.effect.potences.filter(o => o.level < level);
+          potence_finder = the_effect.potences.filter(o => o.level < level);
           if (potence_finder.length > 0) {
             const max_level = Math.max(...potence_finder.map(o => { return o.level }));
-            potence_finder = this.the_spell.effect.potences.filter(o => o.level === max_level);
+            potence_finder = the_effect.potences.filter(o => o.level === max_level);
           }
         } 
         if (potence_finder.length === 1) {
           const potence = new Potence(potence_finder[0]);
-          if (this.use_spellcasting_modifier || (this.the_spell && this.the_spell.effect.add_modifier.toLowerCase() === "true")) {
+          if (this.use_spellcasting_modifier || (this.the_spell && the_effect.add_modifier.toLowerCase() === "true")) {
             potence.rolls.ability_score = this.spellcasting_ability;
           } else {
             potence.rolls.ability_score = "";
@@ -395,31 +392,12 @@ export class CharacterSpell {
     };
   }
 
-  copySpell(copyMe: Spell | SpellAsAbility) {
-    if (copyMe instanceof Spell) {
-      this.spell_id = copyMe._id;
-    } else if (copyMe.spell_id) {
-      this.spell_id = copyMe.spell_id;
-      if (copyMe.spell) {
-        this.name = copyMe.spell.name;
-      }
-      if (copyMe.slot_override === "At Will") {
-        this.at_will = true;
-      }
-      if (copyMe.casting_time_override !== "Normal") {
-        console.log(copyMe);
-      }
-      if (copyMe.components_override.length > 0) {
-        console.log(copyMe);
-      }
-      if (copyMe.resource_consumed !== "None") {
-        console.log(copyMe);
-      }
-    }
+  copySpell(copyMe: Spell) {
+    this.spell_id = copyMe._id;
     this.spell = copyMe;
   }
 
-  connectSpell(spell: Spell | SpellAsAbility) {
+  connectSpell(spell: Spell) {
     this.spell = spell;
   }
 

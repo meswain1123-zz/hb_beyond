@@ -44,17 +44,17 @@ export class Feature {
   feature_type: string;
   the_feature: Modifier | Reroll | LanguageFeature | SpellModifier | Proficiency | Advantage | DamageMultiplier | ResourceFeature | ASIBaseFeature | Ability | CreatureAbility | MinionAbility | SpellAsAbility | ItemAffectingAbility | BonusSpells | SpellBook | SpellcastingFeature | SenseFeature | SpecialSpellFeature | UpgradableNumber | IStringHash | boolean | number | string | string[] | null;
 
-  constructor(obj?: any) {
+  constructor(obj?: any, is_new: boolean = false) {
     this.parent_type = obj ? obj.parent_type : "";
     this.parent_id = obj ? obj.parent_id : "";
     this.base_id = obj ? obj.base_id : 0;
     this.id = obj ? obj.id : 0;
-    this.true_id = obj && obj.true_id ? obj.true_id : uuidv4().toString();
+    this.true_id = obj && obj.true_id && !is_new ? obj.true_id : uuidv4().toString();
     // if (obj && obj.name === "Burning Hands") {
     //   console.log(obj);
     // }
     this.name = obj ? obj.name : "";
-    this.true_description = obj ? obj.description : "";
+    this.true_description = obj && (!obj.fake_description || obj.fake_description !== "") ? obj.description : "";
     this.fake_description = "";
     this.feature_type = obj ? obj.feature_type : "";
     if (obj && obj.the_feature) {

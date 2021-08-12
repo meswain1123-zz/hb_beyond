@@ -112,12 +112,12 @@ class CharacterManageSpells extends Component<Props, State> {
               let always_known: Spell[] = [];
               let list_spells = spells.filter(o => 
                 list.spell_ids.includes(o._id) && 
-                (!o.level || o.level <= char_class.spell_level_max));
+                (!o.level || o.level.value <= char_class.spell_level_max));
               char_class.bonus_spells.forEach(bs => {
                 const bspells = spells.filter(o => 
                   Object.keys(bs.spell_ids).includes(o._id) && 
                   bs.spell_ids[o._id] <= char_class.level && 
-                  (!o.level || o.level <= char_class.spell_level_max));
+                  (!o.level || o.level.value <= char_class.spell_level_max));
                 // bonus_spells = [...bonus_spells,...bspells.filter(o => list_spells.filter(o2 => o2._id === o._id).length === 0)];
                 bspells.forEach(bspell => {
                   if (list_spells.filter(o => o._id === bspell._id).length === 0) {
@@ -318,14 +318,14 @@ class CharacterManageSpells extends Component<Props, State> {
         let filtered = [...list];
         if (char_class.spell_book && !this.state.add_to_book) {
           const spell_book = char_class.spell_book;
-          filtered = filtered.filter(o => o.level === 0 || spell_book.spells.filter(o2 => o2.spell_id === o._id).length === 1);
+          filtered = filtered.filter(o => o.level.value === 0 || spell_book.spells.filter(o2 => o2.spell_id === o._id).length === 1);
         }
 
         if (this.state.search_string.length > 0) {
           filtered = filtered.filter(o => o.name.toLowerCase().includes(this.state.search_string.toLowerCase()));
         }
         if (this.state.levels.length > 0) {
-          filtered = filtered.filter(o => this.state.levels.includes(o.level));
+          filtered = filtered.filter(o => this.state.levels.includes(o.level.value));
         }
         if (this.state.concentration === null) {
 
@@ -355,7 +355,7 @@ class CharacterManageSpells extends Component<Props, State> {
                     if (a.level === b.level) {
                       return a.name < b.name ? -1 : 1;
                     }
-                    return a.level - b.level; 
+                    return a.level.value - b.level.value; 
                   }).map((spell, key) => {
                     let char_spell: CharacterSpell | null = null;
                     const spell_finder = spell_book.spells.filter(o => o.spell_id === spell._id);
@@ -380,20 +380,20 @@ class CharacterManageSpells extends Component<Props, State> {
                               onClick={() => {
                               }}
                             />
-                          : !this.state.reloading && (spell.level === 0 && !char_class.cantrip_ids.includes(spell._id)) ?
+                          : !this.state.reloading && (spell.level.value === 0 && !char_class.cantrip_ids.includes(spell._id)) ?
                             <ButtonBox
                               name="Add"
                               disabled={ 
-                                (spell.level === 0 && 
+                                (spell.level.value === 0 && 
                                   (char_class.cantrips_max <= char_class.cantrip_ids.length)) || 
-                                (spell.level > 0 && 
+                                (spell.level.value > 0 && 
                                   (char_class.spells_prepared_max <= char_class.spell_ids.length)) 
                               }
                               onClick={() => {
                                 this.addSpell(spell, char_class);
                               }}
                             />
-                          : !this.state.reloading && (spell.level === 0 && char_class.cantrip_ids.includes(spell._id)) ?
+                          : !this.state.reloading && (spell.level.value === 0 && char_class.cantrip_ids.includes(spell._id)) ?
                             <ButtonBox
                               name="Remove"
                               onClick={() => {
@@ -442,7 +442,7 @@ class CharacterManageSpells extends Component<Props, State> {
                     if (a.level === b.level) {
                       return a.name < b.name ? -1 : 1;
                     }
-                    return a.level - b.level; 
+                    return a.level.value - b.level.value; 
                   }).map((spell, key) => {
                     return (
                       <Grid item key={key} container spacing={0} direction="row">
@@ -462,33 +462,33 @@ class CharacterManageSpells extends Component<Props, State> {
                               onClick={() => {
                               }}
                             />
-                          : !this.state.reloading && (spell.level === 0 && !char_class.cantrip_ids.includes(spell._id)) ?
+                          : !this.state.reloading && (spell.level.value === 0 && !char_class.cantrip_ids.includes(spell._id)) ?
                             <ButtonBox
                               name="Add"
                               disabled={ 
-                                (spell.level === 0 && 
+                                (spell.level.value === 0 && 
                                   (char_class.cantrips_max <= char_class.cantrip_ids.length)) || 
-                                (spell.level > 0 && 
+                                (spell.level.value > 0 && 
                                   (char_class.spells_prepared_max <= char_class.spell_ids.length)) 
                               }
                               onClick={() => {
                                 this.addSpell(spell, char_class);
                               }}
                             />
-                          : !this.state.reloading && (spell.level === 0 && char_class.cantrip_ids.includes(spell._id)) ?
+                          : !this.state.reloading && (spell.level.value === 0 && char_class.cantrip_ids.includes(spell._id)) ?
                             <ButtonBox
                               name="Remove"
                               onClick={() => {
                                 this.removeSpell(spell._id, char_class.game_class_id);
                               }}
                             />
-                          : !this.state.reloading && (spell.level > 0 && !char_class.spell_ids.includes(spell._id)) ?
+                          : !this.state.reloading && (spell.level.value > 0 && !char_class.spell_ids.includes(spell._id)) ?
                             <ButtonBox
                               name="Prepare"
                               disabled={ 
-                                (spell.level === 0 && 
+                                (spell.level.value === 0 && 
                                   (char_class.cantrips_max <= char_class.cantrip_ids.length)) || 
-                                (spell.level > 0 && 
+                                (spell.level.value > 0 && 
                                   (char_class.spells_prepared_max <= char_class.spell_ids.length)) 
                               }
                               onClick={() => {
@@ -522,7 +522,7 @@ class CharacterManageSpells extends Component<Props, State> {
                   if (a.level === b.level) {
                     return a.name < b.name ? -1 : 1;
                   }
-                  return a.level - b.level; 
+                  return a.level.value - b.level.value; 
                 }).map((spell, key) => {
                   return (
                     <Grid item key={key} container spacing={0} direction="row">
@@ -542,13 +542,13 @@ class CharacterManageSpells extends Component<Props, State> {
                             onClick={() => {
                             }}
                           />
-                        : !this.state.reloading && ((spell.level === 0 && !char_class.cantrip_ids.includes(spell._id)) || (spell.level > 0 && !char_class.spell_ids.includes(spell._id))) ?
+                        : !this.state.reloading && ((spell.level.value === 0 && !char_class.cantrip_ids.includes(spell._id)) || (spell.level.value > 0 && !char_class.spell_ids.includes(spell._id))) ?
                           <ButtonBox
                             name="Add"
                             disabled={ 
-                              (spell.level === 0 && 
+                              (spell.level.value === 0 && 
                                 (char_class.cantrips_max <= char_class.cantrip_ids.length)) || 
-                              (spell.level > 0 && 
+                              (spell.level.value > 0 && 
                                 (char_class.spells_prepared_max <= char_class.spell_ids.length)) 
                             }
                             onClick={() => {
@@ -582,6 +582,9 @@ class CharacterManageSpells extends Component<Props, State> {
     const obj = this.props.obj;
     if (obj instanceof Character) {
       obj.add_spell(spell, source);
+      // Something is wrong with adding spells.  
+      // I'm testing with a paladin, and any time I refresh
+      // it loses spells that I just added.
       this.update(obj);
     }
   }

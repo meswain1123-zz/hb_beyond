@@ -390,7 +390,7 @@ class CharacterFeatureInput extends Component<Props, State> {
           <Grid item>
             { feature.feature_options.map((opt, key) => {
               return (
-                <span key={key}>Mystic Arcanum {opt.level}</span>
+                <span key={key}>Mystic Arcanum {opt.level.value}</span>
               );
             })}
           </Grid>;
@@ -400,7 +400,7 @@ class CharacterFeatureInput extends Component<Props, State> {
           <Grid item>
             { feature.feature_options.map((opt, key) => {
               return (
-                <span key={key}>Spell Mastery {opt.level}</span>
+                <span key={key}>Spell Mastery {opt.level.value}</span>
               );
             })}
           </Grid>;

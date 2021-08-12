@@ -147,19 +147,29 @@ class CharacterEdit extends Component<Props, State> {
       this.api.getSetOfObjects(["armor_type","spell","spell_slot_type","eldritch_invocation","weapon_keyword","source_book"]).then((res: any) => {
         const armor_types: ArmorType[] = res.armor_type;
         const spells: Spell[] = res.spell;
-        this.setState({ 
-          armor_types,
-          spells,
-          spell_slot_types: res.spell_slot_type,
-          eldritch_invocations: res.eldritch_invocation,
-          weapon_keywords: res.weapon_keyword,
-          source_books: res.source_book
-        }, () => {
-          let { id } = this.props.match.params;
-          if (id !== undefined && this.state.obj._id !== id) {
+        let { id } = this.props.match.params;
+        if (id !== undefined && this.state.obj._id !== id) {
+          this.setState({ 
+            armor_types,
+            spells,
+            spell_slot_types: res.spell_slot_type,
+            eldritch_invocations: res.eldritch_invocation,
+            weapon_keywords: res.weapon_keyword,
+            source_books: res.source_book
+          }, () => {
             this.load_object(id);
-          }
-        });
+          }); 
+        } else {
+          this.setState({ 
+            armor_types,
+            spells,
+            spell_slot_types: res.spell_slot_type,
+            eldritch_invocations: res.eldritch_invocation,
+            weapon_keywords: res.weapon_keyword,
+            source_books: res.source_book, 
+            loading: false 
+          });
+        }
       });
     });
   }
@@ -191,13 +201,23 @@ class CharacterEdit extends Component<Props, State> {
             </span>
           </Grid>
           <Grid item>
-            <CenteredMenu
-              options={["Home","Race","Background","Abilities","Class","Equipment","Lineage"]}
-              selected={this.state.mode}
-              onSelect={(mode: string) => {
-                this.setState({ mode });
-              }}
-            />
+            { this.state.obj.source_books.includes("60d9e2ff909a1d2014235f15") ? 
+              <CenteredMenu
+                options={["Home","Race","Background","Abilities","Class","Equipment","Lineage"]}
+                selected={this.state.mode}
+                onSelect={(mode: string) => {
+                  this.setState({ mode });
+                }}
+              />
+            : 
+              <CenteredMenu
+                options={["Home","Race","Background","Abilities","Class","Equipment"]}
+                selected={this.state.mode}
+                onSelect={(mode: string) => {
+                  this.setState({ mode });
+                }}
+              />
+          }
           </Grid>
           <Grid item 
             style={{ 

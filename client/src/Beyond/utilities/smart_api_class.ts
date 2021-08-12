@@ -586,6 +586,7 @@ export class APIClass {
 
   deleteObject = async (data_type: string, obj: ModelBase) => {
     if (this.real) {
+      console.log(obj);
       const object_id = obj._id;
       const response = await this.deleteData("/api/beyond/deleteObject", { data_type, object_id });
       const res = await this.processResponse(response, data_type, null);

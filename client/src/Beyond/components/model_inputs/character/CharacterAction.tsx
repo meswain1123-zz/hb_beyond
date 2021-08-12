@@ -11,6 +11,7 @@ import {
   Ability,
   Character,
   CharacterAbility,
+  CharacterAction,
   CharacterItem,
   CharacterSpell,
   CharacterSpecialSpell,
@@ -58,7 +59,7 @@ type Props = PropsFromRedux & {
   character: Character;
   level: number;
   show_casting_time: boolean;
-  action: any;
+  action: CharacterAction;
   group: string;
   onChange: (change_types: string[]) => void; // For slots, resources, and concentration
 }
@@ -80,7 +81,7 @@ export interface State {
   popoverMode: string;
 }
 
-class CharacterAction extends Component<Props, State> {
+class CharacterActionInput extends Component<Props, State> {
   public static defaultProps = {
     show_casting_time: false,
     level: -1
@@ -141,7 +142,9 @@ class CharacterAction extends Component<Props, State> {
   }
 
   render() {
-    const action = this.props.action;
+    const action = this.props.action.action;
+    const action_type = this.props.action.type;
+    const action_level = this.props.action.level.value;
     const group2 = this.props.group;
     if (action instanceof CharacterItem) {
       const weapon = action;
@@ -167,14 +170,14 @@ class CharacterAction extends Component<Props, State> {
       );
     } else if (action instanceof CharacterSpecialSpell || action instanceof CharacterSpell) {
       const spell = action;
-      const level = this.props.level === -1 ? spell.level : this.props.level;
-      let slots = this.props.character.slots.filter(o => o.level === level);
+      const level = this.props.level === -1 ? spell.level.value : this.props.level;
+      let slots = this.props.character.slots.filter(o => o.level.value === level);
       let level2 = level;
       if (slots.length === 0) {
         level2 = 9; 
-        this.props.character.slots.filter(o => o.level > level).forEach(s => {
-          if (s.level < level2) {
-            level2 = s.level;
+        this.props.character.slots.filter(o => o.level.value > level).forEach(s => {
+          if (s.level.value < level2) {
+            level2 = s.level.value;
           }
         });
       }
@@ -222,6 +225,8 @@ class CharacterAction extends Component<Props, State> {
           <Grid item xs={1}>
             <CharacterCastButton
               obj={action}
+              type={action_type}
+              level={action_level}
               simple
               character={this.props.character}
               onChange={(change_types: string[]) => {
@@ -260,7 +265,7 @@ class CharacterAction extends Component<Props, State> {
               { action.the_ability.spell && action.the_ability.spell.range }
             </Grid>
           }
-          { this.renderSpellAttacks(action, action.level) }
+          { this.renderSpellAttacks(action, action_level) }
           { this.renderExtras() }
         </Grid>
       );
@@ -801,4 +806,4 @@ class CharacterAction extends Component<Props, State> {
   }
 }
 
-export default connector(CharacterAction);
+export default connector(CharacterActionInput);

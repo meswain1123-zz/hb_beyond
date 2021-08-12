@@ -2,7 +2,8 @@
 import { 
   SpecialSpellFeature,
   Spell,
-  Character
+  Character,
+  SlotLevel
 } from ".";
 import { CharacterSpell } from "./CharacterSpell";
 
@@ -47,7 +48,7 @@ export class CharacterSpecialSpell extends CharacterSpell {
           level = the_ability.level;
         }
         const filtered_slots = character.slots.filter(o => 
-          o.level === level // &&
+          o.level.value === level // &&
           // (the_ability.slot_type === "" || o.type_id === the_ability.slot_type)
         );
         if (filtered_slots.length === 1) {
@@ -65,6 +66,14 @@ export class CharacterSpecialSpell extends CharacterSpell {
       // }
     }
     return true;
+  }
+
+  get level(): SlotLevel {
+    if (this.the_spell) {
+      return this.the_spell.level;
+    } else {
+      return new SlotLevel();
+    }
   }
 
   toDBObj = () => {

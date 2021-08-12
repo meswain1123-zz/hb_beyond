@@ -28,6 +28,7 @@ import { APIClass } from "../../utilities/smart_api_class";
 
 
 interface AppState {
+  source_book: string;
   special_feature_type: string;
   height: number;
   width: number;
@@ -42,6 +43,7 @@ interface MatchParams {
 }
 
 const mapState = (state: RootState) => ({
+  source_book: state.app.source_book,
   special_feature_type: state.app.special_feature_type,
   height: state.app.height,
   width: state.app.width
@@ -70,9 +72,14 @@ export interface State {
 class SpecialFeatureEdit extends Component<Props, State> {
   constructor(props: Props) {
     super(props);
+    const obj = new SpecialFeature();
+    obj.type = props.special_feature_type;
+    if (this.props.source_book !== "Any") {
+      obj.source_id = this.props.source_book;
+    }
     this.state = {
       redirectTo: null,
-      obj: new SpecialFeature(),
+      obj,
       processing: false,
       child_names_valid: true,
       expanded_feature_base: null,
@@ -220,6 +227,7 @@ class SpecialFeatureEdit extends Component<Props, State> {
                   onBlur={(value: string) => {
                     const obj = this.state.obj;
                     obj.type = value;
+                    this.props.setSpecialFeatureType(value);
                     this.setState({ obj });
                   }}
                 />
@@ -253,35 +261,6 @@ class SpecialFeatureEdit extends Component<Props, State> {
                     });
                   }}
                 />
-                {/* <FeatureListInput 
-                  label="Feature"
-                  features={this.state.obj.features} 
-                  parent_id={this.state.obj._id} 
-                  parent_type="SpecialFeature"
-                  onChange={(changed: Feature[]) => {
-                    const obj = this.state.obj;
-                    obj.features = [];
-                    this.setState({ obj }, () => {
-                      obj.features = changed;
-                      this.setState({ obj });
-                    });
-                  }}
-                  onExpand={(expanded_feature: Feature) => {
-                    this.setState({ expanded_feature });
-                  }}
-                  onAdd={() => {
-                    const obj = this.state.obj;
-                    const feature = new Feature();
-                    feature.parent_type = "SpecialFeature";
-                    feature.parent_id = obj._id;
-                    feature.id = obj.features.length;
-                    obj.features.push(feature);
-                    this.setState({
-                      obj,
-                      expanded_feature: feature
-                    });
-                  }}
-                /> */}
               </Grid>
             </Grid>
           </Grid>

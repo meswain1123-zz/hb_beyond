@@ -13,12 +13,14 @@ import {
 import StringBox from "../../components/input/StringBox";
 
 import SelectSpecialFeatureTypeBox from "../../components/model_inputs/select/SelectSpecialFeatureTypeBox";
+import SelectObjectBox from "../../components/input/SelectObjectBox";
 
 import ObjectIndex from "../../components/Navigation/ObjectIndex";
 import LetterLinks from "../../components/Navigation/LetterLinks";
 
 
 interface AppState {
+  source_book: string;
   special_feature_type: string;
   height: number;
   width: number;
@@ -29,13 +31,15 @@ interface RootState {
 }
 
 const mapState = (state: RootState) => ({
+  source_book: state.app.source_book,
   special_feature_type: state.app.special_feature_type,
   height: state.app.height,
   width: state.app.width
 })
 
 const mapDispatch = {
-  setSpecialFeatureType: (type: string) => ({ type: 'SET', dataType: 'special_feature_type', payload: type })
+  setSpecialFeatureType: (type: string) => ({ type: 'SET', dataType: 'special_feature_type', payload: type }),
+  setSourceBook: (sb: string) => ({ type: 'SET', dataType: 'source_book', payload: sb })
 }
 
 const connector = connect(mapState, mapDispatch)
@@ -74,6 +78,9 @@ class SpecialFeatureIndex extends Component<Props, State> {
     if (this.state.search_string !== "") {
       filter.search_string = this.state.search_string;
     }
+    if (this.props.source_book !== "Any") {
+      filter.source_id = this.props.source_book;
+    }
 
     return filter;
   }
@@ -85,7 +92,7 @@ class SpecialFeatureIndex extends Component<Props, State> {
       return (
         <Grid container spacing={1} direction="column">
           <Grid item container spacing={1} direction="row">
-            <Grid item xs={3}>
+            <Grid item xs={2}>
               <span className={"MuiTypography-root MuiListItemText-primary header"}>
                 Special Features
               </span>
@@ -107,7 +114,7 @@ class SpecialFeatureIndex extends Component<Props, State> {
                 }}
               />
             </Grid>
-            <Grid item xs={3}>
+            <Grid item xs={2}>
               <SelectSpecialFeatureTypeBox 
                 name="Special Feature Type" 
                 value={this.props.special_feature_type} 
@@ -116,6 +123,18 @@ class SpecialFeatureIndex extends Component<Props, State> {
                   this.props.setSpecialFeatureType(value);
                   this.setState({ type: value });
                 }} 
+              />
+            </Grid>
+            <Grid item xs={2}>
+              <SelectObjectBox
+                name="Source Book"
+                value={this.props.source_book} 
+                data_type="source_book"
+                extra_options={["Any","Basic Rules"]}
+                onChange={(value: string) => {
+                  this.props.setSourceBook(value);
+                  this.setState({ });
+                }}
               />
             </Grid>
           </Grid>

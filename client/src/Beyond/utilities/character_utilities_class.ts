@@ -1,7 +1,7 @@
 
 
 import {
-  Ability,
+  // Ability,
   AbilityScores,
   Advantage,
   ArmorType,
@@ -48,7 +48,10 @@ import {
   IStringHash,
   SpecialSpellFeature,
   CharacterSpecialSpell,
-  CharacterSpellBook
+  CharacterSpellBook,
+  CharacterAction,
+  SlotLevel,
+  Ability
 } from "../models";
 
 import API from "./smart_api";
@@ -440,10 +443,11 @@ export class CharacterUtilitiesClass {
       const check_bonuses: Bonus[] = [];
       const rerolls: Reroll[] = [];
 
-      let level = 0;
+      let new_character_level = 0;
       char.classes.forEach(char_class => {
-        level += char_class.level;
+        new_character_level += char_class.level;
       });
+      char.character_level = new_character_level;
 
       const processCharacterFeature = (f: CharacterFeature, source_type: string, source_id: string, source_name: string) => {
         if (f.feature_type === "Special Feature Choices") {
@@ -537,7 +541,7 @@ export class CharacterUtilitiesClass {
         } else if (f.feature_type === "Ability" ||
           f.feature_type === "Item Affecting Ability") {
           let char_ability = new CharacterAbility();
-          char_ability.copyFeature(f);
+          char_ability.copyFeature(f, char, (source_type === "Class" ? source_id : ""));
           const ability_finder = abilities.filter(o => o.name === char_ability.name && o.source_type === source_type && o.source_id === source_id);
           if (ability_finder.length === 0) {
             char_ability.source_type = source_type;
@@ -546,31 +550,32 @@ export class CharacterUtilitiesClass {
             abilities.push(char_ability);
           } else {
             char_ability = ability_finder[0];
-            char_ability.connectFeature(f);
+            char_ability.connectFeature(f, char, (source_type === "Class" ? source_id : ""));
           }
         } else if (f.feature_type === "Spell as Ability") {
           if (f.feature.the_feature instanceof SpellAsAbility) {
             const the_feature = f.feature.the_feature;
-            const spell_finder = all_spells.filter(o => o._id === the_feature.spell_id);
-            if (spell_finder.length === 1) {
-              the_feature.connectSpell(spell_finder[0]);
+            if (!the_feature.spell) {
+              const spell_finder = all_spells.filter(o => o._id === the_feature.spell_id);
+              if (spell_finder.length === 1) {
+                the_feature.connectSpell(spell_finder[0]);
+              }
             }
             let char_ability = new CharacterAbility();
             char_ability.the_ability = f.feature.the_feature;
             const true_id = f.true_id;
-            // The spell_as_abilities say true_id is empty.  That's the problem.
             const ability_finder = spell_as_abilities.filter(o => o.true_id === true_id);
             if (ability_finder.length === 0) {
               char_ability.source_type = source_type;
               char_ability.source_id = source_id;
               char_ability.source_name = source_name;
               char_ability.spellcasting_ability = the_feature.spellcasting_ability;
-              char_ability.connectFeature(f);
+              char_ability.connectFeature(f, char, (source_type === "Class" ? source_id : ""));
               spell_as_abilities.push(char_ability);
             } else {
               char_ability = ability_finder[0];
               char_ability.the_ability = f.feature.the_feature;
-              char_ability.connectFeature(f);
+              char_ability.connectFeature(f, char, (source_type === "Class" ? source_id : ""));
             }
           }
         } else if (f.feature_type === "Spell Book" ||
@@ -626,7 +631,7 @@ export class CharacterUtilitiesClass {
                 char_spell = ability_finder[0];
                 char_spell.the_ability = new SpellAsAbility();
                 char_spell.the_ability.spell = obj_finder[0];
-                char_spell.connectFeature(f);
+                char_spell.connectFeature(f, char, (source_type === "Class" ? source_id : ""));
               }
             }
           });
@@ -710,7 +715,9 @@ export class CharacterUtilitiesClass {
           }
         }
         if (good) {
-          fb.features.forEach(f => { processCharacterFeature(f, source_type, source_id, source_name); });
+          fb.features.forEach(f => {
+            processCharacterFeature(f, source_type, source_id, source_name); 
+          });
         }
       }
 
@@ -750,13 +757,16 @@ export class CharacterUtilitiesClass {
         fighting_styles.forEach(ei => {
           ei.features.forEach(f => { processCharacterFeature(f, ei.source_type, ei.source_id, ei.source_name); });
         });
+        // Something isn't right here?  The special features aren't being processed the first time.
         let processed_special_features = 0;
         while (processed_special_features < special_features.length) {
           // Special Features have to be processed differently because they have the ability to add other Special Features which also need to be processed
           const sf = special_features[processed_special_features];
           if (sf.special_feature) {
             const the_sf = sf.special_feature;
-            sf.features.forEach(fb => { processCharacterFeatureBase(me, fb, "Special Feature", sf.special_feature_id, the_sf.name); });
+            sf.features.forEach(fb => { 
+              processCharacterFeatureBase(me, fb, "Special Feature", sf.special_feature_id, the_sf.name); 
+            });
           }
           processed_special_features++;
         }
@@ -872,7 +882,6 @@ export class CharacterUtilitiesClass {
       if (start_hit_dice) {
         max_hit_points += (start_hit_dice.size / 2) - 1;
       }
-      char.character_level = level;
       char.max_hit_points = max_hit_points;
       char.current_hit_points = Math.min(char.current_hit_points, max_hit_points);
 
@@ -1271,12 +1280,18 @@ export class CharacterUtilitiesClass {
         char_class.spell_ids = [];
         char_class.cantrip_ids = [];
         char.spells.filter(o => !o.always_known && o.source_type === "Class" && o.source_id === char_class.game_class_id).forEach(char_spell => {
-          if (char_spell.level === 0) {
+          char_spell.connectSource(char_class);
+          if (!char_spell.the_spell) {
+            const obj_finder = all_spells.filter(o => o._id === char_spell.spell_id);
+            if (obj_finder.length === 1) {
+              char_spell.connectSpell(obj_finder[0]);
+            }
+          }
+          if (char_spell.level.value === 0) {
             char_class.cantrip_ids.push(char_spell.spell_id);
           } else {
             char_class.spell_ids.push(char_spell.spell_id);
           }
-          char_spell.connectSource(char_class);
         });
         if (char_class.spell_book && char_class.spell_book.spell_book) {
           const spell_book = char_class.spell_book;
@@ -1333,7 +1348,7 @@ export class CharacterUtilitiesClass {
           Object.keys(entry.slots_per_level).forEach((sl: any) => {
             const slot_level = +sl;
             const slot = new CharacterSlot();
-            slot.level = slot_level;
+            slot.level = new SlotLevel(slot_level);
             slot.total = entry.slots_per_level[slot_level];
             slot.type_id = table._id;
             slot.slot_name = table.slot_name;
@@ -1479,11 +1494,12 @@ export class CharacterUtilitiesClass {
       char.saving_throw_bonuses = saving_throw_bonuses;
       char.check_bonuses = check_bonuses;
 
+      const actions: CharacterAction[] = [];
       // Apply modifiers to spells
       char.spells.forEach(spell => {
         const attack = new Attack();
         if (spell.the_spell) {
-          if (spell.level === 0) {
+          if (spell.level.value === 0) {
             if (spell.the_spell.effect.attack_type === "Save") {
               // It's a save attack
               char.attack_bonuses.filter(o => o.types.includes("Cantrip Saves")).forEach(ab => {
@@ -1575,8 +1591,25 @@ export class CharacterUtilitiesClass {
         attack.type = "Spell";
         spell.attack = attack;
         spell.recalc_attack_string(char.current_ability_scores);
-        // spell damages are based on levels, so calculated elsewhere
-        // spell.recalc_damage_string(char.current_ability_scores);
+        // Loop through the slot levels >= spell.level and add to actions
+        if (spell.level.value === 0) {
+          const action = new CharacterAction();
+          action.type = "Spell";
+          action.action = spell;
+          action.level = spell.level;
+          action.casting_time = spell.the_spell ? spell.the_spell.casting_time : "A";
+          actions.push(action);
+        } else {
+          const slot_levels = Array.from(new Set(char.slots.filter(o => o.level.value >= spell.level.value).map(o => o.level.value)));
+          slot_levels.forEach(level => {
+            const action = new CharacterAction();
+            action.type = "Spell";
+            action.action = spell;
+            action.level = new SlotLevel(level);
+            action.casting_time = spell.the_spell ? spell.the_spell.casting_time : "A";
+            actions.push(action);
+          });
+        }
       });
       let count = 0;
       while (count < char.special_spells.length) {
@@ -1587,7 +1620,7 @@ export class CharacterUtilitiesClass {
         } else {
           const attack = new Attack();
           if (spell.the_spell) {
-            if (spell.level === 0) {
+            if (spell.level.value === 0) {
               if (spell.the_spell.effect.attack_type === "Save") {
                 // It's a save attack
                 char.attack_bonuses.filter(o => o.types.includes("Cantrip Saves")).forEach(ab => {
@@ -1681,11 +1714,29 @@ export class CharacterUtilitiesClass {
           spell.recalc_attack_string(char.current_ability_scores);
           count++;
         }
+        if (spell.level.value === 0) {
+          const action = new CharacterAction();
+          action.type = "Special Spell";
+          action.action = spell;
+          action.level = spell.level;
+          action.casting_time = spell.the_spell ? spell.the_spell.casting_time : "A";
+          actions.push(action);
+        } else {
+          const slot_levels = Array.from(new Set(char.slots.filter(o => o.level.value >= spell.level.value).map(o => o.level.value)));
+          slot_levels.forEach(level => {
+            const action = new CharacterAction();
+            action.type = "Special Spell";
+            action.action = spell;
+            action.level = new SlotLevel(level);
+            action.casting_time = spell.the_spell ? spell.the_spell.casting_time : "A";
+            actions.push(action);
+          });
+        }
       }
       char.spell_as_abilities.forEach(spell => {
         const attack = new Attack();
         if (spell.spell) {
-          if (spell.level === 0) {
+          if (spell.level.value === 0) {
             if (spell.spell.effect.attack_type === "Save") {
               // It's a save attack
               char.attack_bonuses.filter(o => o.types.includes("Cantrip Saves")).forEach(ab => {
@@ -1779,7 +1830,59 @@ export class CharacterUtilitiesClass {
         spell.recalc_attack_string(char.current_ability_scores);
         // spell damages are based on levels, so calculated elsewhere
         // spell.recalc_damage_string(char.current_ability_scores);
+        
+        if (spell.the_ability instanceof SpellAsAbility) {
+          if (spell.level.value === 0 || ["Only Special Resource","At Will"].includes(spell.the_ability.slot_override)) {
+            const action = new CharacterAction();
+            action.type = "Spell As Ability";
+            action.action = spell;
+            action.level = spell.level;
+            action.casting_time = spell.spell ? spell.spell.casting_time : "A";
+            action.special_resource = spell.the_ability.slot_override === "Only Special Resource";
+            actions.push(action);
+          } else if (["Normal","And Special Resource"].includes(spell.the_ability.slot_override)) {
+            const slot_levels = Array.from(new Set(char.slots.filter(o => o.level.value >= spell.level.value).map(o => o.level.value)));
+            slot_levels.forEach(level => {
+              const action = new CharacterAction();
+              action.type = "Spell As Ability";
+              action.action = spell;
+              action.level = new SlotLevel(level);
+              action.casting_time = spell.spell ? spell.spell.casting_time : "A";
+              action.special_resource = spell.the_ability instanceof SpellAsAbility && spell.the_ability.slot_override === "And Special Resource";
+              actions.push(action);
+            });
+          } else {
+            const action = new CharacterAction();
+            action.type = "Spell As Ability";
+            action.action = spell;
+            action.level = spell.level;
+            action.casting_time = spell.spell ? spell.spell.casting_time : "A";
+            action.special_resource = true;
+            actions.push(action);
+            
+            const slot_levels = Array.from(new Set(char.slots.filter(o => o.level.value >= spell.level.value).map(o => o.level.value)));
+            slot_levels.forEach(level => {
+              const action = new CharacterAction();
+              action.type = "Spell";
+              action.action = spell;
+              action.casting_time = spell.spell ? spell.spell.casting_time : "A";
+              action.level = new SlotLevel(level);
+              actions.push(action);
+            });
+          }
+        }
       });
+      if (false) {
+        // TODO:
+        // Warcaster:
+        // When a hostile creature's movement 
+        // provokes an opportunity attack from you, 
+        // you can use your reaction to cast a spell 
+        // at the creature, rather than making an 
+        // opportunity attack. 
+        // The spell must have a casting time of 
+        // 1 action and must target only that creature.
+      }
 
       // Go through weapons
       const item_actions = char.items.filter(o =>
@@ -1794,47 +1897,126 @@ export class CharacterUtilitiesClass {
       item_actions.forEach(weapon => {
         weapon.weapon_keywords = all_weapon_keywords.filter(o => weapon.base_item && weapon.base_item.weapon_keyword_ids.includes(o._id));
         weapon.attacks = this.get_weapon_attacks(weapon, char, two_handed_id);
+        const action = new CharacterAction();
+        action.type = "Weapon";
+        action.action = weapon;
+        actions.push(action);
+        if (this.can_bonus_action_attack(weapon, char)) {
+          const action = new CharacterAction();
+          action.type = "Weapon";
+          action.action = weapon;
+          action.casting_time = "BA";
+          actions.push(action);
+        }
+        if (this.can_reaction_attack(weapon, char)) {
+          const action = new CharacterAction();
+          action.type = "Weapon";
+          action.action = weapon;
+          action.casting_time = "RA";
+          actions.push(action);  
+        }
+        // If they can do it as a bonus action or reaction then add
       });
-      char.actions.item_actions = item_actions;
-      // Do Unarmed Strike
-      char.actions.unarmed = this.get_unarmed_strikes(char);
-      // Go through spells
-      const spell_actions = char.spells.filter(o =>
-        o.spell && o.spell instanceof Spell && o.spell.effect.type !== "None");
-      const spell_ability_actions = char.spell_as_abilities.filter(o =>
-        o.spell && o.spell.effect.type !== "None");
-      // TODO: Once I've got the rest of Wizard all working, I'll need to make it so special spells will work with spells that aren't always_known
-      const special_spell_actions = char.special_spells.filter(o =>
-        o.special_spell_feature && o.special_spell_feature.always_known &&
-        o.spell && o.spell.effect.type !== "None");
-      char.actions.spells_actions = [
-        ...spell_actions.filter(o => o.spell && o.spell instanceof Spell && o.spell.casting_time === "A"),
-        ...spell_ability_actions.filter(o => o.spell && o.spell.casting_time === "A"),
-        ...special_spell_actions.filter(o => o.spell && o.spell.casting_time === "A")
-      ];
-      char.actions.spells_bonus_actions = [
-        ...spell_actions.filter(o => o.spell && o.spell instanceof Spell && o.spell.casting_time === "BA"),
-        ...spell_ability_actions.filter(o => o.spell && o.spell.casting_time === "BA"),
-        ...special_spell_actions.filter(o => o.spell && o.spell.casting_time === "BA")
-      ];
-      char.actions.spells_reactions = [
-        ...spell_actions.filter(o => o.spell && o.spell.casting_time === "RA"),
-        ...spell_ability_actions.filter(o => o.spell && o.spell.casting_time === "RA"),
-        ...special_spell_actions.filter(o => o.spell && o.spell.casting_time === "RA")
-      ];
-      char.actions.spells_other_actions = [
-        ...spell_actions.filter(o => o.spell && !["A", "BA", "RA"].includes(o.spell.casting_time)),
-        ...spell_ability_actions.filter(o => o.spell && !["A", "BA", "RA"].includes(o.spell.casting_time)),
-        ...special_spell_actions.filter(o => o.spell && !["A", "BA", "RA"].includes(o.spell.casting_time))
-      ];
-      // Go through abilities
-      const ability_actions = char.abilities.filter(o =>
-        o.the_ability && 
-        o.the_ability instanceof Ability);
-      char.actions.abilities_actions = ability_actions.filter(o => o.the_ability && o.the_ability instanceof Ability && o.the_ability.casting_time === "A");
-      char.actions.abilities_bonus_actions = ability_actions.filter(o => o.the_ability && o.the_ability instanceof Ability && o.the_ability.casting_time === "BA");
-      char.actions.abilities_reactions = ability_actions.filter(o => o.the_ability && o.the_ability instanceof Ability && o.the_ability.casting_time === "RA");
-      char.actions.abilities_other_actions = ability_actions.filter(o => o.the_ability && o.the_ability instanceof Ability && !["A", "BA", "RA"].includes(o.the_ability.casting_time));
+      char.abilities.forEach(ability => {
+        const attack = new Attack();
+        attack.type = "Ability";
+        ability.attack = attack;
+        ability.recalc_attack_string(char.current_ability_scores);
+        
+        if (ability.the_ability instanceof Ability) {
+          if (ability.the_ability.resource_consumed === "Slot") {
+            const min_level = ability.the_ability.slot_level.value;
+            char.slots.filter(o => o.level.value >= min_level).forEach(slot => {
+              const action = new CharacterAction();
+              action.type = "Ability";
+              action.action = ability;
+              action.level = slot.level;
+              if (ability.the_ability instanceof Ability) {
+                action.casting_time = ability.the_ability.casting_time;
+              }
+              actions.push(action);
+            });
+          } else {
+            const action = new CharacterAction();
+            action.type = "Ability";
+            action.action = ability;
+            action.casting_time = ability.the_ability.casting_time;
+            actions.push(action);
+          }
+        }
+      });
+      // Need to get char.abilities into actions as well
+      // console.log(item_actions);
+      // console.log(char.spells);
+      // console.log(char.abilities);
+      // console.log(char.spell_as_abilities);
+      // console.log(char.special_spells);
+      // console.log(actions);
+      char.actions = actions;
     }
+  }
+
+  /**
+   * Two-Weapon Fighting:
+   * When you take the Attack action and 
+   * attack with a light melee weapon that 
+   * you're holding in one hand, 
+   * you can use a bonus action to attack 
+   * with a different light melee weapon 
+   * that you're holding in the other hand. 
+   * You don't add your ability modifier to 
+   * the damage of the bonus attack, 
+   * unless that modifier is negative.
+   * 
+   * If either weapon has the thrown property, 
+   * you can throw the weapon, 
+   * instead of making a melee attack with it.
+   */
+  can_bonus_action_attack(weapon: CharacterItem, char: Character): boolean {
+    if (weapon.weapon_keywords.filter(o => o.name === "Light").length > 0 &&
+      weapon.weapon_keywords.filter(o => o.name === "Melee").length > 0) {
+      return true;
+    } else {
+      // TODO:
+      // Crossbow Expert Attack
+      // When you use the Attack action 
+      // and attack with a one-handed weapon, 
+      // you can use a bonus action to attack 
+      // with a hand crossbow you are holding.
+
+      // Dual Wielder
+      // You master fighting with two weapons, 
+      // gaining the following benefits:
+
+      // You gain a +1 bonus to AC while 
+      // you are wielding a separate melee 
+      // weapon in each hand.
+      // You can use two-weapon fighting even 
+      // when the one-handed melee weapons 
+      // you are wielding aren't light.
+      // You can draw or stow two one-handed 
+      // weapons when you would normally be 
+      // able to draw or stow only one.
+    }
+
+    return false;
+  }
+
+  /**
+   * Opportunity Attack:
+   * You can make an opportunity attack when a 
+   * hostile creature that you can see moves 
+   * out of your reach. To make the opportunity attack, 
+   * you use your reaction to make one melee attack 
+   * against the provoking creature. 
+   * The attack occurs right before the creature leaves 
+   * your reach.
+   */
+  can_reaction_attack(weapon: CharacterItem, char: Character): boolean {
+    if (weapon.weapon_keywords.filter(o => o.name === "Melee").length > 0) {
+      return true;
+    }
+
+    return false;
   }
 }

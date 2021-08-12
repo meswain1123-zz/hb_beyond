@@ -9,7 +9,8 @@ import {
   TemplateBase,
   SpellAsAbility,
   SpellAsAbilityTemplate,
-  UpgradableNumber
+  UpgradableNumber,
+  SlotLevel
 } from "../../../models";
 import { 
   ABILITY_SCORES, 
@@ -152,6 +153,22 @@ class SpellAsAbilityInput extends Component<Props, State> {
                 onChange={(values: string[]) => {
                   const obj = this.props.obj;
                   obj.components_override = values;
+                  this.props.onChange(obj);
+                }}
+              /> 
+            </Grid>
+            <Grid item xs={4}>
+              <SelectStringBox 
+                name="Cast At Level"
+                options={["Spell Level","1","2","3","4","5","6","7","8","9"]}
+                value={ this.props.obj.cast_at_level.value === -1 ? "Spell Level" : `${this.props.obj.cast_at_level.value}` }
+                onChange={(value: string) => {
+                  const obj = this.props.obj;
+                  if (value === "Spell Level") {
+                    obj.cast_at_level = new SlotLevel(-1);
+                  } else {
+                    obj.cast_at_level = new SlotLevel(+value);
+                  }
                   this.props.onChange(obj);
                 }}
               /> 

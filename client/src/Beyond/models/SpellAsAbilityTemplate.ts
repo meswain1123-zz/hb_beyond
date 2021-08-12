@@ -1,7 +1,7 @@
 
 import { TemplateBase } from "./TemplateBase";
 import { SpellAsAbility } from "./SpellAsAbility";
-import { UpgradableNumber } from ".";
+import { UpgradableNumber, SlotLevel } from ".";
 
 
 export class SpellAsAbilityTemplate extends TemplateBase {
@@ -12,7 +12,7 @@ export class SpellAsAbilityTemplate extends TemplateBase {
   slot_override: string;
   resource_consumed: string | null; // Slot-X, Ki, Lay on Hands, Charge, etc.
   amount_consumed: number;
-  slot_level: number; // If it consumes slots then this is the minimum level of the slot
+  slot_level: SlotLevel; // If it consumes slots then this is the minimum level of the slot
   slot_type: string; // If it consumes a specific type of slot (usually Pact) then this holds that
   special_resource_amount: UpgradableNumber;
   special_resource_refresh_rule: string; // Short Rest, Long Rest, Dawn, 1 Hour, 8 Hours, 24 Hours
@@ -20,6 +20,7 @@ export class SpellAsAbilityTemplate extends TemplateBase {
   ritual: boolean;
   ritual_only: boolean;
   at_will: boolean;
+  cast_at_level: SlotLevel;
 
   constructor(obj?: any) {
     super(obj);
@@ -31,7 +32,7 @@ export class SpellAsAbilityTemplate extends TemplateBase {
     this.slot_override = obj ? obj.slot_override : "Normal";
     this.resource_consumed = obj ? obj.resource_consumed : "";
     this.amount_consumed = obj && obj.amount_consumed ? +obj.amount_consumed : 0;
-    this.slot_level = obj && obj.slot_level ? obj.slot_level : 1;
+    this.slot_level = obj && obj.slot_level ? new SlotLevel(obj.slot_level) : new SlotLevel(1);
     this.slot_type = obj && obj.slot_type ? obj.slot_type : "";
     if (obj && obj.special_resource_amount && obj.special_resource_amount.base === undefined) {
       // Translate old set up to new
@@ -47,6 +48,7 @@ export class SpellAsAbilityTemplate extends TemplateBase {
     this.ritual = obj && obj.ritual ? obj.ritual : false;
     this.ritual_only = this.ritual && obj && obj.ritual_only ? obj.ritual_only : false;
     this.at_will = obj && obj.at_will ? obj.at_will : false;
+    this.cast_at_level = obj && obj.cast_at_level ? new SlotLevel(obj.cast_at_level) : new SlotLevel(-1);
   }
 
   toDBObj = () => {
@@ -65,14 +67,15 @@ export class SpellAsAbilityTemplate extends TemplateBase {
       slot_override: this.slot_override,
       resource_consumed: this.resource_consumed,
       amount_consumed: this.amount_consumed,
-      slot_level: this.slot_level,
+      slot_level: this.slot_level.value,
       slot_type: this.slot_type,
       special_resource_amount: this.special_resource_amount.toDBObj(),
       special_resource_refresh_rule: this.special_resource_refresh_rule,
       spellcasting_ability: this.spellcasting_ability,
       ritual: this.ritual,
       ritual_only: this.ritual_only,
-      at_will: this.at_will
+      at_will: this.at_will,
+      cast_at_level: this.cast_at_level
     };
   }
 
@@ -101,6 +104,7 @@ export class SpellAsAbilityTemplate extends TemplateBase {
     this.ritual = copyMe.ritual;
     this.ritual_only = copyMe.ritual_only;
     this.at_will = copyMe.at_will;
+    this.cast_at_level = copyMe.cast_at_level;
   }
 
   copyObj(copyMe: SpellAsAbility): void {
@@ -122,5 +126,6 @@ export class SpellAsAbilityTemplate extends TemplateBase {
     this.ritual = copyMe.ritual;
     this.ritual_only = copyMe.ritual_only;
     this.at_will = copyMe.at_will;
+    this.cast_at_level = copyMe.cast_at_level;
   }
 }

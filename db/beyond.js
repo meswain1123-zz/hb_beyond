@@ -9,7 +9,7 @@ var mongodb = require("mongodb");
 var MongoClient = mongodb.MongoClient;
 var ObjectID = mongodb.ObjectID;
 var assert = require("assert");
-// var uuid = require('uuid');
+var uuid = require('uuid');
 
 
 // const dbType = process.env.DB_TYPE;
@@ -29,7 +29,7 @@ function open() {
     // fixItems();
     // deleteCreatures();
     // parseDoc();
-    // fixFeatureBases();
+    // fixFeatures();
   });
 }
 function close() {
@@ -324,6 +324,39 @@ function fixFeatureBases() {
   getObjects(gotObjects, "eldritch_invocation", {}, 0, -1);
 }
 
+function fixFeatures() {
+  function gotObjects(objs) {
+    let pos = 0;
+    function respond(response) {
+      pos++;
+      if (pos < objs.length) {
+        const obj2 = objs[pos];
+        obj2.features.forEach(fb => {
+          console.log(fb);
+          fb.features.forEach(f => {
+            f.true_id = uuid.v1().toString();
+          });
+        });
+        
+        updateObject(respond, "special_feature", obj2);
+      } else {
+        console.log('done');
+      }
+    }
+    const obj = objs[pos];
+    obj.features.forEach(fb => {
+      console.log(fb);
+      fb.features.forEach(f => {
+        f.true_id = uuid.v1().toString();
+      });
+    });
+    
+    updateObject(respond, "special_feature", obj);
+  }
+
+  getObjects(gotObjects, "special_feature", {}, 0, -1);
+}
+
 function getUserByLogin(respond, email, password) {
   try {
     const db = client.db(dbName);
@@ -537,6 +570,9 @@ function updateObject(respond, data_type, obj) {
 function deleteObject(respond, data_type, object_id) {
   const db = client.db(dbName);
 
+  console.log("Delete:");
+  console.log(data_type);
+  console.log(object_id);
   db.collection(data_type).deleteOne({
     _id: ObjectID(object_id)
   });

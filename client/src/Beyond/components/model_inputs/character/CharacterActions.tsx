@@ -7,13 +7,14 @@ import {
 import { 
   Attack,
   Character,
-  CharacterItem,
+  // CharacterItem,
   CharacterSpell,
+  CharacterAction,
   Spell,
   INumHash,
 } from "../../../models";
 
-import CharacterAction from "./CharacterAction";
+import CharacterActionInput from "./CharacterAction";
 
 import CenteredMenu from "../../input/CenteredMenu";
 
@@ -99,6 +100,7 @@ class CharacterActions extends Component<Props, State> {
   }
 
   render() {
+    // console.log(this.props.obj.actions);
     return (
       <Grid item container spacing={1} direction="column" 
         style={{
@@ -144,55 +146,39 @@ class CharacterActions extends Component<Props, State> {
           this.renderActionGroup("Reactions") 
         }
         { (this.state.view === "ALL" || this.state.view === "Other") && 
-          this.renderActionGroup("Other Actions") 
+          this.renderActionGroup("Other") 
         }
       </Grid>
     );
   }
 
   renderActionGroup(group: string) {
-    const group2 = this.data_util.replaceAll(group.toLowerCase()," ","_");
-    let found = false;
-    if (["actions","bonus_actions","reactions"].includes(group2)) {
-      found = this.props.obj.actions.item_actions.length > 0;
-    }
-    if (!found) {
-      found = this.props.obj.actions[`spells_${group2}`].length > 0 || this.props.obj.actions[`abilities_${group2}`].length > 0;
-    }
-    let extra_attacks = "";
-    if (this.props.obj.extra_attacks > 0) {
-      extra_attacks = `${this.props.obj.extra_attacks + 1} Attacks per Action`;
-    }
-    if (found) {
+    const filtered = this.props.obj.actions.filter(o => o.casting_time[0] === group[0] || (group === "Other" && !["A","BA","RA"].includes(o.casting_time)));
+    if (filtered.length > 0) {
+      let extra_attacks = "";
+      if (group === "Action" && this.props.obj.extra_attacks > 0) {
+        extra_attacks = `${this.props.obj.extra_attacks + 1} Attacks per Action`;
+      }
       return (
         <Grid item container spacing={1} direction="column">
           <Grid item style={{ fontWeight: "bold", fontSize: "15px" }}>
             { group } { extra_attacks }
           </Grid>
-          { this.renderActionsOfType(group2, "Weapon Attacks") }
-          { this.renderActionsOfType(group2, "Spells") }
-          { this.renderActionsOfType(group2, "Abilities") }
+          { this.renderActionsOfType(filtered, "Weapon Attacks") }
+          { this.renderActionsOfType(filtered, "Spells") }
+          { this.renderActionsOfType(filtered, "Abilities") }
         </Grid>
       );
     } else return null;
   }
 
-  renderActionsOfType(group2: string, type: string) {
-    const type2 = this.data_util.replaceAll(type.toLowerCase()," ","_");
-    let dingen: any = type === "Weapon Attacks" ? (["actions","bonus_actions","reactions"].includes(group2) ? this.props.obj.actions.item_actions : []) : this.props.obj.actions[`${type2}_${group2}`];
-    if (type === "Weapon Attacks") {
-      dingen = dingen.filter((o: any) => o instanceof CharacterItem && o.attacks.filter(a => group2 !== "bonus_actions" || a.bonus_action).length > 0);
-    }
+  renderActionsOfType(actions: CharacterAction[], type: string) {
+    let dingen = type === "Weapon Attacks" ? 
+      actions.filter(o => o.type === "Weapon") : 
+      (type === "Spells" ? 
+      actions.filter(o => o.type === "Spell" || o.type === "Spell As Ability") :
+      actions.filter(o => !["Weapon","Spell","Spell As Ability"].includes(o.type)));
     dingen = dingen.sort((a: any, b: any) => { return a.name.localeCompare(b.name) });
-    if (type === "Spells") {
-      dingen = dingen.sort((a: any, b: any) => { 
-        if (a instanceof CharacterSpell && b instanceof CharacterSpell) {
-          return a.level < b.level ? -1 : 1;
-        } else {
-          return a.name.localeCompare(b.name)
-        }
-      });
-    }
     if (dingen && dingen.length > 0) {
       return (
         <Grid item container spacing={1} direction="column">
@@ -202,11 +188,11 @@ class CharacterActions extends Component<Props, State> {
               return (<span key={key}></span>);
             } else {
               return (
-                <CharacterAction 
+                <CharacterActionInput
                   key={key}
                   character={this.props.obj}
                   action={action}
-                  group={group2}
+                  group={action.casting_time}
                   onChange={(change_types: string[]) => {
                     this.props.onChange(change_types);
                   }}

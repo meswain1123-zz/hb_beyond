@@ -54,7 +54,7 @@ export class CreatureAbility {
   duration: string;
   components: string[]; // VSM
   material_component: string;
-  casting_time: string; // A, BA, RA, X minute(s), etc
+  casting_time: 'A' | 'BA' | 'RA' | 'Special' | 'Attack'; // A, BA, RA, X minute(s), etc
   resource_consumed: string | null; // Slot-X, Ki, Lay on Hands, Charge, etc.
   amount_consumed: number;
   special_resource_amount: string;

@@ -63,7 +63,7 @@ class ViewSpell extends Component<Props, State> {
       concentration = spell.concentration;
       ritual = spell.ritual;
       if (spell.level) {
-        level = spell.level;
+        level = spell.level.value;
       }
     } else if (spell instanceof CharacterSpell) {
       detail = spell.source_name;
@@ -84,7 +84,7 @@ class ViewSpell extends Component<Props, State> {
         concentration = spell.spell.concentration;
         ritual = spell.ritual;
         if (spell.spell.level) {
-          level = spell.spell.level;
+          level = spell.spell.level.value;
         }
       }
     } else if (spell instanceof CharacterAbility) {
@@ -105,7 +105,7 @@ class ViewSpell extends Component<Props, State> {
         }
         concentration = spell.spell.concentration;
         if (spell.spell.level) {
-          level = spell.spell.level;
+          level = spell.spell.level.value;
         }
       }
     }

@@ -83,7 +83,7 @@ class CharacterAbilityDetails extends Component<Props, State> {
   render() {
     const return_me: any[] = [];
     const the_ability = this.props.ability.the_ability;
-    const level = this.state.level === -1 ? this.props.ability.level : this.state.level;
+    const level = this.state.level === -1 ? this.props.ability.level.value : this.state.level;
     return_me.push(
       <Grid item key="source" style={{ 
         lineHeight: "1.1",
@@ -187,8 +187,8 @@ class CharacterAbilityDetails extends Component<Props, State> {
     const the_ability = this.props.ability.the_ability;
     const level = this.state.level === -1 ? this.props.ability.level : this.state.level;
     if (the_ability && level > 0) { // and not at will and not ritual only
-      const slot_levels = Array.from(new Set(this.props.obj.slots.filter(o => o.level >= this.props.ability.level).map(o => o.level)));
-      const slots = this.props.obj.slots.filter(o => o.level === level);
+      const slot_levels = Array.from(new Set(this.props.obj.slots.filter(o => o.level.value >= this.props.ability.level.value).map(o => o.level)));
+      const slots = this.props.obj.slots.filter(o => o.level.value === level);
       if (slot_levels.length > 1) {
         return (
           <Grid container spacing={0} direction="row">
@@ -199,9 +199,9 @@ class CharacterAbilityDetails extends Component<Props, State> {
               <Grid item xs={4}>
                 <ButtonBox
                   name=" - "
-                  disabled={ level === Math.min(...slot_levels) }
+                  // disabled={ level === Math.min(...slot_levels) }
                   onClick={() => {
-                    this.setState({ level: Math.max(...slot_levels.filter(o => o < level)) });
+                    // this.setState({ level: Math.max(...slot_levels.filter(o => o < level)) });
                   }} 
                 />
               </Grid>
@@ -214,9 +214,9 @@ class CharacterAbilityDetails extends Component<Props, State> {
               <Grid item xs={4}>
                 <ButtonBox
                   name=" + "
-                  disabled={ level === Math.max(...slot_levels) }
+                  // disabled={ level === Math.max(...slot_levels) }
                   onClick={() => {
-                    this.setState({ level: Math.min(...slot_levels.filter(o => o > level)) });
+                    // this.setState({ level: Math.min(...slot_levels.filter(o => o > level)) });
                   }} 
                 />
               </Grid>
@@ -243,7 +243,7 @@ class CharacterAbilityDetails extends Component<Props, State> {
 
   renderAttacks() {
     const ability = this.props.ability;
-    const level = this.state.level === -1 ? this.props.ability.level : this.state.level;
+    const level = this.state.level === -1 ? this.props.ability.level.value : this.state.level;
     return (
       <Grid item key="attacks" container spacing={0} direction="row">
         { (ability.use_attack || ability.attack_string !== "--") &&
