@@ -16,13 +16,13 @@ import {
   Character, 
   CharacterBackground,
   CharacterRace,
-  CharacterLineage,
   EldritchInvocation,
   FeatureBase,
   WeaponKeyword,
   Spell,
   SpellSlotType,
-  SourceBook
+  SourceBook,
+  User
 } from "../../models";
 
 import StringBox from "../../components/input/StringBox";
@@ -44,6 +44,7 @@ import { CharacterUtilitiesClass } from "../../utilities/character_utilities_cla
 
 
 interface AppState {
+  loginUser: User | null;
   height: number;
   width: number;
 }
@@ -57,6 +58,7 @@ interface MatchParams {
 }
 
 const mapState = (state: RootState) => ({
+  loginUser: state.app.loginUser,
   height: state.app.height,
   width: state.app.width
 })
@@ -84,6 +86,7 @@ export interface State {
   eldritch_invocations: EldritchInvocation[] | null;
   source_books: SourceBook[] | null;
   loading: boolean;
+  logging_in: boolean;
 }
 
 class CharacterEdit extends Component<Props, State> {
@@ -102,7 +105,8 @@ class CharacterEdit extends Component<Props, State> {
       spell_slot_types: null,
       eldritch_invocations: null,
       source_books: null,
-      loading: false
+      loading: false,
+      logging_in: false
     };
     this.api = API.getInstance();
     this.char_util = CharacterUtilities.getInstance();
@@ -112,7 +116,26 @@ class CharacterEdit extends Component<Props, State> {
   char_util: CharacterUtilitiesClass;
 
   componentDidMount() {
-    this.load();
+    if (this.props.loginUser === null) {
+      const userObjStr = localStorage.getItem("loginUser");
+      if (!userObjStr) {
+        this.setState({ redirectTo: "/beyond" });
+      } else {
+        this.setState({ logging_in: true }, this.check_login);
+      }
+    } else {
+      this.load();
+    }
+  }
+
+  check_login() {
+    setTimeout(() => {
+      if (this.props.loginUser === null) {
+        this.check_login();
+      } else {
+        this.setState({ logging_in: false }, this.load);
+      }
+    }, 1000);
   }
 
   submit() {
@@ -124,6 +147,7 @@ class CharacterEdit extends Component<Props, State> {
           this.setState({ processing: false, redirectTo: "/beyond/character" });
         });
       } else {
+        obj.owner_id = this.props.loginUser ? this.props.loginUser._id : "No Login";
         this.api.createObject("character", obj).then((res: any) => {
           this.setState({ processing: false, redirectTo: "/beyond/character" });
         });
@@ -315,9 +339,8 @@ class CharacterEdit extends Component<Props, State> {
       return (
         <CharacterLineageInput 
           character={this.state.obj}
-          onChange={(changed: CharacterLineage) => {
-            const obj = this.state.obj;
-            obj.lineage = changed;
+          onChange={(changed: Character) => {
+            const obj = changed;
             this.char_util.recalcAll(obj);
             this.setState({ obj });
           }}

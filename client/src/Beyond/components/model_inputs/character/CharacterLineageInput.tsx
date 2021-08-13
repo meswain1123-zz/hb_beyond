@@ -4,16 +4,26 @@ import { connect, ConnectedProps } from 'react-redux';
 import {
   Grid, Button, Link, Tooltip
 } from "@material-ui/core";
+import {
+  Close
+} from "@material-ui/icons";
 
 import { 
-  // ModelBase,
-  Lineage,
+  Race, 
+  Subrace,
   Character,
-  CharacterLineage
+  CharacterLineage,
+  // CharacterFeature,
+  CharacterFeatureBase,
+  Lineage,
+  // FeatureBase,
+  // Feature,
 } from "../../../models";
 
 import StringBox from "../../input/StringBox";
+// import SelectStringBox from "../../input/SelectStringBox"; 
 import CharacterFeatureBasesInput from "./CharacterFeatureBases";
+import CharacterFeatureBaseOptionsInput from "./CharacterFeatureBaseOptions";
 
 import API from "../../../utilities/smart_api";
 import { APIClass } from "../../../utilities/smart_api_class";
@@ -40,32 +50,38 @@ type PropsFromRedux = ConnectedProps<typeof connector>
 
 type Props = PropsFromRedux & {
   character: Character;
-  onChange: (changed: CharacterLineage) => void;
+  onChange: (changed: Character) => void;
 }
 
 export interface State {
-  lineages: Lineage[] | null;
+  lineagees: Lineage[] | null;
+  races: Race[] | null;
+  subraces: Subrace[] | null;
   search_string: string;
   page_num: number;
   start_letter: string;
-  change_lineage: boolean;
+  new_lineage: boolean;
   loading: boolean;
-  expanded_feature_base_id: number;
-  custom_origins: boolean;
+  expanded_lineage_id: string;
+  expanded_feature_base_id: string;
+  optional: boolean | null;
 }
 
 class CharacterLineageInput extends Component<Props, State> {
   constructor(props: Props) {
     super(props);
     this.state = {
-      lineages: null,
+      lineagees: null,
+      races: null,
+      subraces: null,
       search_string: "",
       page_num: 0,
       start_letter: "",
-      change_lineage: false,
+      new_lineage: false,
       loading: false,
-      expanded_feature_base_id: -1,
-      custom_origins: false
+      expanded_lineage_id: "",
+      expanded_feature_base_id: "",
+      optional: false
     };
     this.api = API.getInstance();
   }
@@ -92,19 +108,20 @@ class CharacterLineageInput extends Component<Props, State> {
   load() {
     this.setState({ loading: true }, () => {
       this.api.getSetOfObjects(["lineage"]).then((res: any) => {
-        const lineages: Lineage[] = res.lineage;
         const character = this.props.character;
-
-        if (character.lineage.lineage_id && !character.lineage.lineage) {
-          const char_lineage = character.lineage;
-          const obj_finder = lineages.filter(o => o._id === char_lineage.lineage_id);
-          if (obj_finder.length === 1) {
-            const lineage = obj_finder[0];
-            char_lineage.connectLineage(lineage);
+        const lineagees: Lineage[] = res.lineage;
+        character.lineages.forEach(char_lineage => {
+          if (!char_lineage.lineage) {
+            const objFinder = lineagees.filter(o => o._id === char_lineage.lineage_id);
+            if (objFinder.length === 1) {
+              char_lineage.connectLineage(objFinder[0]);
+            }
           }
-        }
+        });
+        this.props.onChange(character);
         this.setState({ 
-          lineages,
+          expanded_lineage_id: (character.lineages.length === 1 ? character.lineages[0].lineage_id : ""),
+          lineagees, 
           loading: false 
         });
       });
@@ -112,12 +129,11 @@ class CharacterLineageInput extends Component<Props, State> {
   }
 
   render() {
-    let character_lineage = this.props.character.lineage;
-    if (this.state.loading || this.state.lineages === null) {
+    if (this.state.loading || this.state.lineagees === null) {
       return <span>Loading</span>;
-    } else if (!character_lineage || character_lineage.lineage_id === "" || this.state.change_lineage) {
+    } else if (this.props.character.lineages.length === 0 || this.state.new_lineage) {
       const page_size = 7;
-      const filtered: any[] = this.state.lineages ? this.state.lineages.filter(o => 
+      const filtered: any[] = this.state.lineagees ? this.state.lineagees.filter(o => 
         (this.state.start_letter === "" || 
           o.name.toUpperCase().startsWith(this.state.start_letter)) && 
         (this.state.search_string === "" || 
@@ -128,25 +144,13 @@ class CharacterLineageInput extends Component<Props, State> {
       const filtered_and_paged: any[] = filtered.slice(page_size * this.state.page_num, page_size * (this.state.page_num + 1));
       return (
         <Grid container spacing={1} direction="column">
-          { character_lineage && character_lineage.lineage && this.state.change_lineage && 
-            <Grid item>
-              { character_lineage.lineage.name } 
-              <Button 
-                fullWidth variant="contained" color="primary" 
-                onClick={ () => {
-                  this.setState({ change_lineage: false });
-                }}>
-                  Keep Lineage
-              </Button>
-            </Grid>
-          }
           <Grid item container spacing={1} direction="row">
             <Grid item xs={3}>
               <span className={"MuiTypography-root MuiListItemText-primary header"}>
                 Lineages
               </span>
             </Grid>
-            <Grid item xs={9}>
+            <Grid item xs={ this.state.new_lineage ? 6 : 9 }>
               <StringBox
                 name="Search"
                 value={`${this.state.search_string}`}
@@ -155,6 +159,16 @@ class CharacterLineageInput extends Component<Props, State> {
                 }}
               />
             </Grid>
+            { this.state.new_lineage && 
+              <Grid item xs={3}>
+                <Button variant="contained" color="primary"
+                  onClick={() => {
+                    this.setState({ new_lineage: false });
+                  }}>
+                  Cancel Add
+                </Button>
+              </Grid>
+            }
           </Grid>
           <Grid item>
             <Grid container spacing={1} direction="column">
@@ -171,67 +185,241 @@ class CharacterLineageInput extends Component<Props, State> {
           </Grid>
         </Grid>
       );
-    } else if (character_lineage.lineage) {
+    } else {
       return (
-        <Grid container spacing={1} direction="row">
-          <Grid item xs={6} className={"MuiTypography-root MuiListItemText-primary header"}>
-            { character_lineage.lineage && <span>{ character_lineage.lineage.name }</span> }
+        <Grid container spacing={1} direction="column">
+          <Grid item className={"MuiTypography-root MuiListItemText-primary header"}>
+            Character Level { this.props.character.character_level }
           </Grid>
-          <Grid item xs={6}>
-            <Button 
-              fullWidth variant="contained" color="primary" 
-              onClick={ () => {
-                this.setState({ change_lineage: true });
+          { this.renderCharLineages() }
+          <Grid item>
+            <Link href="#" 
+              onClick={(event: React.SyntheticEvent) => {
+                event.preventDefault();
+                this.setState({ new_lineage: true });
               }}>
-                Change Lineage
-            </Button>
+              + Add Another Lineage
+            </Link>
           </Grid>
-          { this.props.character.custom_origins && 
-            <Grid item xs={12} container spacing={0} direction="row">
-              <Grid item xs={6} 
-                style={{ cursor: "pointer" }} 
-                onClick={() => {
-                  this.setState({ custom_origins: false });
-                }}>
-                Racial Features
-              </Grid>
-              <Grid item xs={6} 
-                style={{ cursor: "pointer" }} 
-                onClick={() => {
-                  this.setState({ custom_origins: true });
-                }}>
-                Origin Manager
-              </Grid>
-            </Grid>
-          }
-          <CharacterFeatureBasesInput 
-            character={this.props.character}
-            features={character_lineage.features}
-            onChange={() => {
-              this.props.onChange(character_lineage);
-            }}
-          />
         </Grid>
       );
-    } else return null;
+    }
+  }
+
+  renderCharLineages() {
+    return (
+      <Grid item container spacing={1} direction="column">
+        { this.props.character.lineages.map((char_lineage, key) => {
+          if (char_lineage.lineage) {
+            return (
+              <Grid item key={key} container spacing={1} direction="row">
+                <Grid item xs={9}>
+                  <span className={"MuiTypography-root MuiListItemText-primary header"}>
+                    { char_lineage.lineage.name }
+                  </span>
+                </Grid>
+                <Grid item xs={3}>
+                    <Close style={{ cursor: "pointer" }}
+                      onClick={() => {
+                        const character = this.props.character;
+                        character.lineages = character.lineages.filter(o => o.lineage_id !== char_lineage.lineage_id);
+                        character.spells = character.spells.filter(o => o.source_type !== "Lineage" || o.source_id !== char_lineage.lineage_id);
+                        this.props.onChange(character);
+                        this.setState({ new_lineage: false });
+                      }} 
+                    />
+                </Grid>
+                <Grid item xs={12}>
+                  <Link href="#" 
+                    onClick={(event: React.SyntheticEvent) => {
+                      event.preventDefault();
+                      this.setState({ expanded_lineage_id: (this.state.expanded_lineage_id === char_lineage.lineage_id ? "" : char_lineage.lineage_id) });
+                    }}>
+                    { this.state.expanded_lineage_id === char_lineage.lineage_id ? "Hide" : "Show" } Features
+                  </Link>
+                </Grid>
+                { this.props.character.optional_features ? 
+                  <Grid item xs={12} container spacing={0} direction="row">
+                    <Grid item xs={6}>
+                      <Link href="#" 
+                        onClick={(event: React.SyntheticEvent) => {
+                          event.preventDefault();
+                          this.setState({ 
+                            expanded_lineage_id: char_lineage.lineage_id,
+                            optional: (this.state.optional === false ? null : false)
+                          });
+                        }}>
+                        Features
+                      </Link>
+                    </Grid>
+                    <Grid item xs={6}>
+                      <Link href="#" 
+                        onClick={(event: React.SyntheticEvent) => {
+                          event.preventDefault();
+                          this.setState({ 
+                            expanded_lineage_id: char_lineage.lineage_id,
+                            optional: (this.state.optional === true ? null : true)
+                          });
+                        }}>
+                        Optional Features
+                      </Link>
+                    </Grid>
+                  </Grid>
+                :
+                  <Grid item xs={12}>
+                    <Link href="#" 
+                      onClick={(event: React.SyntheticEvent) => {
+                        event.preventDefault();
+                        this.setState({ 
+                          expanded_lineage_id: char_lineage.lineage_id,
+                          optional: (this.state.optional === false ? null : false)
+                        });
+                      }}>
+                      Features
+                    </Link>
+                  </Grid>
+                }
+                { this.renderCharLineageFeatures(char_lineage) }
+              </Grid>
+            );
+          } else {
+            return (<span key={key}></span>);
+          }
+        })}
+      </Grid>
+    )
+  }
+
+  renderCharLineageFeatures(char_lineage: CharacterLineage) {
+    if (char_lineage.lineage && this.state.expanded_lineage_id === char_lineage.lineage_id && this.state.optional !== null) {
+      if (this.state.optional) {
+        return (
+          <Grid item xs={12} container spacing={1} direction="column">
+            <Grid item>
+              Optional Features
+            </Grid>
+            <CharacterFeatureBaseOptionsInput 
+              character={this.props.character}
+              features={ char_lineage.lineage.features }
+              onChange={(true_id: string, value: boolean) => {
+                const character = this.props.character;
+                if (char_lineage.lineage) {
+                  let feature_finder = char_lineage.lineage.features.filter(o => o.true_id === true_id);
+                  if (feature_finder.length === 1) {
+                    const feature = feature_finder[0];
+                    if (value) {
+                      if (!this.props.character.optional_feature_base_ids.includes(feature.true_id)) {
+                        character.optional_feature_base_ids.push(feature.true_id);
+                        const character_feature = new CharacterFeatureBase();
+                        character_feature.copyFeatureBase(feature);
+                        char_lineage.features.push(character_feature);
+                        if (feature.replaces_feature_base_id !== "") {
+                          char_lineage.features = char_lineage.features.filter(o => o.true_id !== feature.replaces_feature_base_id);
+                        }
+                      }
+                    } else {
+                      if (this.props.character.optional_feature_base_ids.includes(feature.true_id)) {
+                        character.optional_feature_base_ids = character.optional_feature_base_ids.filter(o => o !== feature.true_id);
+                        char_lineage.features = char_lineage.features.filter(o => o.true_id !== feature.true_id);
+                        if (feature.replaces_feature_base_id !== "") {
+                          let feature_finder2 = char_lineage.lineage.features.filter(o => o.true_id === feature.replaces_feature_base_id);
+                          if (feature_finder2.length === 1) {
+                            const feature2 = feature_finder2[0];
+                            const character_feature = new CharacterFeatureBase();
+                            character_feature.copyFeatureBase(feature2);
+                            char_lineage.features.push(character_feature);
+                          }
+                        }
+                      }
+                    }
+                  }
+                  this.props.onChange(character);
+                }
+              }}
+            />
+          </Grid>
+        );
+      } else {
+        const features = char_lineage.features.filter(o => o.feature_base && o.feature_base.level <= this.props.character.character_level);
+        return (
+          <CharacterFeatureBasesInput 
+            character={this.props.character}
+            features={features.sort((a, b) => (a.feature_base && b.feature_base && a.feature_base.level > b.feature_base.level) ? 1 : -1)}
+            onChange={() => {
+              this.props.onChange(this.props.character);
+            }}
+          />
+        );
+      }
+    }
+    return null;
   }
 
   renderLineage(lineage: Lineage, key: number) {
+    let disabled = false;
+    let reasons = "";
+    if (this.state.new_lineage) {
+      // Check if they already have the lineage
+      const character = this.props.character;
+      if (character.lineages.filter(o => o.lineage_id === lineage._id).length === 1) {
+        disabled = true;
+      } else {
+        // TODO: When I make race specific lineages, disable them here when necessary
+        // if (reason2 !== "") {
+        //   reason2 += ` from ${lineage.name}\n`;
+        //   reasons += reason2;
+        // }
+      }
+    }
     return (
       <Grid key={key} item container spacing={1} direction="row">
         <Grid item xs={3}>
-          <Tooltip title={`Select ${lineage.name}`}>
+          { disabled ? 
             <Button 
               fullWidth variant="contained" color="primary" 
+              disabled={disabled}
               onClick={ () => {
-                const changed = new CharacterLineage();
-                changed.copyLineage(lineage);
-                this.props.onChange(changed);
-                this.setState({ change_lineage: false });
+                const character = this.props.character;
+                const char_lineage = new CharacterLineage();
+                char_lineage.copyLineage(lineage);
+                character.lineages.push(char_lineage);
+                
+                this.props.onChange(character);
+                this.setState({ new_lineage: false, expanded_lineage_id: lineage._id });
               }}>
               {lineage.name}
+              <div 
+                style={{
+                  fontSize: "8px",
+                  color: "red"
+                }}> 
+                { disabled ? reasons : "" }
+              </div>
             </Button>
-          </Tooltip>
+            : 
+            <Tooltip title={`Select ${lineage.name}`}>
+              <Button 
+                fullWidth variant="contained" color="primary" 
+                onClick={ () => {
+                  const character = this.props.character;
+                  const char_lineage = new CharacterLineage();
+                  char_lineage.copyLineage(lineage);
+                  character.lineages.push(char_lineage);
+                  
+                  this.props.onChange(character);
+                  this.setState({ new_lineage: false, expanded_lineage_id: lineage._id });
+                }}>
+                {lineage.name}
+                <div 
+                  style={{
+                    fontSize: "8px",
+                    color: "red"
+                  }}> 
+                  { disabled ? reasons : "" }
+                </div>
+              </Button>
+            </Tooltip>
+          }
         </Grid>
         <Grid item xs={9}>
           { this.renderDescription(lineage) }

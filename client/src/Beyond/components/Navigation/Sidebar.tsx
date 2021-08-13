@@ -10,6 +10,7 @@ import {
 } from "@material-ui/core";
 import { NavLink } from "react-router-dom";
 import { connect, ConnectedProps } from 'react-redux';
+import { User } from "../../models";
 
 import Home from "@material-ui/icons/Home";
 
@@ -20,6 +21,7 @@ import { APIClass } from "../../utilities/smart_api_class";
 
 
 interface AppState {
+  loginUser: User | null;
 }
 
 interface RootState {
@@ -27,6 +29,7 @@ interface RootState {
 }
 
 const mapState = (state: RootState) => ({
+  loginUser: state.app.loginUser
 })
 
 const mapDispatch = {
@@ -66,26 +69,52 @@ class Sidebar extends Component<Props, State> {
     );
   }
 
-  links() {
-    return (
-      menuRoutes.admin.sort((a, b) => { return a.name.localeCompare(b.name) }).map((prop, key) => 
-        <ListItem key={key} className="curvedButton">
-          <NavLink to={prop.path} className="MyButton" activeClassName="active">
-            <ListItem button>
-              {/* { prop.icon === undefined ?
-                <span></span>
-              : typeof prop.icon === "string" ? (
-                <Icon className="marginLeft">{prop.icon}</Icon>
-              ) : (
-                <prop.icon className="marginLeft" />
-              )}
-              &nbsp; */}
-              <ListItemText primary={prop.name} className="marginLeft" />
-            </ListItem>
-          </NavLink>
-        </ListItem>
-      )
-    );
+  user_links() {
+    if (this.props.loginUser) {
+      return (
+        menuRoutes.user.sort((a, b) => { return a.name.localeCompare(b.name) }).map((prop, key) => 
+          <ListItem key={key} className="curvedButton">
+            <NavLink to={prop.path} className="MyButton" activeClassName="active">
+              <ListItem button>
+                {/* { prop.icon === undefined ?
+                  <span></span>
+                : typeof prop.icon === "string" ? (
+                  <Icon className="marginLeft">{prop.icon}</Icon>
+                ) : (
+                  <prop.icon className="marginLeft" />
+                )}
+                &nbsp; */}
+                <ListItemText primary={prop.name} className="marginLeft" />
+              </ListItem>
+            </NavLink>
+          </ListItem>
+        )
+      );
+    } else return null;
+  }
+
+  admin_links() {
+    if (this.props.loginUser && this.props.loginUser.admin) {
+      return (
+        menuRoutes.admin.sort((a, b) => { return a.name.localeCompare(b.name) }).map((prop, key) => 
+          <ListItem key={key} className="curvedButton">
+            <NavLink to={prop.path} className="MyButton" activeClassName="active">
+              <ListItem button>
+                {/* { prop.icon === undefined ?
+                  <span></span>
+                : typeof prop.icon === "string" ? (
+                  <Icon className="marginLeft">{prop.icon}</Icon>
+                ) : (
+                  <prop.icon className="marginLeft" />
+                )}
+                &nbsp; */}
+                <ListItemText primary={prop.name} className="marginLeft" />
+              </ListItem>
+            </NavLink>
+          </ListItem>
+        )
+      );
+    } else return null;
   }
 
   render() {
@@ -102,7 +131,8 @@ class Sidebar extends Component<Props, State> {
           </NavLink>
         </ListItem>
         <Divider light />
-        {this.links()}
+        {this.user_links()}
+        {this.admin_links()}
       </List>
     );
   }

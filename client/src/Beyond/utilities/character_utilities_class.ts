@@ -726,7 +726,9 @@ export class CharacterUtilitiesClass {
         if (me.race.subrace) {
           me.race.subrace.features.forEach(fb => { processCharacterFeatureBase(me, fb, "Subrace", me.race.subrace ? me.race.subrace.subrace_id : "", me.race.subrace ? me.race.subrace.name : ""); });
         }
-        me.lineage.features.forEach(fb => { processCharacterFeatureBase(me, fb, "Lineage", me.lineage.lineage_id, me.lineage.name); });
+        me.lineages.forEach(l => {
+          l.features.forEach(fb => { processCharacterFeatureBase(me, fb, "Lineage", l.lineage_id, l.name); });
+        });
         me.background.features.forEach(fb => { processCharacterFeatureBase(me, fb, "Background", me.background.background_id, me.background.background ? me.background.background.name : ""); });
         me.classes.forEach(char_class => {
           char_class.class_features.forEach(fb => { processCharacterFeatureBase(me, fb, "Class", char_class.game_class_id, char_class.name); });

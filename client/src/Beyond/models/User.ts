@@ -7,6 +7,7 @@ export class User extends ModelBase {
   username: string;
   password: string;
   dm: boolean;
+  admin: boolean;
 
   constructor(obj?: any) {
     super(obj);
@@ -14,6 +15,7 @@ export class User extends ModelBase {
     this.username = obj ? obj.username : "";
     this.password = obj ? obj.password : "";
     this.dm = obj ? obj.dm : false;
+    this.admin = obj ? obj.admin : false;
   }
 
   toDBObj = () => {
@@ -26,7 +28,8 @@ export class User extends ModelBase {
       email: this.email,
       username: this.username,
       password: this.password,
-      dm: this.dm
+      dm: this.dm,
+      admin: this.admin
     };
   }
 
@@ -42,5 +45,6 @@ export class User extends ModelBase {
     this.username = copyMe.username;
     this.password = copyMe.password;
     this.dm = copyMe.dm;
+    this.admin = copyMe.admin;
   }
 }

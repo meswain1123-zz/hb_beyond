@@ -2,6 +2,7 @@
 const initialState = {
   loginOpen: false,
   menuOpen: true,
+  loginUser: null,
   height: 0,
   width: 0,
   item_type: "ALL",

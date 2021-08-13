@@ -68,14 +68,11 @@ class HomePage extends Component<Props, State> {
             Other players will be able to create and modify their 
             characters, as well as join campaigns.
           </p>
-          <p>
-            <Grid container spacing={1} direction="column">
-              <Grid item>
-                To do:
-              </Grid>
+          <Grid container spacing={1} direction="column">
+            <Grid item>
+              To do:
             </Grid>
-            
-          </p>
+          </Grid>
         </div>
       );
     }

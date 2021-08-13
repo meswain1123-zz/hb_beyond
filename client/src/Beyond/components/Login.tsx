@@ -13,8 +13,8 @@ import { APIClass } from "../utilities/smart_api_class";
 
 
 interface AppState {
-  loginUser: User | null,
-  loginOpen: boolean
+  loginUser: User | null;
+  loginOpen: boolean;
 }
 
 interface RootState {
@@ -41,7 +41,10 @@ type Props = PropsFromRedux & {
 export interface State {
   email: string;
   password: string;
+  username: string;
+  confirm_password: string;
   processing: boolean;
+  registering: boolean;
 }
 class Login extends Component<Props, State> {
   constructor(props: Props) {
@@ -49,7 +52,10 @@ class Login extends Component<Props, State> {
     this.state = {
       email: "",
       password: "",
-      processing: false
+      username: "",
+      confirm_password: "",
+      processing: false,
+      registering: false
     };
     this.api = API.getInstance();
   }
@@ -70,27 +76,68 @@ class Login extends Component<Props, State> {
     this.setState({
       processing: true
     }, () => {
-      // const userObj = {
-      //   email: this.state.email,
-      //   password: this.state.password
-      // };
-      // this.api.login(userObj).then((res: any) => {
-      //   if (res !== undefined && res.error === undefined && !res.message) {
-      //     const newUser: User = new User(res);
-      //     this.props.login(newUser);
-      //     this.setState({ processing: false }, () => {
-      //       this.props.toggleLogin();
-      //     });
-      //   } else {
-      //     console.log(res);
-      //   }
-      // });
+      if (this.state.registering) {
+        const userObj = {
+          username: this.state.username,
+          email: this.state.email,
+          password: this.state.password
+        };
+        this.api.register(userObj).then((res: any) => {
+          if (res !== undefined && res.error === undefined) {
+            this.registerMode();
+          } else {
+            console.log(res);
+          }
+        });
+      } else {
+        const userObj = {
+          email: this.state.email,
+          password: this.state.password
+        };
+        this.api.login(userObj, true).then((res: any) => {
+          if (res !== undefined && res.error === undefined && !res.message) {
+            const newUser: User = new User(res);
+            this.props.login(newUser);
+            this.setState({ processing: false }, () => {
+              this.props.toggleLogin();
+            });
+          } else {
+            console.log(res);
+          }
+        });
+      }
+    });
+  }
+
+  registerMode = () => {
+    this.setState({
+      registering: !this.state.registering
     });
   }
 
   renderMain = () => {
     return (
       <Grid key="main" container spacing={1} direction="column">
+        { this.state.registering && 
+          <Grid item>
+            <FormControl variant="outlined" fullWidth>
+              <InputLabel htmlFor="text_field_login_username">Username</InputLabel>
+                <OutlinedInput
+                  id={`text_field_login_username`}
+                  name={`text_field_login_username`}
+                  type="text"
+                  autoComplete="Off"
+                  // error={this.state.error !== ""}
+                  value={this.state.username}
+                  onChange={e => {
+                    this.setState({ username: e.target.value });
+                  }}
+                  labelWidth={70}
+                  fullWidth
+                />
+            </FormControl>
+          </Grid>
+        }
         <Grid item>
           <FormControl variant="outlined" fullWidth>
             <InputLabel htmlFor="text_field_login_email">Email</InputLabel>
@@ -105,7 +152,7 @@ class Login extends Component<Props, State> {
                   this.setState({ email: e.target.value });
                 }}
                 onKeyDown={e => {
-                  if (e.key === "Enter" && !this.state.processing && this.state.email !== "" && this.state.password !== "") {
+                  if (e.key === "Enter" && !this.state.registering && !this.state.processing && this.state.email !== "" && this.state.password !== "") {
                     this.login();
                   }
                 }}
@@ -128,7 +175,7 @@ class Login extends Component<Props, State> {
                   this.setState({ password: e.target.value });
                 }}
                 onKeyDown={e => {
-                  if (e.key === "Enter" && !this.state.processing && this.state.email !== "" && this.state.password !== "") {
+                  if (e.key === "Enter" && !this.state.registering && !this.state.processing && this.state.email !== "" && this.state.password !== "") {
                     this.login();
                   }
                 }}
@@ -137,11 +184,38 @@ class Login extends Component<Props, State> {
               />
           </FormControl>
         </Grid>
+        { this.state.registering && 
+          <Grid item>
+            <FormControl variant="outlined" fullWidth>
+            <InputLabel htmlFor="text_field_login_confirm_password">Confirm Password</InputLabel>
+              <OutlinedInput
+                id={`text_field_login_confirm_password`}
+                name={`text_field_login_confirm_password`}
+                type="password"
+                autoComplete="Off"
+                // error={this.state.error !== ""}
+                value={this.state.confirm_password}
+                onChange={e => {
+                  this.setState({ confirm_password: e.target.value });
+                }}
+                labelWidth={140}
+                fullWidth
+              />
+          </FormControl>
+          </Grid>
+        }
         <Grid item>
-          <Button disabled={ this.state.processing || this.state.email === "" || this.state.password === "" } 
+          <Button disabled={ this.state.processing || this.state.email === "" || this.state.password === "" || (this.state.registering && (this.state.username === "" || this.state.password !== this.state.confirm_password)) } 
             onClick={this.login} 
             variant="contained" color="primary">
             Submit
+          </Button>
+        </Grid>
+        <Grid item>
+          <Button 
+            onClick={this.registerMode} 
+            variant="contained" color="primary">
+            { this.state.registering ? "Cancel" : "Register" }
           </Button>
         </Grid>
       </Grid>

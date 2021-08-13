@@ -36,6 +36,7 @@ export class Character extends ModelBase {
   static data_type: string = "character";
   static always_store: boolean = false;
   connected: boolean;
+  owner_id: string;
 
   source_books: string[];
   allow_homebrew: boolean;
@@ -44,7 +45,7 @@ export class Character extends ModelBase {
 
   image_url: string;
   race: CharacterRace;
-  lineage: CharacterLineage;
+  lineages: CharacterLineage[];
   classes: CharacterClass[];
   background: CharacterBackground;
   base_ability_scores: AbilityScores;
@@ -155,6 +156,7 @@ export class Character extends ModelBase {
   constructor(obj?: any) {
     super(obj);
 
+    this.owner_id = obj && obj.owner_id ? obj.owner_id : "";
     this.source_books = obj && obj.source_books ? obj.source_books : [];
     this.allow_homebrew = obj && obj.allow_homebrew ? obj.allow_homebrew : false;
     this.custom_origins = obj && obj.custom_origins ? obj.custom_origins : false;
@@ -164,7 +166,12 @@ export class Character extends ModelBase {
     this.image_url = obj && obj.image_url ? obj.image_url : "";
     this.inspiration = obj && obj.inspiration ? obj.inspiration : 0;
     this.race = obj ? new CharacterRace(obj.race) : new CharacterRace();
-    this.lineage = obj && obj.lineage ? new CharacterLineage(obj.lineage) : new CharacterLineage();
+    this.lineages = [];
+    if (obj && obj.lineages && obj.lineages.length > 0) {
+      for (let i = 0; i < obj.lineages.length; i++) {
+        this.lineages.push(new CharacterLineage(obj.lineages[i]));
+      }
+    }
     this.classes = [];
     if (obj && obj.classes && obj.classes.length > 0) {
       for (let i = 0; i < obj.classes.length; i++) {
@@ -381,6 +388,10 @@ export class Character extends ModelBase {
   }
 
   toDBObj = () => {
+    const lineages: any[] = [];
+    for (let i = 0; i < this.lineages.length; i++) {
+      lineages.push(this.lineages[i].toDBObj());
+    }
     const classes: any[] = [];
     for (let i = 0; i < this.classes.length; i++) {
       classes.push(this.classes[i].toDBObj());
@@ -443,6 +454,7 @@ export class Character extends ModelBase {
     }
     return {
       _id: this._id,
+      owner_id: this.owner_id,
       name: this.name,
       description: this.description,
       source_books: this.source_books,
@@ -454,7 +466,7 @@ export class Character extends ModelBase {
       source_id: this.source_id,
       image_url: this.image_url,
       race: this.race.toDBObj(),
-      lineage: this.lineage.toDBObj(),
+      lineages,
       classes,
       background: this.background.toDBObj(),
       base_ability_scores: this.base_ability_scores.toDBObj(),
@@ -520,6 +532,7 @@ export class Character extends ModelBase {
 
   copy(copyMe: Character): void {
     this._id = copyMe._id;
+    this.owner_id = copyMe.owner_id;
     this.connected = copyMe.connected;
     this.source_books = copyMe.source_books;
     this.allow_homebrew = copyMe.allow_homebrew;
@@ -527,7 +540,7 @@ export class Character extends ModelBase {
     this.optional_features = copyMe.optional_features;
     this.optional_feature_base_ids = copyMe.optional_feature_base_ids;
     this.race = copyMe.race;
-    this.lineage = copyMe.lineage;
+    this.lineages = copyMe.lineages;
     this.classes = copyMe.classes;
     this.background = copyMe.background;
     this.base_ability_scores = copyMe.base_ability_scores;

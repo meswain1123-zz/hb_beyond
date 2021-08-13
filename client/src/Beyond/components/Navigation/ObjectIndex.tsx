@@ -3,7 +3,8 @@ import { connect, ConnectedProps } from 'react-redux';
 import { Redirect } from "react-router-dom";
 import {
   Edit,
-  FileCopy
+  FileCopy,
+  DeleteForever
 } from "@material-ui/icons";
 import {
   Grid, 
@@ -173,7 +174,19 @@ class ObjectIndex extends Component<Props, State> {
                     </Fab>
                   </Tooltip> 
                 </Grid>
-                <Grid item xs={8}>
+                <Grid item xs={1}>
+                  <Tooltip title={`Delete ${o.name}`}>
+                    <Fab size="small" color="primary" style={{marginLeft: "8px"}}
+                      onClick={ () => {
+                        this.api.deleteObject(this.props.data_type, o).then((res: any) => {
+                          this.setState({ });
+                        });
+                      }}>
+                      <DeleteForever/>
+                    </Fab>
+                  </Tooltip> 
+                </Grid>
+                <Grid item xs={7}>
                   <Tooltip title={o.description}>
                     <div style={this.descriptionStyle()}>
                       { o.description }

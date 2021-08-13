@@ -308,17 +308,17 @@ export class APIClass {
           await this.connectFeatureBase(char.race.features[i]);
         }
       }
-      if (!char.lineage.lineage) {
-        if (!this.smart_hash.lineage) {
-          await this.getObjects("lineage");
+      if (!this.smart_hash.lineage) {
+        await this.getObjects("lineage");
+      }
+      for (let k = 0; k < char.lineages.length; ++k) {
+        const l = char.lineages[k];
+        const lineage_finder = this.smart_hash.lineage.filter(o => o._id === l.lineage_id);
+        if (lineage_finder.length === 1) {
+          l.connectLineage(lineage_finder[0] as Lineage);
         }
-        const obj_finder = this.smart_hash.lineage.filter(o => o._id === char.lineage.lineage_id);
-        if (obj_finder.length === 1) {
-          const lineage = obj_finder[0];
-          char.lineage.connectLineage(lineage as Lineage);
-        }
-        for (let i = 0; i < char.lineage.features.length; ++i) {
-          await this.connectFeatureBase(char.lineage.features[i]);
+        for (let i = 0; i < l.features.length; ++i) {
+          await this.connectFeatureBase(l.features[i]);
         }
       }
       if (!char.background.background) {

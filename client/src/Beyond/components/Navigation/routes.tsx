@@ -60,18 +60,8 @@ const menuRoutes = {
       
     },
     {
-      path: "/beyond/campaign",
-      name: "Campaigns",
-      
-    },
-    {
       path: "/beyond/creature",
       name: "Creatures",
-      
-    },
-    {
-      path: "/beyond/character",
-      name: "Characters",
       
     },
     {
@@ -164,6 +154,20 @@ const menuRoutes = {
       name: "Attributions",
       
     }
+  ],
+  user: [
+    {
+      path: "/beyond/campaign",
+      name: "My Campaigns",
+    },
+    {
+      path: "/beyond/character",
+      name: "My Characters",
+    },
+    {
+      path: "/beyond/encounter",
+      name: "My Encounters",
+    },
   ]
 };
 

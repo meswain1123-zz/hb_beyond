@@ -12,11 +12,15 @@ import {
   Grid, 
   Box
 } from "@material-ui/core";
+import { User } from "./models";
 import { Helmet } from 'react-helmet';
 import "./assets/css/quill.snow.css";
+import API from "./utilities/smart_api";
+import { APIClass } from "./utilities/smart_api_class";
 
 interface AppState {
-  menuOpen: boolean
+  loginUser: User | null;
+  menuOpen: boolean;
 }
 
 interface RootState {
@@ -24,10 +28,12 @@ interface RootState {
 }
 
 const mapState = (state: RootState) => ({
+  loginUser: state.app.loginUser,
   menuOpen: state.app.menuOpen
 })
 
 const mapDispatch = {
+  login: (user: User) => ({ type: 'SET', dataType: 'loginUser', payload: user }),
   toggleMenu: () => ({ type: 'TOGGLE_MENU' }),
   setHeight: (height: number) => ({ type: 'SET', dataType: 'height', payload: height }),
   setWidth: (width: number) => ({ type: 'SET', dataType: 'width', payload: width })
@@ -55,11 +61,29 @@ class AppLayout extends Component<Props, State> {
       innerWidth: 0,
       marginLeft: 220
     };
+    this.api = API.getInstance();
   }
+
+  api: APIClass;
 
   props: any;
 
   componentDidMount() {
+    if (!this.props.loginUser) {
+      const userObjStr = localStorage.getItem("loginUser");
+      if (userObjStr) {
+        const userObj = JSON.parse(userObjStr);
+        const user = userObj.body;
+        this.api.login(user, true).then((res: any) => {
+          if (res !== undefined && res.error === undefined && !res.message) {
+            const newUser: User = new User(res);
+            this.props.login(newUser);
+          } else {
+            console.log(res);
+          }
+        });
+      }
+    }
     this.updateDimensions();
     window.addEventListener("resize", this.updateDimensions.bind(this));
   }
