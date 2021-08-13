@@ -20,7 +20,6 @@ router
         res.send(user);
       }
     }
-    console.log(req);
     db.getUserByLogin(gotUser, req.body.email, req.body.password);
   })
   .post('/register', function (req, res) {

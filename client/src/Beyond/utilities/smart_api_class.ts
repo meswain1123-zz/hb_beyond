@@ -321,6 +321,12 @@ export class APIClass {
           await this.connectFeatureBase(l.features[i]);
         }
       }
+      if (char.campaign_id !== "" && !char.campaign) {
+        const campaign = await this.getFullObject("campaign", char.campaign_id);
+        if (campaign instanceof Campaign) {
+          char.campaign = campaign as Campaign;
+        }
+      }
       if (!char.background.background) {
         if (!this.smart_hash.background) {
           await this.getObjects("background");

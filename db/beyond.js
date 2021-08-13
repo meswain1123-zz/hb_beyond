@@ -332,7 +332,6 @@ function fixFeatures() {
       if (pos < objs.length) {
         const obj2 = objs[pos];
         obj2.features.forEach(fb => {
-          console.log(fb);
           fb.features.forEach(f => {
             f.true_id = uuid.v1().toString();
           });
@@ -345,7 +344,6 @@ function fixFeatures() {
     }
     const obj = objs[pos];
     obj.features.forEach(fb => {
-      console.log(fb);
       fb.features.forEach(f => {
         f.true_id = uuid.v1().toString();
       });

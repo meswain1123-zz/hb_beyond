@@ -348,8 +348,8 @@ class CharacterEdit extends Component<Props, State> {
       );
     } else {
       return (
-        <Grid container spacing={1} direction="column">
-          <Grid item>
+        <Grid container spacing={1} direction="row">
+          <Grid item xs={12}>
             <StringBox 
               value={this.state.obj.name} 
               message={this.state.obj.name.length > 0 ? "" : "Name Invalid"} 
@@ -361,7 +361,7 @@ class CharacterEdit extends Component<Props, State> {
               }}
             />
           </Grid>
-          <Grid item>
+          <Grid item xs={4}>
             <ToggleButtonBox 
               name="Custom Origins"
               value={this.state.obj.custom_origins} 
@@ -372,7 +372,7 @@ class CharacterEdit extends Component<Props, State> {
               }}
             />
           </Grid>
-          <Grid item>
+          <Grid item xs={4}>
             <ToggleButtonBox 
               name="Optional Features"
               value={this.state.obj.optional_features} 
@@ -383,7 +383,7 @@ class CharacterEdit extends Component<Props, State> {
               }}
             />
           </Grid>
-          <Grid item>
+          <Grid item xs={4}>
             <ToggleButtonBox 
               name="Homebrew Content"
               value={this.state.obj.allow_homebrew} 
@@ -396,7 +396,7 @@ class CharacterEdit extends Component<Props, State> {
           </Grid>
           { this.state.source_books && this.state.source_books.map((book, key) => {
             return (
-              <Grid item key={key}>
+              <Grid item xs={4} key={key}>
                 <ToggleButtonBox 
                   name={`${book.abbreviation} Content`}
                   value={this.state.obj.source_books.includes(book._id)} 

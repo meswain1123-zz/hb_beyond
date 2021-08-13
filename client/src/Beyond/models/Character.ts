@@ -28,7 +28,8 @@ import {
   AbilityEffect,
   CharacterSpecialSpell,
   CharacterLineage,
-  CharacterAction
+  CharacterAction,
+  Campaign
 } from ".";
 
 
@@ -42,6 +43,9 @@ export class Character extends ModelBase {
   allow_homebrew: boolean;
   custom_origins: boolean;
   optional_features: boolean;
+
+  campaign_id: string;
+  campaign: Campaign | null;
 
   image_url: string;
   race: CharacterRace;
@@ -156,6 +160,8 @@ export class Character extends ModelBase {
   constructor(obj?: any) {
     super(obj);
 
+    this.campaign_id = obj && obj.campaign_id ? obj.campaign_id : "";
+    this.campaign = null;
     this.owner_id = obj && obj.owner_id ? obj.owner_id : "";
     this.source_books = obj && obj.source_books ? obj.source_books : [];
     this.allow_homebrew = obj && obj.allow_homebrew ? obj.allow_homebrew : false;
@@ -455,6 +461,7 @@ export class Character extends ModelBase {
     return {
       _id: this._id,
       owner_id: this.owner_id,
+      campaign_id: this.campaign_id,
       name: this.name,
       description: this.description,
       source_books: this.source_books,
@@ -533,6 +540,8 @@ export class Character extends ModelBase {
   copy(copyMe: Character): void {
     this._id = copyMe._id;
     this.owner_id = copyMe.owner_id;
+    this.campaign_id = copyMe.campaign_id;
+    this.campaign = copyMe.campaign;
     this.connected = copyMe.connected;
     this.source_books = copyMe.source_books;
     this.allow_homebrew = copyMe.allow_homebrew;
@@ -729,5 +738,10 @@ export class Character extends ModelBase {
         resource.created += amount;
       }
     }
+  }
+
+  connect_campaign(campaign: Campaign) {
+    this.campaign_id = campaign._id;
+    this.campaign = campaign;
   }
 }
