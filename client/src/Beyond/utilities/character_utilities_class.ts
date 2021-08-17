@@ -7,6 +7,7 @@ import {
   ArmorType,
   Bonus,
   BonusSpells,
+  Campaign,
   Character,
   CharacterAbility,
   CharacterASIBaseFeature,
@@ -18,6 +19,7 @@ import {
   CharacterItem,
   CharacterLanguageFeature,
   CharacterPactBoon,
+  CharacterRace,
   CharacterResource,
   CharacterSense,
   CharacterSlot,
@@ -51,7 +53,8 @@ import {
   CharacterSpellBook,
   CharacterAction,
   SlotLevel,
-  Ability
+  Ability,
+  CharacterBackground
 } from "../models";
 
 import API from "./smart_api";
@@ -386,7 +389,7 @@ export class CharacterUtilitiesClass {
     return attacks;
   }
 
-  recalcAll(char: Character): void {
+  recalcAll(char: Character, campaign: Campaign | null = null): void {
     if (this.armor_types && this.conditions && this.spells && this.spell_slot_types && this.weapon_keywords && this.eldritch_invocations && this.fighting_styles) {
       const all_armor_types = this.armor_types;
       const all_spells = this.spells;
@@ -442,6 +445,13 @@ export class CharacterUtilitiesClass {
       const saving_throw_bonuses: Bonus[] = [];
       const check_bonuses: Bonus[] = [];
       const rerolls: Reroll[] = [];
+
+      if (campaign) {
+        // First make sure that the options match.
+        // Then enforce the options on:
+        // race, subrace, lineages, classes, subclasses, 
+        // items, and spells
+      }
 
       let new_character_level = 0;
       char.classes.forEach(char_class => {
@@ -1955,6 +1965,133 @@ export class CharacterUtilitiesClass {
       // console.log(char.special_spells);
       // console.log(actions);
       char.actions = actions;
+    }
+  }
+
+  enforce_options(char: Character, campaign: Campaign | null = null): void {
+    this.recalcAll(char, null);
+    let i = 0;
+    if (campaign) {
+      char.allow_homebrew = campaign.allow_homebrew;
+      char.custom_origins = campaign.custom_origins;
+      char.optional_features = campaign.optional_features;
+      char.source_books = campaign.source_books;
+
+      if (campaign.blocked_races.includes(char.race.race_id)) {
+        char.spells = char.spells.filter(o => o.source_type !== "Race" || o.source_id !== char.race.race_id);
+        char.race = new CharacterRace();
+      }
+      while (i < char.classes.length) {
+        const char_class = char.classes[i];
+        if (campaign.blocked_classes.includes(char_class.game_class_id)) {
+          // Remove the class
+          char.classes = char.classes.filter(o => o.game_class_id !== char_class.game_class_id);
+          char.classes.filter(o => o.position > char_class.position).forEach(cc => {
+            cc.position--;
+            if (cc.position === 0) {
+              cc.fixWithGameClass();
+            }
+          });
+          char.spells = char.spells.filter(o => o.source_type !== "Class" || o.source_id !== char_class.game_class_id);
+        } else {
+          i++;
+        }
+      }
+      if (!campaign.source_books.includes("60d9e2ff909a1d2014235f15")) {
+        char.lineages = [];
+        char.spells = char.spells.filter(o => o.source_type !== "Lineage");
+      } else {
+        i = 0;
+        while (i < char.lineages.length) {
+          const char_lineage = char.lineages[i];
+          if (campaign.blocked_lineages.includes(char_lineage.lineage_id)) {
+            // Remove the class
+            char.lineages = char.lineages.filter(o => o.lineage_id !== char_lineage.lineage_id);
+            char.spells = char.spells.filter(o => o.source_type !== "Lineage" || o.source_id !== char_lineage.lineage_id);
+          } else {
+            i++;
+          }
+        }
+      }
+      i = 0;
+    }
+    while (i < char.classes.length) {
+      const char_class = char.classes[i];
+      if (char_class.game_class && char_class.game_class.source_id !== "Basic Rules" && !char.source_books.includes(char_class.game_class.source_id)) {
+        // Remove the class
+        char.classes = char.classes.filter(o => o.game_class_id !== char_class.game_class_id);
+        char.classes.filter(o => o.position > char_class.position).forEach(cc => {
+          cc.position--;
+          if (cc.position === 0) {
+            cc.fixWithGameClass();
+          }
+        });
+        char.spells = char.spells.filter(o => o.source_type !== "Class" || o.source_id !== char_class.game_class_id);
+      } else {
+        if (char_class.subclass && !char.source_books.includes(char_class.subclass.source_id)) {
+          // Remove the class
+          if (char_class.spellcasting_ability !== "") {
+            // Check to see if spellcasting came through the subclass
+            for (let j = 0; j < char_class.subclass_features.length; ++j) {
+              const feature = char_class.subclass_features[j];
+              if (feature.name === "Spellcasting") {
+                char.spells = char.spells.filter(o => o.source_type !== "Class" || (o.source_id !== char_class.game_class_id && o.source_id !== char_class.subclass_id));
+                char_class.spellcasting_ability = "";
+                char_class.spell_attack = 0;
+                char_class.spell_book = null;
+                char_class.spell_count_per_level = 0;
+                char_class.spell_dc = 0;
+                char_class.spell_ids = [];
+                char_class.spell_level_max = -1;
+                char_class.spell_list_id = "";
+                char_class.spell_table = "";
+                char_class.spellcasting_focus = "";
+                char_class.spellcasting_level = 0;
+                char_class.spells_prepared_max = 0;
+                char_class.base_spell_count = 0;
+                char_class.bonus_spells = [];
+                char_class.cantrip_ids = [];
+                char_class.cantrips_max = 0;
+                break;
+              }
+            }
+          }
+          char_class.subclass_id = "";
+          char_class.subclass = null;
+          char_class.subclass_features = [];
+        }
+        i++;
+      }
+    }
+    if (char.background && char.background.background) {
+      if (!char.source_books.includes(char.background.background.source_id)) {
+        char.background = new CharacterBackground();
+      }
+    }
+    if (char.race && char.race.race && 
+      (!char.source_books.includes(char.race.race.source_id) || 
+        (char.race.subrace && char.race.subrace.subrace && 
+          !char.source_books.includes(char.race.subrace.subrace.source_id)))) {
+      char.spells = char.spells.filter(o => o.source_type !== "Race" || o.source_id !== char.race.race_id);
+      char.race = new CharacterRace();
+    }
+    i = 0;
+    while (i < char.items.length) {
+      const char_item = char.items[i];
+      if (char_item.magic_item && char_item.magic_item.source_id !== "Basic Rules" && !char.source_books.includes(char_item.magic_item.source_id)) {
+        char.remove_item(char_item);
+      } else {
+        i++;
+      }
+    }
+    i = 0;
+    while (i < char.spells.length) {
+      const char_spell = char.spells[i];
+      if (char_spell.spell && char_spell.spell.source_id !== "Basic Rules" && !char.source_books.includes(char_spell.spell.source_id)) {
+        char.remove_spell(char_spell.spell_id, char_spell.source_type, char_spell.source_id);
+      } else {
+        i++;
+      }
     }
   }
 

@@ -149,7 +149,7 @@ class CharacterRaceInput extends Component<Props, State> {
       return <span>Loading</span>;
     } else if (!character_race || character_race.race_id === "" || this.state.change_race) {
       const page_size = 7;
-      const filtered: any[] = this.state.races ? this.state.races.filter(o => 
+      let filtered = this.state.races ? this.state.races.filter(o => 
         (this.state.start_letter === "" || 
           o.name.toUpperCase().startsWith(this.state.start_letter) || 
           o.subraces.filter(s => s.name.toUpperCase().startsWith(this.state.start_letter)).length > 0) && 
@@ -160,9 +160,15 @@ class CharacterRaceInput extends Component<Props, State> {
             s.name.toLowerCase().includes(this.state.search_string.toLowerCase()) || 
             s.description.toLowerCase().includes(this.state.search_string.toLowerCase())
           ).length > 0)
-        ).sort((a,b) => {return a.name.localeCompare(b.name)}) : [];
+        ) : [];
+      filtered = filtered.filter(o => o.source_id === "Basic Rules" || this.props.character.source_books.includes(o.source_id));
+      if (this.props.character.campaign) {
+        const blocked_races = this.props.character.campaign.blocked_races;
+        filtered = filtered.filter(o => !blocked_races.includes(o._id));
+      }
+      filtered = filtered.sort((a,b) => {return a.name.localeCompare(b.name)});
       const page_count = Math.ceil(filtered.length / page_size);
-      const filtered_and_paged: any[] = filtered.slice(page_size * this.state.page_num, page_size * (this.state.page_num + 1));
+      const filtered_and_paged = filtered.slice(page_size * this.state.page_num, page_size * (this.state.page_num + 1));
       return (
         <Grid container spacing={1} direction="column">
           { character_race && character_race.race && this.state.change_race && 

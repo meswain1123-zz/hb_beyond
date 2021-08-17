@@ -98,7 +98,8 @@ class CharacterManageSpells extends Component<Props, State> {
   load() {
     this.setState({ loading: true }, () => {
       this.api.getSetOfObjects(["spell","spell_list"]).then((res: any) => {
-        const spells: Spell[] = res.spell;
+        let spells: Spell[] = res.spell;
+        spells = spells.filter(o => o.source_id === "Basic Rules" || this.props.obj.source_books.includes(o.source_id));
         const spell_lists: SpellList[] = res.spell_list;
         const my_spell_lists: any = {};
         const my_always_known: any = {};

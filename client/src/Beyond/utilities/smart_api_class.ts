@@ -158,6 +158,35 @@ export class APIClass {
       return [{ _id: -1, vttID: -1, Name: "Alice" }];
     }
   };
+  getFullObjects = async (data_type: string, filter: any = {}, skip: number = 0, take: number = -1, refresh = false) => {
+    if (refresh) {
+      const objects = await this.getObjectsFromAPI(data_type, filter, skip, take);
+      objects.forEach((obj: any) => {
+        this.connectObject(obj);
+      });
+      return objects;
+    } else {
+      if (this.smart_hash[data_type]) {
+        let filtered = this.filter(this.smart_hash[data_type], filter);
+        if (take > -1) {
+          filtered = filtered.slice(skip, take);
+        } else if (skip > 0) {
+          filtered = filtered.slice(skip);
+        }
+        filtered.forEach((obj: any) => {
+          this.connectObject(obj);
+        });
+        return filtered;
+      } else {
+        const objects = await this.getObjectsFromAPI(data_type, filter, skip, take);
+        objects.forEach((obj: any) => {
+          this.connectObject(obj);
+        });
+        return objects;
+      }
+    }
+  };
+
   getObjectFromAPI = async (data_type: string, id: string) => {
     if (this.real) {
       const response = await this.fetchData(
@@ -665,7 +694,7 @@ export class APIClass {
   };
 
   always_store(data_type: string) {
-    const dont_store = ["spell","creature","baseItem","magic_item"];
+    const dont_store = ["spell","creature","baseItem","magic_item","character"];
     return !dont_store.includes(data_type);
   }
 

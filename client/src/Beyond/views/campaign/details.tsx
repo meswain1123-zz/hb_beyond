@@ -5,7 +5,9 @@ import { Redirect } from "react-router-dom";
 
 import {
   Grid, 
+  Snackbar,
 } from "@material-ui/core";
+import MuiAlert, { AlertProps } from '@material-ui/lab/Alert';
 
 import { 
   Campaign, 
@@ -20,9 +22,16 @@ import {
 import ObjectDetails from "../../components/model_inputs/ObjectDetails";
 import CheckBox from "../../components/input/CheckBox";
 import CenteredMenu from "../../components/input/CenteredMenu";
+import ButtonBox from '../../components/input/ButtonBox';
 
 import API from "../../utilities/smart_api";
 import { APIClass } from "../../utilities/smart_api_class";
+import CharacterUtilities from "../../utilities/character_utilities";
+import { CharacterUtilitiesClass } from "../../utilities/character_utilities_class";
+
+function Alert(props: AlertProps) {
+  return <MuiAlert elevation={6} variant="filled" {...props} />;
+}
 
 
 interface AppState {
@@ -64,8 +73,12 @@ export interface State {
   lineages: Lineage[];
   players: User[];
   characters: Character[];
+  my_characters: Character[];
   loading: boolean;
   logging_in: boolean;
+  processing: boolean;
+  message: string;
+  add_existing: boolean;
 }
 
 class CampaignDetails extends Component<Props, State> {
@@ -74,20 +87,26 @@ class CampaignDetails extends Component<Props, State> {
     this.state = {
       redirectTo: null,
       obj: new Campaign(),
-      mode: "Characters",
+      mode: "Characters", // "Players", // 
       source_books: [],
       races: [],
       game_classes: [],
       players: [],
       characters: [],
+      my_characters: [],
       lineages: [],
       loading: false,
-      logging_in: false
+      logging_in: false,
+      processing: false,
+      message: "",
+      add_existing: false
     };
     this.api = API.getInstance();
+    this.char_util = CharacterUtilities.getInstance();
   }
 
   api: APIClass;
+  char_util: CharacterUtilitiesClass;
 
   componentDidMount() {
     if (this.props.loginUser === null) {
@@ -123,7 +142,7 @@ class CampaignDetails extends Component<Props, State> {
           filter.ids = obj.player_ids;
           this.api.getObjects("user", filter).then((res: any) => {
             if (res && !res.error) {
-              this.setState({ players: res }, this.load_characters);
+              this.setState({ players: res, obj }, this.load_characters);
             }
           });
         } else {
@@ -170,8 +189,30 @@ class CampaignDetails extends Component<Props, State> {
     });
   }
 
+  handleClose() {
+    this.setState({ message: "" });
+  }
+
+  remove_characters_for_user(user_id: string) {
+    const characters_for_user = this.state.characters.filter(o => o.owner_id);
+    if (characters_for_user.length > 0) {
+      const char = characters_for_user[0];
+      char.campaign_id = "";
+      this.api.updateObject("character", char).then((res: any) => {
+        const characters = this.state.characters.filter(o => o.campaign_id === this.state.obj._id);
+        this.setState({ characters }, () => {
+          this.remove_characters_for_user(user_id);
+        });
+      });
+    } else if (this.props.loginUser && this.props.loginUser._id === user_id) {
+      this.setState({ redirectTo: `/beyond/campaign` });
+    } else {
+      this.setState({ processing: false });
+    }
+  }
+
   render() {
-    if (this.state.loading || this.state.obj === null) {
+    if (this.state.loading || this.props.loginUser === null || this.state.obj === null) {
       return <span>Loading</span>;
     } else if (this.state.redirectTo !== null) {
       return <Redirect to={this.state.redirectTo} />;
@@ -219,47 +260,283 @@ class CampaignDetails extends Component<Props, State> {
     let return_me = <Grid item>Coming Soon</Grid>;
     if (this.state.mode === "Players") {
       return_me = (
-        <Grid container spacing={1} direction="row">
-          <Grid item xs={12}>
-            Add Player (only visible for DM)
+        <Grid container spacing={0} direction="row">
+          <Grid item xs={6}>
+            <ButtonBox name="Reusable Invitation Link" 
+              onClick={() => {
+                const invite = this.state.obj.reusable_invite;
+                navigator.clipboard.writeText(`${window.location.origin}/beyond/campaign/join/${this.state.obj._id}/${invite}`);
+                this.setState({ message: "Link Copied to Clipboard" });
+              }}
+            />
           </Grid>
+          <Grid item xs={6}>
+            <ButtonBox name="Generate Single Use Invitation Link" 
+              disabled={this.state.processing}
+              onClick={() => {
+                const obj = this.state.obj;
+                const invite = obj.generate_invite();
+                navigator.clipboard.writeText(`${window.location.origin}/beyond/campaign/join/${this.state.obj._id}/${invite}`);
+                this.setState({ processing: true }, () => {
+                  this.api.updateObject("campaign", obj).then((res: any) => {
+                    this.setState({ 
+                      obj, 
+                      processing: false, 
+                      message: "Link Copied to Clipboard" 
+                    });
+                  });
+                });
+              }}
+            />
+          </Grid>
+          <Snackbar 
+            open={ this.state.message !== "" } 
+            autoHideDuration={6000} 
+            onClose={this.handleClose}>
+            <Alert onClose={this.handleClose} severity="success">
+              { this.state.message }
+            </Alert>
+          </Snackbar>
           { this.state.players.map((player, key) => {
             return (
-              <Grid item xs={4} key={key}>
-                { player.username } 
-                Remove Player (only visible for DM)
-                Leave Campaign (only visible for that player)
+              <Grid item xs={12} key={key} container spacing={0} direction="row">
+                <Grid item xs={6}>
+                  { player.username }
+                </Grid> 
+                { this.props.loginUser && this.state.obj.owner_id === this.props.loginUser._id ?
+                  <Grid item xs={6}>
+                    <ButtonBox 
+                      name="Remove Player"
+                      onClick={() => {
+                        this.setState({ processing: true }, () => {
+                          const obj = this.state.obj;
+                          obj.player_ids = obj.player_ids.filter(o => o !== player._id);
+                          this.api.updateObject("campaign", obj).then((res: any) => {
+                            this.remove_characters_for_user(player._id);
+                          });
+                        });
+                      }}
+                    />
+                  </Grid> 
+                : this.props.loginUser && player._id === this.props.loginUser._id &&
+                  <Grid item xs={6}>
+                    <ButtonBox 
+                      name="Leave Campaign"
+                      lineHeight={1.1}
+                      onClick={() => {
+                        this.setState({ processing: true }, () => {
+                          const obj = this.state.obj;
+                          obj.player_ids = obj.player_ids.filter(o => o !== player._id);
+                          this.api.updateObject("campaign", obj).then((res: any) => {
+                            this.remove_characters_for_user(player._id);
+                          });
+                        });
+                      }}
+                    />
+                  </Grid> 
+                }
               </Grid>
             );
           })}
         </Grid>
       ); 
     } else if (this.state.mode === "Characters") {
-      return_me = (
-        <Grid container spacing={1} direction="row">
-          <Grid item>
-            Create Character
+      if (this.state.add_existing) {
+        return_me = (
+          <Grid container spacing={1} direction="column">
+            <Grid item>
+              Adding an existing character which doesn't comply with the allowed options for this campaign will automatically undo those options on the character.<br/>
+              This may include race, subrace, class, subclass, lineages, items, and spells.
+            </Grid>
+            <Grid item container spacing={1} direction="row">
+              { this.state.my_characters.map((char, key) => {
+                return (
+                  <Grid item xs={4} key={key} container spacing={0} direction="row">
+                    <Grid item xs={12}>{ char.name }</Grid>
+                    { char.campaign_id === this.state.obj._id ? 
+                      <Grid item xs={12}>Already in Campaign</Grid>
+                    : char.campaign_id === "" ? 
+                      <Grid item xs={12}>
+                        <ButtonBox name="Join" 
+                          onClick={() => {
+                            char.campaign_id = this.state.obj._id;
+                            char.connect_campaign(this.state.obj);
+                            this.char_util.enforce_options(char, this.state.obj);
+                            this.api.updateObject("character", char).then((res: any) => {
+                              const characters = this.state.characters;
+                              characters.push(char);
+                              this.setState({ add_existing: false, characters });
+                            });
+                          }}
+                        />
+                      </Grid>
+                    : 
+                      <Grid item xs={12}>In a Different Campaign</Grid>
+                    }
+                  </Grid>
+                );
+              })}
+            </Grid>
+            <Grid item>
+              <ButtonBox name="Cancel" 
+                onClick={() => {
+                  this.setState({ add_existing: false });
+                }}
+              />
+            </Grid>
           </Grid>
-          <Grid item>
-            Add Existing Character
-          </Grid>
-          <Grid item>
-            Create Unassigned Character
-          </Grid>
-          { this.state.characters.map((char, key) => {
-            return (
-              <Grid item xs={4} key={key}>
-                { char.name }
-                View
-                Edit (only visible for DM or that player)
-                Leave Campaign (only visible for that player)
-                Unassign (only visible for that player)
-                Claim (only visible for unassigned character)
+        );
+      } else {
+        return_me = (
+          <Grid container spacing={1} direction="row">
+            { this.props.loginUser && 
+              <Grid item xs={12} container spacing={1} direction="row">
+                <Grid item xs={4}>
+                  <ButtonBox name="Add Existing Character" 
+                    onClick={() => {
+                      if (this.state.my_characters.length > 0) {
+                        this.setState({ 
+                          add_existing: true
+                        });
+                      } else {
+                        this.setState({ loading: true }, () => {
+                          if (this.props.loginUser) {
+                            const filter: any = {};
+                          
+                            filter.owner_id = this.props.loginUser._id;
+                            this.api.getFullObjects("character", filter).then((res: any) => {
+                              if (res && !res.error) {
+                                this.setState({ 
+                                  my_characters: res, 
+                                  loading: false, 
+                                  add_existing: true 
+                                });
+                              }
+                            });
+                          }
+                        });
+                      }
+                    }}
+                  />
+                </Grid>
+                <Grid item xs={4}>
+                  <ButtonBox name="Create Character" 
+                    onClick={() => {
+                      this.setState({ redirectTo:`/beyond/character/create_on_campaign/${this.state.obj._id}/0` });
+                    }}
+                  />
+                </Grid>
+                <Grid item xs={4}>
+                  <ButtonBox name="Create Unassigned Character" 
+                    onClick={() => {
+                      this.setState({ redirectTo:`/beyond/character/create_on_campaign/${this.state.obj._id}/1` });
+                    }}
+                  />
+                </Grid>
               </Grid>
-            );
-          })}
-        </Grid>
-      ); 
+            }
+            { this.state.characters.map((char, key) => {
+              if (this.props.loginUser && (this.state.obj.owner_id === this.props.loginUser._id || this.state.obj.player_ids.includes(this.props.loginUser._id))) {
+                if (char.owner_id === "") {
+                  return (
+                    <Grid item xs={4} key={key} container spacing={0} direction="row">
+                      <Grid item xs={12}>{ char.name }</Grid>
+                      <Grid item xs={4}>
+                        <ButtonBox name="View" 
+                          onClick={() => {
+                            this.setState({ redirectTo:`/beyond/character/details/${char._id}` });
+                          }}
+                        />
+                      </Grid>
+                      <Grid item xs={4}>
+                        <ButtonBox name="Edit" 
+                          onClick={() => {
+                            this.setState({ redirectTo:`/beyond/character/edit/${char._id}` });
+                          }}
+                        />
+                      </Grid>
+                      <Grid item xs={4}>
+                        <ButtonBox name="Claim" 
+                          onClick={() => {
+                            if (this.props.loginUser) {
+                              char.owner_id = this.props.loginUser._id;
+                              this.api.updateObject("character", char).then((res: any) => {
+                                this.setState({ });
+                              });
+                            }
+                          }}
+                        />
+                      </Grid>
+                    </Grid>
+                  );
+                } else if (this.props.loginUser._id === char.owner_id || this.props.loginUser._id === this.state.obj.owner_id) {
+                  return (
+                    <Grid item xs={4} key={key} container spacing={0} direction="row">
+                      <Grid item xs={12}>{ char.name }</Grid>
+                      <Grid item xs={3}>
+                        <ButtonBox name="View" 
+                          onClick={() => {
+                            this.setState({ redirectTo:`/beyond/character/details/${char._id}` });
+                          }}
+                        />
+                      </Grid>
+                      <Grid item xs={3}>
+                        <ButtonBox name="Edit" 
+                          onClick={() => {
+                            this.setState({ redirectTo:`/beyond/character/edit/${char._id}` });
+                          }}
+                        />
+                      </Grid>
+                      <Grid item xs={3}>
+                        <ButtonBox name="Unassign" 
+                          onClick={() => {
+                            char.owner_id = "";
+                            this.api.updateObject("character", char).then((res: any) => {
+                              this.setState({ });
+                            });
+                          }}
+                        />
+                      </Grid>
+                      <Grid item xs={3}>
+                        <ButtonBox 
+                          name="Leave Campaign" 
+                          lineHeight={1.1}
+                          onClick={() => {
+                            char.campaign_id = "";
+                            this.api.updateObject("character", char).then((res: any) => {
+                              const characters = this.state.characters.filter(o => o.campaign_id === this.state.obj._id);
+                              this.setState({ characters });
+                            });
+                          }}
+                        />
+                      </Grid>
+                    </Grid>
+                  );
+                } else {
+                  return (
+                    <Grid item xs={4} key={key} container spacing={0} direction="row">
+                      <Grid item xs={12}>{ char.name }</Grid>
+                      <Grid item xs={12}>
+                        <ButtonBox name="View" 
+                          onClick={() => {
+                            this.setState({ redirectTo:`/beyond/character/details/${char._id}` });
+                          }}
+                        />
+                      </Grid>
+                    </Grid>
+                  );
+                }
+              } else {
+                return (
+                  <Grid item xs={4} key={key} container spacing={0} direction="row">
+                    <Grid item xs={12}>{ char.name }</Grid>
+                  </Grid>
+                );
+              }
+            })}
+          </Grid>
+        ); 
+      }
     } else if (this.state.mode === "Sources") {
       return_me = (
         <Grid container spacing={1} direction="row">

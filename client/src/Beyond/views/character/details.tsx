@@ -16,6 +16,7 @@ import {
 } from "@material-ui/core";
 import { 
   ArmorType,
+  Campaign,
   Character,
   Condition,
   EldritchInvocation,
@@ -71,6 +72,7 @@ type Props = PropsFromRedux & RouteComponentProps<MatchParams> & { }
 
 export interface State { 
   redirectTo: string | null;
+  campaign: Campaign | null;
   obj: Character;
   armor_types: ArmorType[] | null;
   conditions: Condition[] | null;
@@ -92,6 +94,7 @@ class CharacterDetails extends Component<Props, State> {
     super(props);
     this.state = {
       redirectTo: null,
+      campaign: null,
       obj: new Character(),
       armor_types: null,
       conditions: null,
@@ -125,9 +128,19 @@ class CharacterDetails extends Component<Props, State> {
   load_object(id: string) {
     this.api.getFullObject("character", id).then((res: any) => {
       if (res) {
-        const obj = res;
-        this.char_util.recalcAll(obj);
-        this.setState({ obj, loading: false });
+        const obj = res as Character;
+        if (obj.campaign_id === "") {
+          this.char_util.recalcAll(obj, null);
+          this.setState({ obj, loading: false });
+        } else {
+          this.api.getFullObject("campaign", obj.campaign_id).then((res2: any) => {
+            if (res) {
+              const campaign = res2 as Campaign;
+              this.char_util.recalcAll(obj, campaign);
+              this.setState({ obj, campaign, loading: false });
+            }
+          });
+        }
       }
     });
   }
@@ -212,6 +225,7 @@ class CharacterDetails extends Component<Props, State> {
             <CharacterMainDetails 
               bar3_mode={this.state.bar3_mode}
               obj={this.state.obj}
+              campaign={this.state.campaign}
               onChange={() => {
                 this.setState({ });
               }}

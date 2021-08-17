@@ -15,6 +15,7 @@ import {
 } from "@material-ui/core";
 import { 
   ArmorType,
+  Campaign,
   Character,
   Condition,
   EldritchInvocation,
@@ -83,6 +84,7 @@ type PropsFromRedux = ConnectedProps<typeof connector>
 
 type Props = PropsFromRedux & {
   obj: Character; 
+  campaign: Campaign | null;
   bar3_mode: string;
   onChange: () => void;
 }
@@ -118,7 +120,7 @@ class CharacterMainDetails extends Component<Props, State> {
       eldritch_invocations: null,
       loading: false,
       reloading: false,
-      view: "spells", // "main", // 
+      view: "equipment", // "main", // 
       menu_open: "",
       minion: null
     };
@@ -946,7 +948,7 @@ class CharacterMainDetails extends Component<Props, State> {
                 } else {
                   obj.favorite_conditions.push(cond._id);
                 }
-                this.char_util.recalcAll(obj);
+                this.char_util.recalcAll(obj, this.props.campaign);
                 this.updateCharacter();
               }}>
                 { is_favorite ? <Star/> : <StarBorder/> }
@@ -962,7 +964,7 @@ class CharacterMainDetails extends Component<Props, State> {
                   } else {
                     obj.conditions.push(cond._id);
                   }
-                  this.char_util.recalcAll(obj);
+                  this.char_util.recalcAll(obj, this.props.campaign);
                   this.updateCharacter();
                 }
               }}>
@@ -979,7 +981,7 @@ class CharacterMainDetails extends Component<Props, State> {
                   obj.condition_immunities.push(cond._id);
                   if (has_cond) {
                     obj.conditions = obj.conditions.filter(o => o !== cond._id);
-                    this.char_util.recalcAll(obj);
+                    this.char_util.recalcAll(obj, this.props.campaign);
                   }
                 } else {
                   obj.condition_immunities = obj.condition_immunities.filter(o => o !== cond._id);
@@ -1100,7 +1102,7 @@ class CharacterMainDetails extends Component<Props, State> {
           <CharacterAbilityScores key="abilities" obj={this.props.obj} 
             onChange={() => {
               const obj = this.props.obj;
-              this.char_util.recalcAll(obj);
+              this.char_util.recalcAll(obj, this.props.campaign);
               this.props.onChange();
             }}
           />,
@@ -1108,7 +1110,7 @@ class CharacterMainDetails extends Component<Props, State> {
           <CharacterSavingThrows key="saves" obj={this.props.obj} 
             onChange={() => {
               const obj = this.props.obj;
-              this.char_util.recalcAll(obj);
+              this.char_util.recalcAll(obj, this.props.campaign);
               this.props.onChange();
             }}
           />,
@@ -1116,7 +1118,7 @@ class CharacterMainDetails extends Component<Props, State> {
           <CharacterSenses key="senses" obj={this.props.obj} 
             onChange={() => {
               const obj = this.props.obj;
-              this.char_util.recalcAll(obj);
+              this.char_util.recalcAll(obj, this.props.campaign);
               this.props.onChange();
             }}
           />,
@@ -1127,7 +1129,7 @@ class CharacterMainDetails extends Component<Props, State> {
           <CharacterSkills obj={this.props.obj} 
             onChange={() => {
               const obj = this.props.obj;
-              this.char_util.recalcAll(obj);
+              this.char_util.recalcAll(obj, this.props.campaign);
               this.props.onChange();
             }}
           />;
@@ -1138,7 +1140,7 @@ class CharacterMainDetails extends Component<Props, State> {
             obj={this.props.obj}
             onChange={() => {
               const obj = this.props.obj;
-              this.char_util.recalcAll(obj);
+              this.char_util.recalcAll(obj, this.props.campaign);
               this.props.onChange();
             }}
           />;
@@ -1149,7 +1151,7 @@ class CharacterMainDetails extends Component<Props, State> {
             obj={this.props.obj}
             onChange={() => {
               const obj = this.props.obj;
-              this.char_util.recalcAll(obj);
+              this.char_util.recalcAll(obj, this.props.campaign);
               this.props.onChange();
             }}
           />;
@@ -1158,6 +1160,7 @@ class CharacterMainDetails extends Component<Props, State> {
         return_me = 
           <CharacterSpells 
             obj={this.props.obj}
+            campaign={this.props.campaign}
             onChange={() => {
               this.setState({ });
               // this.props.onChange();

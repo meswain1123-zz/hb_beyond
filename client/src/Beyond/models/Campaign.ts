@@ -1,4 +1,5 @@
 
+import { v4 as uuidv4 } from "uuid";
 import { ModelBase } from "./ModelBase";
 
 export class Campaign extends ModelBase {
@@ -14,6 +15,9 @@ export class Campaign extends ModelBase {
   custom_origins: boolean;
   optional_features: boolean;
   player_control_for_lineages: boolean;
+  invites: string[];
+  // invites_created: string[];
+  reusable_invite: string;
 
   constructor(obj?: any) {
     super(obj);
@@ -27,6 +31,9 @@ export class Campaign extends ModelBase {
     this.custom_origins = obj && obj.custom_origins ? obj.custom_origins : false;
     this.optional_features = obj && obj.optional_features ? obj.optional_features : false;
     this.player_control_for_lineages = obj && obj.player_control_for_lineages ? obj.player_control_for_lineages : false;
+    this.invites = obj && obj.invites ? obj.invites : [];
+    // this.invites_created = obj && obj.invites_created ? obj.invites_created : [];
+    this.reusable_invite = obj && obj.reusable_invite ? obj.reusable_invite : uuidv4().toString();
   }
 
   toDBObj = () => {
@@ -45,8 +52,17 @@ export class Campaign extends ModelBase {
       player_control_for_lineages: this.player_control_for_lineages,
       blocked_races: this.blocked_races,
       blocked_classes: this.blocked_classes,
-      blocked_lineages: this.blocked_lineages
+      blocked_lineages: this.blocked_lineages,
+      invites: this.invites,
+      reusable_invite: this.reusable_invite
     };
+  }
+
+  generate_invite(): string {
+    const invite = uuidv4().toString();
+    this.invites.push(invite);
+    // this.invites_created.push(new Date().toString());
+    return invite;
   }
 
   clone(): Campaign {
@@ -69,5 +85,7 @@ export class Campaign extends ModelBase {
     this.blocked_races = copyMe.blocked_races;
     this.blocked_classes = copyMe.blocked_classes;
     this.blocked_lineages = copyMe.blocked_lineages;
+    this.invites = copyMe.invites;
+    this.reusable_invite = copyMe.reusable_invite;
   }
 }

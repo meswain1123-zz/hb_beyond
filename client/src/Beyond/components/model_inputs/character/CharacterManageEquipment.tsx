@@ -242,6 +242,8 @@ class CharacterManageEquipment extends Component<Props, State> {
     if (this.state.base_items && this.state.magic_items) {
       let filtered_base_items = this.state.magical ? [] : this.state.base_items;
       let filtered_magic_items = this.state.magic_items;
+      filtered_magic_items = filtered_magic_items.filter(o => o.source_id === "Basic Rules" || this.props.obj.source_books.includes(o.source_id));
+        
       if (this.state.search_string.length > 0) {
         filtered_base_items = filtered_base_items.filter(o => o.name.toLowerCase().includes(this.state.search_string.toLowerCase()));
         filtered_magic_items = filtered_magic_items.filter(o => o.name.toLowerCase().includes(this.state.search_string.toLowerCase()));

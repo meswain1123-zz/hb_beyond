@@ -105,11 +105,13 @@ class CharacterBackgroundInput extends Component<Props, State> {
     if (this.state.loading || this.state.backgrounds === null) {
       return <span>Loading</span>;
     } else {
+      let filtered = this.state.backgrounds.filter(o => o.source_id === "Basic Rules" || this.props.obj.source_books.includes(o.source_id));
       return (
         <Grid container spacing={1} direction="row">
           <Grid item xs={12}>
             <SelectBackgroundBox
               name="Choose a Background"
+              backgrounds={filtered}
               value={obj_background.background_id}
               onChange={(id: string) => {
                 if (this.state.backgrounds) {

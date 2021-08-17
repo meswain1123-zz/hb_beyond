@@ -54,7 +54,7 @@ type Props = PropsFromRedux & {
 }
 
 export interface State {
-  lineagees: Lineage[] | null;
+  lineages: Lineage[] | null;
   races: Race[] | null;
   subraces: Subrace[] | null;
   search_string: string;
@@ -71,7 +71,7 @@ class CharacterLineageInput extends Component<Props, State> {
   constructor(props: Props) {
     super(props);
     this.state = {
-      lineagees: null,
+      lineages: null,
       races: null,
       subraces: null,
       search_string: "",
@@ -109,10 +109,10 @@ class CharacterLineageInput extends Component<Props, State> {
     this.setState({ loading: true }, () => {
       this.api.getSetOfObjects(["lineage"]).then((res: any) => {
         const character = this.props.character;
-        const lineagees: Lineage[] = res.lineage;
+        const lineages: Lineage[] = res.lineage;
         character.lineages.forEach(char_lineage => {
           if (!char_lineage.lineage) {
-            const objFinder = lineagees.filter(o => o._id === char_lineage.lineage_id);
+            const objFinder = lineages.filter(o => o._id === char_lineage.lineage_id);
             if (objFinder.length === 1) {
               char_lineage.connectLineage(objFinder[0]);
             }
@@ -121,7 +121,7 @@ class CharacterLineageInput extends Component<Props, State> {
         this.props.onChange(character);
         this.setState({ 
           expanded_lineage_id: (character.lineages.length === 1 ? character.lineages[0].lineage_id : ""),
-          lineagees, 
+          lineages, 
           loading: false 
         });
       });
@@ -129,19 +129,24 @@ class CharacterLineageInput extends Component<Props, State> {
   }
 
   render() {
-    if (this.state.loading || this.state.lineagees === null) {
+    if (this.state.loading || this.state.lineages === null) {
       return <span>Loading</span>;
     } else if (this.props.character.lineages.length === 0 || this.state.new_lineage) {
       const page_size = 7;
-      const filtered: any[] = this.state.lineagees ? this.state.lineagees.filter(o => 
+      let filtered = this.state.lineages ? this.state.lineages.filter(o => 
         (this.state.start_letter === "" || 
           o.name.toUpperCase().startsWith(this.state.start_letter)) && 
         (this.state.search_string === "" || 
           o.name.toLowerCase().includes(this.state.search_string.toLowerCase()) || 
           o.description.toLowerCase().includes(this.state.search_string.toLowerCase()))
-        ).sort((a,b) => {return a.name.localeCompare(b.name)}) : [];
+        ) : [];
+      if (this.props.character.campaign) {
+        const blocked_lineages = this.props.character.campaign.blocked_lineages;
+        filtered = filtered.filter(o => !blocked_lineages.includes(o._id));
+      }
+      filtered = filtered.sort((a,b) => {return a.name.localeCompare(b.name)});
       const page_count = Math.ceil(filtered.length / page_size);
-      const filtered_and_paged: any[] = filtered.slice(page_size * this.state.page_num, page_size * (this.state.page_num + 1));
+      const filtered_and_paged = filtered.slice(page_size * this.state.page_num, page_size * (this.state.page_num + 1));
       return (
         <Grid container spacing={1} direction="column">
           <Grid item container spacing={1} direction="row">

@@ -6,6 +6,7 @@ import {
 } from "@material-ui/core";
 
 import { 
+  Campaign,
   Character,
   CharacterSpell,
   CharacterAbility,
@@ -51,6 +52,7 @@ type PropsFromRedux = ConnectedProps<typeof connector>
 
 type Props = PropsFromRedux & {
   obj: Character;
+  campaign: Campaign | null;
   onChange: (change_types: string[]) => void;
 }
 
@@ -200,7 +202,7 @@ class CharacterSpells extends Component<Props, State> {
             open={ this.state.drawer === "manage" } 
             onClose={() => {
               this.setState({ drawer: "", reloading: true }, () => {
-                this.char_util.recalcAll(this.props.obj);
+                this.char_util.recalcAll(this.props.obj, this.props.campaign);
                 this.setState({ reloading: false }, () => {
                   this.resetSearch();
                 });
@@ -210,7 +212,7 @@ class CharacterSpells extends Component<Props, State> {
               obj={this.props.obj}
               onChange={() => {
                 this.setState({ reloading: true }, () => {
-                  this.char_util.recalcAll(this.props.obj);
+                  this.char_util.recalcAll(this.props.obj, this.props.campaign);
                   this.setState({ reloading: false }, () => {
                     this.resetSearch();
                   });

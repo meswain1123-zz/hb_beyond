@@ -13,6 +13,7 @@ import {
 import {  
   ArmorType,
   AbilityScores,
+  Campaign,
   Character, 
   CharacterBackground,
   CharacterRace,
@@ -22,7 +23,7 @@ import {
   Spell,
   SpellSlotType,
   SourceBook,
-  User
+  User,
 } from "../../models";
 
 import StringBox from "../../components/input/StringBox";
@@ -55,6 +56,8 @@ interface RootState {
 
 interface MatchParams {
   id: string;
+  campaign_id: string;
+  unassigned: string;
 }
 
 const mapState = (state: RootState) => ({
@@ -74,6 +77,7 @@ type Props = PropsFromRedux & RouteComponentProps<MatchParams> & { }
 
 export interface State { 
   redirectTo: string | null;
+  campaign: Campaign | null;
   obj: Character;
   processing: boolean;
   expanded_feature_base: FeatureBase | null;
@@ -94,6 +98,7 @@ class CharacterEdit extends Component<Props, State> {
     super(props);
     this.state = {
       redirectTo: null,
+      campaign: null,
       obj: new Character(),
       processing: false,
       expanded_feature_base: null,
@@ -147,7 +152,13 @@ class CharacterEdit extends Component<Props, State> {
           this.setState({ processing: false, redirectTo: "/beyond/character" });
         });
       } else {
-        obj.owner_id = this.props.loginUser ? this.props.loginUser._id : "No Login";
+        let { campaign_id, unassigned } = this.props.match.params;
+        if (campaign_id) {
+          obj.campaign_id = campaign_id;
+        }
+        if (!unassigned || unassigned === "0") {
+          obj.owner_id = this.props.loginUser ? this.props.loginUser._id : "No Login";
+        }
         this.api.createObject("character", obj).then((res: any) => {
           this.setState({ processing: false, redirectTo: "/beyond/character" });
         });
@@ -159,9 +170,19 @@ class CharacterEdit extends Component<Props, State> {
   load_object(id: string) {
     this.api.getFullObject("character", id).then((res: any) => {
       if (res) {
-        const obj = res;
-        this.char_util.recalcAll(obj);
-        this.setState({ obj, loading: false });
+        const obj = res as Character;
+        if (obj.campaign_id === "") {
+          this.char_util.recalcAll(obj, null);
+          this.setState({ obj, loading: false });
+        } else {
+          this.api.getFullObject("campaign", obj.campaign_id).then((res2: any) => {
+            if (res) {
+              const campaign = res2 as Campaign;
+              this.char_util.recalcAll(obj, campaign);
+              this.setState({ obj, campaign, loading: false });
+            }
+          });
+        }
       }
     });
   }
@@ -184,15 +205,34 @@ class CharacterEdit extends Component<Props, State> {
             this.load_object(id);
           }); 
         } else {
-          this.setState({ 
-            armor_types,
-            spells,
-            spell_slot_types: res.spell_slot_type,
-            eldritch_invocations: res.eldritch_invocation,
-            weapon_keywords: res.weapon_keyword,
-            source_books: res.source_book, 
-            loading: false 
-          });
+          let { campaign_id } = this.props.match.params;
+          if (campaign_id) {
+            this.api.getFullObject("campaign", campaign_id).then((res2: any) => {
+              if (res) {
+                const campaign = res2 as Campaign;
+                this.setState({ 
+                  campaign, 
+                  armor_types,
+                  spells,
+                  spell_slot_types: res.spell_slot_type,
+                  eldritch_invocations: res.eldritch_invocation,
+                  weapon_keywords: res.weapon_keyword,
+                  source_books: res.source_book, 
+                  loading: false 
+                });
+              }
+            });
+          } else {
+            this.setState({ 
+              armor_types,
+              spells,
+              spell_slot_types: res.spell_slot_type,
+              eldritch_invocations: res.eldritch_invocation,
+              weapon_keywords: res.weapon_keyword,
+              source_books: res.source_book, 
+              loading: false 
+            });
+          }
         }
       });
     });
@@ -284,7 +324,7 @@ class CharacterEdit extends Component<Props, State> {
           onChange={(changed: CharacterRace) => {
             const obj = this.state.obj;
             obj.race = changed;
-            this.char_util.recalcAll(obj);
+            this.char_util.recalcAll(obj, this.state.campaign);
             this.setState({ obj });
           }}
         />
@@ -296,7 +336,7 @@ class CharacterEdit extends Component<Props, State> {
           onChange={(changed: CharacterBackground) => {
             const obj = this.state.obj;
             obj.background = changed;
-            this.char_util.recalcAll(obj);
+            this.char_util.recalcAll(obj, this.state.campaign);
             this.setState({ obj });
           }}
         />
@@ -308,7 +348,7 @@ class CharacterEdit extends Component<Props, State> {
           onChange={(changed: AbilityScores) => {
             const obj = this.state.obj;
             obj.base_ability_scores = changed;
-            this.char_util.recalcAll(obj);
+            this.char_util.recalcAll(obj, this.state.campaign);
             this.setState({ obj });
           }}
         />
@@ -319,7 +359,7 @@ class CharacterEdit extends Component<Props, State> {
           character={this.state.obj}
           onChange={(changed: Character) => {
             const obj = changed;
-            this.char_util.recalcAll(obj);
+            this.char_util.recalcAll(obj, this.state.campaign);
             this.setState({ obj });
           }}
         />
@@ -330,7 +370,7 @@ class CharacterEdit extends Component<Props, State> {
           obj={this.state.obj}
           onChange={() => {
             const obj = this.state.obj;
-            this.char_util.recalcAll(obj);
+            this.char_util.recalcAll(obj, this.state.campaign);
             this.setState({ obj });
           }}
         />
@@ -341,7 +381,7 @@ class CharacterEdit extends Component<Props, State> {
           character={this.state.obj}
           onChange={(changed: Character) => {
             const obj = changed;
-            this.char_util.recalcAll(obj);
+            this.char_util.recalcAll(obj, this.state.campaign);
             this.setState({ obj });
           }}
         />
@@ -361,9 +401,15 @@ class CharacterEdit extends Component<Props, State> {
               }}
             />
           </Grid>
+          { this.state.campaign && 
+            <Grid item xs={12}>
+              Settings inherited from { this.state.campaign.name } campaign
+            </Grid>
+          }
           <Grid item xs={4}>
             <ToggleButtonBox 
               name="Custom Origins"
+              disabled={this.state.campaign !== null}
               value={this.state.obj.custom_origins} 
               onToggle={() => {
                 const obj = this.state.obj;
@@ -375,6 +421,7 @@ class CharacterEdit extends Component<Props, State> {
           <Grid item xs={4}>
             <ToggleButtonBox 
               name="Optional Features"
+              disabled={this.state.campaign !== null}
               value={this.state.obj.optional_features} 
               onToggle={() => {
                 const obj = this.state.obj;
@@ -386,6 +433,7 @@ class CharacterEdit extends Component<Props, State> {
           <Grid item xs={4}>
             <ToggleButtonBox 
               name="Homebrew Content"
+              disabled={this.state.campaign !== null}
               value={this.state.obj.allow_homebrew} 
               onToggle={() => {
                 const obj = this.state.obj;
@@ -399,6 +447,7 @@ class CharacterEdit extends Component<Props, State> {
               <Grid item xs={4} key={key}>
                 <ToggleButtonBox 
                   name={`${book.abbreviation} Content`}
+                  disabled={this.state.campaign !== null}
                   value={this.state.obj.source_books.includes(book._id)} 
                   onToggle={() => {
                     const obj = this.state.obj;

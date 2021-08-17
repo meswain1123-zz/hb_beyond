@@ -35,6 +35,7 @@ import BaseItemDetails from "./base_item/details";
 import CampaignIndex from "./campaign";
 import CampaignEdit from "./campaign/edit";
 import CampaignDetails from "./campaign/details";
+import CampaignJoin from "./campaign/join";
 
 import CharacterIndex from "./character";
 import CharacterEdit from "./character/edit";
@@ -241,6 +242,7 @@ class MainPage extends Component<Props, State> {
 
           <Route exact path="/beyond/campaign" component={CampaignIndex} />
           <Route exact path="/beyond/campaign/details/:id" component={CampaignDetails} />
+          <Route exact path="/beyond/campaign/join/:id/:invite" component={CampaignJoin} />
           <Route exact path="/beyond/campaign/create" component={CampaignEdit} />
           <Route exact path="/beyond/campaign/edit/:id" component={CampaignEdit} />
 
@@ -248,6 +250,7 @@ class MainPage extends Component<Props, State> {
           <Route exact path="/beyond/character/details/:id" component={CharacterDetails} />
           <Route exact path="/beyond/character/create" component={CharacterEdit} />
           <Route exact path="/beyond/character/edit/:id" component={CharacterEdit} />
+          <Route exact path="/beyond/character/create_on_campaign/:campaign_id/:unassigned" component={CharacterEdit} />
 
           <Route exact path="/beyond/creature" component={CreatureIndex} />
           <Route exact path="/beyond/creature/details/:id" component={CreatureDetails} />
